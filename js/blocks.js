@@ -1578,6 +1578,7 @@
         kind: 'category', name: 'Sons et temps', colour: COULEUR_SONS, contents: [
           { kind: 'button', text: '🎵 Importer un son…', callbackKey: 'importerSon' },
           { kind: 'button', text: '🎤 Enregistrer avec le micro…', callbackKey: 'enregistrerSon' },
+          { kind: 'button', text: '🎹 Composer une musique 8 bits…', callbackKey: 'composerMusique' },
           { kind: 'block', type: 'bs_son' },
           { kind: 'block', type: 'bs_son_mode' },
           { kind: 'label', text: 'Contrôles Son' },

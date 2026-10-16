@@ -1094,6 +1094,8 @@
     const choisir = s => { c.son = s.id; maj(); afficherProprietes(); };
     bouton('🎵 Importer…', () => importerSon(choisir));
     bouton('🎤 Enregistrer…', () => ouvrirMicro(choisir));
+    bouton('🎹 Composer…', () => composerMusique(choisir));
+    if (son && son.musique) bouton('🎹 Modifier la musique', () => modifierMusique(son));
     prop(liste, '').appendChild(boutons);
 
     const v = prop(liste, `Volume : ${c.volume ?? 100} %`);
@@ -1494,6 +1496,32 @@
     if ($('vue-sommaire').classList.contains('actif')) afficherSommaire();
     $('astuce').textContent = `🎵 Son « ${nom} » ${comment} : choisissez-le dans un bloc « jouer le son » (catégorie Sons et temps).`;
     return son;
+  }
+
+  // ---- Musiques 8 bits (js/studio-musique.js) ----
+  // La partition reste dans le son (`musique`) pour pouvoir la retoucher ;
+  // `donnees` contient sa version WAV, jouée comme n'importe quel son.
+  function composerMusique(surAjout) {
+    StudioMusique.ouvrir({ nom: nomSonLibre('musique') }, r => {
+      const s = ajouterSon(r.nom, r.donnees, 'composé');
+      s.musique = r.musique;
+      planifierSauvegarde();
+      if ($('vue-sommaire').classList.contains('actif')) afficherSommaire(); // pour le bouton « Modifier »
+      if (typeof surAjout === 'function') surAjout(s);
+    });
+  }
+
+  function modifierMusique(s) {
+    StudioMusique.ouvrir({ nom: s.nom, musique: s.musique, modification: true }, r => {
+      s.musique = r.musique;
+      s.donnees = r.donnees;
+      delete s.debut; // l'ancien découpage ne correspond plus
+      delete s.fin;
+      planifierSauvegarde();
+      if ($('vue-sommaire').classList.contains('actif')) afficherSommaire();
+      afficherProprietes();
+      $('astuce').textContent = `🎹 Musique « ${s.nom} » mise à jour.`;
+    });
   }
 
   // ---- Enregistrement au micro ----
@@ -2119,11 +2147,12 @@
       const tr = el('tr');
       tr.appendChild(el('td')).appendChild(puce('▶ ' + s.nom, () => ecouterSon(s), 'puce-nom'));
       tr.appendChild(el('td', 'muet', `${Math.max(1, Math.round(s.donnees.length * 0.75 / 1024))} Ko` +
-        (s.fin > s.debut || s.debut > 0 ? ' · ✂️ découpé' : '')));
+        (s.fin > s.debut || s.debut > 0 ? ' · ✂️ découpé' : '') + (s.musique ? ' · 🎹 8 bits' : '')));
       const endroits = tr.appendChild(pucesEndroits(usages));
       if (controles.length) endroits.querySelector('.muet')?.remove();
       controles.forEach(c => endroits.prepend(puce('🔊 ' + c.nom, () => allerAuControle(c.id))));
       const actions = tr.appendChild(el('td', 'actions-son'));
+      if (s.musique) actions.appendChild(puce('🎹 Modifier', () => modifierMusique(s)));
       actions.appendChild(puce('✂️ Découper', () => ouvrirDecoupe(s)));
       actions.appendChild(puce('✏️ Renommer', () => renommerSon(s)));
       actions.appendChild(puce('🗑️ Supprimer', () => supprimerSon(s, usages.length + controles.length)));
@@ -2131,6 +2160,7 @@
     }
     zone.lastElementChild.appendChild(puce('🎵 Importer un son…', importerSon, 'puce-importer'));
     zone.lastElementChild.appendChild(puce('🎤 Enregistrer avec le micro…', ouvrirMicro, 'puce-importer'));
+    zone.lastElementChild.appendChild(puce('🎹 Composer une musique 8 bits…', composerMusique, 'puce-importer'));
 
     // --- Variables ---
     const variables = workspace.getVariableMap().getAllVariables()
@@ -2587,6 +2617,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     $('vue-code').classList.remove('actif');
     workspace.registerButtonCallback('importerSon', importerSon);
     workspace.registerButtonCallback('enregistrerSon', ouvrirMicro);
+    workspace.registerButtonCallback('composerMusique', composerMusique);
     workspace.registerButtonCallback('nouveauSprite', nouveauSprite);
     workspace.registerButtonCallback('importerSprite', importerSprite);
     workspace.registerButtonCallback('nouvelleFenetre', nouvelleFenetre);
