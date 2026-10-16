@@ -829,6 +829,8 @@ function BlocRuntimeFactory() {
     const minuteurs = [];
     const auDemarrage = [];
     const actionsMessages = {};   // nom du message → gestionnaires « quand je reçois »
+    const reglageVoix = { vitesse: 1, hauteur: 1 };
+    const phrasesEnCours = new Set();
 
     // L'erreur est rattachée au dernier bloc exécuté (connu seulement dans l'éditeur).
     function signaler(e) {
@@ -2120,7 +2122,36 @@ function BlocRuntimeFactory() {
         if (mode === 'attendre') return lecture.then(() => arrete ? JAMAIS : undefined);
         lecture.catch(signaler);
       },
+      // ---- Voix (synthèse vocale du navigateur, voix de Windows dans WebView2) ----
+      // La promesse se termine quand la phrase est dite (« et attendre la fin »).
+      dire(texte) {
+        const synthese = window.speechSynthesis;
+        if (!synthese || arrete) return;
+        const phrase = new SpeechSynthesisUtterance(enTexte(texte));
+        phrase.lang = 'fr-FR';
+        const voix = synthese.getVoices().filter(v => /^fr/i.test(v.lang));
+        phrase.voice = voix.find(v => /^fr-FR/i.test(v.lang)) || voix[0] || null;
+        phrase.rate = reglageVoix.vitesse;
+        phrase.pitch = reglageVoix.hauteur;
+        phrase.volume = volumeGeneral;
+        phrasesEnCours.add(phrase); // garde la phrase en vie jusqu'au bout (sinon « onend » peut se perdre)
+        return new Promise(resoudre => {
+          phrase.onend = phrase.onerror = () => {
+            phrasesEnCours.delete(phrase);
+            if (!arrete) resoudre(); // programme arrêté : la suite ne s'exécute pas
+          };
+          synthese.speak(phrase);
+        });
+      },
+      reglerVoix(vitesse, hauteur) {
+        reglageVoix.vitesse = Math.min(10, Math.max(0.1, Number(vitesse) || 1));
+        reglageVoix.hauteur = Math.min(2, Math.max(0, Number(hauteur ?? 1)));
+      },
+      taireVoix() {
+        if (window.speechSynthesis) window.speechSynthesis.cancel();
+      },
       arreterSons() {
+        app.taireVoix();
         sonsEnCours.forEach(s => { try { s.source.stop(); } catch (e) { /* déjà fini */ } });
         sonsEnCours.clear();
         for (const id in donnees) if (donnees[id].type === 'son') ctrlSon(id, 'arreter');

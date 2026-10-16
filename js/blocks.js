@@ -824,7 +824,7 @@
   ], COULEUR_EVENEMENTS, 'Met en marche ou arrête un minuteur. Son intervalle se change avec le bloc « mettre intervalle de … ».');
 
   Blockly.Blocks['bs_sons_arreter'] = instruction(() => ['arrêter tous les sons'],
-    COULEUR_SONS, 'Coupe les sons importés en train de jouer (par exemple une musique de fond).');
+    COULEUR_SONS, 'Coupe les sons importés en train de jouer (par exemple une musique de fond), ainsi que la voix.');
 
   Blockly.Blocks['bs_son_arreter'] = instruction(() => ['arrêter le son', { champ: new ChampSon([], false), nom: 'SON' }],
     COULEUR_SONS, 'Coupe seulement ce son (par exemple la musique de fond) ; les autres continuent.');
@@ -840,6 +840,19 @@
       ['la', 'la'], ['si', 'si'], ['do aigu', 'do2']]), nom: 'NOTE' },
     { nom: 'SEC', libelle: 'pendant', check: 'Number' }, 'secondes'
   ], COULEUR_SONS, 'Joue une note de musique, puis attend qu\'elle soit finie. Enchaînez-les pour faire une mélodie !');
+
+  Blockly.Blocks['bs_dire'] = instruction(() => [
+    { nom: 'VAL', libelle: '🗣️ dire à voix haute' },
+    { champ: new Blockly.FieldDropdown([['sans attendre', 'non'], ['et attendre la fin', 'oui']]), nom: 'ATTENDRE' }
+  ], COULEUR_SONS, 'L\'ordinateur lit le texte avec une voix française. Avec « sans attendre », la suite du programme continue pendant qu\'il parle.');
+
+  Blockly.Blocks['bs_voix_regler'] = instruction(() => [
+    { nom: 'VITESSE', libelle: '🗣️ régler la voix : vitesse', check: 'Number' },
+    { nom: 'HAUTEUR', libelle: 'hauteur', check: 'Number' }
+  ], COULEUR_SONS, 'Vitesse : 1 = normale, 0.5 = lente, 2 = rapide. Hauteur : 1 = normale, 0 = très grave, 2 = très aiguë (voix de robot ou de souris !).');
+
+  Blockly.Blocks['bs_voix_taire'] = instruction(() => ['🗣️ faire taire la voix'],
+    COULEUR_SONS, 'Arrête immédiatement la phrase en cours (et celles qui attendaient leur tour).');
 
   Blockly.Blocks['bs_maintenant'] = valeur(() => [
     { champ: new Blockly.FieldDropdown([
@@ -1194,6 +1207,10 @@
   gen.forBlock['bs_son_arreter'] = b => `app.arreterSon(${q(b.getFieldValue('SON'))});\n`;
   gen.forBlock['bs_son_volume'] = b => `app.volume(${q(b.getFieldValue('SON'))}, ${val(b, 'VOL', '100')});\n`;
   gen.forBlock['bs_note'] = b => `await app.note(${q(b.getFieldValue('NOTE'))}, ${val(b, 'SEC', '0.5')});\n`;
+  gen.forBlock['bs_dire'] = b => (b.getFieldValue('ATTENDRE') === 'oui' ? 'await ' : '') +
+    `app.dire(${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_voix_regler'] = b => `app.reglerVoix(${val(b, 'VITESSE', '1')}, ${val(b, 'HAUTEUR', '1')});\n`;
+  gen.forBlock['bs_voix_taire'] = () => 'app.taireVoix();\n';
   gen.forBlock['bs_maintenant'] = b => [`app.maintenant(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
 
   gen.forBlock['bs_quand_touche'] = b =>
@@ -1547,6 +1564,10 @@
           { kind: 'block', type: 'bs_son_arreter' },
           { kind: 'block', type: 'bs_sons_arreter' },
           { kind: 'block', type: 'bs_son_volume', fields: { SON: '*' }, inputs: { VOL: nombre(30) } },
+          { kind: 'label', text: 'Voix' },
+          { kind: 'block', type: 'bs_dire', inputs: { VAL: texte('Bonjour, je suis ton ordinateur !') }, fields: { ATTENDRE: 'oui' } },
+          { kind: 'block', type: 'bs_voix_regler', inputs: { VITESSE: nombre(1), HAUTEUR: nombre(1) } },
+          { kind: 'block', type: 'bs_voix_taire' },
           { kind: 'label', text: 'Musique et temps' },
           { kind: 'block', type: 'bs_note', inputs: { SEC: nombre(0.5) } },
           { kind: 'block', type: 'bs_maintenant' }
