@@ -638,6 +638,61 @@
     'le menu', { champ: new ChampMenu(), nom: 'MENU' }
   ], COULEUR_CONTROLES, 'Un menu désactivé est grisé : on ne peut plus le choisir.');
 
+  // ---------- Messages (comme dans Scratch) ----------
+
+  // Propose les messages déjà utilisés dans le code, plus « Nouveau message… ».
+  class ChampMessage extends Blockly.FieldDropdown {
+    constructor(valeur) {
+      super(function () {
+        const bloc = this.getSourceBlock();
+        let ws = bloc && bloc.workspace;
+        if (ws && ws.isFlyout) ws = ws.targetWorkspace;
+        const noms = new Set([this.getValue() || 'message1']);
+        if (ws) {
+          ws.getAllBlocks(false).filter(b => b.type === 'bs_quand_message' || b.type === 'bs_envoyer_message')
+            .forEach(b => noms.add(b.getFieldValue('MSG')));
+        }
+        const options = [...noms].filter(Boolean).sort((a, b) => a.localeCompare(b, 'fr')).map(n => [n, n]);
+        options.push(['➕ Nouveau message…', '__nouveau']);
+        return options;
+      }, function (v) {
+        if (v !== '__nouveau') return v;
+        const nom = (prompt('Nom du nouveau message :', '') || '').trim();
+        return nom || null;
+      });
+      if (valeur) this.setValue(valeur);
+    }
+    doClassValidation_(v) {
+      return typeof v === 'string' && v ? v : null;
+    }
+    doValueUpdate_(v) {
+      this.generatedOptions = null;
+      super.doValueUpdate_(v);
+    }
+  }
+
+  Blockly.Blocks['bs_quand_message'] = {
+    init() {
+      this.appendDummyInput().appendField('📨 quand je reçois').appendField(new ChampMessage('message1'), 'MSG');
+      this.appendStatementInput('DO');
+      this.setColour(COULEUR_EVENEMENTS);
+      this.hat = 'cap';
+      this.setTooltip('Exécuté chaque fois que ce message est envoyé (avec « envoyer le message »). Plusieurs blocs peuvent recevoir le même message.');
+    }
+  };
+
+  Blockly.Blocks['bs_envoyer_message'] = {
+    init() {
+      this.appendDummyInput()
+        .appendField('📨 envoyer le message').appendField(new ChampMessage('message1'), 'MSG')
+        .appendField(new Blockly.FieldDropdown([['sans attendre', 'non'], ['et attendre la fin', 'oui']]), 'ATTENDRE');
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour(COULEUR_EVENEMENTS);
+      this.setTooltip('Déclenche tous les blocs « quand je reçois » ce message. Avec « et attendre », la suite attend qu\'ils soient tous terminés.');
+    }
+  };
+
   // ---------- Tableaux ----------
 
   const TABLEAU = { ctrl: ['tableau'] };
@@ -1092,6 +1147,11 @@
   gen.forBlock['bs_menu_actif'] = b =>
     `app.activerMenu(${q(b.getFieldValue('MENU'))}, ${b.getFieldValue('ACTIF') === 'TRUE'});\n`;
 
+  gen.forBlock['bs_quand_message'] = b =>
+    `app.quandMessage(${q(b.getFieldValue('MSG'))}, async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_envoyer_message'] = b => (b.getFieldValue('ATTENDRE') === 'oui' ? 'await ' : '') +
+    `app.envoyerMessage(${q(b.getFieldValue('MSG'))});\n`;
+
   const tab = (b, action, ...args) => `app.tableau(${id(b)}, '${action}'${args.map(a => ', ' + a).join('')});\n`;
   const lireTab = (b, quoi, ...args) => [`app.lireTableau(${id(b)}, '${quoi}'${args.map(a => ', ' + a).join('')})`, Order.FUNCTION_CALL];
   const col = b => val(b, 'COL', '1');
@@ -1318,7 +1378,10 @@
           { kind: 'block', type: 'bs_quand_minuteur' },
           { kind: 'block', type: 'bs_minuteur_ctrl' },
           { kind: 'block', type: 'bs_quand_son_fin' },
-          { kind: 'block', type: 'bs_toutes_les', inputs: { SEC: nombre(1) } }
+          { kind: 'block', type: 'bs_toutes_les', inputs: { SEC: nombre(1) } },
+          { kind: 'label', text: 'Messages entre les scripts' },
+          { kind: 'block', type: 'bs_envoyer_message' },
+          { kind: 'block', type: 'bs_quand_message' }
         ]
       },
       {

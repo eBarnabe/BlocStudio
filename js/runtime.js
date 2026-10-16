@@ -797,6 +797,7 @@ function BlocRuntimeFactory() {
 
     const minuteurs = [];
     const auDemarrage = [];
+    const actionsMessages = {};   // nom du message → gestionnaires « quand je reçois »
 
     // L'erreur est rattachée au dernier bloc exécuté (connu seulement dans l'éditeur).
     function signaler(e) {
@@ -1620,6 +1621,16 @@ function BlocRuntimeFactory() {
         return Math.round(Math.hypot(x2 - x1, y2 - y1) * 10) / 10;
       },
       auDemarrage(fn) { auDemarrage.push(proteger(fn)); },
+
+      // ---- Messages entre les scripts ----
+      quandMessage(nom, fn) { (actionsMessages[nom] = actionsMessages[nom] || []).push(proteger(fn)); },
+      // Les récepteurs démarrent au tour suivant : un message qui se renvoie lui-même
+      // fait une boucle qui laisse respirer la page, au lieu de saturer la pile.
+      // La promesse se termine quand tous les récepteurs ont fini (« et attendre »).
+      async envoyerMessage(nom) {
+        await patienter(0);
+        await Promise.all((actionsMessages[nom] || []).map(h => h()));
+      },
 
       // ---- Clavier et souris ----
       quandTouche(touche, fn) { (actionsTouches[touche] = actionsTouches[touche] || []).push(proteger(fn)); },

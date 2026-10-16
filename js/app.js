@@ -1873,6 +1873,7 @@
       case 'bs_quand_touche': return `quand la touche ${r.getField('TOUCHE').getText()} est appuyée`;
       case 'bs_toutes_les': return 'toutes les … secondes';
       case 'bs_quand_menu': return `quand on choisit le menu ${r.getFieldValue('MENU')}`;
+      case 'bs_quand_message': return `quand je reçois ${r.getFieldValue('MSG')}`;
       case 'procedures_defnoreturn':
       case 'procedures_defreturn': return `fonction ${r.getFieldValue('NAME')}`;
       default: return 'blocs non reliés (inactifs)';
