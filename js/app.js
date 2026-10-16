@@ -31,6 +31,8 @@
       defauts: { colonnes: ['Nom', 'Prénom'], lignes: [['Dupont', 'Marie'], ['Martin', 'Lucas']], memoriser: false } },
     date: { prefixe: 'Date', texte: '', largeur: 150, hauteur: 28, defauts: { date: '' } },
     selecteurcouleur: { prefixe: 'Couleur', texte: '#4f46e5', largeur: 60, hauteur: 30 },
+    navigateur: { prefixe: 'Navigateur', texte: '', largeur: 400, hauteur: 260,
+      defauts: { adresse: 'https://fr.wikipedia.org' } },
     // Contrôles invisibles : ils n'ont ni position ni taille à l'écran.
     son: { prefixe: 'Son', texte: '', largeur: 0, hauteur: 0,
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
@@ -44,7 +46,7 @@
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
@@ -52,7 +54,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -944,6 +946,10 @@
       i.value = c.date || '';
       i.addEventListener('input', () => { c.date = i.value; maj(); });
       d.appendChild(i);
+    }
+    if (c.type === 'navigateur') {
+      champTexte(liste, 'Adresse web (ex. : fr.wikipedia.org, ou une vidéo YouTube)', c.adresse || '',
+        v => { c.adresse = v.trim(); maj(); });
     }
     if (c.type === 'selecteurcouleur') champCouleur(liste, 'Couleur choisie', c.texte, v => { c.texte = v; maj(); });
     if (c.type === 'barreprogression') {
@@ -1840,7 +1846,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', son: '🔊', minuteur: '⏱️', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', son: '🔊', minuteur: '⏱️', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',

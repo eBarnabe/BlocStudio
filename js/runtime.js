@@ -20,6 +20,12 @@ function BlocRuntimeFactory() {
       user-select: none; }
     .bs-casecocher input { margin: 0; width: 16px; height: 16px; }
     .bs-listederoulante { border: 1px solid #7a7a7a; padding: 2px 4px; background: #fff; }
+    .bs-navigateur { border: 1px solid #94a3b8; background: #fff; }
+    .bs-navigateur-apercu { display: flex; flex-direction: column; overflow: hidden; color: #475569; }
+    .bs-navigateur-apercu > div:first-child { padding: 4px 8px; background: #e8ebf0; border-bottom: 1px solid #cbd5e1;
+      font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bs-navigateur-apercu > div:last-child { flex: 1; display: flex; align-items: center; justify-content: center;
+      font-size: 40px; opacity: .35; }
     .bs-boutonradio { display: flex; align-items: center; gap: 6px; cursor: pointer;
       user-select: none; }
     .bs-boutonradio input { margin: 0; width: 16px; height: 16px; }
@@ -528,6 +534,21 @@ function BlocRuntimeFactory() {
         el.type = 'date';
         el.value = c.date || aujourdhuiIso();
         break;
+      case 'navigateur':
+        // Dans le concepteur : un simple aperçu (pas de chargement à chaque modification).
+        if (prefixe === 'design') {
+          el = document.createElement('div');
+          el.classList.add('bs-navigateur-apercu');
+          el.appendChild(document.createElement('div')).textContent = '🌐 ' + (adresseWeb(c.adresse) || 'page vide');
+          el.appendChild(document.createElement('div')).textContent = '🌐';
+          break;
+        }
+        el = document.createElement('iframe');
+        el.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+        el.allowFullscreen = true;
+        el.referrerPolicy = 'strict-origin-when-cross-origin';
+        el.src = adresseWeb(c.adresse) || 'about:blank';
+        break;
       case 'selecteurcouleur':
         el = document.createElement('input');
         el.type = 'color';
@@ -536,7 +557,7 @@ function BlocRuntimeFactory() {
       default:
         el = document.createElement('div');
     }
-    el.className = 'bs-ctrl bs-' + c.type;
+    el.className = 'bs-ctrl bs-' + c.type + (el.className ? ' ' + el.className : '');
     appliquerStyle(el, c);
     return el;
   }
@@ -544,6 +565,16 @@ function BlocRuntimeFactory() {
   const estCase = t => t === 'casecocher' || t === 'boutonradio';
   const estListe = t => t === 'listederoulante' || t === 'zoneliste';
   const aValeur = t => t === 'curseur' || t === 'selecteurnombre';
+
+  // « wikipedia.org » → « https://wikipedia.org ». Les vidéos YouTube passent par
+  // leur version « intégrable » : la page normale de YouTube refuse d'être affichée dans un autre site.
+  function adresseWeb(v) {
+    let a = enTexte(v).trim();
+    if (!a) return '';
+    if (!/^[a-z][a-z0-9+.-]*:/i.test(a)) a = 'https://' + a;
+    const yt = a.match(/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/)|youtu\.be\/)([\w-]{6,})/i);
+    return yt ? 'https://www.youtube.com/embed/' + yt[1] : a;
+  }
 
   function remplirListe(select, elements) {
     select.innerHTML = '';
@@ -1429,7 +1460,8 @@ function BlocRuntimeFactory() {
       else if (evenement === 'entre') el.addEventListener('pointerenter', appel);
       else if (evenement === 'sort') el.addEventListener('pointerleave', appel);
       else if (evenement === 'change') {
-        if (estCase(d.type)) el.querySelector('input').addEventListener('change', appel);
+        if (d.type === 'navigateur') el.addEventListener('load', appel); // une page a fini de charger
+        else if (estCase(d.type)) el.querySelector('input').addEventListener('change', appel);
         else el.addEventListener('input', appel);
       } else if (evenement === 'glisser') {
         el.addEventListener('pointermove', e => { if (e.buttons & 1) appel(); });
@@ -1691,6 +1723,7 @@ function BlocRuntimeFactory() {
           case 'visible': return el.style.display !== 'none';
           case 'deplacable': return !!d.deplacable;
           case 'direction': return directionDe(d);
+          case 'adresse': return adresseWeb(d.adresse);
           case 'active': return !(el.disabled || el.querySelector?.('input')?.disabled);
           default: return d[prop];
         }
@@ -1780,6 +1813,10 @@ function BlocRuntimeFactory() {
           case 'couleurFond': d.couleurFond = valeur; el.style.background = couleur(valeur); break;
           case 'taillePolice': d.taillePolice = Number(valeur); el.style.fontSize = d.taillePolice + 'px'; break;
           case 'image': if (d.type === 'image') el.src = valeur; break;
+          // Redonner la même adresse recharge la page.
+          case 'adresse':
+            if (d.type === 'navigateur') { d.adresse = adresseWeb(valeur); el.src = d.adresse || 'about:blank'; }
+            break;
         }
       },
       message(texte, icone) {

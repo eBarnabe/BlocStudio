@@ -21,7 +21,8 @@
     intervalle: 'intervalle (secondes)', deplacable: 'déplaçable à la souris',
     sprite: 'sprite affiché (nom)', costume: 'n° du costume', nomCostume: 'nom du costume',
     vitesse: 'vitesse d\'animation (images/s)', miroir: 'retourné (miroir)', rotation: 'angle (degrés)',
-    enAnimation: 'en train d\'être animé', direction: 'direction (degrés)'
+    enAnimation: 'en train d\'être animé', direction: 'direction (degrés)',
+    adresse: 'adresse web'
   };
 
   // Les propriétés proposées dépendent du type de contrôle choisi dans le bloc.
@@ -44,6 +45,7 @@
     tableau: ['numero', 'texte', 'nombreLignes', 'colonnes', ...TEXTE, ...POSITION],
     date: ['texte', ...TEXTE, 'active', ...POSITION],
     selecteurcouleur: ['texte', 'active', ...POSITION],
+    navigateur: ['adresse', ...POSITION],
     son: ['son', 'volume', 'boucle', 'enLecture'],
     minuteur: ['intervalle', 'active'],
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', ...POSITION, 'direction']
@@ -162,8 +164,8 @@
   Blockly.Blocks['bs_quand_change'] = {
     init() {
       evenement(this, 'quand', ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur'], 'change');
-      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, ou clique sur une ligne d'un tableau.");
+        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur'], 'change');
+      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, ou quand un navigateur web a fini de charger une page.");
     }
   };
 
