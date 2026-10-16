@@ -33,6 +33,11 @@
     selecteurcouleur: { prefixe: 'Couleur', texte: '#4f46e5', largeur: 60, hauteur: 30 },
     navigateur: { prefixe: 'Navigateur', texte: '', largeur: 400, hauteur: 260,
       defauts: { adresse: 'https://fr.wikipedia.org' } },
+    interrupteur: { prefixe: 'Interrupteur', texte: 'Activé', largeur: 150, hauteur: 26 },
+    lien: { prefixe: 'Lien', texte: 'Visiter le site', largeur: 140, hauteur: 24,
+      defauts: { adresse: 'https://fr.wikipedia.org', couleurTexte: '#2563eb' } },
+    video: { prefixe: 'Video', texte: '', largeur: 320, hauteur: 180,
+      defauts: { video: '', barreVideo: true, boucle: false, volume: 100 } },
     // Contrôles invisibles : ils n'ont ni position ni taille à l'écran.
     son: { prefixe: 'Son', texte: '', largeur: 0, hauteur: 0,
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
@@ -41,12 +46,12 @@
   };
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
-  const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'listederoulante',
+  const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'listederoulante',
     'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date'];
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
@@ -54,7 +59,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -453,7 +458,7 @@
     if (fenetreActive) c.fenetre = fenetreActive;
     c.x = borner(arrondir(c.x), 0, Math.max(0, fenetreCourante().largeur - 20));
     c.y = borner(arrondir(c.y), 0, Math.max(0, fenetreCourante().hauteur - 20));
-    if (type === 'etiquette' || type === 'bouton' || type === 'casecocher') c.texte = TYPES[type].texte;
+    if (['etiquette', 'bouton', 'casecocher', 'interrupteur', 'lien'].includes(type)) c.texte = TYPES[type].texte;
     // Un nouveau contrôle Sprite affiche d'emblée le premier sprite de la bibliothèque.
     if (type === 'sprite' && projet.sprites.length) donnerSprite(c, projet.sprites[0]);
     projet.controles.push(c);
@@ -796,7 +801,7 @@
   function ouvrirEvenement(c) {
     const type = AVEC_CHANGE.includes(c.type) ? 'bs_quand_change'
       : c.type === 'zonedessin' ? 'bs_quand_glisse'
-      : c.type === 'son' ? 'bs_quand_son_fin'
+      : c.type === 'son' || c.type === 'video' ? 'bs_quand_son_fin'
       : c.type === 'minuteur' ? 'bs_quand_minuteur' : 'bs_quand_clic';
     afficherVue('vue-code');
     let bloc = workspace.getBlocksByType(type, false).find(b => b.getFieldValue('CTRL') === c.id);
@@ -877,7 +882,7 @@
     });
     if (c.type === 'son') return proprietesSon(liste, c, maj);
     if (c.type === 'minuteur') return proprietesMinuteur(liste, c, maj);
-    if (['bouton', 'etiquette', 'zonetexte', 'casecocher', 'boutonradio', 'cadre'].includes(c.type)) {
+    if (['bouton', 'etiquette', 'zonetexte', 'casecocher', 'boutonradio', 'cadre', 'interrupteur', 'lien'].includes(c.type)) {
       const multiligne = c.type === 'etiquette' || (c.type === 'zonetexte' && c.multiligne);
       champTexte(liste, c.type === 'cadre' ? 'Titre' : 'Texte', c.texte, v => { c.texte = v; maj(); }, multiligne);
     }
@@ -890,6 +895,12 @@
       });
     }
     if (c.type === 'casecocher') champCase(liste, 'Coché', c.coche, v => { c.coche = v; maj(); });
+    if (c.type === 'interrupteur') champCase(liste, 'Allumé', c.coche, v => { c.coche = v; maj(); });
+    if (c.type === 'lien') {
+      champTexte(liste, 'Adresse web (s\'ouvre dans le navigateur ; vide = simple texte cliquable)', c.adresse || '',
+        v => { c.adresse = v.trim(); maj(); });
+    }
+    if (c.type === 'video') proprietesVideo(liste, c, maj);
     if (c.type === 'boutonradio') {
       champCase(liste, 'Sélectionné', c.coche, v => {
         // Dans un groupe, un seul bouton radio peut être sélectionné.
@@ -1218,6 +1229,38 @@
     });
     d.append(b, f);
     champTexte(parent, '…ou adresse web de l\'image', c.image.startsWith('data:') ? '' : c.image, v => { c.image = v; maj(); });
+  }
+
+  // Une vidéo importée est rangée dans le projet : au-delà de quelques Mo,
+  // la sauvegarde automatique ne suit plus (une adresse web n'a pas cette limite).
+  const TAILLE_MAX_VIDEO = 3 * 1024 * 1024;
+
+  function proprietesVideo(liste, c, maj) {
+    const d = prop(liste, 'Vidéo');
+    const b = document.createElement('button');
+    b.textContent = '📁 Choisir une vidéo (MP4, WebM)…';
+    b.style.cssText = 'width:100%;padding:6px';
+    const f = document.createElement('input');
+    f.type = 'file';
+    f.accept = 'video/*';
+    f.hidden = true;
+    b.addEventListener('click', () => f.click());
+    f.addEventListener('change', async () => {
+      const fichier = f.files[0];
+      if (!fichier) return;
+      if (fichier.size > TAILLE_MAX_VIDEO &&
+          !confirm(`Cette vidéo pèse ${(fichier.size / 1048576).toFixed(1)} Mo : le projet risque d'être trop gros ` +
+            'pour la sauvegarde automatique (pensez à 💾 Enregistrer). Continuer ?')) return;
+      c.video = await lireEnDataUrl(fichier);
+      maj();
+      afficherProprietes();
+    });
+    d.append(b, f);
+    champTexte(liste, '…ou adresse web d\'un fichier vidéo (.mp4, .webm)', c.video.startsWith('data:') ? '' : c.video,
+      v => { c.video = v.trim(); maj(); });
+    champCase(liste, 'Afficher la barre de lecture', c.barreVideo !== false, v => { c.barreVideo = v; maj(); });
+    champCase(liste, 'En boucle', c.boucle, v => { c.boucle = v; maj(); });
+    champNombre(liste, 'Volume (%)', c.volume ?? 100, v => { c.volume = Math.min(100, Math.max(0, v)); maj(); });
   }
 
   // ---------------------------------------------------------------- Sprites
@@ -1846,7 +1889,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', son: '🔊', minuteur: '⏱️', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', son: '🔊', minuteur: '⏱️', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',

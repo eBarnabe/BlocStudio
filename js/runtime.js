@@ -21,11 +21,22 @@ function BlocRuntimeFactory() {
     .bs-casecocher input { margin: 0; width: 16px; height: 16px; }
     .bs-listederoulante { border: 1px solid #7a7a7a; padding: 2px 4px; background: #fff; }
     .bs-navigateur { border: 1px solid #94a3b8; background: #fff; }
-    .bs-navigateur-apercu { display: flex; flex-direction: column; overflow: hidden; color: #475569; }
-    .bs-navigateur-apercu > div:first-child { padding: 4px 8px; background: #e8ebf0; border-bottom: 1px solid #cbd5e1;
+    video.bs-video { background: #000; object-fit: contain; }
+    .bs-apercu { display: flex; flex-direction: column; overflow: hidden; color: #475569; }
+    .bs-apercu > div:first-child { padding: 4px 8px; background: #e8ebf0; border-bottom: 1px solid #cbd5e1;
       font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bs-navigateur-apercu > div:last-child { flex: 1; display: flex; align-items: center; justify-content: center;
+    .bs-apercu > div:last-child { flex: 1; display: flex; align-items: center; justify-content: center;
       font-size: 40px; opacity: .35; }
+    .bs-interrupteur { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+    .bs-interrupteur input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
+    .bs-interrupteur i { position: relative; flex: none; width: 38px; height: 22px; border-radius: 11px;
+      background: #cbd5e1; transition: background .15s; }
+    .bs-interrupteur i::after { content: ''; position: absolute; left: 3px; top: 3px; width: 16px; height: 16px;
+      border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.3); transition: transform .15s; }
+    .bs-interrupteur input:checked + i { background: #16a34a; }
+    .bs-interrupteur input:checked + i::after { transform: translateX(16px); }
+    .bs-interrupteur input:focus-visible + i { outline: 2px solid #4f46e5; outline-offset: 2px; }
+    .bs-lien { display: flex; align-items: center; text-decoration: underline; cursor: pointer; overflow: hidden; }
     .bs-boutonradio { display: flex; align-items: center; gap: 6px; cursor: pointer;
       user-select: none; }
     .bs-boutonradio input { margin: 0; width: 16px; height: 16px; }
@@ -537,10 +548,7 @@ function BlocRuntimeFactory() {
       case 'navigateur':
         // Dans le concepteur : un simple aperçu (pas de chargement à chaque modification).
         if (prefixe === 'design') {
-          el = document.createElement('div');
-          el.classList.add('bs-navigateur-apercu');
-          el.appendChild(document.createElement('div')).textContent = '🌐 ' + (adresseWeb(c.adresse) || 'page vide');
-          el.appendChild(document.createElement('div')).textContent = '🌐';
+          el = apercu('🌐', adresseWeb(c.adresse) || 'page vide');
           break;
         }
         el = document.createElement('iframe');
@@ -548,6 +556,36 @@ function BlocRuntimeFactory() {
         el.allowFullscreen = true;
         el.referrerPolicy = 'strict-origin-when-cross-origin';
         el.src = adresseWeb(c.adresse) || 'about:blank';
+        break;
+      case 'interrupteur': {
+        el = document.createElement('label');
+        const box = document.createElement('input');
+        box.type = 'checkbox';
+        box.checked = !!c.coche;
+        const span = document.createElement('span');
+        span.textContent = c.texte;
+        el.append(box, document.createElement('i'), span);
+        break;
+      }
+      case 'lien':
+        el = document.createElement('a');
+        el.textContent = c.texte;
+        el.target = '_blank';
+        el.rel = 'noopener';
+        if (adresseWeb(c.adresse)) el.href = adresseWeb(c.adresse);
+        break;
+      case 'video':
+        if (prefixe === 'design') {
+          el = apercu('🎬', c.video ? (c.video.startsWith('data:') ? 'vidéo importée' : c.video) : 'aucune vidéo');
+          break;
+        }
+        el = document.createElement('video');
+        el.playsInline = true;
+        el.preload = 'metadata';
+        el.controls = c.barreVideo !== false;
+        el.loop = !!c.boucle;
+        el.volume = Math.min(1, Math.max(0, (c.volume ?? 100) / 100));
+        if (c.video) el.src = c.video;
         break;
       case 'selecteurcouleur':
         el = document.createElement('input');
@@ -562,7 +600,16 @@ function BlocRuntimeFactory() {
     return el;
   }
 
-  const estCase = t => t === 'casecocher' || t === 'boutonradio';
+  const estCase = t => t === 'casecocher' || t === 'boutonradio' || t === 'interrupteur';
+
+  // Aperçu dans le concepteur des contrôles lourds (page web, vidéo) : une barre de titre et une icône.
+  function apercu(icone, texte) {
+    const el = document.createElement('div');
+    el.classList.add('bs-apercu');
+    el.appendChild(document.createElement('div')).textContent = icone + ' ' + texte;
+    el.appendChild(document.createElement('div')).textContent = icone;
+    return el;
+  }
   const estListe = t => t === 'listederoulante' || t === 'zoneliste';
   const aValeur = t => t === 'curseur' || t === 'selecteurnombre';
 
@@ -947,6 +994,21 @@ function BlocRuntimeFactory() {
           d.etat = 'arrete';
           d.position = 0;
           break;
+      }
+    }
+
+    // Une vidéo se commande comme un contrôle Son (jouer, pause, reprendre, arrêter).
+    function ctrlVideo(id, action) {
+      const el = elements[id];
+      const jouer = () => el.play().catch(e => { if (e.name !== 'AbortError') signaler(new Error('Impossible de lire la vidéo de « ' + donnees[id].nom + ' ».')); });
+      switch (action) {
+        case 'jouer': case 'reprendre': jouer(); break;
+        case 'pause': el.pause(); break;
+        case 'arreter': el.pause(); el.currentTime = 0; break;
+        case 'attendre':
+          jouer();
+          return new Promise(resoudre => el.addEventListener('ended', () => resoudre(), { once: true }))
+            .then(() => arrete ? JAMAIS : undefined);
       }
     }
 
@@ -1607,6 +1669,7 @@ function BlocRuntimeFactory() {
         ctrl(id);
         const h = proteger(fn);
         // « quand Son1 se termine », « quand Minuteur1 sonne »
+        if (evenement === 'fin' && donnees[id].type === 'video') return elements[id].addEventListener('ended', () => h(id));
         if (evenement === 'fin' || evenement === 'tic') return donnees[id].surEvenement.push(() => h(id));
         (evenementsCtrl[id] = evenementsCtrl[id] || []).push({ evenement, h });
         brancher(id, evenement, h);
@@ -1726,6 +1789,11 @@ function BlocRuntimeFactory() {
           case 'deplacable': return !!d.deplacable;
           case 'direction': return directionDe(d);
           case 'adresse': return adresseWeb(d.adresse);
+          case 'enLecture': return d.type === 'video' ? !el.paused && !el.ended : false;
+          case 'position': return d.type === 'video' ? Math.round(el.currentTime * 10) / 10 : 0;
+          case 'duree': return d.type === 'video' && isFinite(el.duration) ? Math.round(el.duration * 10) / 10 : 0;
+          case 'volume': return d.type === 'video' ? Math.round(el.volume * 100) : 0;
+          case 'boucle': return d.type === 'video' ? el.loop : false;
           case 'active': return !(el.disabled || el.querySelector?.('input')?.disabled);
           default: return d[prop];
         }
@@ -1818,7 +1886,12 @@ function BlocRuntimeFactory() {
           // Redonner la même adresse recharge la page.
           case 'adresse':
             if (d.type === 'navigateur') { d.adresse = adresseWeb(valeur); el.src = d.adresse || 'about:blank'; }
+            if (d.type === 'lien') { d.adresse = adresseWeb(valeur); if (d.adresse) el.href = d.adresse; else el.removeAttribute('href'); }
             break;
+          case 'video': if (d.type === 'video') { d.video = enTexte(valeur); el.src = d.video; } break;
+          case 'position': if (d.type === 'video') el.currentTime = Math.max(0, Number(valeur) || 0); break;
+          case 'volume': if (d.type === 'video') el.volume = Math.min(1, Math.max(0, (Number(valeur) || 0) / 100)); break;
+          case 'boucle': if (d.type === 'video') el.loop = !!valeur; break;
         }
       },
       message(texte, icone) {
@@ -2167,7 +2240,9 @@ function BlocRuntimeFactory() {
         for (const id in donnees) if (donnees[id].type === 'son' && donnees[id].son === nom) ctrlSon(id, 'arreter');
       },
       // Contrôles Son et Minuteur
-      sonCtrl: ctrlSon,
+      sonCtrl(id, action) {
+        return ctrl(id) && donnees[id].type === 'video' ? ctrlVideo(id, action) : ctrlSon(id, action);
+      },
       minuteur: ctrlMinuteur,
       sprite: ctrlSprite,
       // Volume en % (0 = muet, 100 = normal) d'un son, ou de tous les sons avec '*'.

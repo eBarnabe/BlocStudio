@@ -22,7 +22,7 @@
     sprite: 'sprite affiché (nom)', costume: 'n° du costume', nomCostume: 'nom du costume',
     vitesse: 'vitesse d\'animation (images/s)', miroir: 'retourné (miroir)', rotation: 'angle (degrés)',
     enAnimation: 'en train d\'être animé', direction: 'direction (degrés)',
-    adresse: 'adresse web'
+    adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)'
   };
 
   // Les propriétés proposées dépendent du type de contrôle choisi dans le bloc.
@@ -46,16 +46,20 @@
     date: ['texte', ...TEXTE, 'active', ...POSITION],
     selecteurcouleur: ['texte', 'active', ...POSITION],
     navigateur: ['adresse', ...POSITION],
+    interrupteur: ['coche', 'texte', ...TEXTE, 'active', ...POSITION],
+    lien: ['texte', 'adresse', ...TEXTE, ...POSITION],
+    video: ['enLecture', 'position', 'duree', 'volume', 'boucle', 'video', ...POSITION],
     son: ['son', 'volume', 'boucle', 'enLecture'],
     minuteur: ['intervalle', 'active'],
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { tableau: ['texte', 'nombreLignes'], son: ['enLecture'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
     boutonradio: { coche: 'sélectionné' },
+    interrupteur: { coche: 'allumé' },
     cadre: { texte: 'titre' },
     tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
     date: { texte: 'date (jj/mm/aaaa)' },
@@ -164,7 +168,7 @@
   Blockly.Blocks['bs_quand_change'] = {
     init() {
       evenement(this, 'quand', ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur'], 'change');
+        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur'], 'change');
       this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, ou quand un navigateur web a fini de charger une page.");
     }
   };
@@ -185,8 +189,8 @@
 
   Blockly.Blocks['bs_quand_son_fin'] = {
     init() {
-      evenement(this, 'quand', ['son'], 'se termine');
-      this.setTooltip('Exécuté quand le son arrive à sa fin (pas quand on l\'arrête ou le met en pause). Pratique pour enchaîner des musiques.');
+      evenement(this, 'quand', ['son', 'video'], 'se termine');
+      this.setTooltip('Exécuté quand le son ou la vidéo arrive à sa fin (pas quand on l\'arrête ou le met en pause). Pratique pour enchaîner des musiques.');
     }
   };
 
@@ -815,8 +819,8 @@
   Blockly.Blocks['bs_sonctrl'] = instruction(() => [
     { champ: new Blockly.FieldDropdown([['jouer', 'jouer'], ['jouer jusqu\'au bout', 'attendre'], ['mettre en pause', 'pause'],
       ['reprendre', 'reprendre'], ['arrêter', 'arreter']]), nom: 'ACTION' },
-    { ctrl: ['son'] }
-  ], COULEUR_SONS, 'Commande un contrôle Son. « reprendre » repart de l\'endroit de la pause. Son volume et « en boucle » se changent avec le bloc « mettre … ».');
+    { ctrl: ['son', 'video'] }
+  ], COULEUR_SONS, 'Commande un contrôle Son ou Vidéo. « reprendre » repart de l\'endroit de la pause. Son volume et « en boucle » se changent avec le bloc « mettre … ».');
 
   Blockly.Blocks['bs_minuteur_ctrl'] = instruction(() => [
     { champ: new Blockly.FieldDropdown([['démarrer', 'demarrer'], ['arrêter', 'arreter']]), nom: 'ACTION' },
