@@ -27,6 +27,13 @@ function BlocRuntimeFactory() {
       font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .bs-apercu > div:last-child { flex: 1; display: flex; align-items: center; justify-content: center;
       font-size: 40px; opacity: .35; }
+    .bs-onglets { display: flex; flex-direction: column; }
+    .bs-onglets-titres { display: flex; flex: none; gap: 2px; padding: 0 4px; overflow: hidden; }
+    .bs-onglets-titres button { flex: none; margin-top: 3px; padding: 4px 12px; border: 1px solid #a3acb9;
+      border-bottom: 0; border-radius: 6px 6px 0 0; background: #e8ebf0; color: inherit; font: inherit; cursor: pointer; }
+    .bs-onglets-titres button.bs-actif { position: relative; top: 1px; margin-top: 0; padding-bottom: 6px; background: #fff; }
+    .bs-onglets-corps { flex: 1; border: 1px solid #a3acb9; border-radius: 0 6px 6px 6px; background: #fff; }
+    .bs-hors-page { display: none !important; }
     .bs-interrupteur { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
     .bs-interrupteur input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
     .bs-interrupteur i { position: relative; flex: none; width: 38px; height: 22px; border-radius: 11px;
@@ -557,6 +564,12 @@ function BlocRuntimeFactory() {
         el.referrerPolicy = 'strict-origin-when-cross-origin';
         el.src = adresseWeb(c.adresse) || 'about:blank';
         break;
+      case 'onglets':
+        el = document.createElement('div');
+        el.appendChild(document.createElement('div')).className = 'bs-onglets-titres';
+        el.appendChild(document.createElement('div')).className = 'bs-onglets-corps';
+        titresOnglets(el, c.pages || [], c.page || 0);
+        break;
       case 'graphique':
         el = document.createElement('canvas');
         dessinerGraphique(el, c);
@@ -605,6 +618,17 @@ function BlocRuntimeFactory() {
   }
 
   const estCase = t => t === 'casecocher' || t === 'boutonradio' || t === 'interrupteur';
+
+  // ---- Onglets : une barre de titres ; les contrôles posés sur une page ont `onglets` (id) et `page` ----
+  function titresOnglets(el, pages, page) {
+    el.firstChild.replaceChildren(...pages.map((titre, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = enTexte(titre);
+      if (i === page) b.className = 'bs-actif';
+      return b;
+    }));
+  }
 
   // ---- Graphique : barres, courbe ou secteurs ----
   const COULEURS_SECTEURS = ['#4f46e5', '#16a34a', '#f59e0b', '#dc2626', '#0891b2', '#db2777',
@@ -806,7 +830,7 @@ function BlocRuntimeFactory() {
       background: c.couleurFond ? couleur(c.couleurFond) : '',
       fontSize: (c.taillePolice || 14) + 'px',
       display: c.visible === false ? 'none' : '',
-      zIndex: c.type === 'cadre' ? 0 : 1
+      zIndex: c.type === 'cadre' || c.type === 'onglets' ? 0 : 1
     });
     if (c.type === 'image' || c.type === 'sprite') el.style.objectFit = 'contain';
   }
@@ -959,11 +983,42 @@ function BlocRuntimeFactory() {
       if (c.type === 'sprite') d.costume = Math.max(0, Math.round(Number(c.costume) || 0));
       if (c.type === 'zonedessin') suivreSouris(el, d);
       if (c.type === 'tableau') preparerTableau(el, d);
+      if (c.type === 'onglets') {
+        d.pages = (c.pages || []).map(enTexte);
+        d.page = Math.min(Math.max(0, Math.round(Number(c.page) || 0)), Math.max(0, d.pages.length - 1));
+        el.addEventListener('click', e => {
+          const b = e.target.closest('.bs-onglets-titres button');
+          if (!b) return;
+          const i = [...b.parentNode.children].indexOf(b);
+          if (i === d.page) return;
+          d.page = i;
+          majOnglets(c.id);
+          el.dispatchEvent(new Event('input')); // « quand Onglets1 change »
+        });
+      }
       if (c.type === 'graphique') {
         d.valeurs = (c.valeurs || []).map(v => Number(v) || 0);
         d.etiquettes = (c.etiquettes || []).map(enTexte);
         while (d.etiquettes.length < d.valeurs.length) d.etiquettes.push('');
       }
+    }
+
+    // Montre les contrôles de la page affichée, cache ceux des autres pages
+    // (et tout le contenu si les onglets eux-mêmes sont cachés). Des onglets peuvent en contenir d'autres.
+    function majOnglets(id) {
+      const d = donnees[id], el = elements[id];
+      el.querySelectorAll('.bs-onglets-titres button').forEach((b, i) => b.classList.toggle('bs-actif', i === d.page));
+      const cache = el.style.display === 'none' || el.classList.contains('bs-hors-page');
+      for (const cid in donnees) {
+        const o = donnees[cid];
+        if (o.onglets !== id || cid === id) continue;
+        elements[cid].classList.toggle('bs-hors-page', cache || (Number(o.page) || 0) !== d.page);
+        if (o.type === 'onglets') majOnglets(cid);
+      }
+    }
+    for (const id in donnees) {
+      const d = donnees[id];
+      if (d.type === 'onglets' && !(d.onglets && donnees[d.onglets])) majOnglets(id); // les plus extérieurs d'abord
     }
 
     // Un tableau « mémorisé » retrouve ses lignes au lancement suivant. La mémoire
@@ -1907,6 +1962,11 @@ function BlocRuntimeFactory() {
           const v = d[prop];
           return Array.isArray(v) ? v.slice() : v ?? '';
         }
+        if (d.type === 'onglets') {
+          if (prop === 'numero') return d.page + 1;
+          if (prop === 'texte') return d.pages[d.page] ?? '';
+          if (prop === 'elements') return d.pages.slice();
+        }
         switch (prop) {
           case 'texte':
             if (d.type === 'zonetexte') return el.value;
@@ -1951,6 +2011,16 @@ function BlocRuntimeFactory() {
         if (d.type === 'son') return ecrireSon(d, prop, valeur);
         if (d.type === 'minuteur') return ecrireMinuteur(d, prop, valeur);
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return ecrireSprite(d, prop, valeur);
+        if (d.type === 'onglets' && (prop === 'numero' || prop === 'elements')) {
+          if (prop === 'elements') {
+            d.pages = (Array.isArray(valeur) ? valeur : enTexte(valeur).split('\n')).map(enTexte);
+            titresOnglets(el, d.pages, d.page);
+          }
+          const n = prop === 'numero' ? Math.round(Number(valeur)) - 1 : d.page;
+          d.page = Math.min(Math.max(0, n), Math.max(0, d.pages.length - 1));
+          return majOnglets(id);
+        }
+        const avant = { x: d.x, y: d.y };
         if (d.type === 'graphique' && PROPS_GRAPHIQUE.includes(prop)) {
           const liste = Array.isArray(valeur) ? valeur : enTexte(valeur).split(/[\n;]/).map(e => e.trim()).filter(e => e);
           if (prop === 'valeurs') d.valeurs = liste.map(v => app.nombre(v));
@@ -2049,6 +2119,15 @@ function BlocRuntimeFactory() {
           case 'boucle': if (d.type === 'video') el.loop = !!valeur; break;
         }
         if (d.type === 'graphique') dessinerGraphique(el, d); // taille, couleurs du texte ou du fond
+        if (d.type === 'onglets') {
+          if (prop === 'visible') majOnglets(id);
+          // Les contrôles posés sur les onglets se déplacent avec eux.
+          if (prop === 'x' || prop === 'y') {
+            for (const cid in donnees) {
+              if (donnees[cid].onglets === id) poser(cid, donnees[cid].x + d.x - avant.x, donnees[cid].y + d.y - avant.y);
+            }
+          }
+        }
       },
       graphique(id, action, valeur, etiquette) {
         const el = ctrlDeType(id, 'graphique', 'un graphique');

@@ -33,6 +33,8 @@
     selecteurcouleur: { prefixe: 'Couleur', texte: '#4f46e5', largeur: 60, hauteur: 30 },
     navigateur: { prefixe: 'Navigateur', texte: '', largeur: 400, hauteur: 260,
       defauts: { adresse: 'https://fr.wikipedia.org' } },
+    onglets: { prefixe: 'Onglets', texte: '', largeur: 340, hauteur: 220,
+      defauts: { pages: ['Page 1', 'Page 2', 'Page 3'], page: 0 } },
     graphique: { prefixe: 'Graphique', texte: 'Mon graphique', largeur: 320, hauteur: 200,
       defauts: { genre: 'barres', etiquettes: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'], valeurs: [3, 5, 2, 6, 4],
         couleurBarre: '#4f46e5', couleurFond: '#ffffff', maxValeurs: 0 } },
@@ -49,12 +51,12 @@
   };
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
-  const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'listederoulante',
+  const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'onglets', 'listederoulante',
     'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date'];
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
@@ -62,7 +64,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -275,7 +277,7 @@
     w.className = 'd-ctrl';
     w.dataset.id = c.id;
     w.title = c.nom + ' — double-clic pour écrire son code';
-    w.appendChild(BlocRuntime.creerElement(c, 'design', projet.sprites));
+    w.appendChild(creerElementDesign(c));
     const poignee = document.createElement('div');
     poignee.className = 'poignee';
     w.appendChild(poignee);
@@ -286,6 +288,7 @@
       if (e.button === 2) { if (!choisis.has(c.id)) selectionner(c.id); return; } // clic droit : menu
       if (e.button !== 0) return;
       if (e.ctrlKey || e.shiftKey) { selectionner(c.id, true); return; }
+      if (c.type === 'onglets') cliquerTitreOnglets(e, w, c);
       const dejaChoisi = choisis.has(c.id);
       if (!dejaChoisi) selectionner(c.id);
       deplacerOuRedimensionner(e, w, c, e.target === poignee && choisis.size === 1, dejaChoisi);
@@ -293,6 +296,98 @@
 
     w.addEventListener('dblclick', () => ouvrirEvenement(c));
     return w;
+  }
+
+  const creerElementDesign = c =>
+    BlocRuntime.creerElement(c.type === 'onglets' ? { ...c, page: pageVue(c) } : c, 'design', projet.sprites);
+
+  // ---- Onglets ----
+  // Un contrôle lâché sur une page d'onglets en fait partie : `onglets` (id des onglets) et `page` (n°).
+  // Le concepteur ne montre que la page choisie (clic sur son titre) ; le programme fait de même.
+  const HAUTEUR_TITRES_ONGLETS = 28;
+  const pageDesign = {}; // id des onglets → page montrée dans le concepteur
+  const pageVue = o => Math.min(pageDesign[o.id] ?? (o.page || 0), Math.max(0, (o.pages || []).length - 1));
+  const ongletsDe = c => c.onglets ? projet.controles.find(o => o.id === c.onglets && o.type === 'onglets') : null;
+
+  // Vrai si `c` est posé (directement ou non) sur les onglets `parent`.
+  function estDans(c, parent) {
+    for (let o = ongletsDe(c), n = 0; o && n < 50; o = ongletsDe(o), n++) if (o === parent) return true;
+    return false;
+  }
+
+  function horsPage(c) {
+    const o = ongletsDe(c);
+    return !!o && ((c.page || 0) !== pageVue(o) || horsPage(o));
+  }
+
+  // Après un déplacement : un contrôle lâché sur des onglets rejoint la page affichée
+  // (s'il était déjà sur ces onglets, il garde sa page) ; lâché ailleurs, il les quitte.
+  function rattacherAuxOnglets(liste) {
+    const tous = projet.controles.filter(o => o.type === 'onglets' && dansFenetreActive(o) && !horsPage(o));
+    for (const c of liste) {
+      if (estInvisible(c)) continue;
+      const cx = c.x + c.largeur / 2, cy = c.y + c.hauteur / 2;
+      const o = tous.filter(o => o !== c && !estDans(o, c) && cx >= o.x && cx <= o.x + o.largeur &&
+        cy >= o.y + HAUTEUR_TITRES_ONGLETS && cy <= o.y + o.hauteur).at(-1);
+      if (!o) { delete c.onglets; delete c.page; }
+      else if (c.onglets !== o.id) { c.onglets = o.id; c.page = pageVue(o); }
+    }
+  }
+
+  // Remet à jour ce qui est montré ou caché dans le concepteur.
+  function replacerTout() {
+    for (const o of projet.controles) {
+      const w = elementDesign(o.id);
+      if (w) placer(w, o);
+    }
+  }
+
+  function cliquerTitreOnglets(e, w, c) {
+    const i = [...w.querySelectorAll('.bs-onglets-titres button')].findIndex(b => {
+      const r = b.getBoundingClientRect();
+      return e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+    });
+    if (i < 0 || i === pageVue(c)) return;
+    pageDesign[c.id] = i;
+    w.firstChild.replaceWith(creerElementDesign(c));
+    replacerTout();
+  }
+
+  // Un contrôle choisi ailleurs (liste des propriétés, Sommaire) : on affiche sa page.
+  function montrerPageDe(id) {
+    const c = projet.controles.find(x => x.id === id);
+    let change = false;
+    for (let x = c, o = c && ongletsDe(c), n = 0; o && n < 50; x = o, o = ongletsDe(o), n++) {
+      if (pageVue(o) !== (x.page || 0)) { pageDesign[o.id] = x.page || 0; change = true; }
+    }
+    if (change) afficherConcepteur();
+  }
+
+  function proprietesOnglets(liste, c, maj) {
+    champTexte(liste, 'Titres des pages (un par ligne)', (c.pages || []).join('\n'), v => {
+      c.pages = v.split('\n').map(t => t.trim()).filter(t => t);
+      if (!c.pages.length) c.pages = ['Page 1'];
+      const derniere = c.pages.length - 1;
+      c.page = Math.min(c.page || 0, derniere);
+      // Les contrôles d'une page supprimée vont sur la dernière page.
+      for (const o of projet.controles) if (o.onglets === c.id && (o.page || 0) > derniere) o.page = derniere;
+      maj();
+      replacerTout();
+    }, true);
+    const d = prop(liste, 'Page affichée au démarrage');
+    const choix = document.createElement('select');
+    (c.pages || []).forEach((t, i) => choix.add(new Option(`${i + 1}. ${t}`, String(i))));
+    choix.value = String(c.page || 0);
+    choix.addEventListener('change', () => {
+      c.page = pageDesign[c.id] = Number(choix.value);
+      maj();
+      replacerTout();
+    });
+    d.appendChild(choix);
+    const aide = document.createElement('p');
+    aide.className = 'info-petit';
+    aide.textContent = 'Cliquez sur le titre d\'une page pour l\'afficher, puis glissez-y des contrôles : ils en font partie et se déplacent avec les onglets.';
+    liste.appendChild(aide);
   }
 
   // Bande « Contrôles invisibles » sous la fenêtre : un clic sélectionne, un double-clic ouvre le code.
@@ -327,8 +422,9 @@
     Object.assign(w.style, {
       left: c.x + 'px', top: c.y + 'px',
       width: c.largeur + 'px', height: c.hauteur + 'px',
-      zIndex: c.type === 'cadre' ? 0 : 1 // les cadres restent derrière les autres contrôles
+      zIndex: c.type === 'cadre' || c.type === 'onglets' ? 0 : 1 // cadres et onglets restent derrière
     });
+    w.hidden = horsPage(c);
     w.classList.toggle('cache', c.visible === false);
     marquerSelection(w);
   }
@@ -384,6 +480,11 @@
         }
       }
     }
+    if (!redim) {
+      for (const onglets of bouges.filter(o => o.type === 'onglets')) {
+        for (const o of projet.controles) if (!bouges.includes(o) && estDans(o, onglets)) bouges.push(o);
+      }
+    }
     const depart = bouges.map(o => ({ o, x: o.x, y: o.y, w: elementDesign(o.id) }));
     const boite = enveloppe(bouges);
     const autres = projet.controles.filter(o => !bouges.includes(o) && !estInvisible(o) && dansFenetreActive(o)).map(rectDe);
@@ -434,6 +535,10 @@
       // Un simple clic sur un contrôle d'une sélection multiple ne garde que lui.
       if (!bouge && dejaChoisi && choisis.size > 1) return selectionner(c.id);
       if (bouge) {
+        if (!redim) {
+          rattacherAuxOnglets(bouges);
+          replacerTout();
+        }
         afficherProprietes();
         planifierSauvegarde();
       }
@@ -465,6 +570,7 @@
     // Un nouveau contrôle Sprite affiche d'emblée le premier sprite de la bibliothèque.
     if (type === 'sprite' && projet.sprites.length) donnerSprite(c, projet.sprites[0]);
     projet.controles.push(c);
+    rattacherAuxOnglets([c]);
     if (estInvisible(c)) afficherInvisibles();
     else $('surface-design').appendChild(creerControleDesign(c));
     selectionner(c.id);
@@ -506,6 +612,7 @@
   const selectionnes = () => projet.controles.filter(c => choisis.has(c.id));
 
   function selectionner(id, basculer) {
+    if (id) montrerPageDe(id);
     if (basculer && id) {
       if (choisis.has(id)) {
         choisis.delete(id);
@@ -605,10 +712,10 @@
     // Dans la même fenêtre, chaque collage est un peu décalé ; dans une autre, à la même place.
     const decalage = source.fenetre === fenetreActive ? ++source.collages * 16 : 0;
     const f = fenetreCourante();
-    const ids = [];
+    const ids = [], nouveauxIds = {};
     for (const modele of source.controles) {
       const c = structuredClone(modele);
-      c.id = 'c' + projet.prochainId++;
+      c.id = nouveauxIds[modele.id] = 'c' + projet.prochainId++;
       c.nom = nomUnique(modele.nom.replace(/\d+$/, '') || TYPES[c.type].prefixe);
       if (fenetreActive) c.fenetre = fenetreActive; else delete c.fenetre;
       if (!estInvisible(c)) {
@@ -619,6 +726,12 @@
       projet.controles.push(c);
       ids.push(c.id);
     }
+    const colles = projet.controles.filter(c => ids.includes(c.id));
+    for (const c of colles) {
+      if (nouveauxIds[c.onglets]) c.onglets = nouveauxIds[c.onglets];
+      else delete c.onglets; // collé seul : il rejoindra la page affichée là où il tombe
+    }
+    rattacherAuxOnglets(colles.filter(c => !ids.includes(c.onglets)));
     afficherConcepteur();
     selectionnerPlusieurs(ids);
     planifierSauvegarde();
@@ -905,6 +1018,7 @@
     }
     if (c.type === 'video') proprietesVideo(liste, c, maj);
     if (c.type === 'graphique') proprietesGraphique(liste, c, maj);
+    if (c.type === 'onglets') proprietesOnglets(liste, c, maj);
     if (c.type === 'boutonradio') {
       champCase(liste, 'Sélectionné', c.coche, v => {
         // Dans un groupe, un seul bouton radio peut être sélectionné.
@@ -1947,7 +2061,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', son: '🔊', minuteur: '⏱️', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',

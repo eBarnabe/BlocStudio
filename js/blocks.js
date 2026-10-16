@@ -48,6 +48,7 @@
     date: ['texte', ...TEXTE, 'active', ...POSITION],
     selecteurcouleur: ['texte', 'active', ...POSITION],
     navigateur: ['adresse', ...POSITION],
+    onglets: ['numero', 'texte', 'elements', ...TEXTE, ...POSITION],
     graphique: ['valeurs', 'etiquettes', 'texte', 'genre', 'couleurBarre', 'maxValeurs', ...TEXTE, ...POSITION],
     interrupteur: ['coche', 'texte', ...TEXTE, 'active', ...POSITION],
     lien: ['texte', 'adresse', ...TEXTE, ...POSITION],
@@ -57,12 +58,13 @@
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
     boutonradio: { coche: 'sélectionné' },
     interrupteur: { coche: 'allumé' },
+    onglets: { numero: 'n° de la page affichée', texte: 'titre de la page affichée', elements: 'titres des pages (liste)' },
     graphique: { texte: 'titre', couleurBarre: 'couleur des barres / de la courbe' },
     cadre: { texte: 'titre' },
     tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
@@ -172,8 +174,8 @@
   Blockly.Blocks['bs_quand_change'] = {
     init() {
       evenement(this, 'quand', ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur'], 'change');
-      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, ou quand un navigateur web a fini de charger une page.");
+        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets'], 'change');
+      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau ou sur une page d'onglets, ou quand un navigateur web a fini de charger une page.");
     }
   };
 
