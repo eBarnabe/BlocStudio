@@ -213,8 +213,14 @@ namespace BlocStudio
                 try { Process.Start(e.Uri); } catch { }
             };
 
-            vue.CoreWebView2.Navigate(new Uri(page).AbsoluteUri);
+            // La page est servie sous une adresse https fictive plutôt qu'en file:// :
+            // certains sites (vidéos YouTube intégrées…) refusent de s'afficher dans une page locale.
+            vue.CoreWebView2.SetVirtualHostNameToFolderMapping(Hote, Path.GetDirectoryName(page),
+                Microsoft.Web.WebView2.Core.CoreWebView2HostResourceAccessKind.Allow);
+            vue.CoreWebView2.Navigate("https://" + Hote + "/index.html");
         }
+
+        const string Hote = "programme.blocstudio.example";
 
         // La page est écrite dans un dossier propre à ce programme (même contenu = même dossier).
         string EcrirePage()

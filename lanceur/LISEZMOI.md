@@ -15,7 +15,9 @@ rien d'autre à copier.
 
 Ce que le lanceur écrit sur le disque, dans `%LOCALAPPDATA%\BlocStudio\` :
 - `lanceur-<version>\WebView2Loader.dll` : extrait une seule fois ;
-- `programmes\<empreinte>\index.html` : la page du programme ;
+- `programmes\<empreinte>\index.html` : la page du programme, affichée sous
+  l'adresse fictive `https://programme.blocstudio.example/` (pas en `file://` :
+  les vidéos YouTube intégrées, par exemple, refusent les pages locales) ;
 - `WebView2\` : le profil du moteur (cache…).
 
 ## BlocStudio.exe (l'éditeur en application Windows)
