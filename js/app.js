@@ -33,6 +33,9 @@
     selecteurcouleur: { prefixe: 'Couleur', texte: '#4f46e5', largeur: 60, hauteur: 30 },
     navigateur: { prefixe: 'Navigateur', texte: '', largeur: 400, hauteur: 260,
       defauts: { adresse: 'https://fr.wikipedia.org' } },
+    graphique: { prefixe: 'Graphique', texte: 'Mon graphique', largeur: 320, hauteur: 200,
+      defauts: { genre: 'barres', etiquettes: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'], valeurs: [3, 5, 2, 6, 4],
+        couleurBarre: '#4f46e5', couleurFond: '#ffffff', maxValeurs: 0 } },
     interrupteur: { prefixe: 'Interrupteur', texte: 'Activé', largeur: 150, hauteur: 26 },
     lien: { prefixe: 'Lien', texte: 'Visiter le site', largeur: 140, hauteur: 24,
       defauts: { adresse: 'https://fr.wikipedia.org', couleurTexte: '#2563eb' } },
@@ -46,7 +49,7 @@
   };
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
-  const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'listederoulante',
+  const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'listederoulante',
     'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date'];
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
@@ -59,7 +62,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -901,6 +904,7 @@
         v => { c.adresse = v.trim(); maj(); });
     }
     if (c.type === 'video') proprietesVideo(liste, c, maj);
+    if (c.type === 'graphique') proprietesGraphique(liste, c, maj);
     if (c.type === 'boutonradio') {
       champCase(liste, 'Sélectionné', c.coche, v => {
         // Dans un groupe, un seul bouton radio peut être sélectionné.
@@ -1229,6 +1233,32 @@
     });
     d.append(b, f);
     champTexte(parent, '…ou adresse web de l\'image', c.image.startsWith('data:') ? '' : c.image, v => { c.image = v; maj(); });
+  }
+
+  function proprietesGraphique(liste, c, maj) {
+    champTexte(liste, 'Titre', c.texte, v => { c.texte = v; maj(); });
+    const d = prop(liste, 'Genre');
+    const choix = document.createElement('select');
+    for (const [valeur, libelle] of [['barres', '📊 Barres'], ['courbe', '📈 Courbe'], ['secteurs', '🥧 Secteurs (camembert)']]) {
+      choix.add(new Option(libelle, valeur));
+    }
+    choix.value = c.genre || 'barres';
+    choix.addEventListener('change', () => { c.genre = choix.value; maj(); });
+    d.appendChild(choix);
+    champTexte(liste, 'Valeurs de départ (une par ligne : étiquette ; nombre)',
+      (c.valeurs || []).map((v, i) => `${(c.etiquettes || [])[i] ?? ''} ; ${v}`).join('\n'), v => {
+        const lignes = v.split('\n').filter(l => l.trim()).map(l => {
+          const morceaux = l.split(';');
+          const nombre = parseFloat((morceaux.pop() || '').trim().replace(',', '.'));
+          return [morceaux.join(';').trim(), isNaN(nombre) ? 0 : nombre];
+        });
+        c.etiquettes = lignes.map(l => l[0]);
+        c.valeurs = lignes.map(l => l[1]);
+        maj();
+      }, true);
+    champCouleur(liste, 'Couleur des barres / de la courbe', c.couleurBarre, v => { c.couleurBarre = v; maj(); });
+    champNombre(liste, 'Garder seulement les N dernières valeurs (0 = toutes)', c.maxValeurs || 0,
+      v => { c.maxValeurs = Math.max(0, Math.round(v)); maj(); });
   }
 
   // Une vidéo importée est rangée dans le projet : au-delà de quelques Mo,
@@ -1889,7 +1919,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', son: '🔊', minuteur: '⏱️', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', son: '🔊', minuteur: '⏱️', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',

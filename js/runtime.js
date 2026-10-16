@@ -557,6 +557,10 @@ function BlocRuntimeFactory() {
         el.referrerPolicy = 'strict-origin-when-cross-origin';
         el.src = adresseWeb(c.adresse) || 'about:blank';
         break;
+      case 'graphique':
+        el = document.createElement('canvas');
+        dessinerGraphique(el, c);
+        break;
       case 'interrupteur': {
         el = document.createElement('label');
         const box = document.createElement('input');
@@ -601,6 +605,139 @@ function BlocRuntimeFactory() {
   }
 
   const estCase = t => t === 'casecocher' || t === 'boutonradio' || t === 'interrupteur';
+
+  // ---- Graphique : barres, courbe ou secteurs ----
+  const COULEURS_SECTEURS = ['#4f46e5', '#16a34a', '#f59e0b', '#dc2626', '#0891b2', '#db2777',
+    '#7c3aed', '#65a30d', '#ea580c', '#475569'];
+  const nombreLisible = v => (Math.round(v * 100) / 100).toLocaleString('fr-FR');
+
+  // Un pas « rond » pour les graduations : 1, 2, 5, 10, 20, 50…
+  function pasRond(x) {
+    const p = Math.pow(10, Math.floor(Math.log10(x)));
+    const m = x / p;
+    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
+  }
+
+  function couper(ctx, texte, largeur) {
+    if (ctx.measureText(texte).width <= largeur) return texte;
+    while (texte.length > 1 && ctx.measureText(texte + '…').width > largeur) texte = texte.slice(0, -1);
+    return texte + '…';
+  }
+
+  function dessinerGraphique(canvas, d) {
+    const L = Number(d.largeur) || 10, H = Number(d.hauteur) || 10;
+    canvas.width = 0; // repart d'un canevas vide
+    preparerDessin(canvas, L, H);
+    const ctx = canvas.getContext('2d');
+    const valeurs = (d.valeurs || []).map(v => Number(v) || 0);
+    const etiquettes = d.etiquettes || [];
+    const taille = Math.max(9, (Number(d.taillePolice) || 14) - 2);
+    const police = (gras, t = taille) => `${gras ? 'bold ' : ''}${t}px "Segoe UI", sans-serif`;
+    const encre = couleur(d.couleurTexte || '#000000');
+    ctx.textBaseline = 'middle';
+
+    let haut = 8;
+    if (d.texte) {
+      ctx.font = police(true, taille + 2);
+      ctx.fillStyle = encre;
+      ctx.textAlign = 'center';
+      ctx.fillText(couper(ctx, enTexte(d.texte), L - 10), L / 2, haut + (taille + 2) / 2);
+      haut += taille + 12;
+    }
+    ctx.font = police(false);
+    if (!valeurs.length) {
+      ctx.fillStyle = '#94a3b8';
+      ctx.textAlign = 'center';
+      ctx.fillText('(aucune valeur)', L / 2, (haut + H) / 2);
+      return;
+    }
+    const nom = i => etiquettes[i] !== undefined && etiquettes[i] !== '' ? enTexte(etiquettes[i]) : String(i + 1);
+
+    if (d.genre === 'secteurs') {
+      const total = valeurs.reduce((s, v) => s + Math.max(0, v), 0) || 1;
+      const legende = Math.min(L * 0.45, 160);
+      const r = Math.max(5, Math.min((L - legende - 20) / 2, (H - haut - 8) / 2));
+      const cx = 10 + r, cy = haut + (H - haut - 8) / 2;
+      let angle = -Math.PI / 2;
+      valeurs.forEach((v, i) => {
+        const part = Math.max(0, v) / total * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, angle, angle + part);
+        ctx.closePath();
+        ctx.fillStyle = COULEURS_SECTEURS[i % COULEURS_SECTEURS.length];
+        ctx.fill();
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        angle += part;
+      });
+      const x = cx + r + 14, ligne = taille + 6;
+      ctx.textAlign = 'left';
+      valeurs.forEach((v, i) => {
+        const y = cy - (valeurs.length - 1) * ligne / 2 + i * ligne;
+        if (y < haut || y > H - 4) return;
+        ctx.fillStyle = COULEURS_SECTEURS[i % COULEURS_SECTEURS.length];
+        ctx.fillRect(x, y - 5, 10, 10);
+        ctx.fillStyle = encre;
+        const pourcent = Math.round(Math.max(0, v) / total * 100);
+        ctx.fillText(couper(ctx, `${nom(i)} (${pourcent} %)`, L - x - 18), x + 15, y);
+      });
+      return;
+    }
+
+    // Barres ou courbe : graduations à gauche, étiquettes en bas.
+    let min = Math.min(0, ...valeurs), max = Math.max(0, ...valeurs);
+    if (max === min) max = min + 1;
+    const pas = pasRond((max - min) / 4);
+    min = Math.floor(min / pas) * pas;
+    max = Math.ceil(max / pas) * pas;
+    const graduations = [];
+    for (let v = min; v <= max + pas / 2; v += pas) graduations.push(v);
+    const gauche = 8 + Math.max(...graduations.map(v => ctx.measureText(nombreLisible(v)).width)) + 6;
+    const droite = L - 8, bas = H - taille - 10;
+    if (bas - haut < 10 || droite - gauche < 10) return;
+    const y = v => bas - (v - min) / (max - min) * (bas - haut);
+
+    ctx.textAlign = 'right';
+    ctx.lineWidth = 1;
+    for (const v of graduations) {
+      ctx.strokeStyle = v === 0 ? '#64748b' : '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(gauche, Math.round(y(v)) + 0.5);
+      ctx.lineTo(droite, Math.round(y(v)) + 0.5);
+      ctx.stroke();
+      ctx.fillStyle = '#64748b';
+      ctx.fillText(nombreLisible(v), gauche - 6, y(v));
+    }
+
+    const n = valeurs.length, case_ = (droite - gauche) / n;
+    const coul = couleur(d.couleurBarre || '#4f46e5');
+    const centre = i => gauche + case_ * (i + 0.5);
+    if (d.genre === 'courbe') {
+      ctx.strokeStyle = coul;
+      ctx.lineWidth = 2;
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      valeurs.forEach((v, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, centre(i), y(v)));
+      ctx.stroke();
+      ctx.fillStyle = coul;
+      if (case_ >= 6) valeurs.forEach((v, i) => { ctx.beginPath(); ctx.arc(centre(i), y(v), 3, 0, Math.PI * 2); ctx.fill(); });
+    } else {
+      ctx.fillStyle = coul;
+      valeurs.forEach((v, i) => {
+        const largeur = Math.max(1, case_ * 0.7);
+        ctx.fillRect(centre(i) - largeur / 2, Math.min(y(v), y(0)), largeur, Math.abs(y(v) - y(0)));
+      });
+    }
+
+    // Étiquettes : une sur k si elles ne tiennent pas toutes.
+    ctx.fillStyle = encre;
+    ctx.textAlign = 'center';
+    const plusLarge = Math.max(...valeurs.map((v, i) => ctx.measureText(nom(i)).width));
+    const k = Math.max(1, Math.ceil((Math.min(plusLarge, 80) + 6) / case_));
+    for (let i = 0; i < n; i += k) ctx.fillText(couper(ctx, nom(i), case_ * k - 4), centre(i), bas + taille / 2 + 5);
+  }
 
   // Aperçu dans le concepteur des contrôles lourds (page web, vidéo) : une barre de titre et une icône.
   function apercu(icone, texte) {
@@ -822,6 +959,11 @@ function BlocRuntimeFactory() {
       if (c.type === 'sprite') d.costume = Math.max(0, Math.round(Number(c.costume) || 0));
       if (c.type === 'zonedessin') suivreSouris(el, d);
       if (c.type === 'tableau') preparerTableau(el, d);
+      if (c.type === 'graphique') {
+        d.valeurs = (c.valeurs || []).map(v => Number(v) || 0);
+        d.etiquettes = (c.etiquettes || []).map(enTexte);
+        while (d.etiquettes.length < d.valeurs.length) d.etiquettes.push('');
+      }
     }
 
     // Un tableau « mémorisé » retrouve ses lignes au lancement suivant. La mémoire
@@ -1096,6 +1238,7 @@ function BlocRuntimeFactory() {
     const animations = new Set();
     for (const s of spritesProjet.values()) for (const c of s.costumes || []) contourCostume(c.donnees);
     const PROPS_SPRITE = ['sprite', 'costume', 'nomCostume', 'vitesse', 'miroir', 'rotation', 'enAnimation'];
+    const PROPS_GRAPHIQUE = ['texte', 'valeurs', 'etiquettes', 'genre', 'couleurBarre', 'maxValeurs'];
     const spriteDe = d => spritesProjet.get(d.sprite);
     const costumesDe = d => (spriteDe(d) && spriteDe(d).costumes) || [];
     const majSprite = d => afficherSprite(elements[d.id], d, spriteDe(d));
@@ -1760,6 +1903,10 @@ function BlocRuntimeFactory() {
         if (d.type === 'son') return lireSon(d, prop);
         if (d.type === 'minuteur') return lireMinuteur(d, prop);
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return lireSprite(d, prop);
+        if (d.type === 'graphique' && PROPS_GRAPHIQUE.includes(prop)) {
+          const v = d[prop];
+          return Array.isArray(v) ? v.slice() : v ?? '';
+        }
         switch (prop) {
           case 'texte':
             if (d.type === 'zonetexte') return el.value;
@@ -1804,6 +1951,14 @@ function BlocRuntimeFactory() {
         if (d.type === 'son') return ecrireSon(d, prop, valeur);
         if (d.type === 'minuteur') return ecrireMinuteur(d, prop, valeur);
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return ecrireSprite(d, prop, valeur);
+        if (d.type === 'graphique' && PROPS_GRAPHIQUE.includes(prop)) {
+          const liste = Array.isArray(valeur) ? valeur : enTexte(valeur).split(/[\n;]/).map(e => e.trim()).filter(e => e);
+          if (prop === 'valeurs') d.valeurs = liste.map(v => app.nombre(v));
+          else if (prop === 'etiquettes') d.etiquettes = liste.map(enTexte);
+          else if (prop === 'genre') d.genre = ['barres', 'courbe', 'secteurs'].includes(enTexte(valeur).trim()) ? enTexte(valeur).trim() : 'barres';
+          else d[prop] = valeur;
+          return dessinerGraphique(el, d);
+        }
         switch (prop) {
           case 'texte':
             if (d.type === 'zonetexte') el.value = valeur;
@@ -1893,6 +2048,24 @@ function BlocRuntimeFactory() {
           case 'volume': if (d.type === 'video') el.volume = Math.min(1, Math.max(0, (Number(valeur) || 0) / 100)); break;
           case 'boucle': if (d.type === 'video') el.loop = !!valeur; break;
         }
+        if (d.type === 'graphique') dessinerGraphique(el, d); // taille, couleurs du texte ou du fond
+      },
+      graphique(id, action, valeur, etiquette) {
+        const el = ctrlDeType(id, 'graphique', 'un graphique');
+        const d = donnees[id];
+        if (action === 'vider') {
+          d.valeurs = [];
+          d.etiquettes = [];
+        } else {
+          d.valeurs.push(app.nombre(valeur));
+          d.etiquettes.push(enTexte(etiquette));
+          const max = Math.round(Number(d.maxValeurs) || 0);
+          if (max > 0 && d.valeurs.length > max) {
+            d.valeurs.splice(0, d.valeurs.length - max);
+            d.etiquettes.splice(0, d.etiquettes.length - max);
+          }
+        }
+        dessinerGraphique(el, d);
       },
       message(texte, icone) {
         return dialogue({

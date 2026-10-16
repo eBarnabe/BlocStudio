@@ -22,6 +22,8 @@
     sprite: 'sprite affiché (nom)', costume: 'n° du costume', nomCostume: 'nom du costume',
     vitesse: 'vitesse d\'animation (images/s)', miroir: 'retourné (miroir)', rotation: 'angle (degrés)',
     enAnimation: 'en train d\'être animé', direction: 'direction (degrés)',
+    valeurs: 'valeurs (liste)', etiquettes: 'étiquettes (liste)', genre: 'genre (barres, courbe ou secteurs)',
+    maxValeurs: 'nombre maximum de valeurs',
     adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)'
   };
 
@@ -46,6 +48,7 @@
     date: ['texte', ...TEXTE, 'active', ...POSITION],
     selecteurcouleur: ['texte', 'active', ...POSITION],
     navigateur: ['adresse', ...POSITION],
+    graphique: ['valeurs', 'etiquettes', 'texte', 'genre', 'couleurBarre', 'maxValeurs', ...TEXTE, ...POSITION],
     interrupteur: ['coche', 'texte', ...TEXTE, 'active', ...POSITION],
     lien: ['texte', 'adresse', ...TEXTE, ...POSITION],
     video: ['enLecture', 'position', 'duree', 'volume', 'boucle', 'video', ...POSITION],
@@ -60,6 +63,7 @@
     zoneliste: { texte: 'élément choisi' },
     boutonradio: { coche: 'sélectionné' },
     interrupteur: { coche: 'allumé' },
+    graphique: { texte: 'titre', couleurBarre: 'couleur des barres / de la courbe' },
     cadre: { texte: 'titre' },
     tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
     date: { texte: 'date (jj/mm/aaaa)' },
@@ -717,6 +721,16 @@
     NUMERO('supprimer la ligne n°'), 'de', TABLEAU
   ], COULEUR_CONTROLES, 'Supprime une ligne. Astuce : « n° de la ligne choisie » donne la ligne sur laquelle on a cliqué.');
 
+  const GRAPHIQUE = { ctrl: ['graphique'] };
+
+  Blockly.Blocks['bs_graphique_ajouter'] = instruction(() => [
+    { nom: 'VAL', libelle: 'ajouter la valeur', check: 'Number' }, { nom: 'ETIQ', libelle: 'avec l\'étiquette' },
+    'au graphique', GRAPHIQUE
+  ], COULEUR_CONTROLES, 'Ajoute une barre (ou un point à la courbe) à la fin du graphique. Avec « garder seulement les N dernières valeurs », les plus anciennes disparaissent : parfait pour suivre un score en direct.');
+
+  Blockly.Blocks['bs_graphique_vider'] = instruction(() => ['vider le graphique', GRAPHIQUE],
+    COULEUR_CONTROLES, 'Enlève toutes les valeurs du graphique.');
+
   Blockly.Blocks['bs_tableau_vider'] = instruction(() => ['vider le tableau', TABLEAU],
     COULEUR_CONTROLES, 'Supprime toutes les lignes (les titres des colonnes restent).');
 
@@ -1175,6 +1189,8 @@
   const lireTab = (b, quoi, ...args) => [`app.lireTableau(${id(b)}, '${quoi}'${args.map(a => ', ' + a).join('')})`, Order.FUNCTION_CALL];
   const col = b => val(b, 'COL', '1');
   const num = b => val(b, 'NUM', '1');
+  gen.forBlock['bs_graphique_ajouter'] = b => `app.graphique(${id(b)}, 'ajouter', ${val(b, 'VAL', '0')}, ${val(b, 'ETIQ', "''")});\n`;
+  gen.forBlock['bs_graphique_vider'] = b => `app.graphique(${id(b)}, 'vider');\n`;
   gen.forBlock['bs_tableau_ajouter'] = b => tab(b, 'ajouter', val(b, 'LIGNE', '[]'));
   gen.forBlock['bs_tableau_remplacer'] = b => tab(b, 'remplacer', num(b), val(b, 'LIGNE', '[]'));
   gen.forBlock['bs_tableau_supprimer'] = b => tab(b, 'supprimer', num(b));
@@ -1432,6 +1448,9 @@
           { kind: 'block', type: 'bs_tableau_chercher', inputs: { COL: texte('Nom'), VAL: texte('Dupont') } },
           { kind: 'block', type: 'bs_tableau_csv' },
           { kind: 'block', type: 'bs_tableau_remplir_csv' },
+          { kind: 'label', text: 'Graphiques' },
+          { kind: 'block', type: 'bs_graphique_ajouter', inputs: { VAL: nombre(10), ETIQ: texte('Sam') } },
+          { kind: 'block', type: 'bs_graphique_vider' },
           { kind: 'label', text: 'Menus' },
           { kind: 'block', type: 'bs_menu_actif' },
           { kind: 'label', text: 'Minuteurs et sons' },
