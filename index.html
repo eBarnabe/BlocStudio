@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BlocStudio</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="barre">
+    <div class="logo"><span class="logo-cube">◆</span> BlocStudio</div>
+    <div class="actions">
+      <div class="menu-conteneur">
+        <button id="btn-exemples" title="Ouvrir un programme d'exemple">📚 Exemples</button>
+        <div id="menu-exemples" class="menu" hidden></div>
+      </div>
+      <button id="btn-nouveau" title="Nouveau projet">📄 Nouveau</button>
+      <button id="btn-ouvrir" title="Ouvrir un projet (.bstudio)">📂 Ouvrir</button>
+      <button id="btn-enregistrer" title="Enregistrer le projet (Ctrl+S)">💾 Enregistrer</button>
+      <div class="menu-conteneur">
+        <button id="btn-exporter" title="Créer un programme autonome">📦 Exporter</button>
+        <div id="menu-export" class="menu menu-droite" hidden>
+          <button class="menu-item" id="export-exe"><strong>🪟 Application Windows (.exe)</strong>
+            <span>Un vrai logiciel : double-clic pour le lancer, dans sa propre fenêtre.</span></button>
+          <button class="menu-item" id="export-html"><strong>🌐 Page web (.html)</strong>
+            <span>S'ouvre dans le navigateur, sur n'importe quel ordinateur (Windows, Mac, Linux…).</span></button>
+        </div>
+      </div>
+      <button id="btn-executer" class="executer" title="Lancer le programme (F5)">▶ Exécuter</button>
+    </div>
+    <input type="file" id="fichier" accept=".bstudio,.json" hidden>
+  </header>
+
+  <nav class="onglets">
+    <button class="onglet actif" data-vue="vue-fenetre">🖼️ Fenêtre</button>
+    <button class="onglet" data-vue="vue-code">🧩 Code</button>
+    <button class="onglet" data-vue="vue-sommaire">📑 Sommaire</button>
+    <span class="astuce" id="astuce"></span>
+  </nav>
+
+  <main>
+    <!-- Concepteur de fenêtre (façon Visual Basic) -->
+    <section id="vue-fenetre" class="vue actif">
+      <aside class="palette">
+        <h3>Contrôles</h3>
+        <div class="outil" draggable="true" data-type="bouton"><span>🔘</span> Bouton</div>
+        <div class="outil" draggable="true" data-type="etiquette"><span>🔤</span> Étiquette</div>
+        <div class="outil" draggable="true" data-type="zonetexte"><span>✏️</span> Zone de texte</div>
+        <div class="outil" draggable="true" data-type="casecocher"><span>☑️</span> Case à cocher</div>
+        <div class="outil" draggable="true" data-type="boutonradio"><span class="radio-icone">◉</span> Bouton radio</div>
+        <div class="outil" draggable="true" data-type="selecteurnombre"><span>🔢</span> Sélecteur de nombre</div>
+        <div class="outil" draggable="true" data-type="image"><span>🖼️</span> Image</div>
+        <div class="outil" draggable="true" data-type="sprite"><span>🎭</span> Sprite</div>
+        <div class="outil" draggable="true" data-type="listederoulante"><span>📋</span> Liste déroulante</div>
+        <div class="outil" draggable="true" data-type="zoneliste"><span>📃</span> Zone de liste</div>
+        <div class="outil" draggable="true" data-type="cadre"><span>🔲</span> Cadre</div>
+        <div class="outil" draggable="true" data-type="curseur"><span>🎚️</span> Curseur</div>
+        <div class="outil" draggable="true" data-type="barreprogression"><span>📊</span> Barre de progression</div>
+        <div class="outil" draggable="true" data-type="zonedessin"><span>🎨</span> Zone de dessin</div>
+        <div class="outil" draggable="true" data-type="tableau"><span>🗂️</span> Tableau</div>
+        <div class="outil" draggable="true" data-type="date"><span>📅</span> Sélecteur de date</div>
+        <div class="outil" draggable="true" data-type="selecteurcouleur"><span>🌈</span> Sélecteur de couleur</div>
+        <h3 class="palette-sous-titre">Invisibles</h3>
+        <div class="outil" draggable="true" data-type="son"><span>🔊</span> Son</div>
+        <div class="outil" draggable="true" data-type="minuteur"><span>⏱️</span> Minuteur</div>
+        <p class="aide">Glissez un contrôle sur la fenêtre, ou cliquez dessus.<br><br>
+          <b>Double-cliquez</b> sur un contrôle de la fenêtre pour écrire ce qu'il fait.<br><br>
+          <b>Ctrl+clic</b> ou un rectangle tiré à la souris : plusieurs contrôles à la fois.
+          <b>Clic droit</b> : copier, coller, dupliquer…</p>
+      </aside>
+
+      <div class="atelier" id="atelier">
+        <div class="barre-atelier">
+          <div id="onglets-fenetres" class="onglets-fenetres"></div>
+          <div class="actions-atelier">
+            <button id="btn-annuler-design" title="Annuler la dernière modification de la fenêtre (Ctrl+Z)" disabled>↶ Annuler</button>
+            <button id="btn-retablir-design" title="Rétablir ce qui a été annulé (Ctrl+Y)" disabled>↷ Rétablir</button>
+          </div>
+        </div>
+        <div class="fenetre-design" id="fenetre-design">
+          <div class="titre-fenetre"><span id="titre-design"></span><span class="faux-boutons">— ☐ ✕</span></div>
+          <div id="menus-design"></div>
+          <div class="surface-design" id="surface-design"></div>
+        </div>
+        <div id="invisibles-design" class="invisibles-design" hidden>
+          <div class="invisibles-titre">Contrôles invisibles <span>— ils agissent sans s'afficher dans la fenêtre</span></div>
+          <div id="liste-invisibles" class="liste-invisibles"></div>
+        </div>
+      </div>
+
+      <aside class="proprietes">
+        <select id="choix-controle" class="choix-controle" title="Choisir le contrôle à modifier"></select>
+        <h3 id="titre-proprietes">Propriétés</h3>
+        <div id="liste-proprietes"></div>
+        <button id="btn-supprimer" class="danger" hidden>🗑️ Supprimer ce contrôle</button>
+      </aside>
+    </section>
+
+    <!-- Sommaire du projet : contrôles, variables, fonctions -->
+    <section id="vue-sommaire" class="vue">
+      <div class="sommaire" id="sommaire"></div>
+    </section>
+
+    <!-- Éditeur de blocs (façon Scratch) -->
+    <section id="vue-code" class="vue">
+      <div id="blockly"></div>
+      <div id="panneau-js" class="panneau-js" hidden>
+        <div class="panneau-js-titre">Code JavaScript généré <small>(lecture seule)</small></div>
+        <pre id="code-js"></pre>
+      </div>
+      <button id="btn-voir-js" class="voir-js">&lt;/&gt; Voir le code</button>
+    </section>
+  </main>
+
+  <!-- Informations après l'export en .exe -->
+  <div id="info-exe" class="voile" hidden>
+    <div class="info-boite">
+      <h2>🎉 Votre application est prête !</h2>
+      <p class="si-navigateur">Le fichier <b id="info-exe-nom"></b> se trouve dans votre dossier <b>Téléchargements</b>.
+        Double-cliquez dessus pour le lancer. Vous pouvez le copier sur une clé USB ou l'envoyer à vos amis.</p>
+      <p class="si-hote">Votre programme est enregistré ici :<br><b id="info-exe-chemin" class="info-chemin"></b></p>
+      <p class="si-hote">Double-cliquez dessus pour le lancer, comme n'importe quel logiciel.
+        Vous pouvez le copier sur une clé USB ou l'envoyer à vos amis.</p>
+      <div class="info-note si-navigateur">
+        <b>⚠️ Au premier lancement</b>, Windows peut afficher « Windows a protégé votre ordinateur ».
+        C'est normal pour un programme que l'on vient de créer soi-même (il n'est pas « signé » par un éditeur connu) :
+        cliquez sur <b>Informations complémentaires</b>, puis sur <b>Exécuter quand même</b>.
+      </div>
+      <div class="info-note si-navigateur">
+        <b>🔒 Message « Vos paramètres de sécurité Internet ont empêché l'ouverture… » ?</b>
+        Faites un clic droit sur le fichier → <b>Propriétés</b> → en bas, cochez <b>Débloquer</b> → <b>OK</b>.
+        Le programme s'ouvrira ensuite normalement (à faire une seule fois par fichier).
+      </div>
+      <p class="info-petit si-navigateur">Fonctionne sur Windows 10 et 11. Le navigateur peut aussi demander de confirmer
+        le téléchargement d'un fichier .exe : choisissez « Conserver ».</p>
+      <p class="info-petit si-hote">Fonctionne sur Windows 10 et 11. Sur un autre ordinateur, Windows peut afficher
+        « Windows a protégé votre ordinateur » : cliquez sur <b>Informations complémentaires</b> → <b>Exécuter quand même</b>.</p>
+      <div class="info-actions">
+        <button id="btn-dossier-exe" class="si-hote secondaire">📂 Ouvrir le dossier</button>
+        <button id="btn-lancer-exe" class="si-hote secondaire">▶ Lancer</button>
+        <button id="btn-fermer-info-exe">J'ai compris</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Enregistrement d'un son avec le micro -->
+  <div id="micro" class="voile modale" hidden>
+    <div class="info-boite micro-boite">
+      <h2>🎤 Enregistrer un son</h2>
+      <p id="micro-consigne">Cliquez sur le bouton rouge, parlez, chantez ou faites un bruit, puis cliquez à nouveau pour arrêter.</p>
+      <div class="micro-zone">
+        <button id="btn-micro-enreg" class="micro-rond" title="Enregistrer"><span></span></button>
+        <div class="micro-infos">
+          <div class="micro-niveau"><div id="micro-niveau"></div></div>
+          <div id="micro-temps" class="info-petit">20 secondes maximum</div>
+        </div>
+      </div>
+      <div id="micro-resultat" class="micro-resultat" hidden>
+        <button id="btn-micro-ecouter" class="micro-ecouter">▶ Écouter</button>
+        <label>Nom du son <input id="micro-nom" maxlength="40"></label>
+      </div>
+      <div class="info-actions">
+        <button id="btn-micro-annuler" class="secondaire">Annuler</button>
+        <button id="btn-micro-garder" disabled>Garder ce son</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Découpage d'un son : choix du début et de la fin -->
+  <div id="decoupe" class="voile modale" hidden>
+    <div class="info-boite decoupe-boite">
+      <h2 id="decoupe-titre">✂️ Découper le son</h2>
+      <p class="info-petit">Faites glisser les poignées <b>◆</b> pour choisir le début et la fin du son à jouer
+        (ou cliquez dans le dessin : la poignée la plus proche s'y place). Le son d'origine est conservé.</p>
+      <canvas id="decoupe-onde" width="560" height="150"></canvas>
+      <div id="decoupe-infos" class="decoupe-infos"></div>
+      <div class="decoupe-outils">
+        <button id="btn-decoupe-ecouter" class="micro-ecouter">▶ Écouter</button>
+        <button id="btn-decoupe-blancs" class="secondaire-petit">✨ Retirer les blancs</button>
+        <button id="btn-decoupe-tout" class="secondaire-petit">↺ Tout le son</button>
+      </div>
+      <div class="info-actions">
+        <button id="btn-decoupe-annuler" class="secondaire">Annuler</button>
+        <button id="btn-decoupe-valider">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Éditeur de sprite : dessin en pixel art et costumes -->
+  <div id="editeur-sprite" class="voile modale" hidden>
+    <div class="info-boite es-boite">
+      <div class="es-entete">
+        <h2 id="es-titre">🎨 Nouveau sprite</h2>
+        <label>Nom <input id="es-nom" maxlength="30"></label>
+        <label title="Nombre de pixels du dessin">Taille <select id="es-taille"></select></label>
+        <button id="es-importer" class="secondaire-petit">📁 Importer une image…</button>
+      </div>
+      <div class="es-corps">
+        <div class="es-outils" id="es-outils"></div>
+        <div class="es-centre">
+          <canvas id="es-toile"></canvas>
+          <div class="es-position" id="es-position"></div>
+        </div>
+        <div class="es-droite">
+          <div class="es-couleur-actuelle">
+            <span id="es-couleur" title="Couleur du crayon"></span>
+            <label title="Choisir n'importe quelle couleur">Autre couleur <input type="color" id="es-couleur-perso"></label>
+          </div>
+          <div id="es-palette" class="es-palette"></div>
+          <label>Épaisseur du crayon
+            <select id="es-epaisseur">
+              <option value="1">1 pixel</option><option value="2">2 pixels</option>
+              <option value="3">3 pixels</option><option value="4">4 pixels</option>
+            </select>
+          </label>
+          <label><input type="checkbox" id="es-symetrie"> Dessin symétrique ⇋</label>
+          <label><input type="checkbox" id="es-oignon" checked> Voir le costume précédent</label>
+          <label><input type="checkbox" id="es-nets"> Pixels nets (pixel art)</label>
+          <h4>Aperçu de l'animation</h4>
+          <canvas id="es-apercu"></canvas>
+          <div class="es-lecture">
+            <button id="es-lecture" class="secondaire-petit">⏸</button>
+            <input type="range" id="es-vitesse" min="1" max="30" step="1">
+            <span id="es-vitesse-texte"></span>
+          </div>
+        </div>
+      </div>
+      <div class="es-costumes">
+        <div id="es-liste-costumes" class="es-liste-costumes"></div>
+        <div class="es-costume-actions">
+          <b id="es-costume-numero"></b>
+          <label>Nom <input id="es-nom-costume" maxlength="30"></label>
+          <button id="es-c-nouveau" class="secondaire-petit" title="Ajouter un costume vide après celui-ci">➕ Nouveau</button>
+          <button id="es-c-dupliquer" class="secondaire-petit" title="Copier ce costume, pour ne changer qu'un détail : c'est comme ça qu'on anime !">⧉ Dupliquer</button>
+          <button id="es-c-avant" class="secondaire-petit" title="Déplacer avant">◀</button>
+          <button id="es-c-apres" class="secondaire-petit" title="Déplacer après">▶</button>
+          <button id="es-c-supprimer" class="secondaire-petit" title="Supprimer ce costume">🗑️</button>
+        </div>
+      </div>
+      <div class="info-actions es-pied">
+        <span id="es-erreur" class="es-erreur"></span>
+        <button id="es-annuler" class="secondaire">Annuler</button>
+        <button id="es-valider">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fenêtre d'exécution -->
+  <div id="execution" class="voile" hidden>
+    <div class="fenetre-exec" id="fenetre-exec">
+      <div class="titre-fenetre" title="Tenez la barre de titre pour déplacer la fenêtre">
+        <span id="titre-exec"></span>
+        <button id="btn-fermer-exec" class="fermer" title="Arrêter le programme (Échap)">✕</button>
+      </div>
+      <!-- Suivi de l'exécution : voir les blocs s'allumer, ralentir, avancer bloc par bloc -->
+      <div class="barre-suivi">
+        <div class="vitesses-suivi" id="vitesses-suivi">
+          <button data-mode="normal" title="Le programme tourne à vitesse normale">🐇 Normal</button>
+          <button data-mode="lent" title="Un bloc toutes les demi-secondes : on voit chaque bloc s'allumer">🐢 Lent</button>
+          <button data-mode="pas" title="Le programme s'arrête avant chaque bloc (F10 : bloc suivant)">👣 Pas à pas</button>
+        </div>
+        <button id="btn-pas-suivant" class="suivi-principal" title="Exécuter le bloc allumé (F10)" hidden>⏭ Bloc suivant</button>
+        <span class="suivi-espace"></span>
+        <button id="btn-variables" title="Voir la valeur des variables pendant que le programme tourne">🔍 Variables</button>
+        <button id="btn-cote-a-cote" title="Garder le programme dans un coin et voir les blocs derrière">🧩 Voir les blocs</button>
+      </div>
+      <div class="exec-corps">
+        <div id="hote-exec"></div>
+        <div id="panneau-variables" class="panneau-variables" hidden>
+          <h4>Variables</h4>
+          <table id="table-variables"></table>
+        </div>
+      </div>
+      <div id="erreur-exec" class="erreur" hidden>
+        <span id="erreur-texte"></span>
+        <button id="btn-erreur-bloc" title="Montrer le bloc où l'erreur s'est produite">🧩 Voir le bloc</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="lib/blockly/blockly_compressed.js"></script>
+  <script src="lib/blockly/blocks_compressed.js"></script>
+  <script src="lib/blockly/javascript_compressed.js"></script>
+  <script src="lib/blockly/msg/fr.js"></script>
+  <script src="js/runtime.js"></script>
+  <script src="js/emojis.js"></script>
+  <script src="js/blocks.js"></script>
+  <script src="js/editeur-sprite.js"></script>
+  <script src="js/exemples.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
