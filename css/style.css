@@ -661,3 +661,7 @@ body.dans-hote .si-navigateur, body:not(.dans-hote) .si-hote { display: none; }
 .ancrage-droite { right: 0; }
 .ancrage-gauche::before, .ancrage-droite::before { inset: 5px 3px; }
 .ancrage-texte { font-size: 12px; }
+
+/* Un choix parmi quelques possibilités (alignement, bordure…) : boutons côte à côte, sur une seule ligne. */
+.prop-boutons.prop-choix { flex-wrap: nowrap; gap: 4px; }
+.prop-boutons.prop-choix button { flex: 1 1 0; min-width: 0; padding: 5px 2px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

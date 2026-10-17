@@ -31,27 +31,31 @@
     contenu: 'contenu du fichier', nomFichier: 'nom du fichier', annule: 'annulé par l\'utilisateur',
     nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, image ou tous)',
     nombreFiches: 'nombre de fiches', champs: 'champs (liste)', memoriser: 'garder les fiches d\'une fois à l\'autre',
-    adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)'
+    adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)',
+    infobulle: 'infobulle (texte au survol)', gras: 'en gras', italique: 'en italique',
+    alignement: 'alignement (gauche, centre ou droite)', bordure: 'bordure (aucune, simple ou creuse)',
+    ajustement: 'ajustement (entiere, etiree ou recadree)', texteInvite: 'texte d\'invite (grisé)',
+    lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)'
   };
 
   // Les propriétés proposées dépendent du type de contrôle choisi dans le bloc.
-  const POSITION = ['visible', 'deplacable', 'x', 'y', 'largeur', 'hauteur'];
-  const TEXTE = ['couleurTexte', 'couleurFond', 'taillePolice'];
+  const POSITION = ['visible', 'deplacable', 'x', 'y', 'largeur', 'hauteur', 'infobulle'];
+  const TEXTE = ['couleurTexte', 'couleurFond', 'taillePolice', 'gras', 'italique'];
   const PROPS_PAR_TYPE = {
-    bouton: ['texte', ...TEXTE, 'active', ...POSITION],
-    etiquette: ['texte', ...TEXTE, ...POSITION, 'direction'],
-    zonetexte: ['texte', 'motDePasse', ...TEXTE, 'active', ...POSITION],
+    bouton: ['texte', ...TEXTE, 'alignement', 'active', ...POSITION],
+    etiquette: ['texte', ...TEXTE, 'alignement', 'bordure', ...POSITION, 'direction'],
+    zonetexte: ['texte', 'motDePasse', 'texteInvite', 'lectureSeule', 'longueurMax', ...TEXTE, 'alignement', 'active', ...POSITION],
     arborescence: ['texte', 'chemin', 'elements', ...TEXTE, ...POSITION],
     barreetat: ['texte', ...TEXTE, 'visible'],
     casecocher: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
-    image: ['image', 'couleurFond', ...POSITION, 'direction'],
-    listederoulante: ['texte', 'numero', 'elements', ...TEXTE, 'active', ...POSITION],
-    curseur: ['valeur', 'min', 'max', 'active', ...POSITION],
+    image: ['image', 'ajustement', 'bordure', 'couleurFond', ...POSITION, 'direction'],
+    listederoulante: ['texte', 'numero', 'elements', 'trie', ...TEXTE, 'active', ...POSITION],
+    curseur: ['valeur', 'min', 'max', 'pas', 'active', ...POSITION],
     barreprogression: ['valeur', 'max', 'couleurBarre', 'couleurFond', ...POSITION],
     zonedessin: ['couleurFond', ...POSITION],
     boutonradio: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
     cadre: ['texte', ...TEXTE, ...POSITION],
-    zoneliste: ['texte', 'numero', 'elements', ...TEXTE, 'active', ...POSITION],
+    zoneliste: ['texte', 'numero', 'elements', 'trie', ...TEXTE, 'active', ...POSITION],
     selecteurnombre: ['valeur', 'min', 'max', 'pas', ...TEXTE, 'active', ...POSITION],
     tableau: ['numero', 'texte', 'nombreLignes', 'colonnes', ...TEXTE, ...POSITION],
     date: ['texte', ...TEXTE, 'active', ...POSITION],
@@ -60,7 +64,7 @@
     onglets: ['numero', 'texte', 'elements', ...TEXTE, ...POSITION],
     graphique: ['valeurs', 'etiquettes', 'texte', 'genre', 'couleurBarre', 'maxValeurs', ...TEXTE, ...POSITION],
     interrupteur: ['coche', 'texte', ...TEXTE, 'active', ...POSITION],
-    lien: ['texte', 'adresse', ...TEXTE, ...POSITION],
+    lien: ['texte', 'adresse', ...TEXTE, 'alignement', ...POSITION],
     video: ['enLecture', 'position', 'duree', 'volume', 'boucle', 'video', ...POSITION],
     son: ['son', 'volume', 'boucle', 'enLecture'],
     minuteur: ['intervalle', 'active'],
@@ -612,6 +616,12 @@
       this.setTooltip('Retire tous les éléments d\'une liste.');
     }
   };
+
+  // Contrôles qui peuvent recevoir le curseur clavier.
+  const FOCUSABLES = ['zonetexte', 'bouton', 'listederoulante', 'zoneliste', 'selecteurnombre', 'curseur', 'date',
+    'casecocher', 'boutonradio', 'interrupteur', 'selecteurcouleur'];
+  Blockly.Blocks['bs_focus'] = instruction(() => ['placer le curseur clavier dans', { ctrl: FOCUSABLES }], COULEUR_CONTROLES,
+    'Le clavier écrit désormais dans ce contrôle, sans avoir à cliquer dedans : pratique pour une zone de texte au démarrage, ou après « Effacer ». Pour un bouton, Entrée ou Espace le clique.');
 
   Blockly.Blocks['bs_liste_retirer'] = {
     init() {
@@ -1637,6 +1647,7 @@
   gen.forBlock['bs_toujours'] = b => `while (true) {\n${corps(b)}  await app.respirer();\n}\n`;
 
   gen.forBlock['bs_liste_ajouter'] = b => `app.ajouterElement(${id(b)}, ${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_focus'] = b => `app.mettreFocus(${id(b)});\n`;
   gen.forBlock['bs_liste_vider'] = b => `app.viderListe(${id(b)});\n`;
   gen.forBlock['bs_liste_retirer'] = b => `app.retirerElement(${id(b)}, ${val(b, 'NUM', '1')});\n`;
   gen.forBlock['bs_radio_groupe'] = b => [`app.radioCoche(${q(b.getFieldValue('GROUPE'))})`, Order.FUNCTION_CALL];
@@ -1925,10 +1936,13 @@
 
   // Valeur proposée dans « mettre … à » : celle du contrôle dans le concepteur, quand c'est possible.
   const PROPS_NOMBRE = ['x', 'y', 'largeur', 'hauteur', 'taillePolice', 'valeur', 'min', 'max', 'pas', 'numero', 'volume',
-    'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs'];
+    'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax'];
   const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre'];
   const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
-  const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee'];
+  const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee',
+    'gras', 'italique', 'lectureSeule', 'trie'];
+  // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
+  const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree' };
 
   function valeurProposee(c, prop) {
     if (PROPS_COULEUR.includes(prop)) return couleurOmbre();
@@ -1938,7 +1952,7 @@
       return nombre(Number.isFinite(v) ? v : prop === 'numero' ? 1 : prop === 'direction' ? 90 : 0);
     }
     if (PROPS_OUI_NON.includes(prop)) return ombre('logic_boolean', { BOOL: prop === 'visible' ? 'FALSE' : 'TRUE' });
-    const v = typeof c[prop] === 'string' && c[prop].length < 60 ? c[prop] : '';
+    const v = typeof c[prop] === 'string' && c[prop].length < 60 ? c[prop] : CHOIX_PROPOSE[prop] || '';
     return texte(v);
   }
 
@@ -2094,6 +2108,8 @@
           b('bs_base_csv'), b('bs_base_remplir'));
         break;
     }
+
+    if (FOCUSABLES.includes(t)) actions.push(b('bs_focus'));
 
     // Propriétés : « … de Bouton1 » et « mettre … de Bouton1 à … », pour chacune.
     const proprietes = [];

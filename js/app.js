@@ -69,6 +69,9 @@
   const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'onglets', 'listederoulante',
     'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'arborescence', 'barreetat'];
 
+  // Contrôles dont on peut aligner le texte (à gauche, au centre, à droite).
+  const ALIGNABLES = ['bouton', 'etiquette', 'zonetexte', 'lien'];
+
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
     'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
@@ -1071,6 +1074,11 @@
           afficherProprietes();
         });
       }
+      champTexte(liste, 'Texte d\'invite (grisé tant que la zone est vide)', c.texteInvite || '',
+        v => { c.texteInvite = v; maj(); }, false, 'Tapez votre nom…');
+      champCase(liste, 'Lecture seule (on peut lire et copier, pas écrire)', c.lectureSeule, v => { c.lectureSeule = v; maj(); });
+      champNombre(liste, 'Longueur maximale, en lettres (0 = sans limite)', c.longueurMax || 0,
+        v => { c.longueurMax = Math.max(0, Math.round(v)); maj(); });
     }
     if (c.type === 'arborescence') {
       champTexte(liste, 'Éléments — un par ligne ; décalez une ligne d\'espaces pour la ranger dans celle du dessus',
@@ -1126,7 +1134,15 @@
         maj();
       });
     }
-    if (c.type === 'image') champImage(liste, c, maj);
+    if (c.type === 'image') {
+      champImage(liste, c, maj);
+      champChoix(liste, 'Ajustement de l\'image', [['entiere', 'Entière'], ['etiree', 'Étirée'], ['recadree', 'Recadrée']],
+        c.ajustement || 'entiere', v => { c.ajustement = v; maj(); });
+    }
+    if (c.type === 'image' || c.type === 'etiquette') {
+      champChoix(liste, 'Bordure', [['aucune', 'Aucune'], ['simple', 'Simple'], ['creuse', 'Creuse']],
+        c.bordure || 'aucune', v => { c.bordure = v; maj(); });
+    }
     if (c.type === 'sprite') proprietesSprite(liste, c, maj);
     if (c.type === 'selecteurnombre') {
       groupe(liste, [
@@ -1139,11 +1155,13 @@
     if (c.type === 'listederoulante' || c.type === 'zoneliste') {
       champTexte(liste, 'Éléments (un par ligne)', (c.elements || []).join('\n'),
         v => { c.elements = v.split('\n').filter(e => e.trim() !== ''); maj(); }, true);
+      champCase(liste, 'Triée par ordre alphabétique (même ce qu\'on ajoute ensuite)', c.trie, v => { c.trie = v; maj(); });
     }
     if (c.type === 'curseur') {
       groupe(liste, [
         g => champNombre(g, 'Minimum', c.min, v => { c.min = v; maj(); }),
         g => champNombre(g, 'Maximum', c.max, v => { c.max = v; maj(); }),
+        g => champNombre(g, 'Pas', c.pas ?? 1, v => { c.pas = v > 0 ? v : 1; maj(); }),
         g => champNombre(g, 'Valeur', c.valeur, v => { c.valeur = v; maj(); })
       ]);
     }
@@ -1184,9 +1202,19 @@
     ]);
     if (AVEC_TEXTE.includes(c.type)) {
       champNombre(liste, 'Taille du texte', c.taillePolice, v => { c.taillePolice = Math.max(6, v); maj(); });
+      groupe(liste, [
+        g => champCase(g, 'Gras', c.gras, v => { c.gras = v; maj(); }),
+        g => champCase(g, 'Italique', c.italique, v => { c.italique = v; maj(); })
+      ]);
+      if (ALIGNABLES.includes(c.type)) {
+        champChoix(liste, 'Alignement du texte', [['gauche', '⇤ Gauche'], ['centre', '↔ Centre'], ['droite', '⇥ Droite']],
+          c.alignement || (c.type === 'bouton' ? 'centre' : 'gauche'), v => { c.alignement = v; maj(); });
+      }
       champCouleur(liste, 'Couleur du texte', c.couleurTexte, v => { c.couleurTexte = v; maj(); });
     }
     champCouleur(liste, 'Couleur de fond', c.couleurFond, v => { c.couleurFond = v; maj(); });
+    champTexte(liste, 'Infobulle (petit texte montré quand la souris reste dessus)', c.infobulle || '',
+      v => { c.infobulle = v; maj(); }, false, 'Cliquez ici pour…');
     champCase(liste, 'Visible au démarrage', c.visible !== false, v => { c.visible = v; maj(); });
     champCase(liste, 'Déplaçable à la souris (pendant le programme)', c.deplacable, v => { c.deplacable = v; maj(); });
     if (c.type !== 'barreetat') champAncrage(liste, c.ancrage, v => { c.ancrage = v; });
@@ -1506,6 +1534,23 @@
     i.value = valeur;
     i.addEventListener('input', () => { if (i.value !== '') { surChange(Number(i.value)); planifierSauvegarde(); } });
     d.appendChild(i);
+  }
+
+  // Un choix parmi quelques possibilités, en boutons côte à côte. options : [[valeur, texte], …]
+  function champChoix(parent, libelle, options, valeur, surChange) {
+    const zone = el('div', 'prop-boutons prop-choix');
+    const boutons = options.map(([v, texte]) => {
+      const b = el('button', v === valeur ? 'actif' : null, texte);
+      b.type = 'button';
+      b.addEventListener('click', () => {
+        boutons.forEach(x => x.classList.toggle('actif', x === b));
+        surChange(v);
+        planifierSauvegarde();
+      });
+      return b;
+    });
+    zone.append(...boutons);
+    prop(parent, libelle).appendChild(zone);
   }
 
   function champCase(parent, libelle, valeur, surChange) {

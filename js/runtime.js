@@ -567,7 +567,7 @@ function BlocRuntimeFactory() {
       case 'zoneliste':
         el = document.createElement('select');
         el.size = 2; // affichage en liste ouverte ; la hauteur réelle vient du contrôle
-        remplirListe(el, c.elements || []);
+        remplirListe(el, c.elements || [], c.trie);
         break;
       case 'selecteurnombre':
         el = document.createElement('input');
@@ -592,6 +592,9 @@ function BlocRuntimeFactory() {
           el = document.createElement('input');
           el.type = c.motDePasse ? 'password' : 'text';
         }
+        el.placeholder = c.texteInvite || '';
+        el.readOnly = !!c.lectureSeule;
+        if (Number(c.longueurMax) > 0) el.maxLength = Math.round(Number(c.longueurMax));
         el.value = c.texte;
         break;
       case 'barreetat':
@@ -630,13 +633,14 @@ function BlocRuntimeFactory() {
         break;
       case 'listederoulante':
         el = document.createElement('select');
-        remplirListe(el, c.elements || []);
+        remplirListe(el, c.elements || [], c.trie);
         break;
       case 'curseur':
         el = document.createElement('input');
         el.type = 'range';
         el.min = c.min ?? 0;
         el.max = c.max ?? 100;
+        el.step = c.pas || 1;
         el.value = c.valeur ?? 50;
         break;
       case 'barreprogression':
@@ -900,9 +904,14 @@ function BlocRuntimeFactory() {
     return yt ? 'https://www.youtube.com/embed/' + yt[1] : a;
   }
 
-  function remplirListe(select, elements) {
+  // Ordre alphabétique « naturel » (« Élément 2 » avant « Élément 10 »), sans tenir compte des majuscules ni des accents.
+  const ordreAlpha = (a, b) => a.localeCompare(b, 'fr', { numeric: true, sensitivity: 'base' });
+
+  function remplirListe(select, elements, trie) {
     select.innerHTML = '';
-    for (const e of elements) {
+    const textes = elements.map(enTexte);
+    if (trie) textes.sort(ordreAlpha);
+    for (const e of textes) {
       const o = document.createElement('option');
       o.textContent = enTexte(e);
       select.appendChild(o);
@@ -948,8 +957,41 @@ function BlocRuntimeFactory() {
       display: c.visible === false ? 'none' : '',
       zIndex: c.type === 'cadre' || c.type === 'onglets' ? 0 : 1
     });
-    if (c.type === 'image' || c.type === 'sprite') el.style.objectFit = 'contain';
+    if (c.type === 'sprite') el.style.objectFit = 'contain';
+    appliquerApparence(el, c);
   }
+
+  // Apparence réglable : infobulle, gras, italique, alignement du texte, bordure, ajustement d'une image.
+  const ALIGNEMENTS = { gauche: 'left', centre: 'center', droite: 'right' };
+  const BORDURES = { aucune: '', simple: '1px solid #64748b', creuse: '2px inset #e2e8f0' };
+  const AJUSTEMENTS = { entiere: 'contain', etiree: 'fill', recadree: 'cover' };
+  const ALIGNABLES = ['bouton', 'etiquette', 'zonetexte', 'lien'];
+
+  function appliquerApparence(el, c) {
+    el.title = c.infobulle ? enTexte(c.infobulle) : '';
+    el.style.fontWeight = c.gras ? 'bold' : '';
+    el.style.fontStyle = c.italique ? 'italic' : '';
+    if (ALIGNABLES.includes(c.type)) {
+      const a = ALIGNEMENTS[c.alignement] || '';
+      el.style.textAlign = a;
+      if (c.type === 'lien') el.style.justifyContent = a === 'center' ? 'center' : a === 'right' ? 'flex-end' : '';
+    }
+    if (c.type === 'etiquette' || c.type === 'image') el.style.border = BORDURES[c.bordure] || '';
+    if (c.type === 'image') el.style.objectFit = AJUSTEMENTS[c.ajustement] || 'contain';
+  }
+
+  // Valeur d'une propriété d'apparence, ramenée à ce qu'elle peut valoir.
+  function valeurApparence(prop, valeur) {
+    const choix = v => enTexte(v).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    switch (prop) {
+      case 'gras': case 'italique': return !!valeur;
+      case 'infobulle': return enTexte(valeur);
+      case 'alignement': { const v = choix(valeur); return ALIGNEMENTS[v] ? v : v === 'centree' || v === 'milieu' ? 'centre' : 'gauche'; }
+      case 'bordure': { const v = choix(valeur); return BORDURES[v] !== undefined ? v : 'aucune'; }
+      case 'ajustement': { const v = choix(valeur); return AJUSTEMENTS[v] ? v : 'entiere'; }
+    }
+  }
+  const PROPS_APPARENCE = ['infobulle', 'gras', 'italique', 'alignement', 'bordure', 'ajustement'];
 
   // Lance un programme : construit la fenêtre dans `hote` puis exécute le code.
   // `options.enregistrer(nom, texte)` : façon d'enregistrer un fichier propre à l'hôte
@@ -2800,6 +2842,18 @@ function BlocRuntimeFactory() {
         if (d.type === 'arborescence' && ['texte', 'chemin', 'elements'].includes(prop)) return lireArbreCtrl(d, prop);
         if (d.type === 'barreetat' && prop === 'texte') return d.cases.join('|');
         if (prop === 'motDePasse') return !!d.motDePasse;
+        if (PROPS_APPARENCE.includes(prop)) {
+          if (prop === 'alignement') return d.alignement || (d.type === 'bouton' ? 'centre' : 'gauche');
+          if (prop === 'bordure') return d.bordure || 'aucune';
+          if (prop === 'ajustement') return d.ajustement || 'entiere';
+          return valeurApparence(prop, d[prop] ?? '');
+        }
+        if (d.type === 'zonetexte') {
+          if (prop === 'texteInvite') return el.placeholder;
+          if (prop === 'lectureSeule') return el.readOnly;
+          if (prop === 'longueurMax') return el.maxLength > 0 ? el.maxLength : 0;
+        }
+        if (prop === 'trie') return !!d.trie;
         if (d.type === 'basedonnees') {
           if (prop === 'nombreFiches') return d.fiches.length;
           if (prop === 'champs') return d.champs.slice();
@@ -2838,7 +2892,7 @@ function BlocRuntimeFactory() {
             if (aValeur(d.type)) return Number(el.value) || 0;
             return Number(d.valeur ?? 0);
           case 'min': return aValeur(d.type) ? Number(el.min) : 0;
-          case 'pas': return d.type === 'selecteurnombre' ? Number(el.step) : 1;
+          case 'pas': return d.type === 'selecteurnombre' || d.type === 'curseur' ? Number(el.step) || 1 : 1;
           case 'max': return aValeur(d.type) ? Number(el.max) : Number(d.max ?? 100);
           case 'coche': return estCase(d.type) ? el.querySelector('input').checked : false;
           case 'visible': return el.style.display !== 'none';
@@ -2867,6 +2921,28 @@ function BlocRuntimeFactory() {
         if (prop === 'motDePasse') {
           d.motDePasse = !!valeur;
           if (el.tagName === 'INPUT') el.type = d.motDePasse ? 'password' : 'text';
+          return;
+        }
+        if (PROPS_APPARENCE.includes(prop)) {
+          d[prop] = valeurApparence(prop, valeur);
+          return appliquerApparence(el, d);
+        }
+        if (d.type === 'zonetexte') {
+          if (prop === 'texteInvite') { el.placeholder = enTexte(valeur); return; }
+          if (prop === 'lectureSeule') { el.readOnly = !!valeur; return; }
+          if (prop === 'longueurMax') {
+            const n = Math.round(Number(valeur) || 0);
+            if (n > 0) el.maxLength = n; else el.removeAttribute('maxlength');
+            return;
+          }
+        }
+        if (prop === 'trie' && estListe(d.type)) {
+          d.trie = !!valeur;
+          if (d.trie) {
+            const choisi = el.selectedIndex < 0 ? null : el.options[el.selectedIndex].textContent;
+            remplirListe(el, optionsListe(el), true);
+            el.selectedIndex = choisi === null ? -1 : optionsListe(el).indexOf(choisi);
+          }
           return;
         }
         if (d.type === 'camera') {
@@ -2938,7 +3014,7 @@ function BlocRuntimeFactory() {
             break;
           case 'elements':
             if (estListe(d.type)) {
-              remplirListe(el, Array.isArray(valeur) ? valeur : enTexte(valeur).split('\n'));
+              remplirListe(el, Array.isArray(valeur) ? valeur : enTexte(valeur).split('\n'), d.trie);
             }
             break;
           case 'valeur':
@@ -2949,7 +3025,7 @@ function BlocRuntimeFactory() {
             if (aValeur(d.type)) el.min = Number(valeur);
             break;
           case 'pas':
-            if (d.type === 'selecteurnombre') el.step = Number(valeur);
+            if (d.type === 'selecteurnombre' || d.type === 'curseur') el.step = Number(valeur) > 0 ? Number(valeur) : 'any';
             break;
           case 'max':
             if (aValeur(d.type)) el.max = Number(valeur);
@@ -3086,7 +3162,15 @@ function BlocRuntimeFactory() {
         const el = ctrlListe(id);
         const o = document.createElement('option');
         o.textContent = enTexte(valeur);
-        el.appendChild(o);
+        // Liste triée : l'élément prend sa place dans l'ordre alphabétique.
+        const avant = donnees[id].trie ? [...el.options].find(x => ordreAlpha(x.textContent, o.textContent) > 0) : null;
+        el.insertBefore(o, avant || null);
+      },
+      // Le curseur clavier (le « focus ») va dans ce contrôle : on peut taper directement dedans.
+      mettreFocus(id) {
+        const el = ctrl(id);
+        const cible = el.matches('input, textarea, select, button') ? el : el.querySelector('input, textarea, select, button');
+        if (cible) cible.focus();
       },
       viderListe(id) {
         ctrlListe(id).innerHTML = '';
