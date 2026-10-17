@@ -201,6 +201,42 @@
     };
   }
 
+  // Petit fantôme (2 costumes : le bas de sa robe ondule).
+  function spriteFantome() {
+    const haut = [
+      '................', '.....wwwwww.....', '....wwwwwwww....', '...wwwwwwwwww...',
+      '..wwwwwwwwwwww..', '..wwkkwwwwkkww..', '..wwkkwwwwkkww..', '..wpwwwwwwwwpw..',
+      '..wwwwwkkwwwww..', '..wwwwkkkkwwww..', '..wwwwwkkwwwww..', '..wwwwwwwwwwww..',
+      '..wwwwwwwwwwww..', '..wwwwwwwwwwww..'
+    ];
+    const bas = [['..www.wwww.www..', '..ww...ww...ww..'], ['..wwww.ww.wwww..', '...ww..ww..ww...']];
+    const couleurs = { w: '#f1f5f9', k: '#1e1b4b', p: '#f9a8d4' };
+    return {
+      id: 'spr_fantome', nom: 'Fantôme', taille: 16, lisse: false, vitesse: 4,
+      costumes: bas.map((b, i) => ({ nom: 'fantôme ' + (i + 1), donnees: dessinTexte(haut.concat(b), couleurs) }))
+    };
+  }
+
+  // Musique un peu inquiétante (la mineur), écrite comme dans le studio 8 bits :
+  // on peut la retoucher avec « 🎹 Modifier » dans le Sommaire.
+  function musiqueFantomes() {
+    const m = { version: 1, tempo: 112, mesures: 4, pistes: [{ notes: [] }, { notes: [] }, { notes: [] }, { notes: [] }] };
+    const ajouter = (piste, p, h, d) => m.pistes[piste].notes.push([p, h, d]);
+    [[0, 69, 4], [4, 72, 2], [6, 76, 2], [8, 75, 4], [12, 74, 4],
+     [16, 72, 2], [18, 74, 2], [20, 72, 2], [22, 71, 2], [24, 69, 8],
+     [32, 76, 4], [36, 77, 2], [38, 76, 2], [40, 75, 4], [44, 71, 4],
+     [48, 72, 2], [50, 71, 2], [52, 69, 2], [54, 68, 2], [56, 69, 8]].forEach(n => ajouter(0, ...n));
+    const accords = [[64, 60], [65, 62], [64, 59], [64, 60]]; // la mineur, ré mineur, mi, la mineur
+    const basses = [45, 50, 52, 45];
+    for (let i = 0; i < 4; i++) {
+      for (let k = 0; k < 4; k++) ajouter(1, 16 * i + 4 * k + 2, accords[i][k % 2], 1);
+      [[0, 0], [4, 12], [8, 0], [12, 7]].forEach(([p, ecart]) => ajouter(2, 16 * i + p, basses[i] + ecart, 2));
+      ajouter(3, 16 * i, 0, 1); ajouter(3, 16 * i + 10, 0, 1); ajouter(3, 16 * i + 8, 1, 1);
+      for (let p = 2; p < 16; p += 4) ajouter(3, 16 * i + p, 2, 1);
+    }
+    return m;
+  }
+
   // Petite musique « 8 bits » fabriquée par le programme (6,4 s, à jouer en boucle) :
   // WAV mono 11 025 Hz sur 8 bits, pour rester léger.
   function musiqueDeFond() {
@@ -702,6 +738,105 @@
             ])
           ]);
         p.sprites = [spriteVaisseau(), spriteMeteorite()];
+        return p;
+      }
+    },
+    {
+      titre: '👻 Chasse aux fantômes',
+      description: 'Clique sur les fantômes avant qu\'ils ne deviennent trop gros ! Effets de sprite (taille, fondu) et musique composée dans le studio 8 bits.',
+      creer: () => {
+        // c1 Score · c2 Vies · c3 Fantome (caché : ce sont ses clones qui hantent la fenêtre)
+        // c4 Consigne · c5 Apparition (Minuteur) · c6 Musique (Son)
+        const score = () => ecrire('c1', 'texte', joindre(t('Score : '), v('v_score')));
+        const vies = () => ecrire('c2', 'texte', joindre(t('Vies : '), v('v_vies')));
+        const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record fantômes') }) });
+        const intervalle = () => lire('intervalle', 'c5');
+        const fondu = (sens, secondes) => bloc('bs_sprite_fondu', '__moi', { SEC: n(secondes) }, { SENS: sens });
+        // Un fantôme touché par un clic devient un peu transparent : c'est le signal qu'il est attrapé.
+        const libre = () => compare('EQ', lire('transparence', '__moi'), n(0));
+        const p = projet(
+          { titre: 'Chasse aux fantômes', largeur: 480, hauteur: 360, couleurFond: '#1e1b4b' },
+          [
+            { type: 'etiquette', nom: 'Score', texte: 'Score : 0', x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#fde68a' },
+            { type: 'etiquette', nom: 'Vies', texte: 'Vies : 3', x: 360, y: 8, largeur: 110, hauteur: 30, taillePolice: 20, couleurTexte: '#f9a8d4' },
+            { type: 'sprite', nom: 'Fantome', sprite: 'spr_fantome', costume: 0, anime: true, visible: false, x: 208, y: 150, largeur: 64, hauteur: 64 },
+            {
+              type: 'etiquette', nom: 'Consigne', x: 40, y: 110, largeur: 400, hauteur: 130, taillePolice: 18, couleurTexte: '#e0e7ff',
+              texte: 'Les fantômes envahissent le château !\n\nClique sur chaque fantôme avant qu\'il ne devienne trop gros.\nClique (ou appuie sur Espace) pour commencer.'
+            },
+            { type: 'minuteur', nom: 'Apparition', intervalle: 1.2, active: false, largeur: 0, hauteur: 0 },
+            { type: 'son', nom: 'Musique', son: 'son_fantomes', volume: 40, boucle: true, autoDemarrage: false, largeur: 0, hauteur: 0 }
+          ],
+          ['score', 'vies', 'enJeu'],
+          () => [
+            evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            fonction('nouvelle partie', [
+              bloc('bs_supprimer_clones', 'c3'),
+              fixer('v_score', n(0)), fixer('v_vies', n(3)), fixer('v_enJeu', vrai(true)),
+              score(), vies(),
+              ecrire('c4', 'visible', vrai(false)),
+              ecrire('c5', 'intervalle', n(1.2)),
+              bloc('bs_minuteur_ctrl', 'c5', null, { ACTION: 'demarrer' }),
+              bloc('bs_sonctrl', 'c6', null, { ACTION: 'jouer' })
+            ]),
+            // Les fantômes arrivent de plus en plus souvent.
+            evt('bs_quand_minuteur', 'c5', [
+              bloc('bs_creer_clone', 'c3'),
+              si(compare('GT', intervalle(), n(0.45)), [ecrire('c5', 'intervalle', calc('MINUS', intervalle(), n(0.03)))])
+            ]),
+            // La vie d'un fantôme : il apparaît tout petit, en fondu, puis grossit…
+            evt('bs_quand_clone', 'c3', [
+              bloc('bs_placer', '__moi', { X: hasard(20, 396), Y: hasard(50, 276) }), // il reste dans la fenêtre même à 160 %
+              bloc('bs_sprite_taille', '__moi', { VAL: n(40) }),
+              fondu('apparaitre', 0.5),
+              tantQue(et(v('v_enJeu'), et(libre(), compare('LT', lire('taille', '__moi'), n(160)))), [
+                bloc('bs_sprite_grandir', '__moi', { VAL: calc('ADD', n(0.8), calc('DIVIDE', v('v_score'), n(25))) }),
+                attendre(0.05)
+              ]),
+              // … et s'il devient trop gros sans avoir été attrapé, il s'échappe.
+              si(et(v('v_enJeu'), libre()), [
+                bloc('bs_son', null, null, { SON: 'erreur' }),
+                ajouter('v_vies', n(-1)), vies(),
+                si(compare('LTE', v('v_vies'), n(0)), [appeler('fin de partie')]),
+                fondu('disparaitre', 0.3),
+                bloc('bs_supprimer_clone')
+              ]),
+              // Partie finie : les fantômes qui restent s'effacent doucement.
+              si(non(v('v_enJeu')), [fondu('disparaitre', 1), bloc('bs_supprimer_clone')])
+            ]),
+            // Un clic sur un fantôme (un clone) : attrapé !
+            evt('bs_quand_clic', 'c3', [
+              si(et(v('v_enJeu'), libre()), [
+                bloc('bs_sprite_transparence', '__moi', { VAL: n(10) }),
+                bloc('bs_son', null, null, { SON: 'piece' }),
+                ajouter('v_score', n(1)), score(),
+                fondu('disparaitre', 0.25),
+                bloc('bs_supprimer_clone')
+              ])
+            ]),
+            fonction('fin de partie', [
+              si(v('v_enJeu'), [
+                fixer('v_enJeu', vrai(false)),
+                bloc('bs_minuteur_ctrl', 'c5', null, { ACTION: 'arreter' }),
+                bloc('bs_sonctrl', 'c6', null, { ACTION: 'arreter' }),
+                si(compare('GT', v('v_score'), record()), [
+                  bloc('bs_memoriser', null, { VAL: v('v_score'), NOM: t('record fantômes') }),
+                  bloc('bs_son', null, null, { SON: 'succes' })
+                ]),
+                ecrire('c4', 'texte', joindre(t('Les fantômes ont gagné… Score : '), v('v_score'), retourLigne(),
+                  t('Record : '), record(), retourLigne(), retourLigne(), t('Clique (ou Espace) pour rejouer.'))),
+                ecrire('c4', 'visible', vrai(true))
+              ])
+            ])
+          ]);
+        const musique = musiqueFantomes();
+        p.sons = [window.StudioMusique
+          ? { id: 'son_fantomes', nom: 'musique des fantômes', musique,
+              donnees: StudioMusique.enWav(StudioMusique.rendre(musique)) }
+          : { id: 'son_fantomes', nom: 'musique des fantômes', donnees: musiqueDeFond() }];
+        p.sprites = [spriteFantome()];
         return p;
       }
     },
