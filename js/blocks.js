@@ -259,8 +259,32 @@
       this.setNextStatement(true);
       this.setColour(COULEUR_CONTROLES);
       this.setTooltip("Change une propriété d'un contrôle de la fenêtre.");
-    }
+    },
+    onchange() { verifierImageDeFichier(this); }
   };
+
+  // Le contenu d'un fichier lu comme du texte ne peut pas s'afficher dans une image : on prévient sur le bloc.
+  function fichierLuEnTexte(bloc) {
+    if (!bloc) return null;
+    const contenu = (bloc.type === 'bs_lire' && bloc.getFieldValue('PROP') === 'contenu') || bloc.type === 'bs_fichier_contenu';
+    if (!contenu) return null;
+    const c = BlocStudio.controles().find(x => x.id === bloc.getFieldValue('CTRL'));
+    return c && c.type === 'fichier' && !['image', 'tous'].includes(c.typeFichier || 'texte') ? c : null;
+  }
+  function verifierImageDeFichier(bloc) {
+    if (bloc.isInFlyout || bloc.isDeadOrDying()) return;
+    let texte = null;
+    if (['image', 'texte'].includes(bloc.getFieldValue('PROP')) && typeDe(bloc.getFieldValue('CTRL')) === 'image') {
+      const f = fichierLuEnTexte(bloc.getInputTargetBlock('VAL'));
+      if (f) {
+        texte = `« ${f.nom} » lit les fichiers comme du texte : l'image restera vide. Dans les propriétés de ${f.nom} ` +
+          `(onglet Fenêtre, sous la fenêtre), choisissez « Type de fichier proposé : Image ». Ou plus simple : le bloc « ouvrir avec ${f.nom} un fichier dans … ».`;
+      }
+    }
+    bloc.setWarningText(texte, 'fichier-image');
+  }
+  // Après un changement dans les propriétés (type de fichier…), l'éditeur revérifie tous les blocs.
+  window.BlocStudioVerifier = ws => ws.getBlocksByType('bs_ecrire', false).forEach(verifierImageDeFichier);
 
   Blockly.Blocks['bs_lire'] = {
     init() {

@@ -2468,6 +2468,7 @@
     if (id === 'vue-code') {
       if (blocsAPerimes) rechargerBlocs();
       majBoite();
+      window.BlocStudioVerifier(workspace);
       Blockly.svgResize(workspace);
       $('astuce').textContent = 'Glissez des blocs depuis les catégories à gauche, puis emboîtez-les sous un bloc « quand… ».';
     } else if (id === 'vue-sommaire') {
@@ -2884,6 +2885,7 @@
     if (execution) fermerExecution();
     blocsAvertis.forEach(b => { if (!b.isDeadOrDying()) b.setWarningText(null); });
     blocsAvertis.clear();
+    window.BlocStudioVerifier(workspace); // l'effacement ci-dessus retire aussi ses avertissements
     const code = genererCode(true);
     $('titre-exec').textContent = projet.fenetre.titre;
     $('erreur-exec').hidden = true;

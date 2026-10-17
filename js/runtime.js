@@ -2338,6 +2338,15 @@ function BlocRuntimeFactory() {
     const AVEC_FICHIER_CSV = ['tableau', 'basedonnees'];
     const AVEC_FICHIER_IMAGE = ['image', 'zonedessin'];
 
+    // Le contenu d'un fichier lu comme du texte n'est pas une image : on le dit clairement plutôt que d'afficher du vide.
+    function verifierImage(id, valeur) {
+      const f = Object.values(donnees).find(x => x.type === 'fichier' && x.luEnTexte && x.contenu && x.contenu === valeur);
+      if (f) {
+        throw new Error(`« ${f.nom} » a lu « ${f.nomFichier} » comme du texte : il ne peut pas s'afficher dans « ${donnees[id].nom} ». ` +
+          `Dans les propriétés de ${f.nom}, choisissez « Type de fichier proposé : Image ».`);
+      }
+    }
+
     async function ctrlFichier(id, action, a, b) {
       ctrlDeType(id, 'fichier', 'un contrôle Fichier');
       const d = donnees[id];
@@ -2348,7 +2357,10 @@ function BlocRuntimeFactory() {
           d.annule = !f;
           if (!f) return;
           d.nomFichier = f.name;
-          d.contenu = await lireContenu(f, d.typeFichier === 'image');
+          // « Tous les fichiers » : une image est lue comme une image, le reste comme du texte.
+          const enImage = d.typeFichier === 'image' || (d.typeFichier === 'tous' && /^image\//.test(f.type));
+          d.luEnTexte = !enImage;
+          d.contenu = await lireContenu(f, enImage);
           return;
         }
         case 'enregistrer': {
@@ -2986,7 +2998,7 @@ function BlocRuntimeFactory() {
           case 'texte':
             if (d.type === 'zonetexte') el.value = valeur;
             else if (estCase(d.type)) el.querySelector('span').textContent = valeur;
-            else if (d.type === 'image') el.src = valeur;
+            else if (d.type === 'image') { verifierImage(id, valeur); el.src = valeur; }
             else if (estListe(d.type)) {
               const i = optionsListe(el).indexOf(enTexte(valeur));
               if (i >= 0) el.selectedIndex = i;
@@ -3060,7 +3072,7 @@ function BlocRuntimeFactory() {
           case 'couleurTexte': d.couleurTexte = valeur; el.style.color = couleur(valeur); break;
           case 'couleurFond': d.couleurFond = valeur; el.style.background = couleur(valeur); break;
           case 'taillePolice': d.taillePolice = Number(valeur); el.style.fontSize = d.taillePolice + 'px'; break;
-          case 'image': if (d.type === 'image') el.src = valeur; break;
+          case 'image': if (d.type === 'image') { verifierImage(id, valeur); el.src = valeur; } break;
           // Redonner la même adresse recharge la page.
           case 'adresse':
             if (d.type === 'navigateur') { d.adresse = adresseWeb(valeur); el.src = d.adresse || 'about:blank'; }
