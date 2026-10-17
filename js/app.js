@@ -1487,6 +1487,8 @@
       c.anime, v => { c.anime = v; maj(); });
     champCase(liste, 'Retourné (miroir)', c.miroir, v => { c.miroir = v; maj(); });
     champNombre(liste, 'Angle (degrés)', c.rotation || 0, v => { c.rotation = v; maj(); });
+    champNombre(liste, 'Taille (%, 100 = normale)', c.taille ?? 100, v => { c.taille = Math.max(0, v); maj(); });
+    champNombre(liste, 'Transparence (%, 0 = opaque)', c.transparence || 0, v => { c.transparence = Math.min(100, Math.max(0, v)); maj(); });
   }
 
   function nomSpriteLibre(base) {

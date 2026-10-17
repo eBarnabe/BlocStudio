@@ -390,8 +390,12 @@ function BlocRuntimeFactory() {
     const src = costume ? costume.donnees : IMAGE_VIDE;
     if (el.getAttribute('src') !== src) el.src = src;
     el.style.imageRendering = sprite && !sprite.lisse ? 'pixelated' : '';
-    el.style.transform = `rotate(${Number(d.rotation) || 0}deg)` + (d.miroir ? ' scaleX(-1)' : '');
+    // Effets : taille (en %, 100 = normale) et transparence (0 = opaque, 100 = invisible).
+    const k = echelleSprite(d);
+    el.style.transform = `rotate(${Number(d.rotation) || 0}deg)` + (k !== 1 ? ` scale(${k})` : '') + (d.miroir ? ' scaleX(-1)' : '');
+    el.style.opacity = d.transparence > 0 ? String(1 - Math.min(100, Number(d.transparence)) / 100) : '';
   }
+  const echelleSprite = d => d.taille === undefined || d.taille === '' ? 1 : Math.min(10, Math.max(0, Number(d.taille) || 0) / 100);
 
   // Partie non transparente d'un costume (en fractions de sa taille), pour que
   // « … touche … ? » ignore les bords vides de l'image. null : costume entièrement vide.
@@ -520,7 +524,7 @@ function BlocRuntimeFactory() {
         el = document.createElement('img');
         el.alt = c.nom;
         el.draggable = false;
-        afficherSprite(el, { costume: Number(c.costume) || 0, rotation: c.rotation, miroir: c.miroir },
+        afficherSprite(el, { costume: Number(c.costume) || 0, rotation: c.rotation, miroir: c.miroir, taille: c.taille, transparence: c.transparence },
           (sprites || []).find(s => s.id === c.sprite));
         break;
       case 'listederoulante':
@@ -1292,7 +1296,7 @@ function BlocRuntimeFactory() {
     const spritesProjet = new Map((projet.sprites || []).map(s => [s.id, s]));
     const animations = new Set();
     for (const s of spritesProjet.values()) for (const c of s.costumes || []) contourCostume(c.donnees);
-    const PROPS_SPRITE = ['sprite', 'costume', 'nomCostume', 'vitesse', 'miroir', 'rotation', 'enAnimation'];
+    const PROPS_SPRITE = ['sprite', 'costume', 'nomCostume', 'vitesse', 'miroir', 'rotation', 'enAnimation', 'taille', 'transparence'];
     const PROPS_GRAPHIQUE = ['texte', 'valeurs', 'etiquettes', 'genre', 'couleurBarre', 'maxValeurs'];
     const spriteDe = d => spritesProjet.get(d.sprite);
     const costumesDe = d => (spriteDe(d) && spriteDe(d).costumes) || [];
@@ -1342,6 +1346,8 @@ function BlocRuntimeFactory() {
         case 'miroir': return !!d.miroir;
         case 'rotation': return Number(d.rotation) || 0;
         case 'enAnimation': return !!d.animation;
+        case 'taille': return Math.round(echelleSprite(d) * 1000) / 10;
+        case 'transparence': return Math.min(100, Math.max(0, Number(d.transparence) || 0));
       }
     }
 
@@ -1378,6 +1384,8 @@ function BlocRuntimeFactory() {
           break;
         case 'miroir': d.miroir = !!valeur; break;
         case 'rotation': d.rotation = Number(valeur) || 0; break;
+        case 'taille': d.taille = Math.min(1000, Math.max(0, Number(valeur) || 0)); break;
+        case 'transparence': d.transparence = Math.min(100, Math.max(0, Number(valeur) || 0)); break;
         default: return;
       }
       majSprite(d);
@@ -1402,7 +1410,39 @@ function BlocRuntimeFactory() {
         case 'changer': ecrireSprite(d, 'sprite', a); break;
         case 'regarder': ecrireSprite(d, 'miroir', a === 'gauche'); break;
         case 'tourner': ecrireSprite(d, 'rotation', ((Number(d.rotation) || 0) + (Number(a) || 0)) % 360); break;
+        case 'grandir': ecrireSprite(d, 'taille', lireSprite(d, 'taille') + (Number(a) || 0)); break;
+        case 'apparaitre': case 'disparaitre':
+          return Promise.resolve(fondu(d, action === 'apparaitre', Number(a) || 0)).then(() => arrete ? JAMAIS : undefined);
       }
+    }
+
+    // Fondu : « apparaître » part de l'invisible et revient à la transparence choisie ;
+    // « disparaître » devient transparent, puis cache le sprite (sa transparence est remise ensuite).
+    function fondu(d, apparait, secondes) {
+      const el = elements[d.id], id = d.id;
+      const visible = el.style.display !== 'none';
+      const garde = d.fondu ? d.fondu.garde : lireSprite(d, 'transparence') >= 100 ? 0 : lireSprite(d, 'transparence');
+      if (apparait === visible && !d.fondu) return; // déjà dans l'état voulu
+      const depart = apparait ? (visible ? lireSprite(d, 'transparence') : 100) : lireSprite(d, 'transparence');
+      const arrivee = apparait ? garde : 100;
+      const duree = Math.max(0, secondes) * 1000, t0 = performance.now();
+      const courant = d.fondu = { garde };
+      if (apparait) el.style.display = '';
+      return new Promise(fini => {
+        const etape = () => {
+          if (arrete || !donnees[id] || d.fondu !== courant) return fini(); // arrêté, clone supprimé ou nouveau fondu
+          const k = duree ? Math.min(1, (performance.now() - t0) / duree) : 1;
+          ecrireSprite(d, 'transparence', depart + (arrivee - depart) * k);
+          if (k < 1) return requestAnimationFrame(etape);
+          d.fondu = null;
+          if (!apparait) {
+            el.style.display = 'none';
+            ecrireSprite(d, 'transparence', garde);
+          }
+          fini();
+        };
+        etape();
+      });
     }
 
     // Rectangle occupé par un contrôle pour « … touche … ? ». Pour un sprite : seulement
@@ -1412,10 +1452,11 @@ function BlocRuntimeFactory() {
       const r = { x: d.x, y: d.y, l: d.largeur, h: d.hauteur };
       if (d.type !== 'sprite') return r;
       const costume = costumesDe(d)[d.costume];
-      const b = costume ? contourCostume(costume.donnees) : undefined;
-      if (b === null) return null; // costume vide : il ne touche rien
-      if (!b) return r;
-      const cote = Math.min(r.l, r.h);
+      if (!costume) return r;
+      const contour = contourCostume(costume.donnees);
+      if (contour === null) return null; // costume vide : il ne touche rien
+      const b = contour || { x0: 0, y0: 0, x1: 1, y1: 1 }; // contour pas encore calculé : tout le carré
+      const cote = Math.min(r.l, r.h) * echelleSprite(d);
       const ox = r.x + (r.l - cote) / 2, oy = r.y + (r.h - cote) / 2;
       const x0 = d.miroir ? 1 - b.x1 : b.x0, x1 = d.miroir ? 1 - b.x0 : b.x1;
       return { x: ox + x0 * cote, y: oy + b.y0 * cote, l: (x1 - x0) * cote, h: (b.y1 - b.y0) * cote };
@@ -1756,7 +1797,7 @@ function BlocRuntimeFactory() {
       const cid = original + '#' + (++numeroClone);
       const el = elements[id];
       const d = donnees[cid] = Object.assign({}, source, {
-        id: cid, original, animation: null, glissement: null,
+        id: cid, original, animation: null, glissement: null, fondu: null,
         texte: source.type === 'etiquette' ? el.textContent : source.texte,
         image: source.type === 'image' ? el.getAttribute('src') : source.image,
         visible: el.style.display !== 'none'

@@ -22,6 +22,7 @@
     sprite: 'sprite affiché (nom)', costume: 'n° du costume', nomCostume: 'nom du costume',
     vitesse: 'vitesse d\'animation (images/s)', miroir: 'retourné (miroir)', rotation: 'angle (degrés)',
     enAnimation: 'en train d\'être animé', direction: 'direction (degrés)',
+    taille: 'taille (%)', transparence: 'transparence (%)',
     valeurs: 'valeurs (liste)', etiquettes: 'étiquettes (liste)', genre: 'genre (barres, courbe ou secteurs)',
     maxValeurs: 'nombre maximum de valeurs',
     adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)'
@@ -55,7 +56,7 @@
     video: ['enLecture', 'position', 'duree', 'volume', 'boucle', 'video', ...POSITION],
     son: ['son', 'volume', 'boucle', 'enLecture'],
     minuteur: ['intervalle', 'active'],
-    sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', ...POSITION, 'direction']
+    sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
   const LECTURE_SEULE = { onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
@@ -376,6 +377,23 @@
   Blockly.Blocks['bs_sprite_tourner'] = instruction(() => [
     'tourner', SPRITE, { nom: 'DEG', libelle: 'de', check: 'Number' }, 'degrés'
   ], COULEUR_SPRITES, 'Fait pivoter le sprite (sens des aiguilles d\'une montre). Pour choisir l\'angle exact : « mettre angle de … ».');
+
+  Blockly.Blocks['bs_sprite_taille'] = instruction(() => [
+    'mettre la taille de', SPRITE, { nom: 'VAL', libelle: 'à', check: 'Number' }, '%'
+  ], COULEUR_SPRITES, 'Agrandit ou rétrécit le sprite autour de son centre : 100 % = taille normale, 200 % = deux fois plus grand, 50 % = moitié.');
+
+  Blockly.Blocks['bs_sprite_grandir'] = instruction(() => [
+    'changer la taille de', SPRITE, { nom: 'VAL', libelle: 'de', check: 'Number' }, '%'
+  ], COULEUR_SPRITES, 'Ajoute ce nombre à la taille (un nombre négatif rétrécit). Dans une boucle, le sprite grossit petit à petit.');
+
+  Blockly.Blocks['bs_sprite_transparence'] = instruction(() => [
+    'mettre la transparence de', SPRITE, { nom: 'VAL', libelle: 'à', check: 'Number' }, '%'
+  ], COULEUR_SPRITES, 'Rend le sprite plus ou moins transparent : 0 % = bien visible, 50 % = à moitié transparent (un fantôme !), 100 % = invisible.');
+
+  Blockly.Blocks['bs_sprite_fondu'] = instruction(() => [
+    'faire', { champ: new Blockly.FieldDropdown([['apparaître', 'apparaitre'], ['disparaître', 'disparaitre']]), nom: 'SENS' },
+    SPRITE, { nom: 'SEC', libelle: 'en fondu pendant', check: 'Number' }, 'secondes'
+  ], COULEUR_SPRITES, 'Montre ou cache le sprite en douceur ; le programme attend la fin du fondu. « disparaître » cache le sprite à la fin (comme « visible = faux »).');
 
   Blockly.Blocks['bs_sprite_changer'] = instruction(() => [
     'remplacer', SPRITE, 'par le sprite', { champ: new ChampSprite(), nom: 'SPRITE' }
@@ -1256,6 +1274,10 @@
   gen.forBlock['bs_sprite_arreter'] = b => `app.sprite(${id(b)}, 'arreter');\n`;
   gen.forBlock['bs_sprite_regarder'] = b => `app.sprite(${id(b)}, 'regarder', ${q(b.getFieldValue('SENS'))});\n`;
   gen.forBlock['bs_sprite_tourner'] = b => `app.sprite(${id(b)}, 'tourner', ${val(b, 'DEG', '15')});\n`;
+  gen.forBlock['bs_sprite_taille'] = b => `app.ecrire(${id(b)}, 'taille', ${val(b, 'VAL', '100')});\n`;
+  gen.forBlock['bs_sprite_grandir'] = b => `app.sprite(${id(b)}, 'grandir', ${val(b, 'VAL', '10')});\n`;
+  gen.forBlock['bs_sprite_transparence'] = b => `app.ecrire(${id(b)}, 'transparence', ${val(b, 'VAL', '0')});\n`;
+  gen.forBlock['bs_sprite_fondu'] = b => `await app.sprite(${id(b)}, ${q(b.getFieldValue('SENS'))}, ${val(b, 'SEC', '1')});\n`;
   gen.forBlock['bs_sprite_changer'] = b => `app.sprite(${id(b)}, 'changer', ${q(b.getFieldValue('SPRITE'))});\n`;
   gen.forBlock['bs_sprite_numero'] = b => [`app.lire(${id(b)}, 'costume')`, Order.FUNCTION_CALL];
 
@@ -1501,6 +1523,11 @@
           { kind: 'label', text: 'Orientation' },
           { kind: 'block', type: 'bs_sprite_regarder' },
           { kind: 'block', type: 'bs_sprite_tourner', inputs: { DEG: nombre(15) } },
+          { kind: 'label', text: 'Effets' },
+          { kind: 'block', type: 'bs_sprite_taille', inputs: { VAL: nombre(150) } },
+          { kind: 'block', type: 'bs_sprite_grandir', inputs: { VAL: nombre(10) } },
+          { kind: 'block', type: 'bs_sprite_transparence', inputs: { VAL: nombre(50) } },
+          { kind: 'block', type: 'bs_sprite_fondu', inputs: { SEC: nombre(1) } },
           { kind: 'label', text: 'Changer d\'image' },
           { kind: 'block', type: 'bs_sprite_changer' },
           { kind: 'label', text: 'Clones' },
