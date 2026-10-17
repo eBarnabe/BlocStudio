@@ -380,6 +380,16 @@ function BlocRuntimeFactory() {
     return fin - debut > 0.01 ? [debut, fin] : [0, tampon.duration];
   }
 
+  // Fin de la boucle d'un son joué en boucle. Une musique du studio 8 bits se termine par
+  // un peu de silence (pour que ses dernières notes s'éteignent) : en boucle, on reprend
+  // au début dès la fin de sa dernière mesure, sans ce blanc.
+  function finBoucle(son, debut, fin) {
+    const m = son.musique;
+    if (!m || son.fin > son.debut || son.debut > 0) return fin; // pas une musique, ou découpée à la main
+    const mesures = Number(m.mesures) * 240 / Number(m.tempo); // 16 doubles croches par mesure
+    return mesures > 0.05 ? Math.min(fin, debut + mesures) : fin;
+  }
+
   // ---- Sprites ----
   // Un sprite de la bibliothèque du projet : { id, nom, taille, lisse, vitesse, costumes: [{ nom, donnees }] }.
   // Ses costumes sont des images carrées (taille × taille pixels) ; on anime un sprite
@@ -1135,12 +1145,12 @@ function BlocRuntimeFactory() {
         source.buffer = tampon;
         source.loop = !!d.boucle;
         source.loopStart = debut;
-        source.loopEnd = fin;
+        source.loopEnd = finBoucle(s, debut, fin);
         const volume = audio.createGain();
         volume.gain.value = volumeCtrl(d);
         volume.connect(sortieAudio());
         source.connect(volume);
-        const lecture = d.lecture = { source, volume, duree, depart: audio.currentTime - depuis };
+        const lecture = d.lecture = { source, volume, duree, cycle: source.loopEnd - debut, depart: audio.currentTime - depuis };
         return new Promise(termine => {
           source.onended = () => {
             volume.disconnect();
@@ -1181,7 +1191,7 @@ function BlocRuntimeFactory() {
           if (d.etat !== 'lecture') break;
           if (d.lecture) {
             const ecoule = audio.currentTime - d.lecture.depart;
-            d.position = d.lecture.source.loop ? ecoule % d.lecture.duree : ecoule;
+            d.position = d.lecture.source.loop ? ecoule % d.lecture.cycle : ecoule;
           }
           couperCtrlSon(d);
           d.etat = 'pause';
@@ -2473,7 +2483,7 @@ function BlocRuntimeFactory() {
           source.buffer = tampon;
           source.loop = mode === 'boucle';
           source.loopStart = debut;
-          source.loopEnd = fin;
+          source.loopEnd = finBoucle(importe, debut, fin);
           const enCours = { nom, source, volume: volumeDe(nom) };
           source.connect(enCours.volume);
           sonsEnCours.add(enCours);
