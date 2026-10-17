@@ -172,10 +172,12 @@ namespace BlocStudio
             web.SetVirtualHostNameToFolderMapping(Hote, Studio.DossierSite, CoreWebView2HostResourceAccessKind.Allow);
             web.WebMessageReceived += Recevoir;
             web.ScriptDialogOpening += BoiteDeDialogue;
-            // Le micro sert à enregistrer des sons ; la page est celle de BlocStudio, livrée avec l'application.
+            // Le micro sert à enregistrer des sons, la caméra au contrôle Caméra des programmes testés ;
+            // la page est celle de BlocStudio, livrée avec l'application.
             web.PermissionRequested += (s, e) =>
             {
-                if (e.PermissionKind == CoreWebView2PermissionKind.Microphone) e.State = CoreWebView2PermissionState.Allow;
+                if (e.PermissionKind == CoreWebView2PermissionKind.Microphone || e.PermissionKind == CoreWebView2PermissionKind.Camera)
+                    e.State = CoreWebView2PermissionState.Allow;
             };
             web.DocumentTitleChanged += (s, e) =>
             {

@@ -25,6 +25,8 @@
     taille: 'taille (%)', transparence: 'transparence (%)',
     valeurs: 'valeurs (liste)', etiquettes: 'étiquettes (liste)', genre: 'genre (barres, courbe ou secteurs)',
     maxValeurs: 'nombre maximum de valeurs',
+    allumee: 'allumée', photo: 'dernière photo (image)', mouvement: 'mouvement vu (%)',
+    seuilMouvement: 'seuil de mouvement (%)',
     contenu: 'contenu du fichier', nomFichier: 'nom du fichier', annule: 'annulé par l\'utilisateur',
     nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, image ou tous)',
     nombreFiches: 'nombre de fiches', champs: 'champs (liste)', memoriser: 'garder les fiches d\'une fois à l\'autre',
@@ -61,10 +63,11 @@
     minuteur: ['intervalle', 'active'],
     basedonnees: ['nombreFiches', 'champs', 'memoriser'],
     fichier: ['contenu', 'nomFichier', 'annule', 'nomPropose', 'typeFichier'],
+    camera: ['allumee', 'mouvement', 'photo', 'miroir', 'seuilMouvement', ...POSITION],
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
@@ -76,7 +79,8 @@
     tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
     date: { texte: 'date (jj/mm/aaaa)' },
     selecteurcouleur: { texte: 'couleur choisie' },
-    minuteur: { active: 'en marche' }
+    minuteur: { active: 'en marche' },
+    camera: { miroir: 'en miroir (comme dans une glace)' }
   };
 
   function typeDe(id) {
@@ -203,6 +207,13 @@
     init() {
       evenement(this, 'quand on dépose un fichier sur la fenêtre, avec', ['fichier']);
       this.setTooltip('Exécuté quand on fait glisser un fichier (depuis l\'Explorateur de Windows) sur la fenêtre du programme. Ensuite, « contenu du fichier » et « nom du fichier » le décrivent.');
+    }
+  };
+
+  Blockly.Blocks['bs_quand_camera_mouvement'] = {
+    init() {
+      evenement(this, 'quand', ['camera'], 'voit bouger');
+      this.setTooltip('Exécuté quand quelque chose bouge devant la caméra (au plus deux fois par seconde). Le « seuil de mouvement » (propriétés) règle la sensibilité : plus il est petit, plus la caméra réagit.');
     }
   };
 
@@ -656,8 +667,24 @@
   ], COULEUR_FICHIERS, 'Raccourci : un fichier CSV (Excel) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin.');
 
   Blockly.Blocks['bs_fichier_enregistrer_de'] = instruction(() => [
-    'enregistrer', { ctrl: ['tableau', 'basedonnees', 'zonedessin'], nom: 'CIBLE' }, 'dans un fichier avec', FICHIER
-  ], COULEUR_FICHIERS, 'Raccourci : un tableau ou une base de données devient un fichier CSV (lisible par Excel), une zone de dessin une image PNG.');
+    'enregistrer', { ctrl: ['tableau', 'basedonnees', 'zonedessin', 'camera'], nom: 'CIBLE' }, 'dans un fichier avec', FICHIER
+  ], COULEUR_FICHIERS, 'Raccourci : un tableau ou une base de données devient un fichier CSV (lisible par Excel), une zone de dessin ou la dernière photo d\'une caméra une image PNG.');
+
+  // ---------- Caméra ----------
+
+  const CAMERA = { ctrl: ['camera'] };
+
+  Blockly.Blocks['bs_camera_ctrl'] = instruction(() => [
+    { champ: new Blockly.FieldDropdown([['allumer', 'allumer'], ['éteindre', 'eteindre']]), nom: 'ACTION' },
+    'la caméra', CAMERA
+  ], COULEUR_CONTROLES, 'Allume ou éteint la webcam. La première fois, Windows (ou le navigateur) demande la permission. Par défaut, la caméra s\'allume toute seule au démarrage (voir ses propriétés).');
+
+  Blockly.Blocks['bs_camera_photo'] = instruction(() => ['prendre une photo avec', CAMERA], COULEUR_CONTROLES,
+    'Garde l\'image que la caméra voit en ce moment, cadrée comme à l\'écran. Ensuite : « mettre la photo de… dans… », ou « enregistrer … dans un fichier » avec un contrôle Fichier.');
+
+  Blockly.Blocks['bs_camera_photo_dans'] = instruction(() => [
+    'mettre la photo de', CAMERA, 'dans', { ctrl: ['image', 'zonedessin'], nom: 'CIBLE' }
+  ], COULEUR_CONTROLES, 'Affiche la dernière photo dans un contrôle Image, ou la dessine dans une zone de dessin (on peut ensuite dessiner par-dessus).');
 
   Blockly.Blocks['bs_fichier_contenu'] = valeur(() => ['contenu du fichier de', FICHIER], null, COULEUR_FICHIERS,
     'Le texte du dernier fichier ouvert ou déposé (pour le type « Image » : l\'image, à mettre dans un contrôle Image).');
@@ -1462,6 +1489,11 @@
   gen.forBlock['bs_sprite_arreter'] = b => `app.sprite(${id(b)}, 'arreter');\n`;
   gen.forBlock['bs_sprite_regarder'] = b => `app.sprite(${id(b)}, 'regarder', ${q(b.getFieldValue('SENS'))});\n`;
   gen.forBlock['bs_sprite_tourner'] = b => `app.sprite(${id(b)}, 'tourner', ${val(b, 'DEG', '15')});\n`;
+  gen.forBlock['bs_quand_camera_mouvement'] = b =>
+    `app.quand(${id(b)}, 'mouvement', async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_camera_ctrl'] = b => `await app.camera(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
+  gen.forBlock['bs_camera_photo'] = b => `await app.camera(${id(b)}, 'photo');\n`;
+  gen.forBlock['bs_camera_photo_dans'] = b => `await app.camera(${id(b)}, 'photoDans', ${codeCtrl(b.getFieldValue('CIBLE'))});\n`;
   gen.forBlock['bs_quand_fichier_depose'] = b =>
     `app.quand(${id(b)}, 'depose', async function (moi) {\n${corps(b)}});\n`;
   gen.forBlock['bs_fichier_ouvrir_avec'] = b => `await app.fichier(${id(b)}, 'ouvrir');\n`;
@@ -1694,6 +1726,11 @@
           { kind: 'label', text: 'Graphiques' },
           { kind: 'block', type: 'bs_graphique_ajouter', inputs: { VAL: nombre(10), ETIQ: texte('Sam') } },
           { kind: 'block', type: 'bs_graphique_vider' },
+          { kind: 'label', text: 'Caméra' },
+          { kind: 'block', type: 'bs_camera_ctrl' },
+          { kind: 'block', type: 'bs_camera_photo' },
+          { kind: 'block', type: 'bs_camera_photo_dans' },
+          { kind: 'block', type: 'bs_quand_camera_mouvement' },
           { kind: 'label', text: 'Menus' },
           { kind: 'block', type: 'bs_menu_actif' },
           { kind: 'label', text: 'Minuteurs et sons' },

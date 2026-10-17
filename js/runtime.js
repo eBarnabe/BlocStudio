@@ -22,6 +22,8 @@ function BlocRuntimeFactory() {
     .bs-listederoulante { border: 1px solid #7a7a7a; padding: 2px 4px; background: #fff; }
     .bs-navigateur { border: 1px solid #94a3b8; background: #fff; }
     video.bs-video { background: #000; object-fit: contain; }
+    video.bs-camera { background: #1e293b; object-fit: cover; }
+    video.bs-camera.bs-miroir { transform: scaleX(-1); }
     .bs-apercu { display: flex; flex-direction: column; overflow: hidden; color: #475569; }
     .bs-apercu > div:first-child { padding: 4px 8px; background: #e8ebf0; border-bottom: 1px solid #cbd5e1;
       font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -626,6 +628,17 @@ function BlocRuntimeFactory() {
         el.volume = Math.min(1, Math.max(0, (c.volume ?? 100) / 100));
         if (c.video) el.src = c.video;
         break;
+      case 'camera':
+        // Dans le concepteur : un aperçu (la caméra ne s'allume que pendant l'exécution).
+        if (prefixe === 'design') {
+          el = apercu('📷', 'Caméra : image en direct quand le programme tourne');
+          break;
+        }
+        el = document.createElement('video');
+        el.playsInline = true;
+        el.muted = true;
+        if (c.miroir !== false) el.classList.add('bs-miroir');
+        break;
       case 'selecteurcouleur':
         el = document.createElement('input');
         el.type = 'color';
@@ -1006,6 +1019,7 @@ function BlocRuntimeFactory() {
       if (c.type === 'sprite') d.costume = Math.max(0, Math.round(Number(c.costume) || 0));
       if (c.type === 'zonedessin') suivreSouris(el, d);
       if (c.type === 'tableau') preparerTableau(el, d);
+      if (c.type === 'camera') d.surEvenement = [];
       if (c.type === 'onglets') {
         d.pages = (c.pages || []).map(enTexte);
         d.page = Math.min(Math.max(0, Math.round(Number(c.page) || 0)), Math.max(0, d.pages.length - 1));
@@ -2080,7 +2094,10 @@ function BlocRuntimeFactory() {
       g.fillStyle = d.couleurFond ? couleur(d.couleurFond) : '#ffffff';
       g.fillRect(0, 0, sortie.width, sortie.height);
       g.drawImage(toile, 0, 0, sortie.width, sortie.height);
-      const url = sortie.toDataURL('image/png');
+      return octetsDataUrl(sortie.toDataURL('image/png'));
+    }
+
+    function octetsDataUrl(url) {
       return Uint8Array.from(atob(url.slice(url.indexOf(',') + 1)), c => c.charCodeAt(0));
     }
 
@@ -2145,7 +2162,11 @@ function BlocRuntimeFactory() {
           if (cible.type === 'zonedessin') nom = await enregistrerSous(pngDeDessin(a), base + '.png', 'image');
           else if (cible.type === 'tableau') nom = await enregistrerSous(app.lireTableau(a, 'csv'), base + '.csv', 'csv');
           else if (cible.type === 'basedonnees') nom = await enregistrerSous(app.lireBase(a, 'csv'), base + '.csv', 'csv');
-          else throw new Error(`On ne peut pas enregistrer « ${cible.nom} » dans un fichier : choisissez un tableau, une base de données ou une zone de dessin.`);
+          else if (cible.type === 'camera') {
+            if (!cible.photo) throw new Error(`« ${cible.nom} » n'a pas encore pris de photo (bloc « prendre une photo avec… »).`);
+            nom = await enregistrerSous(octetsDataUrl(cible.photo), base + '.png', 'image');
+          }
+          else throw new Error(`On ne peut pas enregistrer « ${cible.nom} » dans un fichier : choisissez un tableau, une base de données, une zone de dessin ou une caméra.`);
           d.annule = !nom;
           if (nom) d.nomFichier = nom;
           return;
@@ -2183,6 +2204,128 @@ function BlocRuntimeFactory() {
       }
     });
 
+    // ---- Caméra ----
+    function erreurCamera(e, nom) {
+      switch (e && e.name) {
+        case 'NotAllowedError': case 'SecurityError':
+          return new Error(`La caméra de « ${nom} » n'est pas autorisée : acceptez son utilisation quand Windows (ou le navigateur) le demande.`);
+        case 'NotFoundError': case 'OverconstrainedError':
+          return new Error('Aucune caméra n\'a été trouvée sur cet ordinateur.');
+        case 'NotReadableError': case 'AbortError':
+          return new Error('La caméra est déjà utilisée par un autre logiciel (Teams, Zoom, l\'appli Caméra…). Fermez-le, puis réessayez.');
+      }
+      return e instanceof Error ? e : new Error(String(e));
+    }
+
+    async function allumerCamera(id) {
+      const d = donnees[id], el = elements[id];
+      if (d.flux) return;
+      if (!d.allumage) {
+        d.allumage = (async () => {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('La caméra n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).');
+          }
+          let flux;
+          try {
+            flux = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+          } catch (e) { throw erreurCamera(e, d.nom); }
+          if (arrete) { flux.getTracks().forEach(p => p.stop()); return; }
+          d.flux = flux;
+          el.srcObject = flux;
+          await el.play().catch(() => {});
+          if (!el.videoWidth) await new Promise(ok => el.addEventListener('loadeddata', ok, { once: true }));
+          surveillerMouvement(d, el);
+        })().finally(() => { d.allumage = null; });
+      }
+      return d.allumage;
+    }
+
+    function eteindreCamera(d, el) {
+      if (d.flux) d.flux.getTracks().forEach(p => p.stop());
+      d.flux = null;
+      clearInterval(d.guet);
+      d.mouvement = 0;
+      d.vignette = null;
+      if (el) el.srcObject = null;
+    }
+
+    // Mouvement : on compare une petite image (32 × 24) avec la précédente, 10 fois par seconde.
+    // « mouvement » = pourcentage de points qui ont changé ; au-delà du seuil, l'événement se déclenche.
+    function surveillerMouvement(d, el) {
+      const petite = document.createElement('canvas');
+      petite.width = 32;
+      petite.height = 24;
+      const g = petite.getContext('2d', { willReadFrequently: true });
+      let dernier = 0;
+      d.guet = setInterval(() => {
+        if (!d.flux || !el.videoWidth) return;
+        g.drawImage(el, 0, 0, 32, 24);
+        const px = g.getImageData(0, 0, 32, 24).data;
+        const gris = new Uint8Array(32 * 24);
+        for (let i = 0; i < gris.length; i++) gris[i] = (px[i * 4] * 3 + px[i * 4 + 1] * 6 + px[i * 4 + 2]) / 10;
+        if (d.vignette) {
+          let changes = 0;
+          for (let i = 0; i < gris.length; i++) if (Math.abs(gris[i] - d.vignette[i]) > 25) changes++;
+          d.mouvement = Math.round(changes * 100 / gris.length);
+          const seuil = Math.max(1, Number(d.seuilMouvement ?? 10));
+          if (d.mouvement >= seuil && Date.now() - dernier > 700) {
+            dernier = Date.now();
+            d.surEvenement.forEach(h => h());
+          }
+        }
+        d.vignette = gris;
+      }, 100);
+      minuteurs.push(d.guet);
+    }
+
+    // La photo a le même cadrage que l'image affichée (le contrôle coupe les bords qui dépassent).
+    async function prendrePhoto(id) {
+      const d = donnees[id], el = elements[id];
+      await allumerCamera(id);
+      if (!d.flux) return;
+      const sl = el.videoWidth, sh = el.videoHeight;
+      const r = d.largeur > 0 && d.hauteur > 0 ? d.largeur / d.hauteur : sl / sh;
+      const l = Math.round(sl / sh > r ? sh * r : sl), h = Math.round(sl / sh > r ? sh : sl / r);
+      const toile = document.createElement('canvas');
+      toile.width = l;
+      toile.height = h;
+      const g = toile.getContext('2d');
+      if (d.miroir !== false) { g.translate(l, 0); g.scale(-1, 1); }
+      g.drawImage(el, (sl - l) / 2, (sh - h) / 2, l, h, 0, 0, l, h);
+      d.photo = toile.toDataURL('image/png');
+    }
+
+    async function ctrlCamera(id, action, a) {
+      ctrlDeType(id, 'camera', 'une caméra');
+      const d = donnees[id];
+      switch (action) {
+        case 'allumer': return allumerCamera(id);
+        case 'eteindre': return eteindreCamera(d, elements[id]);
+        case 'photo': return prendrePhoto(id);
+        // a : contrôle Image ou zone de dessin qui reçoit la dernière photo.
+        case 'photoDans': {
+          ctrl(a);
+          const cible = donnees[a];
+          if (cible.type !== 'image' && cible.type !== 'zonedessin') {
+            throw new Error(`On ne peut pas mettre une photo dans « ${cible.nom} » : choisissez une image ou une zone de dessin.`);
+          }
+          if (!d.photo) throw new Error(`« ${d.nom} » n'a pas encore pris de photo (bloc « prendre une photo avec… »).`);
+          if (cible.type === 'image') app.ecrire(a, 'image', d.photo);
+          else await dessinerImage(a, d.photo);
+        }
+      }
+    }
+
+    function lireCamera(d, prop) {
+      switch (prop) {
+        case 'allumee': return !!d.flux;
+        case 'photo': return d.photo || '';
+        case 'mouvement': return d.mouvement || 0;
+        case 'miroir': return d.miroir !== false;
+        case 'seuilMouvement': return Number(d.seuilMouvement ?? 10);
+      }
+    }
+
     // Glisse en douceur jusqu'à (x, y) ; le programme attend la fin du trajet.
     function glisser(id, x, y, secondes) {
       const d = donnees[id];
@@ -2207,7 +2350,7 @@ function BlocRuntimeFactory() {
         const h = proteger(fn);
         // « quand Son1 se termine », « quand Minuteur1 sonne »
         if (evenement === 'fin' && donnees[id].type === 'video') return elements[id].addEventListener('ended', () => h(id));
-        if (evenement === 'fin' || evenement === 'tic' || evenement === 'depose') return donnees[id].surEvenement.push(() => h(id));
+        if (evenement === 'fin' || evenement === 'tic' || evenement === 'depose' || evenement === 'mouvement') return donnees[id].surEvenement.push(() => h(id));
         (evenementsCtrl[id] = evenementsCtrl[id] || []).push({ evenement, h });
         brancher(id, evenement, h);
       },
@@ -2297,6 +2440,7 @@ function BlocRuntimeFactory() {
         if (d.type === 'son') return lireSon(d, prop);
         if (d.type === 'minuteur') return lireMinuteur(d, prop);
         if (d.type === 'fichier') return lireFichierCtrl(d, prop);
+        if (d.type === 'camera' && ['allumee', 'photo', 'mouvement', 'miroir', 'seuilMouvement'].includes(prop)) return lireCamera(d, prop);
         if (d.type === 'basedonnees') {
           if (prop === 'nombreFiches') return d.fiches.length;
           if (prop === 'champs') return d.champs.slice();
@@ -2356,6 +2500,11 @@ function BlocRuntimeFactory() {
         const d = donnees[id];
         if (d.type === 'son') return ecrireSon(d, prop, valeur);
         if (d.type === 'minuteur') return ecrireMinuteur(d, prop, valeur);
+        if (d.type === 'camera') {
+          if (prop === 'allumee') { (valeur ? allumerCamera(id) : Promise.resolve(eteindreCamera(d, el))).catch(signaler); return; }
+          if (prop === 'miroir') { d.miroir = !!valeur; el.classList.toggle('bs-miroir', d.miroir); return; }
+          if (prop === 'seuilMouvement') { d.seuilMouvement = Math.min(100, Math.max(1, Number(valeur) || 10)); return; }
+        }
         if (d.type === 'fichier') {
           if (prop === 'nomPropose') d.nomPropose = enTexte(valeur);
           if (prop === 'typeFichier') d.typeFichier = TYPES_FICHIER[enTexte(valeur).trim().toLowerCase()] ? enTexte(valeur).trim().toLowerCase() : 'tous';
@@ -2895,6 +3044,7 @@ function BlocRuntimeFactory() {
       },
       minuteur: ctrlMinuteur,
       fichier: ctrlFichier,
+      camera: ctrlCamera,
       sprite: ctrlSprite,
       // Volume en % (0 = muet, 100 = normal) d'un son, ou de tous les sons avec '*'.
       // Il s'applique aussi aux sons déjà en train de jouer.
@@ -2943,6 +3093,7 @@ function BlocRuntimeFactory() {
         const d = donnees[id];
         if (d.type === 'son' && d.autoDemarrage) ctrlSon(id, 'jouer');
         if (d.type === 'minuteur' && d.active !== false) demarrerMinuteur(d);
+        if (d.type === 'camera' && d.allumerAuDemarrage !== false) allumerCamera(id).catch(signaler);
         if (d.type === 'sprite' && d.anime) animerSprite(d, 'boucle');
       }
       auDemarrage.forEach(f => f());
@@ -2981,6 +3132,7 @@ function BlocRuntimeFactory() {
         minuteurs.forEach(clearInterval);
         animations.forEach(a => clearInterval(a.horloge));
         voiles.forEach(v => v.remove());
+        Object.values(donnees).forEach(d => { if (d.type === 'camera') eteindreCamera(d); });
         Object.values(fenetres).forEach(f => { f.el.remove(); if (f.voile) f.voile.remove(); });
         hote.innerHTML = '';
       }

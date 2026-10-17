@@ -43,6 +43,8 @@
       defauts: { adresse: 'https://fr.wikipedia.org', couleurTexte: '#2563eb' } },
     video: { prefixe: 'Video', texte: '', largeur: 320, hauteur: 180,
       defauts: { video: '', barreVideo: true, boucle: false, volume: 100 } },
+    camera: { prefixe: 'Camera', texte: '', largeur: 320, hauteur: 240,
+      defauts: { miroir: true, allumerAuDemarrage: true, seuilMouvement: 10 } },
     // Contrôles invisibles : ils n'ont ni position ni taille à l'écran.
     son: { prefixe: 'Son', texte: '', largeur: 0, hauteur: 0,
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
@@ -68,7 +70,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -938,7 +940,8 @@
       : c.type === 'zonedessin' ? 'bs_quand_glisse'
       : c.type === 'son' || c.type === 'video' ? 'bs_quand_son_fin'
       : c.type === 'minuteur' ? 'bs_quand_minuteur'
-      : c.type === 'fichier' ? 'bs_quand_fichier_depose' : 'bs_quand_clic';
+      : c.type === 'fichier' ? 'bs_quand_fichier_depose'
+      : c.type === 'camera' ? 'bs_quand_camera_mouvement' : 'bs_quand_clic';
     afficherVue('vue-code');
     let bloc = workspace.getBlocksByType(type, false).find(b => b.getFieldValue('CTRL') === c.id);
     if (!bloc) bloc = nouveauBlocEnBas(type, 'CTRL', c.id);
@@ -1039,6 +1042,16 @@
         v => { c.adresse = v.trim(); maj(); });
     }
     if (c.type === 'video') proprietesVideo(liste, c, maj);
+    if (c.type === 'camera') {
+      champCase(liste, 'S\'allume toute seule au démarrage', c.allumerAuDemarrage !== false, v => { c.allumerAuDemarrage = v; maj(); });
+      champCase(liste, 'En miroir (comme dans une glace)', c.miroir !== false, v => { c.miroir = v; maj(); });
+      champNombre(liste, 'Seuil de mouvement (%) : plus petit = plus sensible', c.seuilMouvement ?? 10,
+        v => { c.seuilMouvement = Math.min(100, Math.max(1, v)); maj(); });
+      liste.appendChild(el('p', 'aide',
+        'La webcam s\'affiche quand le programme tourne ; la première fois, Windows demande la permission. ' +
+        'Blocs dans la catégorie Contrôles : « prendre une photo avec… », « mettre la photo de… dans… » (une image ou une zone de dessin), ' +
+        '« enregistrer … dans un fichier » avec un contrôle Fichier. Double-cliquez sur la caméra pour réagir quand elle voit bouger.'));
+    }
     if (c.type === 'graphique') proprietesGraphique(liste, c, maj);
     if (c.type === 'onglets') proprietesOnglets(liste, c, maj);
     if (c.type === 'boutonradio') {
@@ -2305,11 +2318,11 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',
-    bs_quand_son_fin: 'se termine', bs_quand_minuteur: 'sonne', bs_quand_fichier_depose: 'fichier déposé', bs_quand_souris_ctrl: 'souris', bs_quand_clone: 'cloné' };
+    bs_quand_son_fin: 'se termine', bs_quand_minuteur: 'sonne', bs_quand_fichier_depose: 'fichier déposé', bs_quand_camera_mouvement: 'voit bouger', bs_quand_souris_ctrl: 'souris', bs_quand_clone: 'cloné' };
 
   // Libellé court d'un événement de contrôle, pour le Sommaire.
   const libelleEvenement = b => b.type === 'bs_quand_souris_ctrl'
@@ -2332,6 +2345,7 @@
       case 'bs_quand_son_fin': return `quand ${ctrl()} se termine`;
       case 'bs_quand_minuteur': return `quand ${ctrl()} sonne`;
       case 'bs_quand_fichier_depose': return `quand on dépose un fichier (${ctrl()})`;
+      case 'bs_quand_camera_mouvement': return `quand ${ctrl()} voit bouger`;
       case 'bs_quand_clone': return `quand un clone de ${ctrl()} est créé`;
       case 'bs_quand_fenetre': return `quand la fenêtre ${nomFenetre(r.getFieldValue('FENETRE'))} ${r.getField('QUOI').getText()}`;
       case 'bs_quand_souris_ctrl': return `quand on ${r.getField('QUOI').getText()} ${ctrl()}`;

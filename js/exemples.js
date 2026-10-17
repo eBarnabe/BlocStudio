@@ -399,6 +399,56 @@
         ])
     },
     {
+      titre: '📸 Photomaton',
+      description: 'La webcam en direct : compte à rebours 3, 2, 1, photo, enregistrement en PNG, et un détecteur de mouvement.',
+      creer: () => {
+        // c1 Camera · c2 Photo (image) · c3 bouton Photo · c4 interrupteur · c5 bouton Enregistrer
+        // c6 Compte (grand chiffre sur la caméra) · c7 Alerte · c8 FichierPhoto (invisible)
+        const compte = x => [ecrire('c6', 'texte', t(x)), bloc('bs_son', null, null, { SON: 'bip' }), attendre(1)];
+        return projet(
+          { titre: 'Photomaton', largeur: 670, hauteur: 310, couleurFond: '#1e293b' },
+          [
+            { type: 'camera', nom: 'Camera', x: 10, y: 10, largeur: 320, hauteur: 240, miroir: true, allumerAuDemarrage: true, seuilMouvement: 10 },
+            { type: 'image', nom: 'Photo', x: 340, y: 10, largeur: 320, hauteur: 240, couleurFond: '#334155' },
+            { type: 'bouton', nom: 'BoutonPhoto', texte: '📸 Prendre une photo', x: 10, y: 262, largeur: 160, hauteur: 36 },
+            { type: 'interrupteur', nom: 'Allumee', texte: 'Caméra allumée', coche: true, x: 180, y: 268, largeur: 150, hauteur: 26, couleurTexte: '#e2e8f0' },
+            { type: 'bouton', nom: 'Enregistrer', texte: '💾 Enregistrer la photo', x: 340, y: 262, largeur: 170, hauteur: 36 },
+            { type: 'etiquette', nom: 'Compte', texte: '', x: 130, y: 80, largeur: 80, hauteur: 90, taillePolice: 72,
+              couleurTexte: '#ffffff', visible: false },
+            { type: 'etiquette', nom: 'Alerte', texte: '', x: 520, y: 270, largeur: 140, hauteur: 24, couleurTexte: '#fbbf24' },
+            { type: 'fichier', nom: 'FichierPhoto', typeFichier: 'image', nomPropose: 'ma photo.png', largeur: 0, hauteur: 0 }
+          ],
+          [],
+          () => [
+            evt('bs_quand_demarre', null, [ecrire('c5', 'active', vrai(false))]),
+            evt('bs_quand_clic', 'c3', [
+              ecrire('c3', 'active', vrai(false)),
+              ecrire('c6', 'visible', vrai(true)),
+              ...compte('3'), ...compte('2'), ...compte('1'),
+              ecrire('c6', 'visible', vrai(false)),
+              ecrire('c4', 'coche', vrai(true)), // la photo rallume la caméra si besoin
+              bloc('bs_camera_photo', 'c1'),
+              bloc('bs_son', null, null, { SON: 'succes' }),
+              bloc('bs_camera_photo_dans', 'c1', null, { CIBLE: 'c2' }),
+              ecrire('c5', 'active', vrai(true)),
+              ecrire('c3', 'active', vrai(true))
+            ]),
+            evt('bs_quand_clic', 'c5', [
+              bloc('bs_fichier_enregistrer_de', 'c8', null, { CIBLE: 'c1' }),
+              si(non(bloc('bs_fichier_annule', 'c8')), [
+                ecrire('c7', 'texte', joindre(t('💾 '), bloc('bs_fichier_nom', 'c8')))
+              ])
+            ]),
+            evt('bs_quand_change', 'c4', [ecrire('c1', 'allumee', lire('coche', 'c4'))]),
+            evt('bs_quand_camera_mouvement', 'c1', [
+              ecrire('c7', 'texte', t('👀 Ça bouge !')),
+              attendre(1),
+              ecrire('c7', 'texte', t(''))
+            ])
+          ]);
+      }
+    },
+    {
       titre: '📝 Bloc-notes',
       description: 'Un petit traitement de texte : menus Fichier › Nouveau, Ouvrir…, Enregistrer…, et glisser-déposer d\'un fichier.',
       creer: () => {
