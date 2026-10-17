@@ -85,7 +85,8 @@ function BlocRuntimeFactory() {
     .bs-tableau tbody tr { cursor: pointer; }
     .bs-tableau tbody tr:hover { background: #eef2ff; }
     .bs-tableau tbody tr.bs-choisie { background: #4f46e5; color: #fff; }
-    .bs-date { border: 1px solid #7a7a7a; padding: 2px 6px; background: #fff; }
+    .bs-date, .bs-heure { border: 1px solid #7a7a7a; padding: 2px 6px; background: #fff; }
+    .bs-forme svg { display: block; width: 100%; height: 100%; overflow: visible; }
     .bs-selecteurcouleur { padding: 1px 2px; border: 1px solid #7a7a7a; background: #fff; cursor: pointer; }
 
     .bs-menus { position: relative; z-index: 10; display: flex; height: 26px; box-sizing: border-box;
@@ -273,6 +274,60 @@ function BlocRuntimeFactory() {
     };
     document.addEventListener('pointerdown', ailleurs, true);
     return barre;
+  }
+
+  // ---- Heures « hh:mm » ----
+  // Accepte « 9:5 », « 14h30 », « 7 h », ou un nombre d'heures ; '' si ce n'est pas une heure.
+  function heureNormale(v) {
+    const m = /^\s*(\d{1,2})\s*(?:[:h]\s*(\d{1,2})?)?\s*$/i.exec(enTexte(v ?? ''));
+    if (!m) return '';
+    const h = Number(m[1]), mn = Number(m[2] || 0);
+    if (h > 23 || mn > 59) return '';
+    return String(h).padStart(2, '0') + ':' + String(mn).padStart(2, '0');
+  }
+  function maintenantHeure() {
+    const d = new Date();
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  // ---- Formes : rectangle, arrondi, ovale (en CSS), triangle et ligne (en SVG) ----
+  const GENRES_FORME = ['rectangle', 'arrondi', 'ovale', 'triangle', 'ligne'];
+  const SENS_LIGNE = { horizontale: [0, 50, 100, 50], verticale: [50, 0, 50, 100], descendante: [0, 0, 100, 100], montante: [0, 100, 100, 0] };
+  function rendreForme(el, c) {
+    const genre = GENRES_FORME.includes(c.genre) ? c.genre : 'rectangle';
+    const trait = couleur(c.couleurBordure || '#1e3a8a');
+    const ep = Math.max(0, Number(c.epaisseur ?? 2) || 0);
+    const fond = c.couleurFond ? couleur(c.couleurFond) : 'transparent';
+    el.replaceChildren();
+    if (genre !== 'triangle' && genre !== 'ligne') {
+      Object.assign(el.style, {
+        background: fond, border: ep ? `${ep}px solid ${trait}` : 'none',
+        borderRadius: genre === 'ovale' ? '50%' : genre === 'arrondi' ? '14px' : '0'
+      });
+      return;
+    }
+    Object.assign(el.style, { background: 'transparent', border: 'none', borderRadius: '0' });
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns, 'svg');
+    svg.setAttribute('viewBox', '0 0 100 100');
+    svg.setAttribute('preserveAspectRatio', 'none');
+    let f;
+    if (genre === 'triangle') {
+      f = document.createElementNS(ns, 'polygon');
+      f.setAttribute('points', '50,0 100,100 0,100');
+      f.setAttribute('fill', fond);
+      f.setAttribute('stroke-linejoin', 'round');
+    } else {
+      f = document.createElementNS(ns, 'line');
+      const [x1, y1, x2, y2] = SENS_LIGNE[c.sens] || SENS_LIGNE.horizontale;
+      Object.entries({ x1, y1, x2, y2 }).forEach(([k, v]) => f.setAttribute(k, v));
+      f.setAttribute('stroke-linecap', 'round');
+    }
+    f.setAttribute('stroke', ep ? trait : 'none');
+    f.setAttribute('stroke-width', genre === 'ligne' ? Math.max(1, ep) : ep);
+    f.setAttribute('vector-effect', 'non-scaling-stroke'); // l'épaisseur ne change pas avec la taille
+    svg.appendChild(f);
+    el.appendChild(svg);
   }
 
   // ---- Menu contextuel : un élément par ligne, « - » pour un trait ----
@@ -706,6 +761,11 @@ function BlocRuntimeFactory() {
         el.type = 'date';
         el.value = c.date || aujourdhuiIso();
         break;
+      case 'heure':
+        el = document.createElement('input');
+        el.type = 'time';
+        el.value = heureNormale(c.heure) || maintenantHeure();
+        break;
       case 'navigateur':
         // Dans le concepteur : un simple aperçu (pas de chargement à chaque modification).
         if (prefixe === 'design') {
@@ -783,6 +843,7 @@ function BlocRuntimeFactory() {
     }
     el.className = 'bs-ctrl bs-' + c.type + (el.className ? ' ' + el.className : '');
     appliquerStyle(el, c);
+    if (c.type === 'forme') rendreForme(el, c);
     return el;
   }
 
@@ -2249,7 +2310,7 @@ function BlocRuntimeFactory() {
     // Un clone est une copie d'un contrôle (dans son état du moment), avec les mêmes événements.
     // Ses identifiants : « c3#1 », « c3#2 »… ; d.original : le contrôle d'origine.
     const MAX_CLONES = 300;
-    const CLONABLES = ['sprite', 'image', 'etiquette'];
+    const CLONABLES = ['sprite', 'image', 'etiquette', 'forme'];
     const actionsClones = {};    // id d'origine → « quand un clone de … est créé »
     const clonesSupprimes = new Set();
     let numeroClone = 0;
@@ -2264,7 +2325,7 @@ function BlocRuntimeFactory() {
       ctrl(id);
       const source = donnees[id];
       const original = source.original || id;
-      if (!CLONABLES.includes(source.type)) throw new Error(`« ${source.nom} » ne peut pas être cloné : seuls les sprites, les images et les étiquettes le peuvent.`);
+      if (!CLONABLES.includes(source.type)) throw new Error(`« ${source.nom} » ne peut pas être cloné : seuls les sprites, les images, les étiquettes et les formes le peuvent.`);
       if (app.nombreClones(original) >= MAX_CLONES) {
         throw new Error(`Trop de clones de « ${source.nom} » (${MAX_CLONES} au maximum). Pensez à supprimer ceux qui ne servent plus (« supprimer ce clone »).`);
       }
@@ -2987,6 +3048,16 @@ function BlocRuntimeFactory() {
           if (prop === 'longueurMax') return el.maxLength > 0 ? el.maxLength : 0;
         }
         if (prop === 'trie') return !!d.trie;
+        if (d.type === 'heure' && (prop === 'heures' || prop === 'minutes')) {
+          const [h, m] = (el.value || '0:0').split(':').map(Number);
+          return prop === 'heures' ? h : m;
+        }
+        if (d.type === 'forme') {
+          if (prop === 'genre') return GENRES_FORME.includes(d.genre) ? d.genre : 'rectangle';
+          if (prop === 'sens') return SENS_LIGNE[d.sens] ? d.sens : 'horizontale';
+          if (prop === 'epaisseur') return Number(d.epaisseur ?? 2) || 0;
+          if (prop === 'couleurBordure') return d.couleurBordure || '#1e3a8a';
+        }
         if (d.type === 'basedonnees') {
           if (prop === 'nombreFiches') return d.fiches.length;
           if (prop === 'champs') return d.champs.slice();
@@ -3012,6 +3083,7 @@ function BlocRuntimeFactory() {
             if (d.type === 'barreprogression') return String(d.valeur);
             if (d.type === 'cadre') return el.firstChild.textContent;
             if (d.type === 'date') return dateFrancaise(el.value);
+            if (d.type === 'heure') return el.value;
             if (d.type === 'selecteurcouleur') return el.value;
             if (d.type === 'tableau') return enTexte(d.lignes[d.choisie] || '');
             return el.textContent;
@@ -3068,6 +3140,20 @@ function BlocRuntimeFactory() {
             if (n > 0) el.maxLength = n; else el.removeAttribute('maxlength');
             return;
           }
+        }
+        if (d.type === 'heure' && (prop === 'heures' || prop === 'minutes')) {
+          const [h, m] = (el.value || '0:0').split(':').map(Number);
+          const n = Math.round(Number(valeur) || 0);
+          el.value = heureNormale(prop === 'heures' ? `${((n % 24) + 24) % 24}:${m}` : `${h}:${Math.min(59, Math.max(0, n))}`);
+          return;
+        }
+        if (d.type === 'forme' && ['genre', 'sens', 'epaisseur', 'couleurBordure'].includes(prop)) {
+          const choix = enTexte(valeur).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+          if (prop === 'genre') d.genre = { cercle: 'ovale', rond: 'ovale', ellipse: 'ovale', carre: 'rectangle' }[choix] || (GENRES_FORME.includes(choix) ? choix : 'rectangle');
+          if (prop === 'sens') d.sens = SENS_LIGNE[choix] ? choix : 'horizontale';
+          if (prop === 'epaisseur') d.epaisseur = Math.max(0, Number(valeur) || 0);
+          if (prop === 'couleurBordure') d.couleurBordure = enTexte(valeur);
+          return rendreForme(el, d);
         }
         if (prop === 'trie' && estListe(d.type)) {
           d.trie = !!valeur;
@@ -3126,6 +3212,11 @@ function BlocRuntimeFactory() {
             } else if (aValeur(d.type) || d.type === 'barreprogression') app.ecrire(id, 'valeur', valeur);
             else if (d.type === 'cadre') el.firstChild.textContent = valeur;
             else if (d.type === 'date') el.value = dateIso(valeur);
+            else if (d.type === 'heure') {
+              const h = heureNormale(valeur);
+              if (!h) throw new Error(`« ${enTexte(valeur)} » n'est pas une heure : écrivez-la comme 14:30.`);
+              el.value = h;
+            }
             else if (d.type === 'selecteurcouleur') {
               const hex = couleur(enTexte(valeur));
               if (/^#[0-9a-f]{6}$/i.test(hex)) el.value = hex;
@@ -3205,6 +3296,7 @@ function BlocRuntimeFactory() {
           case 'boucle': if (d.type === 'video') el.loop = !!valeur; break;
         }
         if (d.type === 'graphique') dessinerGraphique(el, d); // taille, couleurs du texte ou du fond
+        if (d.type === 'forme' && prop === 'couleurFond') rendreForme(el, d);
         if (d.type === 'onglets') {
           if (prop === 'visible') majOnglets(id);
           // Les contrôles posés sur les onglets se déplacent avec eux.

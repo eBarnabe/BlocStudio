@@ -30,6 +30,9 @@
     tableau: { prefixe: 'Tableau', texte: '', largeur: 300, hauteur: 160,
       defauts: { colonnes: ['Nom', 'Prénom'], lignes: [['Dupont', 'Marie'], ['Martin', 'Lucas']], memoriser: false } },
     date: { prefixe: 'Date', texte: '', largeur: 150, hauteur: 28, defauts: { date: '' } },
+    heure: { prefixe: 'Heure', texte: '', largeur: 110, hauteur: 28, defauts: { heure: '' } },
+    forme: { prefixe: 'Forme', texte: '', largeur: 100, hauteur: 100,
+      defauts: { genre: 'ovale', couleurFond: '#60a5fa', couleurBordure: '#1e3a8a', epaisseur: 2, sens: 'horizontale' } },
     selecteurcouleur: { prefixe: 'Couleur', texte: '#4f46e5', largeur: 60, hauteur: 30 },
     navigateur: { prefixe: 'Navigateur', texte: '', largeur: 400, hauteur: 260,
       defauts: { adresse: 'https://fr.wikipedia.org' } },
@@ -67,19 +70,20 @@
 
   // Entrées de la palette qui créent un contrôle d'un autre type, déjà réglé.
   const VARIANTES = {
-    motdepasse: { type: 'zonetexte', prefixe: 'MotDePasse', valeurs: { motDePasse: true } }
+    motdepasse: { type: 'zonetexte', prefixe: 'MotDePasse', valeurs: { motDePasse: true } },
+    ligne: { type: 'forme', prefixe: 'Ligne', valeurs: { genre: 'ligne', largeur: 160, hauteur: 12, couleurBordure: '#334155' } }
   };
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
   const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'onglets', 'listederoulante',
-    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'arborescence', 'barreetat', 'barreoutils'];
+    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'heure', 'arborescence', 'barreetat', 'barreoutils'];
 
   // Contrôles dont on peut aligner le texte (à gauche, au centre, à droite).
   const ALIGNABLES = ['bouton', 'etiquette', 'zonetexte', 'lien'];
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
@@ -87,7 +91,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', barreoutils: 'Barre d\'outils', menucontextuel: 'Menu contextuel', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', barreoutils: 'Barre d\'outils', menucontextuel: 'Menu contextuel', heure: 'Sélecteur d\'heure', forme: 'Forme', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -1207,6 +1211,34 @@
       i.value = c.date || '';
       i.addEventListener('input', () => { c.date = i.value; maj(); });
       d.appendChild(i);
+    }
+    if (c.type === 'heure') {
+      const d = prop(liste, 'Heure au départ (vide = l\'heure qu\'il est)');
+      const i = document.createElement('input');
+      i.type = 'time';
+      i.value = c.heure || '';
+      i.addEventListener('input', () => { c.heure = i.value; maj(); });
+      d.appendChild(i);
+    }
+    if (c.type === 'forme') {
+      const d = prop(liste, 'Forme');
+      const choix = document.createElement('select');
+      [['rectangle', '▭ Rectangle'], ['arrondi', '▢ Rectangle arrondi'], ['ovale', '⬭ Ovale (ou cercle si elle est carrée)'],
+        ['triangle', '△ Triangle'], ['ligne', '╱ Ligne']].forEach(([v, t]) => choix.add(new Option(t, v)));
+      choix.value = c.genre || 'rectangle';
+      choix.addEventListener('change', () => { c.genre = choix.value; maj(); afficherProprietes(); });
+      d.appendChild(choix);
+      if (c.genre === 'ligne') {
+        champChoix(liste, 'Sens de la ligne', [['horizontale', '—'], ['verticale', '|'], ['descendante', '╲'], ['montante', '╱']],
+          c.sens || 'horizontale', v => { c.sens = v; maj(); });
+      }
+      groupe(liste, [
+        g => champNombre(g, 'Épaisseur du trait', c.epaisseur ?? 2, v => { c.epaisseur = Math.max(0, v); maj(); }),
+        g => champCouleur(g, 'Couleur du trait', c.couleurBordure, v => { c.couleurBordure = v; maj(); })
+      ]);
+      if (c.genre !== 'ligne') {
+        liste.appendChild(el('p', 'aide', 'Sa « couleur de fond » (plus bas) la remplit ; vide = transparente. Épaisseur 0 : pas de bord.'));
+      }
     }
     if (c.type === 'navigateur') {
       champTexte(liste, 'Adresse web (ex. : fr.wikipedia.org, ou une vidéo YouTube)', c.adresse || '',
@@ -2544,7 +2576,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', heure: '🕒', forme: '🔷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',

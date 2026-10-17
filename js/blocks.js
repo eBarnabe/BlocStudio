@@ -35,7 +35,9 @@
     infobulle: 'infobulle (texte au survol)', gras: 'en gras', italique: 'en italique',
     alignement: 'alignement (gauche, centre ou droite)', bordure: 'bordure (aucune, simple ou creuse)',
     ajustement: 'ajustement (entiere, etiree ou recadree)', texteInvite: 'texte d\'invite (grisé)',
-    lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)'
+    lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)',
+    couleurBordure: 'couleur du trait', epaisseur: 'épaisseur du trait', sens: 'sens de la ligne (horizontale, verticale, descendante ou montante)',
+    heures: 'heures', minutes: 'minutes'
   };
 
   // Les propriétés proposées dépendent du type de contrôle choisi dans le bloc.
@@ -61,6 +63,8 @@
     selecteurnombre: ['valeur', 'min', 'max', 'pas', ...TEXTE, 'active', ...POSITION],
     tableau: ['numero', 'texte', 'nombreLignes', 'colonnes', ...TEXTE, ...POSITION],
     date: ['texte', ...TEXTE, 'active', ...POSITION],
+    heure: ['texte', 'heures', 'minutes', ...TEXTE, 'active', ...POSITION],
+    forme: ['genre', 'couleurFond', 'couleurBordure', 'epaisseur', 'sens', ...POSITION, 'direction'],
     selecteurcouleur: ['texte', 'active', ...POSITION],
     navigateur: ['adresse', ...POSITION],
     onglets: ['numero', 'texte', 'elements', ...TEXTE, ...POSITION],
@@ -87,6 +91,8 @@
     cadre: { texte: 'titre' },
     tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
     date: { texte: 'date (jj/mm/aaaa)' },
+    heure: { texte: 'heure (hh:mm)' },
+    forme: { genre: 'forme (rectangle, arrondi, ovale, triangle ou ligne)', couleurFond: 'couleur de remplissage' },
     selecteurcouleur: { texte: 'couleur choisie' },
     minuteur: { active: 'en marche' },
     camera: { miroir: 'en miroir (comme dans une glace)' },
@@ -193,7 +199,7 @@
   };
 
   const TYPES_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
 
   Blockly.Blocks['bs_quand_change'] = {
     init() {
@@ -575,7 +581,7 @@
 
   // ---------- Clones ----------
 
-  const CLONABLES = ['sprite', 'image', 'etiquette'];
+  const CLONABLES = ['sprite', 'image', 'etiquette', 'forme'];
 
   Blockly.Blocks['bs_quand_clone'] = {
     init() {
@@ -644,7 +650,7 @@
   };
 
   // Contrôles qui peuvent recevoir le curseur clavier.
-  const FOCUSABLES = ['zonetexte', 'bouton', 'listederoulante', 'zoneliste', 'selecteurnombre', 'curseur', 'date',
+  const FOCUSABLES = ['zonetexte', 'bouton', 'listederoulante', 'zoneliste', 'selecteurnombre', 'curseur', 'date', 'heure',
     'casecocher', 'boutonradio', 'interrupteur', 'selecteurcouleur'];
   Blockly.Blocks['bs_focus'] = instruction(() => ['placer le curseur clavier dans', { ctrl: FOCUSABLES }], COULEUR_CONTROLES,
     'Le clavier écrit désormais dans ce contrôle, sans avoir à cliquer dedans : pratique pour une zone de texte au démarrage, ou après « Effacer ». Pour un bouton, Entrée ou Espace le clique.');
@@ -2034,8 +2040,8 @@
 
   // Valeur proposée dans « mettre … à » : celle du contrôle dans le concepteur, quand c'est possible.
   const PROPS_NOMBRE = ['x', 'y', 'largeur', 'hauteur', 'taillePolice', 'valeur', 'min', 'max', 'pas', 'numero', 'volume',
-    'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax'];
-  const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre'];
+    'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax', 'epaisseur', 'heures', 'minutes'];
+  const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre', 'couleurBordure'];
   const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee',
     'gras', 'italique', 'lectureSeule', 'trie'];
@@ -2123,7 +2129,7 @@
           b('bs_sprite_transparence', { VAL: nombre(50) }), b('bs_sprite_fondu', { SEC: nombre(1) }),
           ...mouvement(), ...clones());
         break;
-      case 'image': case 'etiquette':
+      case 'image': case 'etiquette': case 'forme':
         actions.push(...mouvement(), ...clones());
         break;
       case 'zonedessin':
