@@ -47,7 +47,9 @@
     son: { prefixe: 'Son', texte: '', largeur: 0, hauteur: 0,
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
     minuteur: { prefixe: 'Minuteur', texte: '', largeur: 0, hauteur: 0,
-      defauts: { intervalle: 1, active: true } }
+      defauts: { intervalle: 1, active: true } },
+    basedonnees: { prefixe: 'Base', texte: '', largeur: 0, hauteur: 0,
+      defauts: { champs: ['Nom', 'Prénom', 'Téléphone'], fiches: [], memoriser: true } }
   };
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
@@ -64,7 +66,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -406,7 +408,9 @@
       const detail = document.createElement('small');
       detail.textContent = c.type === 'minuteur'
         ? `${String(c.intervalle).replace('.', ',')} s${c.active === false ? ', arrêté' : ''}`
-        : (projet.sons.find(s => s.id === c.son)?.nom || 'aucun son');
+        : c.type === 'basedonnees'
+          ? `${(c.champs || []).length} champ(s), ${(c.fiches || []).length} fiche(s) au départ`
+          : (projet.sons.find(s => s.id === c.son)?.nom || 'aucun son');
       puce.appendChild(detail);
       puce.addEventListener('pointerdown', e => {
         e.stopPropagation();
@@ -915,6 +919,13 @@
 
   // Comme dans Visual Basic : double-clic sur un contrôle = aller à son code.
   function ouvrirEvenement(c) {
+    if (c.type === 'basedonnees') { // pas d'événement : on montre ses blocs
+      afficherVue('vue-code');
+      const boite = workspace.getToolbox();
+      const categorie = boite.getToolboxItems().find(i => i.getName && i.getName() === 'Base de données');
+      if (categorie) boite.setSelectedItem(categorie);
+      return;
+    }
     const type = AVEC_CHANGE.includes(c.type) ? 'bs_quand_change'
       : c.type === 'zonedessin' ? 'bs_quand_glisse'
       : c.type === 'son' || c.type === 'video' ? 'bs_quand_son_fin'
@@ -998,6 +1009,7 @@
     });
     if (c.type === 'son') return proprietesSon(liste, c, maj);
     if (c.type === 'minuteur') return proprietesMinuteur(liste, c, maj);
+    if (c.type === 'basedonnees') return proprietesBase(liste, c, maj);
     if (['bouton', 'etiquette', 'zonetexte', 'casecocher', 'boutonradio', 'cadre', 'interrupteur', 'lien'].includes(c.type)) {
       const multiligne = c.type === 'etiquette' || (c.type === 'zonetexte' && c.multiligne);
       champTexte(liste, c.type === 'cadre' ? 'Titre' : 'Texte', c.texte, v => { c.texte = v; maj(); }, multiligne);
@@ -1248,6 +1260,32 @@
     liste.appendChild(el('p', 'aide',
       'Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer ce qu\'il fait à chaque « tic ». ' +
       'On peut le démarrer, l\'arrêter ou changer son intervalle avec des blocs.'));
+  }
+
+  function proprietesBase(liste, c, maj) {
+    champTexte(liste, 'Champs (un par ligne)', (c.champs || []).join('\n'), v => {
+      const avant = c.champs || [];
+      const apres = [...new Set(v.split('\n').map(e => e.trim()).filter(e => e))];
+      // Les fiches de départ suivent leurs champs : retrouvés par leur nom, ou par leur place
+      // quand le nombre de champs ne change pas (on est en train d'en renommer un).
+      const place = apres.map((nom, i) => avant.includes(nom) ? avant.indexOf(nom) : avant.length === apres.length ? i : -1);
+      c.fiches = (c.fiches || []).map(f => place.map(i => i < 0 ? '' : f[i] ?? ''));
+      c.champs = apres;
+      maj();
+      BlocStudioBases.rafraichir(workspace);
+      afficherInvisibles();
+    }, true);
+    champTexte(liste, 'Fiches de départ (une par ligne, valeurs séparées par ;)',
+      (c.fiches || []).map(f => f.join(' ; ')).join('\n'), v => {
+        c.fiches = v.split('\n').filter(l => l.trim()).map(l => l.split(';').map(e => e.trim()));
+        maj();
+        afficherInvisibles();
+      }, true);
+    champCase(liste, 'Garder les fiches d\'une fois à l\'autre', c.memoriser !== false, v => { c.memoriser = v; maj(); });
+    liste.appendChild(el('p', 'aide',
+      'Une base de données range des fiches : une valeur pour chaque champ. Utilisez les blocs de la catégorie ' +
+      '« Base de données » pour ajouter, chercher, modifier ou supprimer des fiches, et « afficher … dans le tableau » pour les voir. ' +
+      'Les fiches ajoutées pendant le programme sont gardées ; elles repartent des fiches de départ si vous changez celles-ci.'));
   }
 
   function prop(parent, libelle) {
@@ -2091,7 +2129,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',

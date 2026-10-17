@@ -442,7 +442,7 @@ function BlocRuntimeFactory() {
 
   // Contrôles sans apparence : ils se posent dans le concepteur mais ne s'affichent
   // pas dans la fenêtre du programme (comme le Timer de Visual Basic).
-  const INVISIBLES = ['son', 'minuteur'];
+  const INVISIBLES = ['son', 'minuteur', 'basedonnees'];
 
   // Nom simple d'une touche du clavier (e.key) : 'gauche', 'entree', 'a', '7', 'f2'…
   const NOMS_TOUCHES = {
@@ -988,6 +988,7 @@ function BlocRuntimeFactory() {
       if (INVISIBLES.includes(c.type)) {
         elements[c.id] = document.createElement('span');
         donnees[c.id] = Object.assign({}, c, { surEvenement: [], etat: 'arrete' });
+        if (c.type === 'basedonnees') preparerBase(donnees[c.id]);
         continue;
       }
       const el = creerElement(c, prefixe, projet.sprites);
@@ -1033,6 +1034,104 @@ function BlocRuntimeFactory() {
     for (const id in donnees) {
       const d = donnees[id];
       if (d.type === 'onglets' && !(d.onglets && donnees[d.onglets])) majOnglets(id); // les plus extérieurs d'abord
+    }
+
+    // ---- Base de données ----
+    // Des fiches (une valeur par champ), numérotées à partir de 1 comme les lignes d'un tableau.
+    // Avec « memoriser », elles sont retrouvées au lancement suivant. La mémoire repart de zéro
+    // si l'on change les fiches de départ ; si l'on change seulement les champs, chaque valeur
+    // mémorisée retrouve son champ par son nom.
+    function valeurFiche(v) { return typeof v === 'number' ? v : enTexte(v); }
+
+    // Noms de champs : ni les majuscules ni les accents ne comptent (« age » = « Âge »).
+    function memeNom(a, b) { return enTexte(a).trim().localeCompare(enTexte(b).trim(), 'fr', { sensitivity: 'base' }) === 0; }
+
+    function preparerBase(d) {
+      d.cleMemoire = 'base.' + d.id + '.' + empreinte(JSON.stringify(d.fiches || []));
+      d.champs = [...new Set((d.champs || []).map(c => enTexte(c).trim()).filter(c => c))];
+      d.fiches = (d.fiches || []).map(f => d.champs.map((_, i) => valeurFiche(f[i] ?? '')));
+      d.vues = new Set(); // tableaux qui montrent toutes les fiches (remis à jour à chaque changement)
+      if (d.memoriser === false) return;
+      const sauve = stockage.lire(d.cleMemoire);
+      if (!sauve || !Array.isArray(sauve.fiches) || !Array.isArray(sauve.champs)) return;
+      // Un champ renommé (même nombre de champs) garde ses valeurs : on le retrouve à sa place.
+      const position = d.champs.map((c, i) => {
+        const j = sauve.champs.findIndex(s => memeNom(s, c));
+        return j < 0 && sauve.champs.length === d.champs.length ? i : j;
+      });
+      d.fiches = sauve.fiches.map(f => position.map(i => i < 0 ? '' : valeurFiche(f[i] ?? '')));
+    }
+
+    function baseModifiee(d) {
+      if (d.memoriser !== false) stockage.ecrire(d.cleMemoire, { champs: d.champs, fiches: d.fiches });
+      for (const t of d.vues) {
+        if (donnees[t] && donnees[t].lienBase && donnees[t].lienBase.base === d.id) afficherBase(d, t, null);
+        else d.vues.delete(t);
+      }
+    }
+
+    function numFiche(d, numero) {
+      const n = Math.round(Number(numero));
+      if (!(n >= 1 && n <= d.fiches.length)) {
+        throw new Error(`« ${d.nom} » n'a pas de fiche n° ${enTexte(numero)} (elle a ${d.fiches.length} fiche(s)).`);
+      }
+      return n - 1;
+    }
+
+    // Un champ se désigne par son nom (sans tenir compte des majuscules) ou par son numéro.
+    function numChamp(d, champ) {
+      const nom = enTexte(champ).trim();
+      const i = d.champs.findIndex(c => memeNom(c, nom));
+      if (i >= 0) return i;
+      const n = Math.round(Number(nom));
+      if (/^\d+$/.test(nom) && n >= 1 && n <= d.champs.length) return n - 1;
+      throw new Error(`« ${d.nom} » n'a pas de champ « ${enTexte(champ)} » (ses champs : ${d.champs.join(', ') || 'aucun'}).`);
+    }
+
+    // Comparaison d'une valeur de fiche : en nombres si les deux en sont, sinon en texte
+    // (sans tenir compte des majuscules ni des accents).
+    function correspond(valeur, operation, cherche) {
+      const a = valeurCellule(valeur), b = valeurCellule(cherche);
+      const ta = enTexte(a).trim(), tb = enTexte(b).trim();
+      const egal = ta.localeCompare(tb, 'fr', { sensitivity: 'base' }) === 0;
+      const ordre = typeof a === 'number' && typeof b === 'number' ? a - b
+        : ta.localeCompare(tb, 'fr', { numeric: true, sensitivity: 'base' });
+      const simple = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+      switch (operation) {
+        case 'egal': return egal;
+        case 'different': return !egal;
+        case 'contient': return simple(ta).includes(simple(tb));
+        case 'commence': return simple(ta).startsWith(simple(tb));
+        case 'inferieur': return ordre < 0;
+        case 'superieur': return ordre > 0;
+        case 'infegal': return ordre <= 0;
+        case 'supegal': return ordre >= 0;
+      }
+      return false;
+    }
+
+    function chercherFiches(d, champ, operation, valeur) {
+      const i = numChamp(d, champ);
+      const r = [];
+      d.fiches.forEach((f, n) => { if (correspond(f[i], operation, valeur)) r.push(n + 1); });
+      return r;
+    }
+
+    // Montre des fiches dans un tableau. `numeros` : les n° à montrer (null = toutes, et le
+    // tableau suit alors la base). « n° de la fiche choisie » retrouve la fiche d'une ligne.
+    function afficherBase(d, idTableau, numeros) {
+      const el = ctrlDeType(idTableau, 'tableau', 'un tableau');
+      const t = donnees[idTableau];
+      const liste = numeros === null ? d.fiches.map((_, n) => n) : (Array.isArray(numeros) ? numeros : [numeros])
+        .map(n => Math.round(Number(n)) - 1).filter(n => n >= 0 && n < d.fiches.length);
+      const choisie = t.lienBase && t.lienBase.base === d.id && t.choisie >= 0 ? t.lienBase.numeros[t.choisie] : -1;
+      t.colonnes = d.champs.slice();
+      t.lignes = liste.map(n => d.fiches[n].map(enTexte));
+      t.lienBase = { base: d.id, numeros: liste };
+      t.choisie = liste.indexOf(choisie);
+      if (numeros === null) d.vues.add(idTableau);
+      else d.vues.delete(idTableau);
+      rendreTableau(el, t);
     }
 
     // Un tableau « mémorisé » retrouve ses lignes au lancement suivant. La mémoire
@@ -2008,6 +2107,12 @@ function BlocRuntimeFactory() {
         const d = donnees[id];
         if (d.type === 'son') return lireSon(d, prop);
         if (d.type === 'minuteur') return lireMinuteur(d, prop);
+        if (d.type === 'basedonnees') {
+          if (prop === 'nombreFiches') return d.fiches.length;
+          if (prop === 'champs') return d.champs.slice();
+          if (prop === 'memoriser') return d.memoriser !== false;
+          return '';
+        }
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return lireSprite(d, prop);
         if (d.type === 'graphique' && PROPS_GRAPHIQUE.includes(prop)) {
           const v = d[prop];
@@ -2061,6 +2166,14 @@ function BlocRuntimeFactory() {
         const d = donnees[id];
         if (d.type === 'son') return ecrireSon(d, prop, valeur);
         if (d.type === 'minuteur') return ecrireMinuteur(d, prop, valeur);
+        if (d.type === 'basedonnees') {
+          if (prop === 'memoriser') {
+            d.memoriser = !!valeur;
+            if (d.memoriser) baseModifiee(d);
+            else stockage.effacer(d.cleMemoire);
+          }
+          return;
+        }
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return ecrireSprite(d, prop, valeur);
         if (d.type === 'onglets' && (prop === 'numero' || prop === 'elements')) {
           if (prop === 'elements') {
@@ -2340,6 +2453,7 @@ function BlocRuntimeFactory() {
       tableau(id, action, a, b, c) {
         const el = ctrlDeType(id, 'tableau', 'un tableau');
         const d = donnees[id];
+        d.lienBase = null;
         switch (action) {
           case 'ajouter': d.lignes.push(enLigne(a)); break;
           case 'remplacer': d.lignes[numLigne(d, a)] = enLigne(b); break;
@@ -2401,6 +2515,67 @@ function BlocRuntimeFactory() {
             return d.lignes.findIndex(l => enTexte(l[col]).trim().toLowerCase() === cherche) + 1;
           }
           case 'csv': return versCsv(d.colonnes.length ? [d.colonnes, ...d.lignes] : d.lignes);
+        }
+        return '';
+      },
+
+      // ---- Base de données ----
+      base(id, action, a, b, c) {
+        ctrlDeType(id, 'basedonnees', 'une base de données');
+        const d = donnees[id];
+        switch (action) {
+          case 'ajouter': {
+            // a : { champ: valeur } ; les champs absents restent vides.
+            const fiche = d.champs.map(() => '');
+            for (const [champ, v] of Object.entries(a || {})) fiche[numChamp(d, champ)] = valeurFiche(v);
+            d.fiches.push(fiche);
+            break;
+          }
+          case 'modifier': d.fiches[numFiche(d, a)][numChamp(d, b)] = valeurFiche(c); break;
+          case 'supprimer': d.fiches.splice(numFiche(d, a), 1); break;
+          case 'vider': d.fiches = []; break;
+          case 'trier': {
+            const i = numChamp(d, a), sens = b === 'decroissant' ? -1 : 1;
+            d.fiches.sort((x, y) => {
+              const vx = valeurCellule(x[i]), vy = valeurCellule(y[i]);
+              const r = typeof vx === 'number' && typeof vy === 'number' ? vx - vy
+                : enTexte(vx).localeCompare(enTexte(vy), 'fr', { numeric: true, sensitivity: 'base' });
+              return r * sens;
+            });
+            break;
+          }
+          case 'csv': {
+            // Une première ligne qui reprend les noms des champs est ignorée.
+            let lignes = depuisCsv(a);
+            const entete = lignes[0];
+            if (entete && entete.join('|').toLowerCase() === d.champs.join('|').toLowerCase()) lignes = lignes.slice(1);
+            d.fiches = lignes.map(l => d.champs.map((_, i) => valeurFiche(l[i] ?? '')));
+            break;
+          }
+          case 'afficher': return afficherBase(d, a, b === undefined ? null : b);
+        }
+        baseModifiee(d);
+      },
+      lireBase(id, quoi, a, b, c) {
+        if (quoi === 'choisie') {
+          // n° de la fiche montrée sur la ligne choisie d'un tableau (0 : aucune).
+          ctrlDeType(id, 'tableau', 'un tableau');
+          const t = donnees[id];
+          if (t.choisie < 0) return 0;
+          return t.lienBase ? (t.lienBase.numeros[t.choisie] ?? -1) + 1 : t.choisie + 1;
+        }
+        ctrlDeType(id, 'basedonnees', 'une base de données');
+        const d = donnees[id];
+        switch (quoi) {
+          case 'champ': return valeurCellule(d.fiches[numFiche(d, a)][numChamp(d, b)]);
+          case 'nombre': return d.fiches.length;
+          case 'chercher': return chercherFiches(d, a, b, c);
+          case 'premiere': return chercherFiches(d, a, b, c)[0] || 0;
+          case 'colonne': {
+            const i = numChamp(d, a);
+            return d.fiches.map(f => valeurCellule(f[i]));
+          }
+          case 'csv': return versCsv([d.champs, ...d.fiches]);
         }
         return '';
       },

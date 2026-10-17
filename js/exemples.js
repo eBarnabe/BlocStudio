@@ -582,6 +582,86 @@
       }
     },
     {
+      titre: '📚 Ma bibliothèque',
+      description: 'Une base de données de livres : ajouter, chercher, trier, supprimer. Les livres sont gardés d\'une fois sur l\'autre.',
+      creer: () => {
+        // c1-c6 saisie · c7 Ajouter · c8 Supprimer · c9 Trier · c10-c11 recherche
+        // c12 Livres (Tableau) · c13 Compteur · c14 Bibliotheque (Base de données)
+        const ajouterFiche = valeurs => ({
+          type: 'bs_base_ajouter', fields: { CTRL: 'c14' }, extraState: { champs: Object.keys(valeurs) },
+          inputs: Object.fromEntries(Object.values(valeurs).map((x, i) => ['V' + i, I(x)]))
+        });
+        const recherche = () => lire('texte', 'c11');
+        const choisie = () => bloc('bs_base_choisie', 'c12');
+        return projet(
+          { titre: 'Ma bibliothèque', largeur: 560, hauteur: 420, couleurFond: '#fffbeb' },
+          [
+            { type: 'etiquette', nom: 'LibelleTitre', texte: 'Titre', y: 14, largeur: 220, hauteur: 20 },
+            { type: 'zonetexte', nom: 'Titre', y: 36, largeur: 220, hauteur: 28 },
+            { type: 'etiquette', nom: 'LibelleAuteur', texte: 'Auteur', x: 250, y: 14, largeur: 180, hauteur: 20 },
+            { type: 'zonetexte', nom: 'Auteur', x: 250, y: 36, largeur: 180, hauteur: 28 },
+            { type: 'etiquette', nom: 'LibelleAnnee', texte: 'Année', x: 440, y: 14, largeur: 100, hauteur: 20 },
+            { type: 'selecteurnombre', nom: 'Annee', x: 440, y: 36, largeur: 100, hauteur: 28, valeur: 2024, min: 1, max: 2100, pas: 1 },
+            { type: 'bouton', nom: 'Ajouter', texte: '➕ Ajouter le livre', y: 76, largeur: 160, hauteur: 30 },
+            { type: 'bouton', nom: 'Supprimer', texte: '🗑️ Supprimer', x: 190, y: 76, largeur: 120, hauteur: 30 },
+            { type: 'bouton', nom: 'Trier', texte: '🔤 Trier par titre', x: 320, y: 76, largeur: 150, hauteur: 30 },
+            { type: 'etiquette', nom: 'LibelleRecherche', texte: '🔍 Chercher un titre ou un auteur :', y: 124, largeur: 250, hauteur: 22 },
+            { type: 'zonetexte', nom: 'Recherche', x: 270, y: 120, largeur: 270, hauteur: 28 },
+            { type: 'tableau', nom: 'Livres', y: 158, largeur: 520, hauteur: 210, colonnes: [], lignes: [] },
+            { type: 'etiquette', nom: 'Compteur', y: 378, largeur: 520, hauteur: 22, taillePolice: 13, couleurTexte: '#78716c' },
+            {
+              type: 'basedonnees', nom: 'Bibliotheque', largeur: 0, hauteur: 0, memoriser: true,
+              champs: ['Titre', 'Auteur', 'Année'],
+              fiches: [['Le Petit Prince', 'Antoine de Saint-Exupéry', 1943], ['Harry Potter à l\'école des sorciers', 'J. K. Rowling', 1997],
+                ['Le Hobbit', 'J. R. R. Tolkien', 1937], ['Matilda', 'Roald Dahl', 1988]]
+            }
+          ],
+          ['trouves'],
+          () => [
+            evt('bs_quand_demarre', null, [appeler('actualiser')]),
+            // Montre toute la base, ou seulement les livres dont le titre ou l'auteur contient la recherche.
+            fonction('actualiser', [
+              si(estVide(recherche()),
+                [bloc('bs_base_afficher', 'c14', null, { TAB: 'c12' })],
+                [
+                  fixer('v_trouves', bloc('bs_base_chercher', 'c14', { VAL: recherche() }, { CHAMP: 'Titre', OP: 'contient' })),
+                  si(estVide(v('v_trouves')), [
+                    fixer('v_trouves', bloc('bs_base_chercher', 'c14', { VAL: recherche() }, { CHAMP: 'Auteur', OP: 'contient' }))
+                  ]),
+                  bloc('bs_base_afficher', 'c14', { NUMS: v('v_trouves') }, { TAB: 'c12' })
+                ]),
+              ecrire('c13', 'texte', joindre(bloc('bs_base_nombre', 'c14'), t(' livre(s) dans la bibliothèque · gardés d\'une fois sur l\'autre')))
+            ]),
+            evt('bs_quand_clic', 'c7', [
+              si(estVide(lire('texte', 'c2')),
+                [message(t('Écrivez au moins le titre du livre.'), 'attention')],
+                [
+                  ajouterFiche({ Titre: lire('texte', 'c2'), Auteur: lire('texte', 'c4'), 'Année': lire('valeur', 'c6') }),
+                  ecrire('c2', 'texte', t('')), ecrire('c4', 'texte', t('')),
+                  bloc('bs_son', null, null, { SON: 'succes' }),
+                  appeler('actualiser')
+                ])
+            ]),
+            evt('bs_quand_clic', 'c8', [
+              si(compare('EQ', choisie(), n(0)),
+                [message(t('Cliquez d\'abord sur un livre dans le tableau.'), 'info')],
+                [
+                  si({ type: 'bs_confirmer', inputs: { VAL: I(joindre(t('Supprimer « '),
+                    bloc('bs_base_champ', 'c14', { N: choisie() }, { CHAMP: 'Titre' }), t(' » ?'))) } }, [
+                    bloc('bs_base_supprimer', 'c14', { N: choisie() }),
+                    appeler('actualiser')
+                  ])
+                ])
+            ]),
+            evt('bs_quand_clic', 'c9', [
+              bloc('bs_base_trier', 'c14', null, { CHAMP: 'Titre', SENS: 'croissant' }),
+              appeler('actualiser')
+            ]),
+            evt('bs_quand_change', 'c11', [appeler('actualiser')])
+          ]);
+      }
+    },
+    {
       titre: '🪙 Attrape la pièce',
       description: 'Un vrai petit jeu : sprites animés, clavier ou souris, minuteur, musique de fond et record.',
       creer: () => {

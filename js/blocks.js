@@ -25,6 +25,7 @@
     taille: 'taille (%)', transparence: 'transparence (%)',
     valeurs: 'valeurs (liste)', etiquettes: 'étiquettes (liste)', genre: 'genre (barres, courbe ou secteurs)',
     maxValeurs: 'nombre maximum de valeurs',
+    nombreFiches: 'nombre de fiches', champs: 'champs (liste)', memoriser: 'garder les fiches d\'une fois à l\'autre',
     adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)'
   };
 
@@ -56,10 +57,11 @@
     video: ['enLecture', 'position', 'duree', 'volume', 'boucle', 'video', ...POSITION],
     son: ['son', 'volume', 'boucle', 'enLecture'],
     minuteur: ['intervalle', 'active'],
+    basedonnees: ['nombreFiches', 'champs', 'memoriser'],
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
@@ -626,6 +628,153 @@
       }
     };
   }
+
+  // ---------- Base de données ----------
+
+  const COULEUR_BASE = '#b45309';
+  const BASE = { ctrl: ['basedonnees'] };
+  const champsDeBase = id => (BlocStudio.controles().find(c => c.id === id && c.type === 'basedonnees') || {}).champs || [];
+  const OPERATIONS = [['=', 'egal'], ['≠', 'different'], ['contient', 'contient'], ['commence par', 'commence'],
+    ['<', 'inferieur'], ['>', 'superieur'], ['≤', 'infegal'], ['≥', 'supegal']];
+
+  // Liste des champs de la base choisie dans le même bloc. Accepte tout nom
+  // (un champ renommé reste affiché au lieu d'être perdu).
+  class ChampNomChamp extends Blockly.FieldDropdown {
+    constructor() {
+      super(function () {
+        const bloc = this.getSourceBlock();
+        const options = (bloc ? champsDeBase(bloc.getFieldValue('CTRL')) : []).map(c => [c, c]);
+        const v = this.getValue();
+        if (v && !options.some(o => o[1] === v)) options.push([v, v]);
+        return options.length ? options : [['(aucun champ)', '']];
+      });
+    }
+    doClassValidation_(v) { return typeof v === 'string' ? v : null; }
+    doValueUpdate_(v) {
+      this.generatedOptions = null;
+      super.doValueUpdate_(v);
+    }
+  }
+
+  // Quand on choisit une autre base, le champ choisi doit en faire partie.
+  function suivreBase(bloc) {
+    bloc.getField('CTRL').setValidator(function (id) {
+      const champ = this.getSourceBlock().getField('CHAMP');
+      const champs = champsDeBase(id);
+      if (champ && champs.length && !champs.includes(champ.getValue())) champ.setValue(champs[0]);
+      return id;
+    });
+    const champ = bloc.getField('CHAMP');
+    if (champ && !champ.getValue()) champ.setValue(champsDeBase(bloc.getFieldValue('CTRL'))[0] || '');
+  }
+  const instructionBase = (morceaux, tooltip) => {
+    const def = instruction(morceaux, COULEUR_BASE, tooltip);
+    const init = def.init;
+    def.init = function () { init.call(this); suivreBase(this); };
+    return def;
+  };
+  const valeurBase = (morceaux, sortie, tooltip) => {
+    const def = valeur(morceaux, sortie, COULEUR_BASE, tooltip);
+    const init = def.init;
+    def.init = function () { init.call(this); suivreBase(this); };
+    return def;
+  };
+  const CHAMP = () => ({ champ: new ChampNomChamp(), nom: 'CHAMP' });
+  const OPERATION = () => ({ champ: new Blockly.FieldDropdown(OPERATIONS), nom: 'OP' });
+
+  // « ajouter une fiche » : une entrée par champ de la base choisie.
+  Blockly.Blocks['bs_base_ajouter'] = {
+    init() {
+      this.appendDummyInput('TETE').appendField('ajouter une fiche à')
+        .appendField(new Blockly.FieldDropdown(optionsControles(['basedonnees']), id => {
+          this.majChamps(champsDeBase(id));
+          return id;
+        }), 'CTRL');
+      this.champs = [];
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setColour(COULEUR_BASE);
+      this.setTooltip('Ajoute une fiche à la fin de la base : une valeur pour chaque champ (un champ laissé vide reste vide).');
+      this.majChamps(champsDeBase(this.getFieldValue('CTRL')));
+    },
+    saveExtraState() { return { champs: this.champs.slice() }; },
+    loadExtraState(etat) { this.majChamps((etat && etat.champs) || []); },
+    // Refait les entrées en gardant les blocs branchés (retrouvés par le nom du champ).
+    majChamps(noms) {
+      if (JSON.stringify(noms) === JSON.stringify(this.champs)) return;
+      const branches = this.champs.map((nom, i) => {
+        const entree = this.getInput('V' + i);
+        const cible = entree && entree.connection.targetBlock();
+        if (cible && !cible.isShadow()) entree.connection.disconnect();
+        return { nom, cible: cible && !cible.isShadow() ? cible : null };
+      });
+      this.champs.forEach((_, i) => this.removeInput('V' + i, true));
+      this.champs = noms.slice();
+      const restants = branches.filter(b => b.cible && !noms.includes(b.nom));
+      noms.forEach((nom, i) => {
+        const entree = this.appendValueInput('V' + i).setAlign(Blockly.inputs.Align.RIGHT).appendField(nom);
+        const trouve = branches.find(b => b.nom === nom && b.cible) || restants.shift();
+        if (trouve && trouve.cible) entree.connection.connect(trouve.cible.outputConnection);
+        else entree.connection.setShadowState({ type: 'text', fields: { TEXT: '' } });
+      });
+    }
+  };
+
+  Blockly.Blocks['bs_base_modifier'] = instructionBase(() => [
+    'dans', BASE, 'mettre le champ', CHAMP(), { nom: 'N', libelle: 'de la fiche n°', check: 'Number' }, { nom: 'VAL', libelle: 'à' }
+  ], 'Change une valeur d\'une fiche. Le n° de fiche vient par exemple de « n° de la fiche choisie dans Tableau » ou d\'une recherche.');
+
+  Blockly.Blocks['bs_base_supprimer'] = instructionBase(() => [
+    { nom: 'N', libelle: 'supprimer la fiche n°', check: 'Number' }, 'de', BASE
+  ], 'Enlève une fiche de la base. Les fiches suivantes prennent un numéro de moins.');
+
+  Blockly.Blocks['bs_base_vider'] = instructionBase(() => ['effacer toutes les fiches de', BASE],
+    'Enlève toutes les fiches de la base (attention : elles sont perdues).');
+
+  Blockly.Blocks['bs_base_trier'] = instructionBase(() => [
+    'trier', BASE, 'par', CHAMP(),
+    { champ: new Blockly.FieldDropdown([['croissant (A → Z, 1 → 9)', 'croissant'], ['décroissant (Z → A, 9 → 1)', 'decroissant']]), nom: 'SENS' }
+  ], 'Range les fiches de la base selon un champ. Les numéros des fiches changent.');
+
+  Blockly.Blocks['bs_base_afficher'] = instructionBase(() => [
+    'afficher les fiches de', BASE, 'dans le tableau', { ctrl: ['tableau'], nom: 'TAB' },
+    { nom: 'NUMS', libelle: 'seulement les n° (liste, facultatif)' }
+  ], 'Montre les fiches dans un Tableau, avec un titre de colonne par champ. Sans liste de n°, le tableau montre toutes les fiches et se met à jour tout seul. Avec une liste (le résultat d\'une recherche), il ne montre que ces fiches.');
+
+  Blockly.Blocks['bs_base_remplir'] = instructionBase(() => [
+    'remplir', BASE, { nom: 'VAL', libelle: 'avec le texte CSV' }
+  ], 'Remplace toutes les fiches par celles d\'un texte CSV (une fiche par ligne, valeurs séparées par ;). Avec « texte d\'un fichier choisi », on peut importer un fichier Excel enregistré en CSV.');
+
+  Blockly.Blocks['bs_base_champ'] = valeurBase(() => [
+    CHAMP(), { nom: 'N', libelle: 'de la fiche n°', check: 'Number' }, 'de', BASE
+  ], null, 'La valeur d\'un champ d\'une fiche.');
+
+  Blockly.Blocks['bs_base_nombre'] = valeurBase(() => ['nombre de fiches de', BASE], 'Number',
+    'Combien de fiches contient la base.');
+
+  Blockly.Blocks['bs_base_chercher'] = valeurBase(() => [
+    'n° des fiches de', BASE, 'où', CHAMP(), OPERATION(), { nom: 'VAL', libelle: '' }
+  ], 'Array', 'Cherche les fiches qui correspondent : donne la liste de leurs numéros (vide si aucune). Les majuscules et les accents ne comptent pas. Pour les montrer : « afficher … seulement les n° ».');
+
+  Blockly.Blocks['bs_base_premiere'] = valeurBase(() => [
+    'n° de la première fiche de', BASE, 'où', CHAMP(), OPERATION(), { nom: 'VAL', libelle: '' }
+  ], 'Number', 'Le numéro de la première fiche qui correspond, ou 0 s\'il n\'y en a aucune.');
+
+  Blockly.Blocks['bs_base_colonne'] = valeurBase(() => ['toutes les valeurs du champ', CHAMP(), 'de', BASE], 'Array',
+    'La liste des valeurs d\'un champ, fiche par fiche. Avec les blocs de Maths (« somme », « moyenne » d\'une liste), on calcule des totaux.');
+
+  Blockly.Blocks['bs_base_csv'] = valeurBase(() => ['contenu de', BASE, 'en texte (CSV)'], 'String',
+    'Toutes les fiches en texte CSV (la première ligne donne les champs) : à enregistrer dans un fichier, lisible par Excel.');
+
+  Blockly.Blocks['bs_base_choisie'] = valeur(() => ['n° de la fiche choisie dans', { ctrl: ['tableau'] }], 'Number',
+    COULEUR_BASE, 'Le numéro (dans la base) de la fiche sur laquelle on a cliqué dans le tableau, ou 0 si aucune ligne n\'est choisie.');
+
+  // Après un changement des champs d'une base dans l'éditeur.
+  window.BlocStudioBases = {
+    rafraichir(espace) {
+      for (const b of espace.getBlocksByType('bs_base_ajouter', false)) b.majChamps(champsDeBase(b.getFieldValue('CTRL')));
+    }
+  };
 
   // ---------- Menus ----------
 
@@ -1274,6 +1423,28 @@
   gen.forBlock['bs_sprite_arreter'] = b => `app.sprite(${id(b)}, 'arreter');\n`;
   gen.forBlock['bs_sprite_regarder'] = b => `app.sprite(${id(b)}, 'regarder', ${q(b.getFieldValue('SENS'))});\n`;
   gen.forBlock['bs_sprite_tourner'] = b => `app.sprite(${id(b)}, 'tourner', ${val(b, 'DEG', '15')});\n`;
+  const champBase = b => q(b.getFieldValue('CHAMP'));
+  gen.forBlock['bs_base_ajouter'] = b => {
+    const valeurs = b.champs.map((nom, i) => `${JSON.stringify(nom)}: ${val(b, 'V' + i, "''")}`);
+    return `app.base(${id(b)}, 'ajouter', { ${valeurs.join(', ')} });\n`;
+  };
+  gen.forBlock['bs_base_modifier'] = b => `app.base(${id(b)}, 'modifier', ${val(b, 'N', '1')}, ${champBase(b)}, ${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_base_supprimer'] = b => `app.base(${id(b)}, 'supprimer', ${val(b, 'N', '1')});\n`;
+  gen.forBlock['bs_base_vider'] = b => `app.base(${id(b)}, 'vider');\n`;
+  gen.forBlock['bs_base_trier'] = b => `app.base(${id(b)}, 'trier', ${champBase(b)}, ${q(b.getFieldValue('SENS'))});\n`;
+  gen.forBlock['bs_base_afficher'] = b =>
+    `app.base(${id(b)}, 'afficher', ${codeCtrl(b.getFieldValue('TAB'))}, ${val(b, 'NUMS', 'null')});\n`;
+  gen.forBlock['bs_base_remplir'] = b => `app.base(${id(b)}, 'csv', ${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_base_champ'] = b =>
+    [`app.lireBase(${id(b)}, 'champ', ${val(b, 'N', '1')}, ${champBase(b)})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_base_nombre'] = b => [`app.lireBase(${id(b)}, 'nombre')`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_base_chercher'] = b =>
+    [`app.lireBase(${id(b)}, 'chercher', ${champBase(b)}, ${q(b.getFieldValue('OP'))}, ${val(b, 'VAL', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_base_premiere'] = b =>
+    [`app.lireBase(${id(b)}, 'premiere', ${champBase(b)}, ${q(b.getFieldValue('OP'))}, ${val(b, 'VAL', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_base_colonne'] = b => [`app.lireBase(${id(b)}, 'colonne', ${champBase(b)})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_base_csv'] = b => [`app.lireBase(${id(b)}, 'csv')`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_base_choisie'] = b => [`app.lireBase(${id(b)}, 'choisie')`, Order.FUNCTION_CALL];
   gen.forBlock['bs_sprite_taille'] = b => `app.ecrire(${id(b)}, 'taille', ${val(b, 'VAL', '100')});\n`;
   gen.forBlock['bs_sprite_grandir'] = b => `app.sprite(${id(b)}, 'grandir', ${val(b, 'VAL', '10')});\n`;
   gen.forBlock['bs_sprite_transparence'] = b => `app.ecrire(${id(b)}, 'transparence', ${val(b, 'VAL', '0')});\n`;
@@ -1601,6 +1772,29 @@
           { kind: 'label', text: 'Fichiers' },
           { kind: 'block', type: 'bs_fichier_enregistrer', inputs: { VAL: texte('Bonjour !'), NOM: texte('mon fichier.txt') } },
           { kind: 'block', type: 'bs_fichier_ouvrir' }
+        ]
+      },
+      {
+        kind: 'category', name: 'Base de données', colour: COULEUR_BASE, contents: [
+          { kind: 'label', text: 'Ajouter et montrer' },
+          { kind: 'block', type: 'bs_base_ajouter' },
+          { kind: 'block', type: 'bs_base_afficher' },
+          { kind: 'label', text: 'Chercher' },
+          { kind: 'block', type: 'bs_base_chercher', inputs: { VAL: texte('') } },
+          { kind: 'block', type: 'bs_base_premiere', inputs: { VAL: texte('') } },
+          { kind: 'block', type: 'bs_base_choisie' },
+          { kind: 'label', text: 'Lire et modifier une fiche' },
+          { kind: 'block', type: 'bs_base_champ', inputs: { N: nombre(1) } },
+          { kind: 'block', type: 'bs_base_modifier', inputs: { N: nombre(1), VAL: texte('') } },
+          { kind: 'block', type: 'bs_base_supprimer', inputs: { N: { block: { type: 'bs_base_choisie' } } } },
+          { kind: 'label', text: 'Toute la base' },
+          { kind: 'block', type: 'bs_base_nombre' },
+          { kind: 'block', type: 'bs_base_trier' },
+          { kind: 'block', type: 'bs_base_colonne' },
+          { kind: 'block', type: 'bs_base_vider' },
+          { kind: 'label', text: 'Fichiers (CSV, lisible par Excel)' },
+          { kind: 'block', type: 'bs_base_csv' },
+          { kind: 'block', type: 'bs_base_remplir' }
         ]
       },
       {
