@@ -47,6 +47,8 @@
     zonetexte: ['texte', 'motDePasse', 'texteInvite', 'lectureSeule', 'longueurMax', ...TEXTE, 'alignement', 'active', ...POSITION],
     arborescence: ['texte', 'chemin', 'elements', ...TEXTE, ...POSITION],
     barreetat: ['texte', ...TEXTE, 'visible'],
+    barreoutils: ['couleurTexte', 'couleurFond', 'taillePolice', 'visible'],
+    menucontextuel: [],
     casecocher: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
     image: ['image', 'ajustement', 'bordure', 'couleurFond', ...POSITION, 'direction'],
     listederoulante: ['texte', 'numero', 'elements', 'trie', ...TEXTE, 'active', ...POSITION],
@@ -947,6 +949,67 @@
     'le menu', { champ: new ChampMenu(), nom: 'MENU' }
   ], COULEUR_CONTROLES, 'Un menu désactivé est grisé : on ne peut plus le choisir.');
 
+  // ---------- Menus contextuels et barres d'outils ----------
+
+  // Les éléments d'un menu contextuel ou les boutons d'une barre d'outils, selon le contrôle choisi dans le bloc.
+  class ChampElementDe extends Blockly.FieldDropdown {
+    constructor(lireElements) {
+      super(function () {
+        const bloc = this.getSourceBlock();
+        const c = bloc && BlocStudio.controles().find(x => x.id === bloc.getFieldValue('CTRL'));
+        const options = c ? lireElements(c).map(e => [e, e]) : [];
+        const v = this.getValue();
+        if (v && !options.some(o => o[1] === v)) options.push([v, v]);
+        if (!options.length) options.push(['(aucun élément)', '']);
+        return options;
+      });
+    }
+    doClassValidation_(v) {
+      return typeof v === 'string' ? v : null;
+    }
+    doValueUpdate_(v) {
+      this.generatedOptions = null;
+      super.doValueUpdate_(v);
+    }
+  }
+  const ELEMENT_MENU = () => ({ champ: new ChampElementDe(c => BlocRuntime.elementsMenuContextuel(c.menu)), nom: 'ITEM' });
+  const BOUTON_OUTIL = () => ({ champ: new ChampElementDe(c => BlocRuntime.elementsBarreOutils(c.boutons)), nom: 'ITEM' });
+  const MENU_CTX = { ctrl: ['menucontextuel'] };
+  const OUTILS = { ctrl: ['barreoutils'] };
+
+  // Bloc « quand… » avec un contrôle (CTRL) et un de ses éléments (ITEM).
+  function chapeauElement(avant, champElement, entre, types, tooltip) {
+    return {
+      init() {
+        this.appendDummyInput()
+          .appendField(avant).appendField(champElement().champ, 'ITEM')
+          .appendField(entre).appendField(new Blockly.FieldDropdown(optionsControles(types)), 'CTRL');
+        this.appendStatementInput('DO');
+        this.setColour(COULEUR_EVENEMENTS);
+        this.hat = 'cap';
+        this.setTooltip(tooltip);
+      }
+    };
+  }
+
+  Blockly.Blocks['bs_quand_menu_contextuel'] = chapeauElement('quand on choisit', ELEMENT_MENU, 'dans', ['menucontextuel'],
+    'Exécuté quand on choisit cet élément dans le menu qui s\'ouvre au clic droit. « nom du contrôle où … a été ouvert » dit sur quel contrôle on avait cliqué.');
+  Blockly.Blocks['bs_menu_contextuel_source'] = valeur(() => ['nom du contrôle où', MENU_CTX, 'a été ouvert'], 'String', COULEUR_CONTROLES,
+    'Le nom du contrôle sur lequel on a fait le clic droit (ou celui de la fenêtre). Utile quand plusieurs contrôles partagent le même menu.');
+  Blockly.Blocks['bs_menu_contextuel_actif'] = instruction(() => [
+    { champ: new Blockly.FieldDropdown([['activer', 'TRUE'], ['désactiver', 'FALSE']]), nom: 'ACTIF' },
+    'l\'élément', ELEMENT_MENU(), 'de', MENU_CTX
+  ], COULEUR_CONTROLES, 'Un élément désactivé est grisé : on ne peut plus le choisir.');
+  Blockly.Blocks['bs_menu_contextuel_montrer'] = instruction(() => ['montrer le menu', MENU_CTX, 'à la souris'], COULEUR_CONTROLES,
+    'Ouvre le menu là où se trouve la souris, sans clic droit : par exemple quand on clique sur un bouton « ⋯ ».');
+
+  Blockly.Blocks['bs_quand_outil'] = chapeauElement('quand on clique sur', BOUTON_OUTIL, 'dans', ['barreoutils'],
+    'Exécuté quand on clique sur ce bouton de la barre d\'outils.');
+  Blockly.Blocks['bs_outil_actif'] = instruction(() => [
+    { champ: new Blockly.FieldDropdown([['activer', 'TRUE'], ['désactiver', 'FALSE']]), nom: 'ACTIF' },
+    'le bouton', BOUTON_OUTIL(), 'de', OUTILS
+  ], COULEUR_CONTROLES, 'Un bouton désactivé est grisé : on ne peut plus cliquer dessus.');
+
   // ---------- Messages (comme dans Scratch) ----------
 
   // Propose les messages déjà utilisés dans le code, plus « Nouveau message… ».
@@ -1511,6 +1574,17 @@
   gen.forBlock['bs_menu_actif'] = b =>
     `app.activerMenu(${q(b.getFieldValue('MENU'))}, ${b.getFieldValue('ACTIF') === 'TRUE'});\n`;
 
+  const item = b => q(b.getFieldValue('ITEM'));
+  gen.forBlock['bs_quand_menu_contextuel'] = b =>
+    `app.quandMenuContextuel(${id(b)}, ${item(b)}, async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_menu_contextuel_source'] = b => [`app.sourceMenuContextuel(${id(b)})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_menu_contextuel_actif'] = b =>
+    `app.activerMenuContextuel(${id(b)}, ${item(b)}, ${b.getFieldValue('ACTIF') === 'TRUE'});\n`;
+  gen.forBlock['bs_menu_contextuel_montrer'] = b => `app.montrerMenuContextuel(${id(b)});\n`;
+  gen.forBlock['bs_quand_outil'] = b =>
+    `app.quandOutil(${id(b)}, ${item(b)}, async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_outil_actif'] = b => `app.activerOutil(${id(b)}, ${item(b)}, ${b.getFieldValue('ACTIF') === 'TRUE'});\n`;
+
   gen.forBlock['bs_quand_message'] = b =>
     `app.quandMessage(${q(b.getFieldValue('MSG'))}, async function (moi) {\n${corps(b)}});\n`;
   gen.forBlock['bs_envoyer_message'] = b => (b.getFieldValue('ATTENDRE') === 'oui' ? 'await ' : '') +
@@ -2004,6 +2078,9 @@
     if (t === 'son' || t === 'video') evenements.push(b('bs_quand_son_fin'));
     if (t === 'minuteur') evenements.push(b('bs_quand_minuteur'));
     if (t === 'fichier') evenements.push(b('bs_quand_fichier_depose'));
+    // Un bloc « quand… » tout prêt pour chaque élément du menu ou bouton de la barre.
+    if (t === 'menucontextuel') BlocRuntime.elementsMenuContextuel(c.menu).forEach(e => evenements.push(b('bs_quand_menu_contextuel', null, { ITEM: e })));
+    if (t === 'barreoutils') BlocRuntime.elementsBarreOutils(c.boutons).forEach(e => evenements.push(b('bs_quand_outil', null, { ITEM: e })));
     if (visible) evenements.push(b('bs_quand_clic'), b('bs_quand_souris_ctrl'));
     if (CLONABLES.includes(t)) evenements.push(b('bs_quand_clone'));
 
@@ -2134,6 +2211,15 @@
     }
 
     if (FOCUSABLES.includes(t)) actions.push(b('bs_focus'));
+    if (t === 'menucontextuel') {
+      const premier = BlocRuntime.elementsMenuContextuel(c.menu)[0] || '';
+      actions.push(b('bs_menu_contextuel_source'), b('bs_menu_contextuel_montrer'),
+        b('bs_menu_contextuel_actif', null, { ITEM: premier, ACTIF: 'FALSE' }), b('bs_menu_contextuel_actif', null, { ITEM: premier }));
+    }
+    if (t === 'barreoutils') {
+      const premier = BlocRuntime.elementsBarreOutils(c.boutons)[0] || '';
+      actions.push(b('bs_outil_actif', null, { ITEM: premier, ACTIF: 'FALSE' }), b('bs_outil_actif', null, { ITEM: premier }));
+    }
 
     // Propriétés : « … de Bouton1 » et « mettre … de Bouton1 à … », pour chacune.
     const proprietes = [];

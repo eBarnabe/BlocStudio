@@ -526,44 +526,64 @@
     },
     {
       titre: '📝 Bloc-notes',
-      description: 'Un petit traitement de texte : menus Fichier › Nouveau, Ouvrir…, Enregistrer…, et glisser-déposer d\'un fichier. On peut agrandir la fenêtre : le texte suit (ancrage).',
+      description: 'Un petit traitement de texte : menus Fichier, barre d\'outils, menu au clic droit sur le texte, glisser-déposer d\'un fichier. On peut agrandir la fenêtre : le texte suit (ancrage).',
       creer: () => {
-        // c1 Texte · c2 Etat (barre d'état) · c3 FichierTexte (contrôle Fichier, invisible)
+        // c1 Texte · c2 Etat · c3 FichierTexte (contrôle Fichier, invisible)
+        // c4 Outils (barre d'outils) · c5 MenuTexte (menu contextuel du texte, invisible)
+        // Menus et barre d'outils font la même chose : ils envoient un message, et le travail est fait une seule fois.
         const etat = x => ecrire('c2', 'texte', x);
         const annule = () => bloc('bs_fichier_annule', 'c3');
         const nomFichier = () => bloc('bs_fichier_nom', 'c3');
+        const envoyer = m => bloc('bs_envoyer_message', null, null, { MSG: m, ATTENDRE: 'non' });
+        const quandMessage = (m, blocs) => Object.assign(evt('bs_quand_message', null, blocs), { fields: { MSG: m } });
+        const quandOutil = (bouton, blocs) => Object.assign(evt('bs_quand_outil', 'c4', blocs), { fields: { CTRL: 'c4', ITEM: bouton } });
+        const quandMenuTexte = (element, blocs) => Object.assign(evt('bs_quand_menu_contextuel', 'c5', blocs), { fields: { CTRL: 'c5', ITEM: element } });
+        const casse = c => ({ type: 'text_changeCase', fields: { CASE: c }, inputs: { TEXT: I(lire('texte', 'c1')) } });
         return projet(
           {
             titre: 'Bloc-notes', largeur: 520, hauteur: 380, couleurFond: '#f1f5f9', menus: 'Fichier\n  Nouveau\n  Ouvrir…\n  Enregistrer…',
             redimensionnable: true, agrandir: true, largeurMin: 300, hauteurMin: 200
           },
           [
-            // Le texte s'étire avec la fenêtre ; la ligne d'état reste collée en bas.
-            { type: 'zonetexte', nom: 'Texte', multiligne: true, ancrage: 'hbgd', x: 10, y: 10, largeur: 500, hauteur: 312, taillePolice: 15,
-              couleurFond: '#ffffff', texte: 'Écrivez ici, puis Fichier › Enregistrer…\n\nAstuce : faites glisser un fichier texte sur la fenêtre pour l\'ouvrir.' },
+            // Le texte s'étire avec la fenêtre ; la ligne d'état reste collée en bas. Clic droit : son menu (MenuTexte).
+            { type: 'zonetexte', nom: 'Texte', multiligne: true, ancrage: 'hbgd', menuContextuel: 'c5', x: 10, y: 44, largeur: 500, hauteur: 278, taillePolice: 15,
+              couleurFond: '#ffffff', texte: 'Écrivez ici, puis 💾 Enregistrer.\n\nAstuces : faites un clic droit sur le texte, ou glissez un fichier texte sur la fenêtre pour l\'ouvrir.' },
             { type: 'etiquette', nom: 'Etat', ancrage: 'bgd', texte: '📄 Nouveau document', x: 10, y: 330, largeur: 500, hauteur: 22, taillePolice: 13, couleurTexte: '#475569' },
-            { type: 'fichier', nom: 'FichierTexte', typeFichier: 'texte', nomPropose: 'mes notes.txt', largeur: 0, hauteur: 0 }
+            { type: 'fichier', nom: 'FichierTexte', typeFichier: 'texte', nomPropose: 'mes notes.txt', largeur: 0, hauteur: 0 },
+            { type: 'barreoutils', nom: 'Outils', boutons: '📄 Nouveau\n📂 Ouvrir\n💾 Enregistrer', x: 0, y: 0, largeur: 520, hauteur: 34, taillePolice: 13 },
+            { type: 'menucontextuel', nom: 'MenuTexte', menu: '🔠 MAJUSCULES\n🔡 minuscules\n-\n🧹 Tout effacer', largeur: 0, hauteur: 0 }
           ],
           [],
           () => [
-            evtMenu('Fichier › Nouveau', [
+            evtMenu('Fichier › Nouveau', [envoyer('nouveau')]),
+            evtMenu('Fichier › Ouvrir…', [envoyer('ouvrir')]),
+            evtMenu('Fichier › Enregistrer…', [envoyer('enregistrer')]),
+            quandOutil('📄 Nouveau', [envoyer('nouveau')]),
+            quandOutil('📂 Ouvrir', [envoyer('ouvrir')]),
+            quandOutil('💾 Enregistrer', [envoyer('enregistrer')]),
+            quandMessage('nouveau', [
               si(confirmer('Effacer le texte pour commencer un nouveau document ?'), [
                 ecrire('c1', 'texte', t('')),
                 etat(t('📄 Nouveau document'))
               ])
             ]),
-            evtMenu('Fichier › Ouvrir…', [
+            quandMessage('ouvrir', [
               bloc('bs_fichier_ouvrir_avec', 'c3'),
               si(non(annule()), [
                 ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),
                 etat(joindre(t('📄 '), nomFichier()))
               ])
             ]),
-            evtMenu('Fichier › Enregistrer…', [
+            quandMessage('enregistrer', [
               { type: 'bs_fichier_enregistrer_avec', fields: { CTRL: 'c3' }, inputs: { VAL: I(lire('texte', 'c1')) } },
               si(annule(),
                 [etat(t('Enregistrement annulé.'))],
                 [etat(joindre(t('💾 Enregistré : '), nomFichier()))])
+            ]),
+            quandMenuTexte('🔠 MAJUSCULES', [ecrire('c1', 'texte', casse('UPPERCASE'))]),
+            quandMenuTexte('🔡 minuscules', [ecrire('c1', 'texte', casse('LOWERCASE'))]),
+            quandMenuTexte('🧹 Tout effacer', [
+              si(confirmer('Effacer tout le texte ?'), [ecrire('c1', 'texte', t(''))])
             ]),
             evt('bs_quand_fichier_depose', 'c3', [
               ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),

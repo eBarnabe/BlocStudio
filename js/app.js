@@ -49,6 +49,9 @@
       defauts: { arbre: 'Animaux\n  Chats\n  Chiens\nPlantes\n  Fleurs\n  Arbres', deplie: true } },
     // Toujours collée en bas de sa fenêtre, sur toute la largeur (voir amarrerBarresEtat).
     barreetat: { prefixe: 'BarreEtat', texte: 'Prêt|', largeur: 300, hauteur: 24, defauts: { taillePolice: 12 } },
+    // Toujours collée en haut de sa fenêtre (sous les menus), sur toute la largeur.
+    barreoutils: { prefixe: 'BarreOutils', texte: '', largeur: 300, hauteur: 34,
+      defauts: { boutons: '📄 Nouveau\n📂 Ouvrir\n💾 Enregistrer\n-\n✂️ Couper\n📋 Copier\n📌 Coller', iconesSeules: false, taillePolice: 13 } },
     // Contrôles invisibles : ils n'ont ni position ni taille à l'écran.
     son: { prefixe: 'Son', texte: '', largeur: 0, hauteur: 0,
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
@@ -56,6 +59,8 @@
       defauts: { intervalle: 1, active: true } },
     fichier: { prefixe: 'Fichier', texte: '', largeur: 0, hauteur: 0,
       defauts: { typeFichier: 'texte', nomPropose: 'mon fichier.txt' } },
+    menucontextuel: { prefixe: 'MenuContextuel', texte: '', largeur: 0, hauteur: 0,
+      defauts: { menu: 'Copier\nColler\n-\nSupprimer' } },
     basedonnees: { prefixe: 'Base', texte: '', largeur: 0, hauteur: 0,
       defauts: { champs: ['Nom', 'Prénom', 'Téléphone'], fiches: [], memoriser: true } }
   };
@@ -67,7 +72,7 @@
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
   const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'onglets', 'listederoulante',
-    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'arborescence', 'barreetat'];
+    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'arborescence', 'barreetat', 'barreoutils'];
 
   // Contrôles dont on peut aligner le texte (à gauche, au centre, à droite).
   const ALIGNABLES = ['bouton', 'etiquette', 'zonetexte', 'lien'];
@@ -82,7 +87,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', barreoutils: 'Barre d\'outils', menucontextuel: 'Menu contextuel', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -275,13 +280,15 @@
     Blockly.common.setSelected(bloc);
   }
 
-  // Une barre d'état occupe le bas de sa fenêtre, sur toute la largeur (même si la fenêtre change de taille).
+  // Une barre d'état occupe le bas de sa fenêtre, une barre d'outils le haut, sur toute la largeur
+  // (même si la fenêtre change de taille).
+  const AMARRES = ['barreetat', 'barreoutils'];
   function amarrerBarresEtat() {
     for (const c of projet.controles) {
-      if (c.type !== 'barreetat') continue;
+      if (!AMARRES.includes(c.type)) continue;
       const f = (c.fenetre && projet.fenetres.find(x => x.id === c.fenetre)) || projet.fenetre;
       c.x = 0;
-      c.y = Math.max(0, f.hauteur - c.hauteur);
+      c.y = c.type === 'barreoutils' ? 0 : Math.max(0, f.hauteur - c.hauteur);
       c.largeur = f.largeur;
     }
   }
@@ -322,7 +329,7 @@
       if (e.button !== 0) return;
       if (e.ctrlKey || e.shiftKey) { selectionner(c.id, true); return; }
       if (c.type === 'onglets') cliquerTitreOnglets(e, w, c);
-      if (c.type === 'barreetat') { selectionner(c.id); return; } // elle reste collée en bas
+      if (AMARRES.includes(c.type)) { selectionner(c.id); return; } // elle reste collée en bas (ou en haut)
       const dejaChoisi = choisis.has(c.id);
       if (!dejaChoisi) selectionner(c.id);
       deplacerOuRedimensionner(e, w, c, e.target === poignee && choisis.size === 1, dejaChoisi);
@@ -444,6 +451,8 @@
           ? `${(c.champs || []).length} champ(s), ${(c.fiches || []).length} fiche(s) au départ`
         : c.type === 'fichier'
           ? (TYPES_FICHIER_EDITEUR[c.typeFichier] || TYPES_FICHIER_EDITEUR.tous).split(' ')[0]
+        : c.type === 'menucontextuel'
+          ? `${BlocRuntime.elementsMenuContextuel(c.menu).length} élément(s), sur ${utilisateursMenu(c).length || 'aucun'} contrôle(s)`
           : (projet.sons.find(s => s.id === c.son)?.nom || 'aucun son');
       puce.appendChild(detail);
       puce.addEventListener('pointerdown', e => {
@@ -610,7 +619,7 @@
     // Un nouveau contrôle Sprite affiche d'emblée le premier sprite de la bibliothèque.
     if (type === 'sprite' && projet.sprites.length) donnerSprite(c, projet.sprites[0]);
     projet.controles.push(c);
-    if (type === 'barreetat') amarrerBarresEtat();
+    if (AMARRES.includes(type)) amarrerBarresEtat();
     rattacherAuxOnglets([c]);
     if (estInvisible(c)) afficherInvisibles();
     else $('surface-design').appendChild(creerControleDesign(c));
@@ -967,10 +976,18 @@
       : c.type === 'son' || c.type === 'video' ? 'bs_quand_son_fin'
       : c.type === 'minuteur' ? 'bs_quand_minuteur'
       : c.type === 'fichier' ? 'bs_quand_fichier_depose'
-      : c.type === 'camera' ? 'bs_quand_camera_mouvement' : 'bs_quand_clic';
+      : c.type === 'camera' ? 'bs_quand_camera_mouvement'
+      : c.type === 'menucontextuel' ? 'bs_quand_menu_contextuel'
+      : c.type === 'barreoutils' ? 'bs_quand_outil' : 'bs_quand_clic';
     afficherVue('vue-code');
     let bloc = workspace.getBlocksByType(type, false).find(b => b.getFieldValue('CTRL') === c.id);
-    if (!bloc) bloc = nouveauBlocEnBas(type, 'CTRL', c.id);
+    if (!bloc) {
+      bloc = nouveauBlocEnBas(type, 'CTRL', c.id);
+      // Menu contextuel, barre d'outils : le premier élément est déjà choisi.
+      const elements = c.type === 'menucontextuel' ? BlocRuntime.elementsMenuContextuel(c.menu)
+        : c.type === 'barreoutils' ? BlocRuntime.elementsBarreOutils(c.boutons) : [];
+      if (elements.length) bloc.setFieldValue(elements[0], 'ITEM');
+    }
     workspace.centerOnBlock(bloc.id);
     Blockly.common.setSelected(bloc);
   }
@@ -1024,6 +1041,7 @@
       ]);
       champCouleur(liste, 'Couleur de fond', f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
       champsRedimensionnement(liste, f, true);
+      champMenuContextuel(liste, f);
       champTexte(liste, "Menus — un par ligne ; leurs éléments en dessous, décalés d'un espace ; « - » pour un trait",
         f.menus, v => { f.menus = v; blocsAPerimes = true; afficherConcepteur(); }, true,
         'Fichier\n  Nouveau\n  -\n  Quitter\nAide\n  À propos');
@@ -1054,6 +1072,15 @@
     if (c.type === 'minuteur') return proprietesMinuteur(liste, c, maj);
     if (c.type === 'basedonnees') return proprietesBase(liste, c, maj);
     if (c.type === 'fichier') return proprietesFichier(liste, c, maj);
+    if (c.type === 'menucontextuel') return proprietesMenuContextuel(liste, c, maj);
+    if (c.type === 'barreoutils') {
+      champTexte(liste, 'Boutons — un par ligne, en commençant par un emoji pour l\'icône ; « - » pour un trait',
+        c.boutons || '', v => { c.boutons = v; blocsAPerimes = true; maj(); }, true, '📄 Nouveau\n💾 Enregistrer\n-\n✂️ Couper');
+      champCase(liste, 'Icônes seules (le texte s\'affiche quand la souris passe dessus)', c.iconesSeules, v => { c.iconesSeules = v; maj(); });
+      liste.appendChild(el('p', 'aide',
+        'Toujours collée en haut de la fenêtre. Double-cliquez dessus pour écrire ce que fait un bouton ; ' +
+        'ses blocs (bouton 🧰 ci-dessus) ont un « quand on clique sur … » tout prêt pour chaque bouton.'));
+    }
     if (['bouton', 'etiquette', 'zonetexte', 'casecocher', 'boutonradio', 'cadre', 'interrupteur', 'lien'].includes(c.type)) {
       const multiligne = c.type === 'etiquette' || (c.type === 'zonetexte' && c.multiligne);
       champTexte(liste, c.type === 'cadre' ? 'Titre' : 'Texte', c.texte, v => { c.texte = v; maj(); }, multiligne);
@@ -1217,7 +1244,8 @@
       v => { c.infobulle = v; maj(); }, false, 'Cliquez ici pour…');
     champCase(liste, 'Visible au démarrage', c.visible !== false, v => { c.visible = v; maj(); });
     champCase(liste, 'Déplaçable à la souris (pendant le programme)', c.deplacable, v => { c.deplacable = v; maj(); });
-    if (c.type !== 'barreetat') champAncrage(liste, c.ancrage, v => { c.ancrage = v; });
+    if (!AMARRES.includes(c.type)) champAncrage(liste, c.ancrage, v => { c.ancrage = v; });
+    champMenuContextuel(liste, c);
   }
 
   function proprietesPlusieurs(liste, ctrls) {
@@ -1261,7 +1289,7 @@
     if (visibles.length) {
       champCouleur(liste, 'Couleur de fond', visibles[0].couleurFond, v => pourTous(visibles, c => { c.couleurFond = v; }));
       champCase(liste, 'Visibles au démarrage', visibles.every(c => c.visible !== false), v => pourTous(visibles, c => { c.visible = v; }));
-      const ancres = visibles.filter(c => c.type !== 'barreetat');
+      const ancres = visibles.filter(c => !AMARRES.includes(c.type));
       if (ancres.length) champAncrage(liste, ancres[0].ancrage, v => ancres.forEach(c => { c.ancrage = v; }));
     }
     liste.appendChild(el('p', 'aide',
@@ -1359,6 +1387,7 @@
     avertir();
     champCouleur(liste, 'Couleur de fond', f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
     champsRedimensionnement(liste, f, false);
+    champMenuContextuel(liste, f);
     liste.appendChild(el('p', 'aide',
       'Cette fenêtre s\'ouvre par-dessus la fenêtre principale avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 ' + f.nom + ' »). ' +
       'Double-cliquez sur son onglet pour écrire ce qui se passe quand elle s\'ouvre.'));
@@ -1437,6 +1466,36 @@
   const TYPES_FICHIER_EDITEUR = {
     texte: 'Texte (.txt)', csv: 'Tableur (.csv, lisible par Excel)', image: 'Image (PNG, JPG, GIF…)', tous: 'Tous les fichiers'
   };
+
+  // Menu qui s'ouvre au clic droit sur ce contrôle (ou sur le fond de cette fenêtre).
+  function champMenuContextuel(liste, objet) {
+    const menus = projet.controles.filter(m => m.type === 'menucontextuel');
+    if (!menus.length) return;
+    const d = prop(liste, 'Menu contextuel (au clic droit)');
+    const choix = document.createElement('select');
+    choix.add(new Option('(aucun)', ''));
+    menus.forEach(m => choix.add(new Option('🖱️ ' + m.nom, m.id)));
+    choix.value = menus.some(m => m.id === objet.menuContextuel) ? objet.menuContextuel : '';
+    choix.addEventListener('change', () => {
+      if (choix.value) objet.menuContextuel = choix.value; else delete objet.menuContextuel;
+      afficherInvisibles();
+      planifierSauvegarde();
+    });
+    d.appendChild(choix);
+  }
+
+  // Contrôles (et fenêtres) qui ouvrent ce menu contextuel.
+  const utilisateursMenu = m => [projet.fenetre, ...projet.fenetres, ...projet.controles].filter(o => o.menuContextuel === m.id);
+
+  function proprietesMenuContextuel(liste, c, maj) {
+    champTexte(liste, 'Éléments du menu — un par ligne ; « - » pour un trait', c.menu || '',
+      v => { c.menu = v; blocsAPerimes = true; maj(); afficherInvisibles(); }, true, 'Copier\nColler\n-\nSupprimer');
+    const qui = utilisateursMenu(c).map(o => o === projet.fenetre ? 'la fenêtre principale' : o.nom);
+    liste.appendChild(el('p', 'aide',
+      (qui.length ? `Il s'ouvre au clic droit sur : ${qui.join(', ')}. ` : 'Il ne s\'ouvre encore nulle part. ') +
+      'Pour qu\'un contrôle (ou une fenêtre) l\'ouvre au clic droit, choisissez ce menu dans sa propriété « Menu contextuel ». ' +
+      'Double-cliquez sur le menu pour écrire ce que fait un élément ; ses blocs (bouton 🧰 ci-dessus) en ont un tout prêt pour chaque élément.'));
+  }
 
   function proprietesFichier(liste, c, maj) {
     const d = prop(liste, 'Type de fichier proposé');
@@ -2485,7 +2544,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',
@@ -2521,6 +2580,8 @@
       case 'bs_quand_touche': return `quand la touche ${r.getField('TOUCHE').getText()} est appuyée`;
       case 'bs_toutes_les': return 'toutes les … secondes';
       case 'bs_quand_menu': return `quand on choisit le menu ${r.getFieldValue('MENU')}`;
+      case 'bs_quand_menu_contextuel': return `quand on choisit ${r.getFieldValue('ITEM')} dans ${ctrl()}`;
+      case 'bs_quand_outil': return `quand on clique sur ${r.getFieldValue('ITEM')} dans ${ctrl()}`;
       case 'bs_quand_message': return `quand je reçois ${r.getFieldValue('MSG')}`;
       case 'procedures_defnoreturn':
       case 'procedures_defreturn': return `fonction ${r.getFieldValue('NAME')}`;
@@ -2533,7 +2594,7 @@
   let empreinteBoite = '';
   function empreinteDuProjet() {
     return JSON.stringify([projet.fenetre.menus, projet.fenetres.map(f => [f.id, f.nom, f.titre]),
-      projet.controles.map(c => [c.id, c.nom, c.type, c.fenetre, c.groupe, c.champs])]);
+      projet.controles.map(c => [c.id, c.nom, c.type, c.fenetre, c.groupe, c.champs, c.menu, c.boutons])]);
   }
   function majBoite() {
     const e = empreinteDuProjet();

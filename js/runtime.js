@@ -101,6 +101,18 @@ function BlocRuntimeFactory() {
     .bs-menu-item:hover { background: #4f46e5; color: #fff; }
     .bs-menu-sep { height: 1px; margin: 4px 0; background: #e2e5ea; }
     .bs-inactif { color: #9ca3af; pointer-events: none; }
+    .bs-menu-contextuel { position: fixed; z-index: 100000; min-width: 170px; padding: 4px 0; background: #fff;
+      border: 1px solid #cbd5e1; border-radius: 4px; box-shadow: 0 8px 20px rgba(0,0,0,.18);
+      font: 13px "Segoe UI", system-ui, sans-serif; color: #1f2937; user-select: none; animation: bs-fondu .1s ease-out; }
+    .bs-barreoutils { display: flex; align-items: center; gap: 2px; padding: 0 4px; background: #f8fafc;
+      border-bottom: 1px solid #e2e5ea; overflow: hidden; user-select: none; }
+    .bs-outil { display: flex; align-items: center; gap: 5px; height: calc(100% - 6px); padding: 0 8px; border: 1px solid transparent;
+      border-radius: 4px; background: transparent; font: inherit; color: inherit; cursor: pointer; white-space: nowrap; }
+    .bs-outil:hover:not(:disabled) { background: #e0e7ff; border-color: #c7d2fe; }
+    .bs-outil:active:not(:disabled) { background: #c7d2fe; }
+    .bs-outil:disabled { opacity: .4; cursor: default; }
+    .bs-outil-icone { font-size: 1.2em; line-height: 1; }
+    .bs-outil-sep { width: 1px; align-self: stretch; margin: 6px 3px; background: #cbd5e1; }
 
     .bs-dlg-voile { position: fixed; inset: 0; z-index: 5000; display: flex;
       align-items: center; justify-content: center; background: rgba(15,23,42,.35);
@@ -261,6 +273,39 @@ function BlocRuntimeFactory() {
     };
     document.addEventListener('pointerdown', ailleurs, true);
     return barre;
+  }
+
+  // ---- Menu contextuel : un élément par ligne, « - » pour un trait ----
+  function lireMenuContextuel(texte) {
+    return String(texte || '').split('\n').map(l => l.trim()).filter(l => l)
+      .map(l => l === '-' ? { separateur: true } : { cle: l });
+  }
+  const elementsMenuContextuel = texte => lireMenuContextuel(texte).filter(e => !e.separateur).map(e => e.cle);
+
+  // ---- Barre d'outils : un bouton par ligne (« 💾 Enregistrer »), « - » pour un trait ----
+  // Le premier mot sert d'icône s'il ne contient ni lettre ni chiffre (un emoji, un symbole).
+  function lireBarreOutils(texte) {
+    return String(texte || '').split('\n').map(l => l.trim()).filter(l => l).map(l => {
+      if (l === '-') return { separateur: true };
+      const m = /^(\S+)\s+(.+)$/u.exec(l);
+      return m && !/[\p{L}\p{N}]/u.test(m[1]) ? { cle: l, icone: m[1], texte: m[2] }
+        : !/[\p{L}\p{N}]/u.test(l) ? { cle: l, icone: l, texte: '' } : { cle: l, icone: '', texte: l };
+    });
+  }
+  const elementsBarreOutils = texte => lireBarreOutils(texte).filter(e => !e.separateur).map(e => e.cle);
+
+  function rendreBarreOutils(el, c) {
+    el.replaceChildren(...lireBarreOutils(c.boutons).map(o => {
+      if (o.separateur) return Object.assign(document.createElement('span'), { className: 'bs-outil-sep' });
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'bs-outil';
+      b.dataset.cle = o.cle;
+      if (o.icone) b.appendChild(Object.assign(document.createElement('span'), { className: 'bs-outil-icone', textContent: o.icone }));
+      if (o.texte && !(c.iconesSeules && o.icone)) b.appendChild(document.createTextNode(o.texte));
+      if (o.texte && c.iconesSeules && o.icone) b.title = o.texte;
+      return b;
+    }));
   }
 
   // ---- Tableaux ----
@@ -514,7 +559,7 @@ function BlocRuntimeFactory() {
 
   // Contrôles sans apparence : ils se posent dans le concepteur mais ne s'affichent
   // pas dans la fenêtre du programme (comme le Timer de Visual Basic).
-  const INVISIBLES = ['son', 'minuteur', 'basedonnees', 'fichier'];
+  const INVISIBLES = ['son', 'minuteur', 'basedonnees', 'fichier', 'menucontextuel'];
 
   // Contrôle Fichier : ce que montrent les boîtes « Ouvrir » et « Enregistrer sous ».
   const TYPES_FICHIER = {
@@ -723,6 +768,10 @@ function BlocRuntimeFactory() {
         el.playsInline = true;
         el.muted = true;
         if (c.miroir !== false) el.classList.add('bs-miroir');
+        break;
+      case 'barreoutils':
+        el = document.createElement('div');
+        rendreBarreOutils(el, c);
         break;
       case 'selecteurcouleur':
         el = document.createElement('input');
@@ -1134,7 +1183,7 @@ function BlocRuntimeFactory() {
         if (ecarts[id]) return ecarts[id];
         const p = parents[id];
         const e = p && profondeur < 20 ? ecartDe(p, profondeur + 1) : { x: 0, y: 0, l: dl, h: dh };
-        const a = donnees[id].type === 'barreetat' ? 'bgd' : String(donnees[id].ancrage ?? 'hg');
+        const a = donnees[id].type === 'barreetat' ? 'bgd' : donnees[id].type === 'barreoutils' ? 'hgd' : String(donnees[id].ancrage ?? 'hg');
         const [x, l] = suivre(a.includes('g'), a.includes('d'), e.x, e.l);
         const [y, h] = suivre(a.includes('h'), a.includes('b'), e.y, e.h);
         return (ecarts[id] = { x, y, l, h });
@@ -1231,6 +1280,7 @@ function BlocRuntimeFactory() {
         elements[c.id] = document.createElement('span');
         donnees[c.id] = Object.assign({}, c, { surEvenement: [], etat: 'arrete' });
         if (c.type === 'basedonnees') preparerBase(donnees[c.id]);
+        if (c.type === 'menucontextuel') Object.assign(donnees[c.id], { actions: {}, inactifs: new Set(), source: '' });
         continue;
       }
       const el = creerElement(c, prefixe, projet.sprites);
@@ -1242,6 +1292,13 @@ function BlocRuntimeFactory() {
       if (c.type === 'tableau') preparerTableau(el, d);
       if (c.type === 'camera') d.surEvenement = [];
       if (c.type === 'barreetat') d.cases = String(c.texte ?? '').split('|');
+      if (c.type === 'barreoutils') {
+        d.surOutil = {};
+        el.addEventListener('click', e => {
+          const b = e.target.closest('.bs-outil');
+          if (b && !b.disabled) (d.surOutil[b.dataset.cle] || []).forEach(f => f());
+        });
+      }
       if (c.type === 'arborescence') preparerArbre(el, d);
       if (c.type === 'onglets') {
         d.pages = (c.pages || []).map(enTexte);
@@ -2047,6 +2104,69 @@ function BlocRuntimeFactory() {
     ecouter(window, 'pointerup', () => { souris.enfonce = false; });
     ecouter(surface, 'click', e => { positionSouris(e); actionsSouris.clic.forEach(f => f()); });
 
+    // ---- Menus contextuels (clic droit) ----
+    let menuOuvert = null;
+    const pointeur = { x: 0, y: 0 }; // dernière position de la souris dans la page
+    ecouter(document, 'pointermove', e => { pointeur.x = e.clientX; pointeur.y = e.clientY; }, true);
+    ecouter(document, 'pointerdown', e => {
+      pointeur.x = e.clientX; pointeur.y = e.clientY;
+      if (menuOuvert && !menuOuvert.contains(e.target)) fermerMenuContextuel();
+    }, true);
+    ecouter(document, 'keydown', e => { if (e.key === 'Escape') fermerMenuContextuel(); });
+
+    function fermerMenuContextuel() {
+      if (menuOuvert) menuOuvert.remove();
+      menuOuvert = null;
+    }
+
+    // source : nom du contrôle (ou de la fenêtre) sur lequel on a cliqué.
+    function ouvrirMenuContextuel(idMenu, source, x, y) {
+      fermerMenuContextuel();
+      const m = donnees[idMenu];
+      if (!m || arrete) return;
+      m.source = source;
+      const boite = document.createElement('div');
+      boite.className = 'bs-menu-contextuel';
+      for (const it of lireMenuContextuel(m.menu)) {
+        const e = document.createElement('div');
+        if (it.separateur) e.className = 'bs-menu-sep';
+        else {
+          e.className = 'bs-menu-item' + (m.inactifs.has(it.cle) ? ' bs-inactif' : '');
+          e.textContent = it.cle;
+          e.addEventListener('click', () => { fermerMenuContextuel(); (m.actions[it.cle] || []).forEach(f => f()); });
+        }
+        boite.appendChild(e);
+      }
+      boite.addEventListener('contextmenu', e => e.preventDefault());
+      document.body.appendChild(boite);
+      // Le menu reste dans la page : il s'ouvre vers la gauche ou vers le haut s'il le faut.
+      const r = boite.getBoundingClientRect();
+      boite.style.left = Math.max(0, x + r.width > innerWidth ? x - r.width : x) + 'px';
+      boite.style.top = Math.max(0, y + r.height > innerHeight ? y - r.height : y) + 'px';
+      menuOuvert = boite;
+    }
+
+    // Le clic droit sur ce contrôle ouvre son menu contextuel (propriété « menuContextuel »).
+    function brancherMenuContextuel(id) {
+      const d = donnees[id];
+      if (!d.menuContextuel || INVISIBLES.includes(d.type)) return;
+      ecouter(elements[id], 'contextmenu', e => {
+        if (!donnees[d.menuContextuel]) return;
+        e.preventDefault();
+        e.stopPropagation();
+        ouvrirMenuContextuel(d.menuContextuel, d.nom, e.clientX, e.clientY);
+      });
+    }
+    // Clic droit sur le fond d'une fenêtre : son propre menu contextuel.
+    function brancherMenuFenetre(def, s, nom) {
+      if (!def.menuContextuel) return;
+      ecouter(s, 'contextmenu', e => {
+        if (e.target !== s || !donnees[def.menuContextuel]) return;
+        e.preventDefault();
+        ouvrirMenuContextuel(def.menuContextuel, nom, e.clientX, e.clientY);
+      });
+    }
+
     // Un événement très fréquent (souris qui bouge) n'est pas relancé tant que le précédent n'est pas fini.
     function sansEmpiler(h) {
       let occupe = false;
@@ -2163,6 +2283,7 @@ function BlocRuntimeFactory() {
         if (source.animation && source.animation.mode === 'boucle') animerSprite(d, 'boucle');
       }
       rendreDeplacable(cid);
+      brancherMenuContextuel(cid);
       for (const { evenement, h } of evenementsCtrl[original] || []) brancher(cid, evenement, h);
       for (const h of actionsClones[original] || []) h(cid);
       return cid;
@@ -3257,6 +3378,35 @@ function BlocRuntimeFactory() {
           if (e.dataset.chemin === chemin) e.classList.toggle('bs-inactif', !actif);
         });
       },
+      quandMenuContextuel(id, cle, fn) {
+        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        const m = donnees[id];
+        (m.actions[cle] = m.actions[cle] || []).push(proteger(fn));
+      },
+      activerMenuContextuel(id, cle, actif) {
+        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        if (actif) donnees[id].inactifs.delete(cle); else donnees[id].inactifs.add(cle);
+      },
+      // Nom du contrôle (ou de la fenêtre) sur lequel le menu a été ouvert ; '' s'il a été ouvert par un bloc.
+      sourceMenuContextuel(id) {
+        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        return donnees[id].source;
+      },
+      montrerMenuContextuel(id) {
+        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        ouvrirMenuContextuel(id, '', pointeur.x, pointeur.y);
+      },
+
+      // ---- Barres d'outils ----
+      quandOutil(id, cle, fn) {
+        ctrlDeType(id, 'barreoutils', 'une barre d\'outils');
+        const d = donnees[id];
+        (d.surOutil[cle] = d.surOutil[cle] || []).push(proteger(fn));
+      },
+      activerOutil(id, cle, actif) {
+        const el = ctrlDeType(id, 'barreoutils', 'une barre d\'outils');
+        el.querySelectorAll('.bs-outil').forEach(b => { if (b.dataset.cle === cle) b.disabled = !actif; });
+      },
 
       // ---- Tableaux ----
       tableau(id, action, a, b, c) {
@@ -3573,6 +3723,9 @@ function BlocRuntimeFactory() {
         if (d.type === 'camera' && d.allumerAuDemarrage !== false) allumerCamera(id).catch(signaler);
         if (d.type === 'sprite' && d.anime) animerSprite(d, 'boucle');
       }
+      for (const id in donnees) brancherMenuContextuel(id);
+      brancherMenuFenetre(fenetre, surface, 'fenêtre');
+      Object.values(fenetres).forEach(f => brancherMenuFenetre(f.def, f.surface, f.def.nom));
       if (dansExe) {
         ecouter(window, 'resize', remplirFenetreWindows);
         remplirFenetreWindows(); // fenêtre déjà agrandie au démarrage
@@ -3614,6 +3767,7 @@ function BlocRuntimeFactory() {
         minuteurs.forEach(clearInterval);
         animations.forEach(a => clearInterval(a.horloge));
         voiles.forEach(v => v.remove());
+        fermerMenuContextuel();
         Object.values(donnees).forEach(d => { if (d.type === 'camera') eteindreCamera(d); });
         Object.values(fenetres).forEach(f => { f.el.remove(); if (f.voile) f.voile.remove(); });
         hote.innerHTML = '';
@@ -3621,7 +3775,8 @@ function BlocRuntimeFactory() {
     };
   }
 
-  return { lancer, creerElement, appliquerStyle, couleur, lireMenus, cheminsMenus, creerBarreMenus, HAUTEUR_MENUS, decoderSon, extraitSon, contexteAudio, INVISIBLES };
+  return { lancer, creerElement, appliquerStyle, couleur, lireMenus, cheminsMenus, creerBarreMenus, HAUTEUR_MENUS,
+    elementsMenuContextuel, elementsBarreOutils, decoderSon, extraitSon, contexteAudio, INVISIBLES };
 }
 
 const BlocRuntime = BlocRuntimeFactory();
