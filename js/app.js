@@ -1567,9 +1567,146 @@
     if (typeof surAjout === 'function') surAjout(s);
   }
 
-  async function importerSprite(surAjout) {
-    const fichier = await EditeurSprite.choisirFichier();
-    if (fichier) nouveauSprite(surAjout, fichier);
+  function importerSprite(surAjout) {
+    const choix = document.createElement('input');
+    choix.type = 'file';
+    choix.accept = 'image/*,.bsprite';
+    choix.addEventListener('change', () => {
+      const fichier = choix.files[0];
+      if (!fichier) return;
+      if (/\.bsprite$/i.test(fichier.name)) importerFichierSprite(fichier, surAjout);
+      else nouveauSprite(surAjout, fichier);
+    });
+    choix.click();
+  }
+
+  // ---- Exporter et réimporter les créations (sprites, musiques, sons) ----
+  // .bsprite et .bmusique : des fichiers JSON qu'un autre projet BlocStudio sait réimporter.
+  const nomDeFichier = nom => String(nom).replace(/[\\/:*?"<>|]+/g, '').trim() || 'sans nom';
+  const octetsDataUrl = url => Uint8Array.from(atob(url.slice(url.indexOf(',') + 1)), c => c.charCodeAt(0));
+
+  function chargerImage(url) {
+    return new Promise((ok, erreur) => {
+      const img = new Image();
+      img.onload = () => ok(img);
+      img.onerror = erreur;
+      img.src = url;
+    });
+  }
+
+  // Costumes côte à côte dans un PNG. Un sprite en pixels est agrandi (sans flou) pour être bien visible.
+  async function pngCostumes(s, costumes) {
+    const k = s.lisse ? 1 : Math.max(1, Math.floor(256 / s.taille));
+    const cote = s.taille * k;
+    const toile = document.createElement('canvas');
+    toile.width = cote * costumes.length;
+    toile.height = cote;
+    const g = toile.getContext('2d');
+    g.imageSmoothingEnabled = !!s.lisse;
+    for (let i = 0; i < costumes.length; i++) g.drawImage(await chargerImage(costumes[i].donnees), i * cote, 0, cote, cote);
+    return octetsDataUrl(toile.toDataURL('image/png'));
+  }
+
+  function menuExporterSprite(ev, s) {
+    const plusieurs = s.costumes.length > 1;
+    menuContextuel(ev.clientX, ev.clientY, [
+      ...s.costumes.slice(0, 8).map((c, i) => ({
+        texte: `🖼️ ${plusieurs ? `Costume ${i + 1} « ${c.nom} »` : 'Image'} en PNG`,
+        action: async () => telechargerOuSignaler(`${nomDeFichier(s.nom)}${plusieurs ? ' - ' + nomDeFichier(c.nom) : ''}.png`, await pngCostumes(s, [c]), 'image/png')
+      })),
+      ...(plusieurs ? [{
+        texte: `🎞️ Tous les costumes côte à côte (planche PNG)`,
+        action: async () => telechargerOuSignaler(`${nomDeFichier(s.nom)} - planche.png`, await pngCostumes(s, s.costumes), 'image/png')
+      }] : []),
+      '-',
+      {
+        texte: '📦 Sprite pour un autre projet (.bsprite)',
+        action: () => {
+          const { nom, taille, lisse, vitesse, costumes } = s;
+          telechargerOuSignaler(nomDeFichier(s.nom) + '.bsprite',
+            JSON.stringify({ format: 'BlocStudio-sprite', version: 1, sprite: { nom, taille, lisse, vitesse, costumes } }), 'application/json');
+        }
+      }
+    ]);
+  }
+
+  async function importerFichierSprite(fichier, surAjout) {
+    let s;
+    try {
+      const d = JSON.parse(await fichier.text());
+      s = d && d.format === 'BlocStudio-sprite' && d.sprite;
+      if (!s || !Array.isArray(s.costumes) || !s.costumes.length ||
+        !s.costumes.every(c => typeof c.donnees === 'string' && c.donnees.startsWith('data:image/'))) throw new Error();
+    } catch (e) {
+      return alert(`« ${fichier.name} » n'est pas un sprite BlocStudio lisible.`);
+    }
+    const sprite = {
+      id: 'spr_' + nouvelId(), nom: nomSpriteLibre(String(s.nom || fichier.name.replace(/\.[^.]+$/, ''))),
+      taille: Math.max(1, Number(s.taille) || 32), lisse: !!s.lisse, vitesse: Number(s.vitesse) || 8,
+      costumes: s.costumes.map((c, i) => ({ nom: String(c.nom || 'costume ' + (i + 1)), donnees: c.donnees }))
+    };
+    projet.sprites.push(sprite);
+    apresChangementSprites();
+    $('astuce').textContent = `🎭 Sprite « ${sprite.nom} » importé (${sprite.costumes.length} costume(s)).`;
+    if (typeof surAjout === 'function') surAjout(sprite);
+  }
+
+  // WAV 16 bits mono d'une partie d'un son (pour un son découpé : on exporte ce qui est joué).
+  function wavDepuisTampon(tampon, debut, fin) {
+    const taux = tampon.sampleRate;
+    const i0 = Math.floor(debut * taux), n = Math.max(0, Math.floor(fin * taux) - i0);
+    const octets = new DataView(new ArrayBuffer(44 + n * 2));
+    const texte = (pos, t) => [...t].forEach((c, i) => octets.setUint8(pos + i, c.charCodeAt(0)));
+    texte(0, 'RIFF'); octets.setUint32(4, 36 + n * 2, true); texte(8, 'WAVEfmt ');
+    octets.setUint32(16, 16, true); octets.setUint16(20, 1, true); octets.setUint16(22, 1, true);
+    octets.setUint32(24, taux, true); octets.setUint32(28, taux * 2, true); octets.setUint16(32, 2, true); octets.setUint16(34, 16, true);
+    texte(36, 'data'); octets.setUint32(40, n * 2, true);
+    const canaux = Array.from({ length: tampon.numberOfChannels }, (_, c) => tampon.getChannelData(c));
+    for (let i = 0; i < n; i++) {
+      let v = 0;
+      for (const canal of canaux) v += canal[i0 + i] || 0;
+      octets.setInt16(44 + i * 2, Math.max(-1, Math.min(1, v / canaux.length)) * 32767, true);
+    }
+    return new Uint8Array(octets.buffer);
+  }
+
+  function menuExporterSon(ev, s) {
+    const type = (s.donnees.match(/^data:([^;,]+)/) || [])[1] || 'audio/wav';
+    const extension = { 'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/ogg': 'ogg', 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a' }[type] || 'wav';
+    const decoupe = s.fin > s.debut || s.debut > 0;
+    menuContextuel(ev.clientX, ev.clientY, [
+      { texte: `🔊 Le son en fichier ${extension.toUpperCase()}${decoupe ? ' (en entier)' : ''}`,
+        action: () => telechargerOuSignaler(`${nomDeFichier(s.nom)}.${extension}`, octetsDataUrl(s.donnees), type) },
+      ...(decoupe ? [{
+        texte: '✂️ Seulement la partie découpée (WAV)',
+        action: async () => {
+          const tampon = await BlocRuntime.decoderSon(s.donnees);
+          const [debut, fin] = BlocRuntime.extraitSon(s, tampon);
+          telechargerOuSignaler(`${nomDeFichier(s.nom)} (extrait).wav`, wavDepuisTampon(tampon, debut, fin), 'audio/wav');
+        }
+      }] : []),
+      ...(s.musique ? ['-', {
+        texte: '🎹 La partition, pour un autre projet (.bmusique)',
+        action: () => telechargerOuSignaler(nomDeFichier(s.nom) + '.bmusique',
+          JSON.stringify({ format: 'BlocStudio-musique', version: 1, nom: s.nom, musique: s.musique }), 'application/json')
+      }] : [])
+    ]);
+  }
+
+  async function importerFichierMusique(fichier, surAjout) {
+    let d;
+    try {
+      d = JSON.parse(await fichier.text());
+      if (!d || d.format !== 'BlocStudio-musique' || !d.musique || !Array.isArray(d.musique.pistes)) throw new Error();
+    } catch (e) {
+      return alert(`« ${fichier.name} » n'est pas une musique BlocStudio lisible.`);
+    }
+    const s = ajouterSon(String(d.nom || fichier.name.replace(/\.[^.]+$/, '')),
+      StudioMusique.enWav(StudioMusique.rendre(d.musique)), 'importé');
+    s.musique = d.musique;
+    planifierSauvegarde();
+    if ($('vue-sommaire').classList.contains('actif')) afficherSommaire();
+    if (typeof surAjout === 'function') surAjout(s);
   }
 
   async function modifierSprite(s) {
@@ -1617,10 +1754,11 @@
   function importerSon(surAjout) {
     const choix = document.createElement('input');
     choix.type = 'file';
-    choix.accept = 'audio/*,.mp3,.wav,.ogg,.m4a';
+    choix.accept = 'audio/*,.mp3,.wav,.ogg,.m4a,.bmusique';
     choix.addEventListener('change', async () => {
       const fichier = choix.files[0];
       if (!fichier) return;
+      if (/\.bmusique$/i.test(fichier.name)) return importerFichierMusique(fichier, surAjout);
       if (fichier.size > TAILLE_MAX_SON) {
         alert(`Ce son est trop lourd (${(fichier.size / 1048576).toFixed(1)} Mo, maximum 1,5 Mo).\n\n` +
           'Choisissez un son plus court, ou réduisez-le avec un logiciel comme Audacity.');
@@ -2378,12 +2516,13 @@
       controles.forEach(c => endroits.prepend(puce('🎭 ' + c.nom, () => allerAuControle(c.id))));
       const actions = tr.appendChild(el('td', 'actions-son'));
       actions.appendChild(puce('🎨 Modifier', () => modifierSprite(s)));
+      actions.appendChild(puce('💾 Exporter…', e => menuExporterSprite(e, s)));
       actions.appendChild(puce('✏️ Renommer', () => renommerSprite(s)));
       actions.appendChild(puce('🗑️ Supprimer', () => supprimerSprite(s, usages.length + controles.length)));
       corpsSprites.appendChild(tr);
     }
     zone.lastElementChild.appendChild(puce('🎨 Dessiner un sprite…', nouveauSprite, 'puce-importer puce-sprite'));
-    zone.lastElementChild.appendChild(puce('📁 Importer une image…', importerSprite, 'puce-importer puce-sprite'));
+    zone.lastElementChild.appendChild(puce('📁 Importer une image ou un sprite (.bsprite)…', importerSprite, 'puce-importer puce-sprite'));
 
     // --- Sons importés ---
     const corpsSons = sectionSommaire(zone, 'Sons', projet.sons.length,
@@ -2403,11 +2542,12 @@
       const actions = tr.appendChild(el('td', 'actions-son'));
       if (s.musique) actions.appendChild(puce('🎹 Modifier', () => modifierMusique(s)));
       actions.appendChild(puce('✂️ Découper', () => ouvrirDecoupe(s)));
+      actions.appendChild(puce('💾 Exporter…', e => menuExporterSon(e, s)));
       actions.appendChild(puce('✏️ Renommer', () => renommerSon(s)));
       actions.appendChild(puce('🗑️ Supprimer', () => supprimerSon(s, usages.length + controles.length)));
       corpsSons.appendChild(tr);
     }
-    zone.lastElementChild.appendChild(puce('🎵 Importer un son…', importerSon, 'puce-importer'));
+    zone.lastElementChild.appendChild(puce('🎵 Importer un son ou une musique (.bmusique)…', importerSon, 'puce-importer'));
     zone.lastElementChild.appendChild(puce('🎤 Enregistrer avec le micro…', ouvrirMicro, 'puce-importer'));
     zone.lastElementChild.appendChild(puce('🎹 Composer une musique 8 bits…', composerMusique, 'puce-importer'));
 
