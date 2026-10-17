@@ -48,6 +48,8 @@
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
     minuteur: { prefixe: 'Minuteur', texte: '', largeur: 0, hauteur: 0,
       defauts: { intervalle: 1, active: true } },
+    fichier: { prefixe: 'Fichier', texte: '', largeur: 0, hauteur: 0,
+      defauts: { typeFichier: 'texte', nomPropose: 'mon fichier.txt' } },
     basedonnees: { prefixe: 'Base', texte: '', largeur: 0, hauteur: 0,
       defauts: { champs: ['Nom', 'Prénom', 'Téléphone'], fiches: [], memoriser: true } }
   };
@@ -66,7 +68,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -410,6 +412,8 @@
         ? `${String(c.intervalle).replace('.', ',')} s${c.active === false ? ', arrêté' : ''}`
         : c.type === 'basedonnees'
           ? `${(c.champs || []).length} champ(s), ${(c.fiches || []).length} fiche(s) au départ`
+        : c.type === 'fichier'
+          ? (TYPES_FICHIER_EDITEUR[c.typeFichier] || TYPES_FICHIER_EDITEUR.tous).split(' ')[0]
           : (projet.sons.find(s => s.id === c.son)?.nom || 'aucun son');
       puce.appendChild(detail);
       puce.addEventListener('pointerdown', e => {
@@ -933,7 +937,8 @@
     const type = AVEC_CHANGE.includes(c.type) ? 'bs_quand_change'
       : c.type === 'zonedessin' ? 'bs_quand_glisse'
       : c.type === 'son' || c.type === 'video' ? 'bs_quand_son_fin'
-      : c.type === 'minuteur' ? 'bs_quand_minuteur' : 'bs_quand_clic';
+      : c.type === 'minuteur' ? 'bs_quand_minuteur'
+      : c.type === 'fichier' ? 'bs_quand_fichier_depose' : 'bs_quand_clic';
     afficherVue('vue-code');
     let bloc = workspace.getBlocksByType(type, false).find(b => b.getFieldValue('CTRL') === c.id);
     if (!bloc) bloc = nouveauBlocEnBas(type, 'CTRL', c.id);
@@ -1014,6 +1019,7 @@
     if (c.type === 'son') return proprietesSon(liste, c, maj);
     if (c.type === 'minuteur') return proprietesMinuteur(liste, c, maj);
     if (c.type === 'basedonnees') return proprietesBase(liste, c, maj);
+    if (c.type === 'fichier') return proprietesFichier(liste, c, maj);
     if (['bouton', 'etiquette', 'zonetexte', 'casecocher', 'boutonradio', 'cadre', 'interrupteur', 'lien'].includes(c.type)) {
       const multiligne = c.type === 'etiquette' || (c.type === 'zonetexte' && c.multiligne);
       champTexte(liste, c.type === 'cadre' ? 'Titre' : 'Texte', c.texte, v => { c.texte = v; maj(); }, multiligne);
@@ -1264,6 +1270,33 @@
     liste.appendChild(el('p', 'aide',
       'Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer ce qu\'il fait à chaque « tic ». ' +
       'On peut le démarrer, l\'arrêter ou changer son intervalle avec des blocs.'));
+  }
+
+  const TYPES_FICHIER_EDITEUR = {
+    texte: 'Texte (.txt)', csv: 'Tableur (.csv, lisible par Excel)', image: 'Image (PNG, JPG, GIF…)', tous: 'Tous les fichiers'
+  };
+
+  function proprietesFichier(liste, c, maj) {
+    const d = prop(liste, 'Type de fichier proposé');
+    const choix = document.createElement('select');
+    for (const [v, t] of Object.entries(TYPES_FICHIER_EDITEUR)) choix.add(new Option(t, v));
+    choix.value = c.typeFichier || 'texte';
+    choix.addEventListener('change', () => {
+      c.typeFichier = choix.value;
+      // Le nom proposé prend l'extension qui va avec.
+      const ext = { texte: '.txt', csv: '.csv', image: '.png' }[c.typeFichier];
+      if (ext && c.nomPropose) c.nomPropose = c.nomPropose.replace(/\.[a-z0-9]{1,5}$/i, '') + ext;
+      maj();
+      afficherProprietes();
+      afficherInvisibles();
+    });
+    d.appendChild(choix);
+    champTexte(liste, 'Nom proposé pour enregistrer', c.nomPropose || '', v => { c.nomPropose = v; maj(); });
+    liste.appendChild(el('p', 'aide',
+      'Comme les boîtes « Ouvrir » et « Enregistrer sous » de Visual Basic. Blocs dans la catégorie Mémoire : ' +
+      '« ouvrir un fichier avec… », puis « contenu du fichier » ; « enregistrer le texte … avec… » ; ' +
+      'et des raccourcis pour un tableau ou une base (CSV), une image ou une zone de dessin (PNG). ' +
+      'Double-cliquez sur ce contrôle pour réagir quand on dépose un fichier sur la fenêtre.'));
   }
 
   function proprietesBase(liste, c, maj) {
@@ -2272,11 +2305,11 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',
-    bs_quand_son_fin: 'se termine', bs_quand_minuteur: 'sonne', bs_quand_souris_ctrl: 'souris', bs_quand_clone: 'cloné' };
+    bs_quand_son_fin: 'se termine', bs_quand_minuteur: 'sonne', bs_quand_fichier_depose: 'fichier déposé', bs_quand_souris_ctrl: 'souris', bs_quand_clone: 'cloné' };
 
   // Libellé court d'un événement de contrôle, pour le Sommaire.
   const libelleEvenement = b => b.type === 'bs_quand_souris_ctrl'
@@ -2298,6 +2331,7 @@
       case 'bs_quand_glisse': return `quand on glisse dans ${ctrl()}`;
       case 'bs_quand_son_fin': return `quand ${ctrl()} se termine`;
       case 'bs_quand_minuteur': return `quand ${ctrl()} sonne`;
+      case 'bs_quand_fichier_depose': return `quand on dépose un fichier (${ctrl()})`;
       case 'bs_quand_clone': return `quand un clone de ${ctrl()} est créé`;
       case 'bs_quand_fenetre': return `quand la fenêtre ${nomFenetre(r.getFieldValue('FENETRE'))} ${r.getField('QUOI').getText()}`;
       case 'bs_quand_souris_ctrl': return `quand on ${r.getField('QUOI').getText()} ${ctrl()}`;
@@ -2314,7 +2348,7 @@
 
   // ---- « Voir les blocs qui l'utilisent » ----
   // Tous les blocs qui désignent ce contrôle (dans n'importe quelle liste de contrôles du bloc).
-  const CHAMPS_CONTROLE = ['CTRL', 'CTRL2', 'TAB'];
+  const CHAMPS_CONTROLE = ['CTRL', 'CTRL2', 'TAB', 'CIBLE'];
   function blocsDuControle(id) {
     return workspace.getAllBlocks(true).filter(b => CHAMPS_CONTROLE.some(n => b.getField(n) && b.getFieldValue(n) === id));
   }

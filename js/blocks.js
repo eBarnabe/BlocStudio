@@ -25,6 +25,8 @@
     taille: 'taille (%)', transparence: 'transparence (%)',
     valeurs: 'valeurs (liste)', etiquettes: 'étiquettes (liste)', genre: 'genre (barres, courbe ou secteurs)',
     maxValeurs: 'nombre maximum de valeurs',
+    contenu: 'contenu du fichier', nomFichier: 'nom du fichier', annule: 'annulé par l\'utilisateur',
+    nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, image ou tous)',
     nombreFiches: 'nombre de fiches', champs: 'champs (liste)', memoriser: 'garder les fiches d\'une fois à l\'autre',
     adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)'
   };
@@ -58,10 +60,11 @@
     son: ['son', 'volume', 'boucle', 'enLecture'],
     minuteur: ['intervalle', 'active'],
     basedonnees: ['nombreFiches', 'champs', 'memoriser'],
+    fichier: ['contenu', 'nomFichier', 'annule', 'nomPropose', 'typeFichier'],
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
@@ -193,6 +196,13 @@
     init() {
       evenement(this, 'quand', ['minuteur'], 'sonne');
       this.setTooltip('Exécuté régulièrement, selon l\'intervalle du minuteur (réglé dans ses propriétés), tant qu\'il est en marche.');
+    }
+  };
+
+  Blockly.Blocks['bs_quand_fichier_depose'] = {
+    init() {
+      evenement(this, 'quand on dépose un fichier sur la fenêtre, avec', ['fichier']);
+      this.setTooltip('Exécuté quand on fait glisser un fichier (depuis l\'Explorateur de Windows) sur la fenêtre du programme. Ensuite, « contenu du fichier » et « nom du fichier » le décrivent.');
     }
   };
 
@@ -628,6 +638,35 @@
       }
     };
   }
+
+  // ---------- Contrôle Fichier ----------
+
+  const COULEUR_FICHIERS = '#a16207'; // comme la catégorie Mémoire, où ces blocs sont rangés
+  const FICHIER = { ctrl: ['fichier'] };
+
+  Blockly.Blocks['bs_fichier_ouvrir_avec'] = instruction(() => ['ouvrir un fichier avec', FICHIER], COULEUR_FICHIERS,
+    'Montre la fenêtre « Ouvrir » de Windows ; le programme attend le choix. Ensuite : « contenu du fichier » (un texte, ou une image pour un contrôle Image), « nom du fichier », ou « annulé ? » si l\'utilisateur a fermé la fenêtre sans choisir.');
+
+  Blockly.Blocks['bs_fichier_enregistrer_avec'] = instruction(() => [
+    { nom: 'VAL', libelle: 'enregistrer le texte' }, 'avec', FICHIER
+  ], COULEUR_FICHIERS, 'Montre la fenêtre « Enregistrer sous » de Windows, avec le nom proposé dans les propriétés du contrôle (ou celui du fichier ouvert).');
+
+  Blockly.Blocks['bs_fichier_ouvrir_dans'] = instruction(() => [
+    'ouvrir avec', FICHIER, 'un fichier dans', { ctrl: ['tableau', 'basedonnees', 'image', 'zonedessin'], nom: 'CIBLE' }
+  ], COULEUR_FICHIERS, 'Raccourci : un fichier CSV (Excel) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin.');
+
+  Blockly.Blocks['bs_fichier_enregistrer_de'] = instruction(() => [
+    'enregistrer', { ctrl: ['tableau', 'basedonnees', 'zonedessin'], nom: 'CIBLE' }, 'dans un fichier avec', FICHIER
+  ], COULEUR_FICHIERS, 'Raccourci : un tableau ou une base de données devient un fichier CSV (lisible par Excel), une zone de dessin une image PNG.');
+
+  Blockly.Blocks['bs_fichier_contenu'] = valeur(() => ['contenu du fichier de', FICHIER], null, COULEUR_FICHIERS,
+    'Le texte du dernier fichier ouvert ou déposé (pour le type « Image » : l\'image, à mettre dans un contrôle Image).');
+
+  Blockly.Blocks['bs_fichier_nom'] = valeur(() => ['nom du fichier de', FICHIER], 'String', COULEUR_FICHIERS,
+    'Le nom du dernier fichier ouvert, enregistré ou déposé (par exemple « mes notes.txt »).');
+
+  Blockly.Blocks['bs_fichier_annule'] = valeur(() => [FICHIER, ': annulé par l\'utilisateur ?'], 'Boolean', COULEUR_FICHIERS,
+    'Vrai si, la dernière fois, l\'utilisateur a fermé la fenêtre « Ouvrir » ou « Enregistrer sous » sans choisir de fichier.');
 
   // ---------- Base de données ----------
 
@@ -1423,6 +1462,15 @@
   gen.forBlock['bs_sprite_arreter'] = b => `app.sprite(${id(b)}, 'arreter');\n`;
   gen.forBlock['bs_sprite_regarder'] = b => `app.sprite(${id(b)}, 'regarder', ${q(b.getFieldValue('SENS'))});\n`;
   gen.forBlock['bs_sprite_tourner'] = b => `app.sprite(${id(b)}, 'tourner', ${val(b, 'DEG', '15')});\n`;
+  gen.forBlock['bs_quand_fichier_depose'] = b =>
+    `app.quand(${id(b)}, 'depose', async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_fichier_ouvrir_avec'] = b => `await app.fichier(${id(b)}, 'ouvrir');\n`;
+  gen.forBlock['bs_fichier_enregistrer_avec'] = b => `await app.fichier(${id(b)}, 'enregistrer', ${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_fichier_ouvrir_dans'] = b => `await app.fichier(${id(b)}, 'ouvrirDans', ${codeCtrl(b.getFieldValue('CIBLE'))});\n`;
+  gen.forBlock['bs_fichier_enregistrer_de'] = b => `await app.fichier(${id(b)}, 'enregistrerDe', ${codeCtrl(b.getFieldValue('CIBLE'))});\n`;
+  gen.forBlock['bs_fichier_contenu'] = b => [`app.lire(${id(b)}, 'contenu')`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_fichier_nom'] = b => [`app.lire(${id(b)}, 'nomFichier')`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_fichier_annule'] = b => [`app.lire(${id(b)}, 'annule')`, Order.FUNCTION_CALL];
   const champBase = b => q(b.getFieldValue('CHAMP'));
   gen.forBlock['bs_base_ajouter'] = b => {
     const valeurs = b.champs.map((nom, i) => `${JSON.stringify(nom)}: ${val(b, 'V' + i, "''")}`);
@@ -1769,7 +1817,16 @@
           { kind: 'block', type: 'bs_memoire', inputs: { NOM: texte('prénom') } },
           { kind: 'block', type: 'bs_oublier', inputs: { NOM: texte('prénom') } },
           { kind: 'block', type: 'bs_tout_oublier' },
-          { kind: 'label', text: 'Fichiers' },
+          { kind: 'label', text: 'Fichiers (avec un contrôle 📁 Fichier)' },
+          { kind: 'block', type: 'bs_fichier_ouvrir_avec' },
+          { kind: 'block', type: 'bs_fichier_contenu' },
+          { kind: 'block', type: 'bs_fichier_enregistrer_avec', inputs: { VAL: texte('Bonjour !') } },
+          { kind: 'block', type: 'bs_fichier_annule' },
+          { kind: 'block', type: 'bs_fichier_nom' },
+          { kind: 'block', type: 'bs_fichier_ouvrir_dans' },
+          { kind: 'block', type: 'bs_fichier_enregistrer_de' },
+          { kind: 'block', type: 'bs_quand_fichier_depose' },
+          { kind: 'label', text: 'Fichiers (sans contrôle)' },
           { kind: 'block', type: 'bs_fichier_enregistrer', inputs: { VAL: texte('Bonjour !'), NOM: texte('mon fichier.txt') } },
           { kind: 'block', type: 'bs_fichier_ouvrir' }
         ]

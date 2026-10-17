@@ -442,7 +442,15 @@ function BlocRuntimeFactory() {
 
   // Contrôles sans apparence : ils se posent dans le concepteur mais ne s'affichent
   // pas dans la fenêtre du programme (comme le Timer de Visual Basic).
-  const INVISIBLES = ['son', 'minuteur', 'basedonnees'];
+  const INVISIBLES = ['son', 'minuteur', 'basedonnees', 'fichier'];
+
+  // Contrôle Fichier : ce que montrent les boîtes « Ouvrir » et « Enregistrer sous ».
+  const TYPES_FICHIER = {
+    texte: { accept: '.txt,text/plain', extension: '.txt', mime: 'text/plain', description: 'Texte' },
+    csv: { accept: '.csv,text/csv', extension: '.csv', mime: 'text/csv', description: 'Tableur (CSV)' },
+    image: { accept: 'image/*', extension: '.png', mime: 'image/png', description: 'Image' },
+    tous: { accept: '', extension: '.txt', mime: 'application/octet-stream', description: 'Fichier' }
+  };
 
   // Nom simple d'une touche du clavier (e.key) : 'gauche', 'entree', 'a', '7', 'f2'…
   const NOMS_TOUCHES = {
@@ -1994,6 +2002,187 @@ function BlocRuntimeFactory() {
       }
     }
 
+    // ---- Fichiers ----
+    // Boîte « Enregistrer sous » (ou téléchargement). Renvoie le nom choisi, ou '' si l'utilisateur annule.
+    async function enregistrerSous(contenu, nom, type) {
+      const t = TYPES_FICHIER[type] || TYPES_FICHIER.tous;
+      nom = enTexte(nom).trim().replace(/[\\/:*?"<>|]+/g, '') || 'fichier';
+      if (!/\.[a-z0-9]{1,5}$/i.test(nom)) nom += t.extension;
+      // Un fichier .csv commence par une marque « UTF-8 » pour qu'Excel affiche bien les accents.
+      if (typeof contenu === 'string' && /\.csv$/i.test(nom)) contenu = '\ufeff' + contenu;
+      if (options.enregistrer) return (await options.enregistrer(nom, contenu)) === null ? '' : nom;
+      if (window.showSaveFilePicker) {
+        try {
+          const extension = (nom.match(/\.[a-z0-9]+$/i) || [t.extension])[0].toLowerCase();
+          const fichier = await window.showSaveFilePicker({
+            suggestedName: nom,
+            types: [{ description: t.description, accept: { [t.mime === 'application/octet-stream' ? 'text/plain' : t.mime]: [extension] } }]
+          });
+          const flux = await fichier.createWritable();
+          await flux.write(contenu);
+          await flux.close();
+          return fichier.name;
+        } catch (e) {
+          if (e.name === 'AbortError') return '';
+          // Sinon (navigateur qui refuse) : simple téléchargement, ci-dessous.
+        }
+      }
+      const url = URL.createObjectURL(new Blob([contenu], { type: t.mime }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nom;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      return nom;
+    }
+
+    // Boîte « Ouvrir » : le fichier choisi, ou null si l'utilisateur annule.
+    function choisirFichierAOuvrir(type) {
+      return new Promise(resoudre => {
+        const choix = document.createElement('input');
+        choix.type = 'file';
+        choix.accept = (TYPES_FICHIER[type] || TYPES_FICHIER.tous).accept;
+        choix.addEventListener('change', () => resoudre(choix.files[0] || null));
+        choix.addEventListener('cancel', () => resoudre(null));
+        choix.click();
+      });
+    }
+
+    // Une image se lit en « adresse » (data:…), utilisable par un contrôle Image ; le reste en texte.
+    function lireContenu(fichier, enImage) {
+      if (enImage) {
+        return new Promise((ok, erreur) => {
+          const r = new FileReader();
+          r.onload = () => ok(r.result);
+          r.onerror = () => erreur(r.error);
+          r.readAsDataURL(fichier);
+        });
+      }
+      return fichier.text().then(t => t.replace(/^\ufeff/, ''));
+    }
+
+    function chargerImage(url) {
+      return new Promise((ok, erreur) => {
+        const img = new Image();
+        img.onload = () => ok(img);
+        img.onerror = () => erreur(new Error('Ce fichier n\'est pas une image lisible.'));
+        img.src = url;
+      });
+    }
+
+    // Image d'une zone de dessin, sur sa couleur de fond (blanc par défaut), à sa taille dans la fenêtre.
+    function pngDeDessin(id) {
+      const d = donnees[id], toile = elements[id];
+      const sortie = document.createElement('canvas');
+      sortie.width = Math.round(d.largeur);
+      sortie.height = Math.round(d.hauteur);
+      const g = sortie.getContext('2d');
+      g.fillStyle = d.couleurFond ? couleur(d.couleurFond) : '#ffffff';
+      g.fillRect(0, 0, sortie.width, sortie.height);
+      g.drawImage(toile, 0, 0, sortie.width, sortie.height);
+      const url = sortie.toDataURL('image/png');
+      return Uint8Array.from(atob(url.slice(url.indexOf(',') + 1)), c => c.charCodeAt(0));
+    }
+
+    // Une image dans une zone de dessin : ajustée à la zone, sans être déformée.
+    async function dessinerImage(id, url) {
+      const img = await chargerImage(url);
+      const d = donnees[id], g = elements[id].getContext('2d');
+      const k = Math.min(d.largeur / img.width, d.hauteur / img.height);
+      const l = img.width * k, h = img.height * k;
+      g.clearRect(0, 0, d.largeur, d.hauteur);
+      g.drawImage(img, (d.largeur - l) / 2, (d.hauteur - h) / 2, l, h);
+    }
+
+    // Les « sortes » de contrôles qu'on peut remplir depuis un fichier, ou enregistrer.
+    const AVEC_FICHIER_CSV = ['tableau', 'basedonnees'];
+    const AVEC_FICHIER_IMAGE = ['image', 'zonedessin'];
+
+    async function ctrlFichier(id, action, a, b) {
+      ctrlDeType(id, 'fichier', 'un contrôle Fichier');
+      const d = donnees[id];
+      const nomPropose = () => d.nomFichier || d.nomPropose || '';
+      switch (action) {
+        case 'ouvrir': {
+          const f = await choisirFichierAOuvrir(d.typeFichier);
+          d.annule = !f;
+          if (!f) return;
+          d.nomFichier = f.name;
+          d.contenu = await lireContenu(f, d.typeFichier === 'image');
+          return;
+        }
+        case 'enregistrer': {
+          const nom = await enregistrerSous(enTexte(a), nomPropose(), d.typeFichier);
+          d.annule = !nom;
+          if (nom) d.nomFichier = nom;
+          return;
+        }
+        // a : contrôle à remplir (tableau ou base : un CSV ; image ou zone de dessin : une image).
+        case 'ouvrirDans': {
+          ctrl(a);
+          const cible = donnees[a];
+          const enImage = AVEC_FICHIER_IMAGE.includes(cible.type);
+          if (!enImage && !AVEC_FICHIER_CSV.includes(cible.type)) {
+            throw new Error(`On ne peut pas ouvrir un fichier dans « ${cible.nom} » : choisissez un tableau, une base de données, une image ou une zone de dessin.`);
+          }
+          const f = await choisirFichierAOuvrir(enImage ? 'image' : 'csv');
+          d.annule = !f;
+          if (!f) return;
+          d.nomFichier = f.name;
+          d.contenu = await lireContenu(f, enImage);
+          if (cible.type === 'tableau') app.tableau(a, 'csv', d.contenu);
+          else if (cible.type === 'basedonnees') app.base(a, 'csv', d.contenu);
+          else if (cible.type === 'image') app.ecrire(a, 'image', d.contenu);
+          else await dessinerImage(a, d.contenu);
+          return;
+        }
+        // a : contrôle à enregistrer (tableau ou base en CSV, zone de dessin en PNG).
+        case 'enregistrerDe': {
+          ctrl(a);
+          const cible = donnees[a];
+          const base = (nomPropose() || cible.nom).replace(/\.[a-z0-9]{1,5}$/i, '');
+          let nom;
+          if (cible.type === 'zonedessin') nom = await enregistrerSous(pngDeDessin(a), base + '.png', 'image');
+          else if (cible.type === 'tableau') nom = await enregistrerSous(app.lireTableau(a, 'csv'), base + '.csv', 'csv');
+          else if (cible.type === 'basedonnees') nom = await enregistrerSous(app.lireBase(a, 'csv'), base + '.csv', 'csv');
+          else throw new Error(`On ne peut pas enregistrer « ${cible.nom} » dans un fichier : choisissez un tableau, une base de données ou une zone de dessin.`);
+          d.annule = !nom;
+          if (nom) d.nomFichier = nom;
+          return;
+        }
+      }
+    }
+
+    function lireFichierCtrl(d, prop) {
+      switch (prop) {
+        case 'contenu': return d.contenu ?? '';
+        case 'nomFichier': return d.nomFichier || '';
+        case 'annule': return !!d.annule;
+        case 'nomPropose': return d.nomPropose || '';
+        case 'typeFichier': return d.typeFichier || 'texte';
+      }
+      return '';
+    }
+
+    // Glisser-déposer un fichier sur la fenêtre : « quand un fichier est déposé, avec Fichier1 ».
+    hote.addEventListener('dragover', e => {
+      if (Object.values(donnees).some(d => d.type === 'fichier' && d.surEvenement.length)) e.preventDefault();
+    });
+    hote.addEventListener('drop', async e => {
+      const recepteurs = Object.values(donnees).filter(d => d.type === 'fichier' && d.surEvenement.length);
+      const f = e.dataTransfer && e.dataTransfer.files[0];
+      if (!recepteurs.length || !f) return;
+      e.preventDefault();
+      for (const d of recepteurs) {
+        try {
+          d.contenu = await lireContenu(f, d.typeFichier === 'image');
+          d.nomFichier = f.name;
+          d.annule = false;
+          d.surEvenement.forEach(h => h());
+        } catch (err) { signaler(err); }
+      }
+    });
+
     // Glisse en douceur jusqu'à (x, y) ; le programme attend la fin du trajet.
     function glisser(id, x, y, secondes) {
       const d = donnees[id];
@@ -2018,7 +2207,7 @@ function BlocRuntimeFactory() {
         const h = proteger(fn);
         // « quand Son1 se termine », « quand Minuteur1 sonne »
         if (evenement === 'fin' && donnees[id].type === 'video') return elements[id].addEventListener('ended', () => h(id));
-        if (evenement === 'fin' || evenement === 'tic') return donnees[id].surEvenement.push(() => h(id));
+        if (evenement === 'fin' || evenement === 'tic' || evenement === 'depose') return donnees[id].surEvenement.push(() => h(id));
         (evenementsCtrl[id] = evenementsCtrl[id] || []).push({ evenement, h });
         brancher(id, evenement, h);
       },
@@ -2107,6 +2296,7 @@ function BlocRuntimeFactory() {
         const d = donnees[id];
         if (d.type === 'son') return lireSon(d, prop);
         if (d.type === 'minuteur') return lireMinuteur(d, prop);
+        if (d.type === 'fichier') return lireFichierCtrl(d, prop);
         if (d.type === 'basedonnees') {
           if (prop === 'nombreFiches') return d.fiches.length;
           if (prop === 'champs') return d.champs.slice();
@@ -2166,6 +2356,11 @@ function BlocRuntimeFactory() {
         const d = donnees[id];
         if (d.type === 'son') return ecrireSon(d, prop, valeur);
         if (d.type === 'minuteur') return ecrireMinuteur(d, prop, valeur);
+        if (d.type === 'fichier') {
+          if (prop === 'nomPropose') d.nomPropose = enTexte(valeur);
+          if (prop === 'typeFichier') d.typeFichier = TYPES_FICHIER[enTexte(valeur).trim().toLowerCase()] ? enTexte(valeur).trim().toLowerCase() : 'tous';
+          return;
+        }
         if (d.type === 'basedonnees') {
           if (prop === 'memoriser') {
             d.memoriser = !!valeur;
@@ -2589,30 +2784,7 @@ function BlocRuntimeFactory() {
       // ---- Fichiers ----
       // Renvoie vrai si le fichier a été enregistré, faux si l'utilisateur a annulé.
       async enregistrerFichier(texte, nom) {
-        nom = enTexte(nom).trim().replace(/[\\/:*?"<>|]+/g, '') || 'fichier';
-        if (!/\.[a-z0-9]{1,5}$/i.test(nom)) nom += '.txt';
-        // Un fichier .csv commence par une marque « UTF-8 » pour qu'Excel affiche bien les accents.
-        const contenu = (/\.csv$/i.test(nom) ? '﻿' : '') + enTexte(texte);
-        if (options.enregistrer) return !!(await options.enregistrer(nom, contenu));
-        if (window.showSaveFilePicker) {
-          try {
-            const fichier = await window.showSaveFilePicker({ suggestedName: nom });
-            const flux = await fichier.createWritable();
-            await flux.write(contenu);
-            await flux.close();
-            return true;
-          } catch (e) {
-            if (e.name === 'AbortError') return false;
-            // Sinon (navigateur qui refuse) : simple téléchargement, ci-dessous.
-          }
-        }
-        const url = URL.createObjectURL(new Blob([contenu], { type: 'text/plain' }));
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nom;
-        a.click();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        return true;
+        return !!(await enregistrerSous(enTexte(texte), nom, 'texte'));
       },
       // Renvoie le texte du fichier choisi (vide si l'utilisateur annule).
       async ouvrirFichier() {
@@ -2722,6 +2894,7 @@ function BlocRuntimeFactory() {
         return ctrl(id) && donnees[id].type === 'video' ? ctrlVideo(id, action) : ctrlSon(id, action);
       },
       minuteur: ctrlMinuteur,
+      fichier: ctrlFichier,
       sprite: ctrlSprite,
       // Volume en % (0 = muet, 100 = normal) d'un son, ou de tous les sons avec '*'.
       // Il s'applique aussi aux sons déjà en train de jouer.

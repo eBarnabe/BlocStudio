@@ -354,7 +354,7 @@
     },
     {
       titre: '🎨 Mini-Paint',
-      description: 'Un logiciel de dessin : couleurs, épaisseur du crayon, bouton Effacer.',
+      description: 'Un logiciel de dessin : couleurs, épaisseur du crayon, effacer, ouvrir une image et enregistrer son dessin en PNG.',
       creer: () => projet(
         { titre: 'Mini-Paint', largeur: 600, hauteur: 380 },
         [
@@ -366,7 +366,10 @@
           { type: 'curseur', nom: 'Epaisseur', x: 450, y: 114, largeur: 130, hauteur: 24, min: 1, max: 40, valeur: 5 },
           { type: 'bouton', nom: 'Effacer', texte: '🗑️ Tout effacer', x: 450, y: 170, largeur: 130, hauteur: 34 },
           { type: 'etiquette', nom: 'Aide', texte: 'Dessine avec la souris !\n(astuce : « blanc » sert de gomme)',
-            x: 450, y: 230, largeur: 140, hauteur: 80, taillePolice: 12, couleurTexte: '#64748b' }
+            x: 450, y: 300, largeur: 140, hauteur: 70, taillePolice: 12, couleurTexte: '#64748b' },
+          { type: 'bouton', nom: 'Ouvrir', texte: '📂 Ouvrir une image', x: 450, y: 214, largeur: 130, hauteur: 34 },
+          { type: 'bouton', nom: 'Enregistrer', texte: '💾 Enregistrer', x: 450, y: 256, largeur: 130, hauteur: 34 },
+          { type: 'fichier', nom: 'FichierImage', typeFichier: 'image', nomPropose: 'mon dessin.png', largeur: 0, hauteur: 0 }
         ],
         [],
         () => [
@@ -390,8 +393,54 @@
           ]),
           evt('bs_quand_clic', 'c6', [
             si(confirmer('Effacer tout le dessin ?'), [dessin('bs_dessin_effacer', 'c1')])
-          ])
+          ]),
+          evt('bs_quand_clic', 'c8', [bloc('bs_fichier_ouvrir_dans', 'c10', null, { CIBLE: 'c1' })]),
+          evt('bs_quand_clic', 'c9', [bloc('bs_fichier_enregistrer_de', 'c10', null, { CIBLE: 'c1' })])
         ])
+    },
+    {
+      titre: '📝 Bloc-notes',
+      description: 'Un petit traitement de texte : menus Fichier › Nouveau, Ouvrir…, Enregistrer…, et glisser-déposer d\'un fichier.',
+      creer: () => {
+        // c1 Texte · c2 Etat (barre d'état) · c3 FichierTexte (contrôle Fichier, invisible)
+        const etat = x => ecrire('c2', 'texte', x);
+        const annule = () => bloc('bs_fichier_annule', 'c3');
+        const nomFichier = () => bloc('bs_fichier_nom', 'c3');
+        return projet(
+          { titre: 'Bloc-notes', largeur: 520, hauteur: 380, couleurFond: '#f1f5f9', menus: 'Fichier\n  Nouveau\n  Ouvrir…\n  Enregistrer…' },
+          [
+            { type: 'zonetexte', nom: 'Texte', multiligne: true, x: 10, y: 10, largeur: 500, hauteur: 312, taillePolice: 15,
+              couleurFond: '#ffffff', texte: 'Écrivez ici, puis Fichier › Enregistrer…\n\nAstuce : faites glisser un fichier texte sur la fenêtre pour l\'ouvrir.' },
+            { type: 'etiquette', nom: 'Etat', texte: '📄 Nouveau document', x: 10, y: 330, largeur: 500, hauteur: 22, taillePolice: 13, couleurTexte: '#475569' },
+            { type: 'fichier', nom: 'FichierTexte', typeFichier: 'texte', nomPropose: 'mes notes.txt', largeur: 0, hauteur: 0 }
+          ],
+          [],
+          () => [
+            evtMenu('Fichier › Nouveau', [
+              si(confirmer('Effacer le texte pour commencer un nouveau document ?'), [
+                ecrire('c1', 'texte', t('')),
+                etat(t('📄 Nouveau document'))
+              ])
+            ]),
+            evtMenu('Fichier › Ouvrir…', [
+              bloc('bs_fichier_ouvrir_avec', 'c3'),
+              si(non(annule()), [
+                ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),
+                etat(joindre(t('📄 '), nomFichier()))
+              ])
+            ]),
+            evtMenu('Fichier › Enregistrer…', [
+              { type: 'bs_fichier_enregistrer_avec', fields: { CTRL: 'c3' }, inputs: { VAL: I(lire('texte', 'c1')) } },
+              si(annule(),
+                [etat(t('Enregistrement annulé.'))],
+                [etat(joindre(t('💾 Enregistré : '), nomFichier()))])
+            ]),
+            evt('bs_quand_fichier_depose', 'c3', [
+              ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),
+              etat(joindre(t('📄 '), nomFichier(), t(' (déposé)')))
+            ])
+          ]);
+      }
     },
     {
       titre: '🧮 Quiz de calcul',
