@@ -815,7 +815,11 @@
     const liste = selectionnes();
     const seul = liste.length === 1 ? liste[0] : null;
     menuContextuel(x, y, [
-      ...(seul ? [{ texte: '🧩 Écrire son code', touche: 'double-clic', action: () => ouvrirEvenement(seul) }, '-'] : []),
+      ...(seul ? [
+        { texte: '🧩 Écrire son code', touche: 'double-clic', action: () => ouvrirEvenement(seul) },
+        (n => ({ texte: n ? `🔎 Voir les blocs qui l'utilisent (${n})` : '🔎 Aucun bloc ne l\'utilise encore',
+          action: () => voirBlocsDuControle(seul), actif: n > 0 }))(blocsDuControle(seul.id).length),
+        '-'] : []),
       { texte: '✂️ Couper', touche: 'Ctrl+X', action: couper },
       { texte: '📄 Copier', touche: 'Ctrl+C', action: copier },
       { texte: '📋 Coller', touche: 'Ctrl+V', action: () => coller(), actif: !!pressePapiers },
@@ -2109,6 +2113,7 @@
 
   function afficherVue(id) {
     fermerMenuContextuel();
+    if (id !== 'vue-code') fermerReperes();
     document.querySelectorAll('.onglet').forEach(o => o.classList.toggle('actif', o.dataset.vue === id));
     document.querySelectorAll('.vue').forEach(v => v.classList.toggle('actif', v.id === id));
     if (id === 'vue-code') {
@@ -2167,6 +2172,67 @@
       case 'procedures_defreturn': return `fonction ${r.getFieldValue('NAME')}`;
       default: return 'blocs non reliés (inactifs)';
     }
+  }
+
+  // ---- « Voir les blocs qui l'utilisent » ----
+  // Tous les blocs qui désignent ce contrôle (dans n'importe quelle liste de contrôles du bloc).
+  const CHAMPS_CONTROLE = ['CTRL', 'CTRL2', 'TAB'];
+  function blocsDuControle(id) {
+    return workspace.getAllBlocks(true).filter(b => CHAMPS_CONTROLE.some(n => b.getField(n) && b.getFieldValue(n) === id));
+  }
+
+  // Les blocs trouvés sont surlignés ; une petite barre passe d'un endroit (bloc « quand… ») à l'autre.
+  const reperes = { blocs: [], racines: [], index: 0 };
+  function voirBlocsDuControle(c) {
+    afficherVue('vue-code'); // d'abord : elle peut recréer les blocs
+    fermerReperes();
+    reperes.blocs = blocsDuControle(c.id);
+    reperes.racines = [...new Set(reperes.blocs.map(b => b.getRootBlock()))];
+    if (!reperes.racines.length) return;
+    reperes.blocs.forEach(b => marquerRepere(b, true));
+    const barre = el('div', 'barre-reperes');
+    barre.id = 'barre-reperes';
+    const texte = el('span');
+    const bouton = (t, titre, action) => {
+      const b = el('button', null, t);
+      b.title = titre;
+      b.addEventListener('click', action);
+      barre.appendChild(b);
+    };
+    barre.appendChild(el('span', 'barre-reperes-nom', `🔎 ${ICONES_TYPES[c.type] || ''} ${c.nom}`));
+    bouton('◀', 'Endroit précédent', () => allerAuRepere(reperes.index - 1));
+    barre.appendChild(texte);
+    bouton('▶', 'Endroit suivant', () => allerAuRepere(reperes.index + 1));
+    bouton('✕', 'Fermer (les blocs ne sont plus surlignés)', fermerReperes);
+    reperes.texte = texte;
+    $('vue-code').appendChild(barre);
+    allerAuRepere(0);
+  }
+
+  function allerAuRepere(i) {
+    reperes.racines = reperes.racines.filter(r => !r.isDisposed()); // des blocs ont pu être supprimés
+    const n = reperes.racines.length;
+    if (!n) return fermerReperes();
+    reperes.index = (i + n) % n;
+    const racine = reperes.racines[reperes.index];
+    reperes.texte.textContent = `${decrireRacine(racine)} · ${reperes.index + 1} / ${n}`;
+    // Centré ; mais un grand bloc garde son haut visible, sous la barre.
+    workspace.centerOnBlock(racine.id);
+    const haut = racine.getRelativeToSurfaceXY().y * workspace.scale + workspace.scrollY;
+    if (haut < 60) workspace.scroll(workspace.scrollX, workspace.scrollY + 60 - haut);
+  }
+
+  // Contour jaune autour du bloc lui-même (pas des blocs qu'il contient).
+  function marquerRepere(bloc, oui) {
+    const chemin = bloc.pathObject && bloc.pathObject.svgPath;
+    if (chemin) chemin.classList.toggle('bloc-repere', oui);
+  }
+
+  function fermerReperes() {
+    for (const b of reperes.blocs) if (!b.isDisposed()) marquerRepere(b, false);
+    reperes.blocs = [];
+    reperes.racines = [];
+    $('barre-reperes')?.remove();
   }
 
   function allerAuBloc(bloc) {

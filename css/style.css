@@ -230,6 +230,32 @@ h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: var(--
 }
 #vue-code.js-ouvert .voir-js { right: calc(38% + 14px); }
 
+/* Barre « Voir les blocs qui l'utilisent » */
+.barre-reperes {
+  position: absolute;
+  top: 10px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 60;
+  display: flex; align-items: center; gap: 6px;
+  max-width: calc(100% - 420px);
+  padding: 5px 6px 5px 12px;
+  border-radius: 8px;
+  background: #fef9c3;
+  border: 1px solid #eab308;
+  box-shadow: 0 4px 14px rgba(0,0,0,.18);
+  font-size: 14px;
+  color: #422006;
+  white-space: nowrap;
+}
+.barre-reperes > span:not(.barre-reperes-nom) { overflow: hidden; text-overflow: ellipsis; }
+.barre-reperes-nom { font-weight: 600; }
+.barre-reperes button {
+  border: 0; border-radius: 5px; padding: 3px 9px;
+  background: #fde68a; color: inherit; font: inherit; cursor: pointer;
+}
+.barre-reperes button:hover { background: #facc15; }
+.blocklyPath.bloc-repere { stroke: #f59e0b !important; stroke-width: 4px !important; filter: drop-shadow(0 0 5px #facc15); }
+
 /* ---------- Menu des exemples ---------- */
 .menu-conteneur { position: relative; }
 .menu {
