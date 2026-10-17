@@ -1020,6 +1020,7 @@
         g => champNombre(g, 'Hauteur', f.hauteur, v => { f.hauteur = Math.max(60, v); afficherConcepteur(); })
       ]);
       champCouleur(liste, 'Couleur de fond', f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
+      champsRedimensionnement(liste, f, true);
       champTexte(liste, "Menus — un par ligne ; leurs éléments en dessous, décalés d'un espace ; « - » pour un trait",
         f.menus, v => { f.menus = v; blocsAPerimes = true; afficherConcepteur(); }, true,
         'Fichier\n  Nouveau\n  -\n  Quitter\nAide\n  À propos');
@@ -1188,6 +1189,7 @@
     champCouleur(liste, 'Couleur de fond', c.couleurFond, v => { c.couleurFond = v; maj(); });
     champCase(liste, 'Visible au démarrage', c.visible !== false, v => { c.visible = v; maj(); });
     champCase(liste, 'Déplaçable à la souris (pendant le programme)', c.deplacable, v => { c.deplacable = v; maj(); });
+    if (c.type !== 'barreetat') champAncrage(liste, c.ancrage, v => { c.ancrage = v; });
   }
 
   function proprietesPlusieurs(liste, ctrls) {
@@ -1231,10 +1233,77 @@
     if (visibles.length) {
       champCouleur(liste, 'Couleur de fond', visibles[0].couleurFond, v => pourTous(visibles, c => { c.couleurFond = v; }));
       champCase(liste, 'Visibles au démarrage', visibles.every(c => c.visible !== false), v => pourTous(visibles, c => { c.visible = v; }));
+      const ancres = visibles.filter(c => c.type !== 'barreetat');
+      if (ancres.length) champAncrage(liste, ancres[0].ancrage, v => ancres.forEach(c => { c.ancrage = v; }));
     }
     liste.appendChild(el('p', 'aide',
       'Ctrl+clic : ajouter ou retirer un contrôle. Glissez l\'un d\'eux pour les déplacer tous ; ' +
       'flèches : déplacer au pixel près (Maj : de 10). Clic droit : copier, coller, dupliquer…'));
+  }
+
+  // Fenêtre que l'on peut agrandir ou rétrécir pendant le programme.
+  function champsRedimensionnement(liste, f, principale) {
+    champCase(liste, 'Redimensionnable (on peut tirer son bord pour changer sa taille)', f.redimensionnable, v => {
+      f.redimensionnable = v;
+      afficherProprietes();
+    });
+    if (f.redimensionnable) {
+      groupe(liste, [
+        g => champNombre(g, 'Largeur minimale', f.largeurMin ?? 100, v => { f.largeurMin = Math.max(100, v); }),
+        g => champNombre(g, 'Hauteur minimale', f.hauteurMin ?? 60, v => { f.hauteurMin = Math.max(60, v); })
+      ]);
+    }
+    if (principale) {
+      champCase(liste, 'Bouton Agrandir dans la barre de titre (application .exe)', f.agrandir, v => { f.agrandir = v; });
+      champCase(liste, 'Démarrer agrandie, sur tout l\'écran (application .exe)', f.agrandie, v => { f.agrandie = v; });
+    }
+    if (f.redimensionnable || f.agrandir || f.agrandie) {
+      liste.appendChild(el('p', 'aide',
+        'Quand la fenêtre change de taille, chaque contrôle suit les bords choisis dans sa propriété « Ancrage » ' +
+        '(par défaut, il reste en haut à gauche). Pendant l\'essai dans BlocStudio, on la tire par la poignée ◢ de son coin.'));
+    }
+  }
+
+  // Ancrage façon Visual Basic : les bords de la fenêtre (ou du conteneur) que le contrôle suit.
+  // h : haut, b : bas, g : gauche, d : droite.
+  function champAncrage(parent, valeur, surChange) {
+    const d = prop(parent, 'Ancrage : quand la fenêtre change de taille, le contrôle suit les bords en bleu');
+    let a = valeur ?? 'hg';
+    const ligne = el('div', 'ligne');
+    const boite = el('div', 'ancrage');
+    boite.appendChild(el('span', 'ancrage-centre'));
+    const explication = el('span', 'aide ancrage-texte');
+    const cotes = [['h', 'haut', 'du haut'], ['b', 'bas', 'du bas'], ['g', 'gauche', 'gauche'], ['d', 'droite', 'droit']];
+    const boutons = cotes.map(([l, classe, nom]) => {
+      const b = el('button', 'ancrage-' + classe);
+      b.type = 'button';
+      b.title = 'Suivre le bord ' + nom;
+      b.addEventListener('click', () => {
+        a = 'hbgd'.split('').filter(x => x === l ? !a.includes(x) : a.includes(x)).join('');
+        surChange(a);
+        maj();
+        planifierSauvegarde();
+      });
+      boite.appendChild(b);
+      return [l, b];
+    });
+    const maj = () => {
+      boutons.forEach(([l, b]) => b.classList.toggle('actif', a.includes(l)));
+      explication.textContent = expliquerAncrage(a);
+    };
+    ligne.append(boite, explication);
+    d.appendChild(ligne);
+    maj();
+  }
+
+  function expliquerAncrage(a) {
+    const g = a.includes('g'), d = a.includes('d'), h = a.includes('h'), b = a.includes('b');
+    const parties = [
+      g && d ? 's\'étire en largeur' : d ? 'reste collé à droite' : g ? '' : 'reste centré de gauche à droite',
+      h && b ? 's\'étire en hauteur' : b ? 'reste collé en bas' : h ? '' : 'reste centré de haut en bas'
+    ].filter(x => x);
+    if (g && d && h && b) return 'Il s\'étire en largeur et en hauteur.';
+    return parties.length ? 'Il ' + parties.join(' et ') + '.' : 'Il reste en haut à gauche (comme d\'habitude).';
   }
 
   function proprietesAutreFenetre(liste, f) {
@@ -1261,6 +1330,7 @@
     liste.appendChild(avertissement);
     avertir();
     champCouleur(liste, 'Couleur de fond', f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
+    champsRedimensionnement(liste, f, false);
     liste.appendChild(el('p', 'aide',
       'Cette fenêtre s\'ouvre par-dessus la fenêtre principale avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 ' + f.nom + ' »). ' +
       'Double-cliquez sur son onglet pour écrire ce qui se passe quand elle s\'ouvre.'));
@@ -2399,6 +2469,7 @@
       case 'bs_quand_camera_mouvement': return `quand ${ctrl()} voit bouger`;
       case 'bs_quand_clone': return `quand un clone de ${ctrl()} est créé`;
       case 'bs_quand_fenetre': return `quand la fenêtre ${nomFenetre(r.getFieldValue('FENETRE'))} ${r.getField('QUOI').getText()}`;
+      case 'bs_quand_fenetre_taille': return `quand la fenêtre ${nomFenetre(r.getFieldValue('FENETRE'))} change de taille`;
       case 'bs_quand_souris_ctrl': return `quand on ${r.getField('QUOI').getText()} ${ctrl()}`;
       case 'bs_quand_souris_fenetre': return `quand la souris ${r.getField('QUOI').getText()} dans la fenêtre`;
       case 'bs_quand_touche': return `quand la touche ${r.getField('TOUCHE').getText()} est appuyée`;
@@ -2511,7 +2582,7 @@
     selectionner(id);
   }
 
-  const nomFenetre = id => projet.fenetres.find(f => f.id === id)?.nom ?? '?';
+  const nomFenetre = id => id === '' ? 'principale' : projet.fenetres.find(f => f.id === id)?.nom ?? '?';
 
   function el(tag, classe, texte) {
     const e = document.createElement(tag);
@@ -3043,7 +3114,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
   const e = document.getElementById('erreur');
   e.textContent = 'Erreur : ' + msg;
   e.style.display = 'block';
-});
+}, { remplir: ${!!pourExe} });
 </script>
 </body>
 </html>
@@ -3069,7 +3140,8 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
 
   // Application Windows : le lanceur, suivi du programme et d'une petite « signature ».
   // Format lu par lanceur/Lanceur.cs :
-  //   [lanceur.exe][largeur\nhauteur\ntitre\nhtml en UTF-8][longueur sur 8 octets][« BLOCSTD1 »]
+  //   [lanceur.exe][largeur\nhauteur\ntitre\noptions\nhtml en UTF-8][longueur sur 8 octets][« BLOCSTD1 »]
+  // options : « redim=1;agrandir=1;agrandie=0;min=300x200 » (fenêtre Windows redimensionnable…).
   async function construireExe() {
     const base64 = await chargerLanceur();
     const binaire = atob(base64);
@@ -3079,8 +3151,11 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     const f = projet.fenetre;
     const titre = (f.titre || 'Mon programme').replace(/[\r\n]+/g, ' ');
     const hauteur = f.hauteur + (BlocRuntime.lireMenus(f.menus).length ? BlocRuntime.HAUTEUR_MENUS : 0);
+    const menus = hauteur - f.hauteur;
+    const reglages = [`redim=${f.redimensionnable ? 1 : 0}`, `agrandir=${f.agrandir ? 1 : 0}`, `agrandie=${f.agrandie ? 1 : 0}`,
+      `min=${Math.round(f.largeurMin ?? 100)}x${Math.round((f.hauteurMin ?? 60) + menus)}`].join(';');
     const programme = new TextEncoder().encode(
-      `${Math.round(f.largeur)}\n${Math.round(hauteur)}\n${titre}\n${genererPageAutonome(true)}`);
+      `${Math.round(f.largeur)}\n${Math.round(hauteur)}\n${titre}\n${reglages}\n${genererPageAutonome(true)}`);
 
     const fin = new Uint8Array(16);
     const vue = new DataView(fin.buffer);

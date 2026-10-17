@@ -28,6 +28,9 @@ namespace BlocStudio
         public string Titre;
         public int Largeur;
         public int Hauteur;
+        // Fenêtre redimensionnable, bouton Agrandir, agrandie au démarrage, taille minimale (0 = aucune).
+        public bool Redimensionnable, Agrandir, Agrandie;
+        public int LargeurMin, HauteurMin;
         public string Html;
         public string Empreinte;
     }
@@ -97,9 +100,9 @@ namespace BlocStudio
             int debut = (int)(fin - 16 - longueur);
             string contenu = Encoding.UTF8.GetString(octets, debut, (int)longueur);
 
-            // En-tête : largeur, hauteur et titre sur trois lignes, puis la page HTML.
-            string[] parties = contenu.Split(new[] { '\n' }, 4);
-            if (parties.Length < 4) return null;
+            // En-tête : largeur, hauteur, titre et réglages de la fenêtre sur quatre lignes, puis la page HTML.
+            string[] parties = contenu.Split(new[] { '\n' }, 5);
+            if (parties.Length < 5) return null;
 
             string empreinte;
             using (var md5 = MD5.Create())
@@ -108,14 +111,34 @@ namespace BlocStudio
                     .Replace("-", "").Substring(0, 16).ToLowerInvariant();
             }
 
-            return new Programme
+            var programme = new Programme
             {
                 Largeur = int.Parse(parties[0]),
                 Hauteur = int.Parse(parties[1]),
                 Titre = parties[2],
-                Html = parties[3],
+                Html = parties[4],
                 Empreinte = empreinte
             };
+            // Réglages « redim=1;agrandir=0;agrandie=0;min=300x200 ».
+            foreach (string reglage in parties[3].Split(';'))
+            {
+                string[] r = reglage.Split('=');
+                if (r.Length != 2) continue;
+                if (r[0] == "redim") programme.Redimensionnable = r[1] == "1";
+                if (r[0] == "agrandir") programme.Agrandir = r[1] == "1";
+                if (r[0] == "agrandie") programme.Agrandie = r[1] == "1";
+                if (r[0] == "min")
+                {
+                    string[] t = r[1].Split('x');
+                    int l, h;
+                    if (t.Length == 2 && int.TryParse(t[0], out l) && int.TryParse(t[1], out h))
+                    {
+                        programme.LargeurMin = l;
+                        programme.HauteurMin = h;
+                    }
+                }
+            }
+            return programme;
         }
 
         // Les DLL .NET de WebView2 sont des ressources de cet exécutable.
@@ -156,25 +179,45 @@ namespace BlocStudio
     {
         readonly Programme programme;
         readonly Microsoft.Web.WebView2.WinForms.WebView2 vue;
+        readonly float echelle;
 
         public FenetreProgramme(Programme p)
         {
             programme = p;
             Text = p.Titre;
-            FormBorderStyle = FormBorderStyle.FixedSingle;
-            MaximizeBox = false;
+            FormBorderStyle = p.Redimensionnable ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+            MaximizeBox = p.Agrandir;
             StartPosition = FormStartPosition.CenterScreen;
             BackColor = Color.FromArgb(240, 240, 240);
             try { Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
 
             // Les tailles du programme sont en pixels « CSS » : on tient compte du zoom de Windows.
-            float echelle;
             using (Graphics g = CreateGraphics()) echelle = g.DpiX / 96f;
-            ClientSize = new Size((int)Math.Ceiling(p.Largeur * echelle), (int)Math.Ceiling(p.Hauteur * echelle));
+            ClientSize = TailleEcran(p.Largeur, p.Hauteur);
+            if (p.Redimensionnable && p.LargeurMin > 0) MinimumSize = SizeFromClientSize(TailleEcran(p.LargeurMin, p.HauteurMin));
+            if (p.Agrandie) WindowState = FormWindowState.Maximized;
 
             vue = new Microsoft.Web.WebView2.WinForms.WebView2 { Dock = DockStyle.Fill };
             Controls.Add(vue);
             Load += async (s, e) => await Demarrer();
+        }
+
+        Size TailleEcran(int largeur, int hauteur)
+        {
+            return new Size((int)Math.Ceiling(largeur * echelle), (int)Math.Ceiling(hauteur * echelle));
+        }
+
+        // Le bloc « changer la taille de la fenêtre » envoie « taille:LARGEURxHAUTEUR » (en pixels CSS).
+        void MessageRecu(string message)
+        {
+            if (message == null || !message.StartsWith("taille:")) return;
+            string[] t = message.Substring(7).Split('x');
+            int l, h;
+            if (t.Length != 2 || !int.TryParse(t[0], out l) || !int.TryParse(t[1], out h)) return;
+            if (WindowState != FormWindowState.Normal) WindowState = FormWindowState.Normal;
+            Size taille = TailleEcran(Math.Max(l, 100), Math.Max(h, 60));
+            Rectangle ecran = Screen.FromControl(this).WorkingArea;
+            ClientSize = new Size(Math.Min(taille.Width, ecran.Width), Math.Min(taille.Height, ecran.Height));
         }
 
         async System.Threading.Tasks.Task Demarrer()
@@ -202,6 +245,10 @@ namespace BlocStudio
             reglages.IsZoomControlEnabled = false;
             reglages.AreBrowserAcceleratorKeysEnabled = false;
 
+            vue.CoreWebView2.WebMessageReceived += (s, e) =>
+            {
+                try { MessageRecu(e.TryGetWebMessageAsString()); } catch { }
+            };
             vue.CoreWebView2.DocumentTitleChanged += (s, e) =>
             {
                 if (!string.IsNullOrEmpty(vue.CoreWebView2.DocumentTitle)) Text = vue.CoreWebView2.DocumentTitle;

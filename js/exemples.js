@@ -526,18 +526,22 @@
     },
     {
       titre: '📝 Bloc-notes',
-      description: 'Un petit traitement de texte : menus Fichier › Nouveau, Ouvrir…, Enregistrer…, et glisser-déposer d\'un fichier.',
+      description: 'Un petit traitement de texte : menus Fichier › Nouveau, Ouvrir…, Enregistrer…, et glisser-déposer d\'un fichier. On peut agrandir la fenêtre : le texte suit (ancrage).',
       creer: () => {
         // c1 Texte · c2 Etat (barre d'état) · c3 FichierTexte (contrôle Fichier, invisible)
         const etat = x => ecrire('c2', 'texte', x);
         const annule = () => bloc('bs_fichier_annule', 'c3');
         const nomFichier = () => bloc('bs_fichier_nom', 'c3');
         return projet(
-          { titre: 'Bloc-notes', largeur: 520, hauteur: 380, couleurFond: '#f1f5f9', menus: 'Fichier\n  Nouveau\n  Ouvrir…\n  Enregistrer…' },
+          {
+            titre: 'Bloc-notes', largeur: 520, hauteur: 380, couleurFond: '#f1f5f9', menus: 'Fichier\n  Nouveau\n  Ouvrir…\n  Enregistrer…',
+            redimensionnable: true, agrandir: true, largeurMin: 300, hauteurMin: 200
+          },
           [
-            { type: 'zonetexte', nom: 'Texte', multiligne: true, x: 10, y: 10, largeur: 500, hauteur: 312, taillePolice: 15,
+            // Le texte s'étire avec la fenêtre ; la ligne d'état reste collée en bas.
+            { type: 'zonetexte', nom: 'Texte', multiligne: true, ancrage: 'hbgd', x: 10, y: 10, largeur: 500, hauteur: 312, taillePolice: 15,
               couleurFond: '#ffffff', texte: 'Écrivez ici, puis Fichier › Enregistrer…\n\nAstuce : faites glisser un fichier texte sur la fenêtre pour l\'ouvrir.' },
-            { type: 'etiquette', nom: 'Etat', texte: '📄 Nouveau document', x: 10, y: 330, largeur: 500, hauteur: 22, taillePolice: 13, couleurTexte: '#475569' },
+            { type: 'etiquette', nom: 'Etat', ancrage: 'bgd', texte: '📄 Nouveau document', x: 10, y: 330, largeur: 500, hauteur: 22, taillePolice: 13, couleurTexte: '#475569' },
             { type: 'fichier', nom: 'FichierTexte', typeFichier: 'texte', nomPropose: 'mes notes.txt', largeur: 0, hauteur: 0 }
           ],
           [],

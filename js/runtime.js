@@ -146,6 +146,9 @@ function BlocRuntimeFactory() {
       font-size: 14px; cursor: pointer; }
     .bs-fenetre-fermer:hover { background: #dc2626; color: #fff; }
     .bs-fenetre-voile { position: fixed; inset: 0; background: rgba(15,23,42,.3); animation: bs-fondu .15s ease-out; }
+    .bs-poignee { position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; z-index: 3000; cursor: nwse-resize;
+      touch-action: none; background: linear-gradient(135deg, transparent 50%, #94a3b8 50%, #94a3b8 58%, transparent 58%,
+      transparent 70%, #94a3b8 70%, #94a3b8 78%, transparent 78%); }
     @keyframes bs-fondu { from { opacity: 0; } }
     @keyframes bs-apparition { from { opacity: 0; transform: scale(.94); } }
   `;
@@ -959,10 +962,11 @@ function BlocRuntimeFactory() {
 
     const actionsMenus = {};
     const menus = lireMenus(fenetre.menus);
+    let barreMenus = null;
     if (menus.length) {
-      const barre = creerBarreMenus(menus, chemin => (actionsMenus[chemin] || []).forEach(f => f()));
-      barre.style.width = fenetre.largeur + 'px';
-      hote.appendChild(barre);
+      barreMenus = creerBarreMenus(menus, chemin => (actionsMenus[chemin] || []).forEach(f => f()));
+      barreMenus.style.width = fenetre.largeur + 'px';
+      hote.appendChild(barreMenus);
     }
 
     // Mémoire du programme : elle reste d'un lancement à l'autre (stockage du navigateur).
@@ -994,6 +998,10 @@ function BlocRuntimeFactory() {
     });
     hote.appendChild(surface);
 
+    // Taille actuelle de chaque fenêtre ('' : la principale) : elle change quand on la redimensionne.
+    const tailles = { '': { largeur: fenetre.largeur, hauteur: fenetre.hauteur } };
+    const principale = { def: fenetre, surface, barreMenus, ouverte: true, surTaille: [] };
+
     // ---- Autres fenêtres du programme ----
     // Elles s'ouvrent par-dessus la fenêtre principale ; leurs contrôles gardent leur
     // contenu quand on les ferme puis les rouvre.
@@ -1020,7 +1028,8 @@ function BlocRuntimeFactory() {
       });
       el.append(barre, s);
       document.body.appendChild(el);
-      const f = fenetres[def.id] = { def, el, titre, surface: s, voile: null, ouverte: false, surOuverture: [], surFermeture: [], attentes: [] };
+      const f = fenetres[def.id] = { def, el, titre, surface: s, voile: null, ouverte: false, surOuverture: [], surFermeture: [], surTaille: [], attentes: [] };
+      tailles[def.id] = { largeur: def.largeur, hauteur: def.hauteur };
       fermer.addEventListener('click', () => fermerFenetre(f));
       el.addEventListener('pointerdown', () => { if (f.ouverte && !f.voile) el.style.zIndex = ++plusHaut; });
       // On déplace la fenêtre en la tenant par sa barre de titre.
@@ -1037,8 +1046,98 @@ function BlocRuntimeFactory() {
         barre.addEventListener('pointerup', lacher);
       });
     }
-    // Fenêtre (principale ou autre) où se trouve un contrôle.
-    const fenetreDe = d => (fenetres[d.fenetre] && fenetres[d.fenetre].def) || fenetre;
+    // Taille de la fenêtre (principale ou autre) où se trouve un contrôle.
+    const idFenetreDe = d => fenetres[d.fenetre] ? d.fenetre : '';
+    const fenetreDe = d => tailles[idFenetreDe(d)];
+
+    // ---- Fenêtres redimensionnables ----
+    // Change la taille d'une fenêtre (sans descendre sous sa taille minimale) ; ses contrôles suivent leur ancrage.
+    function redimensionner(f, largeur, hauteur) {
+      const idF = f === principale ? '' : f.def.id, t = tailles[idF];
+      const l = Math.round(Math.max(Number(f.def.largeurMin) || 100, Number(largeur) || 0));
+      const h = Math.round(Math.max(Number(f.def.hauteurMin) || 60, Number(hauteur) || 0));
+      const dl = l - t.largeur, dh = h - t.hauteur;
+      if (!dl && !dh) return;
+      t.largeur = l;
+      t.hauteur = h;
+      f.surface.style.width = l + 'px';
+      f.surface.style.height = h + 'px';
+      if (f.barreMenus) f.barreMenus.style.width = l + 'px';
+      suivreAncrages(idF, dl, dh);
+      f.surTaille.forEach(fn => fn());
+    }
+
+    // Comme l'« Anchor » de Visual Basic : un contrôle garde sa distance aux bords où il est ancré
+    // (h : haut, b : bas, g : gauche, d : droite ; par défaut en haut à gauche). Ancré des deux côtés,
+    // il s'étire ; d'aucun côté, il reste centré. Un contrôle posé sur des onglets ou dans un cadre
+    // suit les bords de ce conteneur plutôt que ceux de la fenêtre.
+    function suivreAncrages(idF, dl, dh) {
+      const ids = Object.keys(donnees).filter(id => !INVISIBLES.includes(donnees[id].type) && idFenetreDe(donnees[id]) === idF);
+      const cadres = ids.filter(id => donnees[id].type === 'cadre');
+      const parentDe = id => {
+        const d = donnees[id];
+        if (d.onglets && ids.includes(d.onglets)) return d.onglets;
+        const cx = d.x + d.largeur / 2, cy = d.y + d.hauteur / 2;
+        return cadres.filter(p => {
+          const c = donnees[p];
+          return p !== id && c.largeur * c.hauteur > d.largeur * d.hauteur &&
+            cx >= c.x && cx <= c.x + c.largeur && cy >= c.y && cy <= c.y + c.hauteur;
+        }).sort((a, b) => donnees[a].largeur * donnees[a].hauteur - donnees[b].largeur * donnees[b].hauteur)[0];
+      };
+      const parents = Object.fromEntries(ids.map(id => [id, parentDe(id)]));
+      const ecarts = {};
+      const suivre = (debut, fin, decalage, etirement) =>
+        debut && fin ? [decalage, etirement] : fin ? [decalage + etirement, 0] : debut ? [decalage, 0] : [decalage + etirement / 2, 0];
+      const ecartDe = (id, profondeur = 0) => {
+        if (ecarts[id]) return ecarts[id];
+        const p = parents[id];
+        const e = p && profondeur < 20 ? ecartDe(p, profondeur + 1) : { x: 0, y: 0, l: dl, h: dh };
+        const a = donnees[id].type === 'barreetat' ? 'bgd' : String(donnees[id].ancrage ?? 'hg');
+        const [x, l] = suivre(a.includes('g'), a.includes('d'), e.x, e.l);
+        const [y, h] = suivre(a.includes('h'), a.includes('b'), e.y, e.h);
+        return (ecarts[id] = { x, y, l, h });
+      };
+      ids.forEach(id => ecartDe(id));
+      for (const id of ids) {
+        const d = donnees[id], e = ecarts[id];
+        if (e.x || e.y) poser(id, d.x + e.x, d.y + e.y);
+        // Ce qui ne peut pas être retiré (taille déjà nulle) est gardé pour quand la fenêtre regrandit.
+        d.reste = d.reste || { largeur: 0, hauteur: 0 };
+        for (const [prop, ecart] of [['largeur', e.l], ['hauteur', e.h]]) {
+          if (!ecart) continue;
+          const voulu = d[prop] + ecart + d.reste[prop], v = Math.max(0, voulu);
+          d.reste[prop] = voulu - v;
+          if (v !== d[prop]) app.ecrire(id, prop, v);
+        }
+      }
+    }
+
+    // Poignée dans le coin en bas à droite, pour tirer la fenêtre à la souris.
+    function ajouterPoignee(f) {
+      const p = document.createElement('div');
+      p.className = 'bs-poignee';
+      p.title = 'Tirer pour changer la taille de la fenêtre';
+      f.surface.appendChild(p);
+      p.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        e.stopPropagation();
+        const t = tailles[f === principale ? '' : f.def.id];
+        const depart = { x: e.clientX, y: e.clientY, l: t.largeur, h: t.hauteur };
+        try { p.setPointerCapture(e.pointerId); } catch (err) { /* pas grave */ }
+        const bouger = ev => redimensionner(f, depart.l + ev.clientX - depart.x, depart.h + ev.clientY - depart.y);
+        const lacher = () => { p.removeEventListener('pointermove', bouger); p.removeEventListener('pointerup', lacher); };
+        p.addEventListener('pointermove', bouger);
+        p.addEventListener('pointerup', lacher);
+      });
+    }
+
+    // Dans l'application .exe, la page remplit la fenêtre Windows : on suit sa taille.
+    const dansExe = !!options.remplir;
+    function remplirFenetreWindows() {
+      if (window.innerWidth > 0 && window.innerHeight > 0) {
+        redimensionner(principale, window.innerWidth, window.innerHeight - (barreMenus ? HAUTEUR_MENUS : 0));
+      }
+    }
 
     function ouvrirFenetre(f, attendre) {
       if (arrete) return JAMAIS;
@@ -1047,8 +1146,9 @@ function BlocRuntimeFactory() {
         // Centrée sur la fenêtre principale, un peu décalée si d'autres sont déjà ouvertes.
         const r = surface.getBoundingClientRect();
         const decalage = 24 * Object.values(fenetres).filter(x => x.ouverte && x !== f).length;
-        f.el.style.left = Math.max(0, r.left + (r.width - f.def.largeur) / 2 + decalage) + 'px';
-        f.el.style.top = Math.max(0, r.top + (r.height - f.def.hauteur - 30) / 2 + decalage) + 'px';
+        const t = tailles[f.def.id];
+        f.el.style.left = Math.max(0, r.left + (r.width - t.largeur) / 2 + decalage) + 'px';
+        f.el.style.top = Math.max(0, r.top + (r.height - t.hauteur - 30) / 2 + decalage) + 'px';
         f.el.style.display = '';
         f.surOuverture.forEach(h => h());
       }
@@ -1076,6 +1176,7 @@ function BlocRuntimeFactory() {
     }
 
     function laFenetre(id) {
+      if (id === '') return principale;
       if (!fenetres[id]) throw new Error('Cette fenêtre n\'existe plus (elle a peut-être été supprimée).');
       return fenetres[id];
     }
@@ -2606,7 +2707,21 @@ function BlocRuntimeFactory() {
       fenetreOuverte(id) { return laFenetre(id).ouverte; },
       quandFenetre(id, quoi, fn) {
         const f = laFenetre(id), h = proteger(fn);
-        (quoi === 'ouverture' ? f.surOuverture : f.surFermeture).push(() => h());
+        (quoi === 'taille' ? f.surTaille : quoi === 'ouverture' ? f.surOuverture : f.surFermeture).push(() => h());
+      },
+      // La fenêtre principale d'un .exe : c'est la fenêtre Windows qui change de taille (la page suit).
+      tailleFenetre(id, largeur, hauteur) {
+        const f = laFenetre(id);
+        const l = Math.max(Number(f.def.largeurMin) || 100, app.nombre(largeur));
+        const h = Math.max(Number(f.def.hauteurMin) || 60, app.nombre(hauteur));
+        const webview = window.chrome && window.chrome.webview;
+        if (f === principale && dansExe && webview) {
+          webview.postMessage(`taille:${Math.round(l)}x${Math.round(h + (barreMenus ? HAUTEUR_MENUS : 0))}`);
+        } else redimensionner(f, l, h);
+      },
+      lireTailleFenetre(id, quoi) {
+        laFenetre(id);
+        return tailles[id][quoi === 'hauteur' ? 'hauteur' : 'largeur'];
       },
       // ---- Clones ----
       quandClone(id, fn) { (actionsClones[id] = actionsClones[id] || []).push(proteger(fn)); },
@@ -3362,6 +3477,11 @@ function BlocRuntimeFactory() {
         if (d.type === 'camera' && d.allumerAuDemarrage !== false) allumerCamera(id).catch(signaler);
         if (d.type === 'sprite' && d.anime) animerSprite(d, 'boucle');
       }
+      if (dansExe) {
+        ecouter(window, 'resize', remplirFenetreWindows);
+        remplirFenetreWindows(); // fenêtre déjà agrandie au démarrage
+      } else if (fenetre.redimensionnable) ajouterPoignee(principale);
+      Object.values(fenetres).forEach(f => { if (f.def.redimensionnable) ajouterPoignee(f); });
       auDemarrage.forEach(f => f());
     } catch (e) {
       signaler(e);

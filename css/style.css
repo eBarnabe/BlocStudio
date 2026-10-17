@@ -644,3 +644,20 @@ body.dans-hote .si-navigateur, body:not(.dans-hote) .si-hote { display: none; }
 .studio-bas { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
 .studio-bas label { display: flex; align-items: center; gap: 8px; font-size: 14px; }
 .studio-bas input { padding: 6px 8px; border: 1px solid #cbd2e1; border-radius: 6px; font: inherit; }
+
+/* Ancrage d'un contrôle (comme l'« Anchor » de Visual Basic) : on clique sur les bords à suivre. */
+.ancrage { position: relative; flex: none; width: 84px; height: 60px; border: 1px solid var(--bord); border-radius: 6px; background: #f8fafc; }
+.ancrage-centre { position: absolute; left: 29px; top: 21px; width: 26px; height: 18px; border: 1px solid #6366f1; border-radius: 3px; background: #e0e7ff; }
+.ancrage button { position: absolute; padding: 0; border: 0; background: transparent; }
+.ancrage button::before { content: ''; position: absolute; border-radius: 2px; background: #cbd5e1; }
+.ancrage button:hover::before { background: #94a3b8; }
+.ancrage button.actif::before { background: #4f46e5; }
+.ancrage-haut, .ancrage-bas { left: 35px; width: 14px; height: 21px; }
+.ancrage-haut { top: 0; }
+.ancrage-bas { bottom: 0; }
+.ancrage-haut::before, .ancrage-bas::before { inset: 3px 5px; }
+.ancrage-gauche, .ancrage-droite { top: 23px; width: 29px; height: 14px; }
+.ancrage-gauche { left: 0; }
+.ancrage-droite { right: 0; }
+.ancrage-gauche::before, .ancrage-droite::before { inset: 5px 3px; }
+.ancrage-texte { font-size: 12px; }

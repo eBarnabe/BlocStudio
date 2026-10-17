@@ -437,11 +437,13 @@
   const COULEUR_FENETRES = '#0e7490';
 
   // Les autres fenêtres du projet (désignées par leur identifiant, pour pouvoir les renommer).
+  // `avecPrincipale` : la fenêtre principale est aussi proposée (identifiant '').
   class ChampFenetre extends Blockly.FieldDropdown {
-    constructor() {
+    constructor(avecPrincipale) {
       super(function () {
         const options = BlocStudio.fenetres().map(f => ['🪟 ' + f.nom, f.id]);
-        if (!options.length) options.push(['(aucune autre fenêtre)', '']);
+        if (avecPrincipale) options.unshift(['🪟 principale', '']);
+        else if (!options.length) options.push(['(aucune autre fenêtre)', '']);
         const v = this.getValue();
         if (v && !options.some(o => o[1] === v)) options.push(['(fenêtre supprimée)', v]);
         return options;
@@ -479,6 +481,27 @@
     COULEUR_FENETRES, 'Change le texte de la barre de titre de la fenêtre.');
   Blockly.Blocks['bs_fenetre_ouverte'] = valeur(() => ['la fenêtre', FENETRE(), 'est ouverte ?'], 'Boolean',
     COULEUR_FENETRES, 'Vrai si la fenêtre est affichée en ce moment.');
+
+  // Taille des fenêtres (la principale comprise).
+  const TOUTE_FENETRE = () => ({ champ: new ChampFenetre(true), nom: 'FENETRE' });
+  Blockly.Blocks['bs_quand_fenetre_taille'] = {
+    init() {
+      this.appendDummyInput()
+        .appendField('quand la fenêtre')
+        .appendField(new ChampFenetre(true), 'FENETRE')
+        .appendField('change de taille');
+      this.appendStatementInput('DO');
+      this.setColour(COULEUR_EVENEMENTS);
+      this.hat = 'cap';
+      this.setTooltip('Exécuté chaque fois que la fenêtre change de taille : quand on la tire par son bord (si elle est redimensionnable), quand on l\'agrandit, ou avec « changer la taille de la fenêtre ». Les contrôles suivent déjà leur ancrage ; ici, on peut faire le reste.');
+    }
+  };
+  Blockly.Blocks['bs_fenetre_changer_taille'] = instruction(() => [
+    'changer la taille de la fenêtre', TOUTE_FENETRE(), { nom: 'L', libelle: 'largeur', check: 'Number' }, { nom: 'H', libelle: 'hauteur', check: 'Number' }
+  ], COULEUR_FENETRES, 'Donne une nouvelle taille (en pixels, sans la barre de titre ni les menus) à la fenêtre. Elle ne descend pas sous sa taille minimale ; les contrôles suivent leur ancrage.');
+  Blockly.Blocks['bs_fenetre_dimension'] = valeur(() => [
+    { champ: new Blockly.FieldDropdown([['largeur', 'largeur'], ['hauteur', 'hauteur']]), nom: 'QUOI' }, 'de la fenêtre', TOUTE_FENETRE()
+  ], 'Number', COULEUR_FENETRES, 'La taille actuelle de la fenêtre en pixels (sans la barre de titre ni les menus).');
 
   // ---------- Mouvement ----------
 
@@ -1599,6 +1622,10 @@
   gen.forBlock['bs_fenetre_fermer'] = b => `app.fenetre(${fen(b)}, 'fermer');\n`;
   gen.forBlock['bs_fenetre_titre'] = b => `app.fenetre(${fen(b)}, 'titre', ${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_fenetre_ouverte'] = b => [`app.fenetreOuverte(${fen(b)})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_quand_fenetre_taille'] = b =>
+    `app.quandFenetre(${fen(b)}, 'taille', async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_fenetre_changer_taille'] = b => `app.tailleFenetre(${fen(b)}, ${val(b, 'L', '0')}, ${val(b, 'H', '0')});\n`;
+  gen.forBlock['bs_fenetre_dimension'] = b => [`app.lireTailleFenetre(${fen(b)}, ${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
 
   gen.forBlock['bs_quand_clone'] = b => `app.quandClone(${id(b)}, async function (moi) {\n${corps(b)}});\n`;
   gen.forBlock['bs_creer_clone'] = b => `app.creerClone(${id(b)});\n`;
@@ -2107,6 +2134,12 @@
         fen('bs_fenetre_titre', null, { VAL: texte(f.titre || f.nom) }),
         fen('bs_fenetre_ouverte'));
     }
+    // Sa taille : la principale a l'identifiant ''.
+    const taille = (type, champs, inputs) => Object.assign({ kind: 'block', type, fields: Object.assign({ FENETRE: principale ? '' : f.id }, champs) }, inputs && { inputs });
+    contenu.push(etiquette('Taille'),
+      taille('bs_quand_fenetre_taille'),
+      taille('bs_fenetre_dimension'), taille('bs_fenetre_dimension', { QUOI: 'hauteur' }),
+      taille('bs_fenetre_changer_taille', null, { L: nombre(f.largeur), H: nombre(f.hauteur) }));
     const ctrls = BlocStudio.controles().filter(c => (c.fenetre || '') === (principale ? '' : f.id));
     if (!ctrls.length) contenu.push(etiquette('Posez des contrôles sur cette fenêtre (onglet Fenêtre) : chacun aura ici ses blocs.'));
     for (const c of ctrls) {
