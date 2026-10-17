@@ -1201,9 +1201,11 @@
       b.disabled = !actif;
       b.addEventListener('click', action);
       boutons.appendChild(b);
+      return b;
     };
     const son = projet.sons.find(s => s.id === c.son);
-    bouton('▶ Écouter', () => ecouterSon(son), !!son);
+    const ecoute = bouton('▶ Écouter', () => ecouterSon(son, ecoute), !!son);
+    suivreEcoute(ecoute, son);
     bouton('✂️ Découper', () => ouvrirDecoupe(son), !!son);
     const choisir = s => { c.son = s.id; maj(); afficherProprietes(); };
     bouton('🎵 Importer…', () => importerSon(choisir));
@@ -1787,28 +1789,54 @@
   let lectureEnCours = null;
 
   function arreterEcoute() {
-    if (!lectureEnCours) return;
-    try { lectureEnCours.source.stop(); } catch (e) { /* déjà fini */ }
+    const lecture = lectureEnCours;
+    if (!lecture) return;
     lectureEnCours = null;
+    try { lecture.source.stop(); } catch (e) { /* déjà fini */ }
+    finEcoute(lecture);
   }
 
-  function jouerExtrait(tampon, debut, fin) {
+  // `bouton` (facultatif) : le bouton « ▶ … » qui a lancé l'écoute ; il devient « ■ … »
+  // pendant la lecture, et un nouveau clic l'arrête.
+  function jouerExtrait(tampon, debut, fin, bouton, son) {
     arreterEcoute();
     const ctx = BlocRuntime.contexteAudio();
     const source = ctx.createBufferSource();
     source.buffer = tampon;
     source.connect(ctx.destination);
-    const lecture = { source, depart: ctx.currentTime, debut, fin };
-    source.onended = () => { if (lectureEnCours === lecture) lectureEnCours = null; };
+    const lecture = { source, depart: ctx.currentTime, debut, fin, son };
+    source.onended = () => {
+      if (lectureEnCours !== lecture) return;
+      lectureEnCours = null;
+      finEcoute(lecture);
+    };
     source.start(0, debut, fin - debut);
     lectureEnCours = lecture;
+    if (bouton) suivreEcoute(bouton, son);
   }
 
-  async function ecouterSon(s) {
+  // Le bouton affiche « ■ » tant que ce son s'écoute (même après un réaffichage du panneau).
+  function suivreEcoute(bouton, son) {
+    const lecture = lectureEnCours;
+    if (!lecture || !son || lecture.son !== son) return;
+    lecture.bouton = bouton;
+    lecture.texte = bouton.textContent;
+    bouton.textContent = lecture.texte === '▶ Écouter' ? '■ Arrêter' : lecture.texte.replace('▶', '■');
+    bouton.title = 'Arrêter l\'écoute';
+  }
+
+  function finEcoute(lecture) {
+    if (!lecture.bouton) return;
+    lecture.bouton.textContent = lecture.texte;
+    lecture.bouton.title = '';
+  }
+
+  async function ecouterSon(s, bouton) {
+    if (bouton && lectureEnCours && lectureEnCours.son === s) return arreterEcoute();
     try {
       const tampon = await BlocRuntime.decoderSon(s.donnees);
       const [debut, fin] = BlocRuntime.extraitSon(s, tampon);
-      jouerExtrait(tampon, debut, fin);
+      jouerExtrait(tampon, debut, fin, bouton, s);
     } catch (e) {
       alert(`Le son « ${s.nom} » n'a pas pu être lu.`);
     }
@@ -2261,7 +2289,8 @@
       const usages = blocs.filter(b => b.getField('SON') && b.getFieldValue('SON') === s.id);
       const controles = projet.controles.filter(c => c.type === 'son' && c.son === s.id);
       const tr = el('tr');
-      tr.appendChild(el('td')).appendChild(puce('▶ ' + s.nom, () => ecouterSon(s), 'puce-nom'));
+      const ecoute = tr.appendChild(el('td')).appendChild(puce('▶ ' + s.nom, () => ecouterSon(s, ecoute), 'puce-nom'));
+      suivreEcoute(ecoute, s);
       tr.appendChild(el('td', 'muet', `${Math.max(1, Math.round(s.donnees.length * 0.75 / 1024))} Ko` +
         (s.fin > s.debut || s.debut > 0 ? ' · ✂️ découpé' : '') + (s.musique ? ' · 🎹 8 bits' : '')));
       const endroits = tr.appendChild(pucesEndroits(usages));
