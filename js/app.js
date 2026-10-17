@@ -92,8 +92,9 @@
   let execution = null;
 
   window.BlocStudio = {
-    controles: () => projet.controles, fenetre: () => projet.fenetre,
-    sons: () => projet.sons, sprites: () => projet.sprites, fenetres: () => projet.fenetres
+    // (avant le chargement du premier projet, la boîte à outils est construite sur un projet vide)
+    controles: () => projet ? projet.controles : [], fenetre: () => projet ? projet.fenetre : projetVide().fenetre,
+    sons: () => projet.sons, sprites: () => projet.sprites, fenetres: () => projet ? projet.fenetres : []
   };
 
   const $ = id => document.getElementById(id);
@@ -138,6 +139,7 @@
   }
 
   function chargerProjet(p) {
+    workspace.getToolbox().clearSelection(); // sa catégorie ouverte désignait des contrôles de l'ancien projet
     projet = Object.assign(projetVide(), p);
     projet.fenetre = Object.assign({ menus: '' }, projet.fenetre);
     if (!Array.isArray(projet.sons)) projet.sons = [];
@@ -159,6 +161,7 @@
     }
     workspace.clearUndo();
     blocsAPerimes = false;
+    majBoite();
     majCodeJs();
     repartirHistorique();
   }
@@ -240,7 +243,7 @@
     afficherVue('vue-fenetre');
     changerFenetre(f.id);
     planifierSauvegarde();
-    $('astuce').textContent = `🪟 Fenêtre « ${f.nom} » créée : posez-y des contrôles, puis ouvrez-la avec le bloc « ouvrir la fenêtre » (catégorie Fenêtres).`;
+    $('astuce').textContent = `🪟 Fenêtre « ${f.nom} » créée : posez-y des contrôles, puis ouvrez-la avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 ${f.nom} »).`;
   }
 
   function supprimerFenetre(f) {
@@ -848,6 +851,7 @@
     menuContextuel(x, y, [
       ...(seul ? [
         { texte: '🧩 Écrire son code', touche: 'double-clic', action: () => ouvrirEvenement(seul) },
+        { texte: `🧰 Ses blocs (catégorie « ${seul.nom} »)`, action: () => montrerBlocsDe(seul) },
         (n => ({ texte: n ? `🔎 Voir les blocs qui l'utilisent (${n})` : '🔎 Aucun bloc ne l\'utilise encore',
           action: () => voirBlocsDuControle(seul), actif: n > 0 }))(blocsDuControle(seul.id).length),
         '-'] : []),
@@ -954,13 +958,7 @@
 
   // Comme dans Visual Basic : double-clic sur un contrôle = aller à son code.
   function ouvrirEvenement(c) {
-    if (c.type === 'basedonnees') { // pas d'événement : on montre ses blocs
-      afficherVue('vue-code');
-      const boite = workspace.getToolbox();
-      const categorie = boite.getToolboxItems().find(i => i.getName && i.getName() === 'Base de données');
-      if (categorie) boite.setSelectedItem(categorie);
-      return;
-    }
+    if (c.type === 'basedonnees') return montrerBlocsDe(c); // pas d'événement : on montre ses blocs
     const type = AVEC_CHANGE.includes(c.type) ? 'bs_quand_change'
       : c.type === 'zonedessin' ? 'bs_quand_glisse'
       : c.type === 'son' || c.type === 'video' ? 'bs_quand_son_fin'
@@ -1044,6 +1042,10 @@
         maj();
       }
     });
+    const voirBlocs = el('button', 'bouton-ses-blocs', `🧰 Ses blocs (onglet Code)`);
+    voirBlocs.title = 'Ouvre la catégorie de ce contrôle dans la boîte à outils : ses événements, ses actions et ses propriétés.';
+    voirBlocs.addEventListener('click', () => montrerBlocsDe(c));
+    liste.appendChild(voirBlocs);
     if (c.type === 'son') return proprietesSon(liste, c, maj);
     if (c.type === 'minuteur') return proprietesMinuteur(liste, c, maj);
     if (c.type === 'basedonnees') return proprietesBase(liste, c, maj);
@@ -1082,7 +1084,7 @@
       champTexte(liste, 'Texte des cases, séparées par |', c.texte, v => { c.texte = v; maj(); }, false, 'Prêt|Page 1');
       liste.appendChild(el('p', 'aide',
         'Toujours collée en bas de la fenêtre. Pour changer une case pendant le programme : ' +
-        '« écrire … dans la case n° … » (catégorie Contrôles).'));
+        '« écrire … dans la case n° … » (dans ses blocs : bouton 🧰 ci-dessus).'));
     }
     if (c.type === 'casecocher') champCase(liste, 'Coché', c.coche, v => { c.coche = v; maj(); });
     if (c.type === 'interrupteur') champCase(liste, 'Allumé', c.coche, v => { c.coche = v; maj(); });
@@ -1098,7 +1100,7 @@
         v => { c.seuilMouvement = Math.min(100, Math.max(1, v)); maj(); });
       liste.appendChild(el('p', 'aide',
         'La webcam s\'affiche quand le programme tourne ; la première fois, Windows demande la permission. ' +
-        'Blocs dans la catégorie Contrôles : « prendre une photo avec… », « mettre la photo de… dans… » (une image ou une zone de dessin), ' +
+        'Ses blocs (bouton 🧰 ci-dessus) : « prendre une photo avec… », « mettre la photo de… dans… » (une image ou une zone de dessin), ' +
         '« enregistrer … dans un fichier » avec un contrôle Fichier. Double-cliquez sur la caméra pour réagir quand elle voit bouger.'));
     }
     if (c.type === 'graphique') proprietesGraphique(liste, c, maj);
@@ -1260,7 +1262,7 @@
     avertir();
     champCouleur(liste, 'Couleur de fond', f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
     liste.appendChild(el('p', 'aide',
-      'Cette fenêtre s\'ouvre par-dessus la fenêtre principale avec le bloc « ouvrir la fenêtre » (catégorie Fenêtres). ' +
+      'Cette fenêtre s\'ouvre par-dessus la fenêtre principale avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 ' + f.nom + ' »). ' +
       'Double-cliquez sur son onglet pour écrire ce qui se passe quand elle s\'ouvre.'));
     const supprimer = el('button', 'danger', '🗑️ Supprimer cette fenêtre');
     supprimer.addEventListener('click', () => supprimerFenetre(f));
@@ -1314,7 +1316,7 @@
     champCase(liste, 'Jouer dès le démarrage du programme', c.autoDemarrage, val => { c.autoDemarrage = val; maj(); });
     liste.appendChild(el('p', 'aide',
       'Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer « quand il se termine ». ' +
-      'Blocs : catégorie Sons et temps.'));
+      'Ses autres blocs : bouton 🧰 ci-dessus.'));
   }
 
   function proprietesMinuteur(liste, c, maj) {
@@ -1355,7 +1357,7 @@
     d.appendChild(choix);
     champTexte(liste, 'Nom proposé pour enregistrer', c.nomPropose || '', v => { c.nomPropose = v; maj(); });
     liste.appendChild(el('p', 'aide',
-      'Comme les boîtes « Ouvrir » et « Enregistrer sous » de Visual Basic. Blocs dans la catégorie Mémoire : ' +
+      'Comme les boîtes « Ouvrir » et « Enregistrer sous » de Visual Basic. Ses blocs (bouton 🧰 ci-dessus) : ' +
       '« ouvrir un fichier avec… », puis « contenu du fichier » ; « enregistrer le texte … avec… » ; ' +
       'et des raccourcis pour un tableau ou une base (CSV), une image ou une zone de dessin (PNG). ' +
       'Double-cliquez sur ce contrôle pour réagir quand on dépose un fichier sur la fenêtre.'));
@@ -1382,8 +1384,7 @@
       }, true);
     champCase(liste, 'Garder les fiches d\'une fois à l\'autre', c.memoriser !== false, v => { c.memoriser = v; maj(); });
     liste.appendChild(el('p', 'aide',
-      'Une base de données range des fiches : une valeur pour chaque champ. Utilisez les blocs de la catégorie ' +
-      '« Base de données » pour ajouter, chercher, modifier ou supprimer des fiches, et « afficher … dans le tableau » pour les voir. ' +
+      'Une base de données range des fiches : une valeur pour chaque champ. Ses blocs (bouton 🧰 ci-dessus) servent à ajouter, chercher, modifier ou supprimer des fiches, et « afficher … dans le tableau » pour les voir. ' +
       'Les fiches ajoutées pendant le programme sont gardées ; elles repartent des fiches de départ si vous changez celles-ci.'));
   }
 
@@ -2351,6 +2352,7 @@
     document.querySelectorAll('.vue').forEach(v => v.classList.toggle('actif', v.id === id));
     if (id === 'vue-code') {
       if (blocsAPerimes) rechargerBlocs();
+      majBoite();
       Blockly.svgResize(workspace);
       $('astuce').textContent = 'Glissez des blocs depuis les catégories à gauche, puis emboîtez-les sous un bloc « quand… ».';
     } else if (id === 'vue-sommaire') {
@@ -2407,6 +2409,32 @@
       case 'procedures_defreturn': return `fonction ${r.getFieldValue('NAME')}`;
       default: return 'blocs non reliés (inactifs)';
     }
+  }
+
+  // ---- Boîte à outils : une catégorie par fenêtre et par contrôle ----
+  // On la reconstruit quand ce qu'elle montre a changé (contrôle ajouté, renommé, supprimé, fenêtre, menus…).
+  let empreinteBoite = '';
+  function empreinteDuProjet() {
+    return JSON.stringify([projet.fenetre.menus, projet.fenetres.map(f => [f.id, f.nom, f.titre]),
+      projet.controles.map(c => [c.id, c.nom, c.type, c.fenetre, c.groupe, c.champs])]);
+  }
+  function majBoite() {
+    const e = empreinteDuProjet();
+    if (e === empreinteBoite) return;
+    empreinteBoite = e;
+    workspace.getToolbox().clearSelection();
+    workspace.updateToolbox(window.BlocStudioBoite(ICONES_TYPES));
+  }
+
+  // Ouvre la catégorie d'un contrôle dans la boîte à outils (et la fenêtre qui la contient).
+  function montrerBlocsDe(c) {
+    afficherVue('vue-code');
+    const boite = workspace.getToolbox();
+    const item = boite.getToolboxItemById('ctrl-' + c.id);
+    if (!item) return;
+    const parent = item.getParent && item.getParent();
+    if (parent && parent.setExpanded) parent.setExpanded(true);
+    boite.setSelectedItem(item);
   }
 
   // ---- « Voir les blocs qui l'utilisent » ----
@@ -3091,7 +3119,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     // Blockly doit être injecté dans une zone visible pour bien se dimensionner.
     $('vue-code').classList.add('actif');
     workspace = Blockly.inject('blockly', {
-      toolbox: window.BlocStudioToolbox,
+      toolbox: window.BlocStudioBoite(ICONES_TYPES),
       renderer: 'zelos',
       media: 'lib/blockly/media/',
       sounds: false,

@@ -230,6 +230,9 @@ h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: var(--
 }
 #vue-code.js-ouvert .voir-js { right: calc(38% + 14px); }
 
+/* Propriétés : « 🧰 Ses blocs » ouvre la catégorie du contrôle dans l'onglet Code. */
+.bouton-ses-blocs { width: 100%; margin: 4px 0 10px; padding: 6px; cursor: pointer; }
+
 /* Barre « Voir les blocs qui l'utilisent » */
 .barre-reperes {
   position: absolute;

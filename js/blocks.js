@@ -186,10 +186,12 @@
     }
   };
 
+  const TYPES_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
+
   Blockly.Blocks['bs_quand_change'] = {
     init() {
-      evenement(this, 'quand', ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'], 'change');
+      evenement(this, 'quand', TYPES_CHANGE, 'change');
       this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page.");
     }
   };
@@ -1709,345 +1711,427 @@
     'if (++app.boucles > 1000000) throw new Error("Boucle infinie ? Le programme a été arrêté.");\n';
 
   // ---------- Boîte à outils ----------
+  // En haut, les blocs généraux (comme dans Scratch) ; en bas, « Mes contrôles » : une catégorie par
+  // fenêtre, et dedans une catégorie par contrôle, avec ses blocs déjà réglés sur lui (comme App Inventor).
+  // Elle est reconstruite quand les contrôles du projet changent (voir majBoite dans app.js).
 
   const ombre = (type, champs) => ({ shadow: { type, fields: champs } });
   const texte = t => ombre('text', { TEXT: t });
   const nombre = n => ombre('math_number', { NUM: n });
+  const couleurOmbre = () => ({ shadow: { type: 'bs_couleur' } });
   const listeTextes = (...valeurs) => ({
     block: {
       type: 'lists_create_with', extraState: { itemCount: valeurs.length },
       inputs: Object.fromEntries(valeurs.map((v, i) => ['ADD' + i, texte(v)]))
     }
   });
+  const etiquette = text => ({ kind: 'label', text });
 
-  window.BlocStudioToolbox = {
-    kind: 'categoryToolbox',
-    contents: [
-      {
-        kind: 'category', name: 'Événements', colour: COULEUR_EVENEMENTS, contents: [
-          { kind: 'block', type: 'bs_quand_demarre' },
-          { kind: 'block', type: 'bs_quand_clic' },
-          { kind: 'block', type: 'bs_quand_change' },
-          { kind: 'block', type: 'bs_quand_glisse' },
-          { kind: 'block', type: 'bs_quand_menu' },
-          { kind: 'block', type: 'bs_quand_fenetre' },
-          { kind: 'block', type: 'bs_quand_touche' },
-          { kind: 'block', type: 'bs_quand_minuteur' },
-          { kind: 'block', type: 'bs_minuteur_ctrl' },
-          { kind: 'block', type: 'bs_quand_son_fin' },
-          { kind: 'block', type: 'bs_toutes_les', inputs: { SEC: nombre(1) } },
-          { kind: 'label', text: 'Messages entre les scripts' },
-          { kind: 'block', type: 'bs_envoyer_message' },
-          { kind: 'block', type: 'bs_quand_message' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Contrôles', colour: COULEUR_CONTROLES, contents: [
-          { kind: 'block', type: 'bs_ecrire', inputs: { VAL: texte('Bonjour') } },
-          { kind: 'block', type: 'bs_lire' },
-          { kind: 'block', type: 'bs_couleur' },
-          { kind: 'block', type: 'bs_fond_fenetre', inputs: { VAL: { shadow: { type: 'bs_couleur' } } } },
-          { kind: 'label', text: 'Boutons radio' },
-          { kind: 'block', type: 'bs_radio_groupe' },
-          { kind: 'label', text: 'Listes' },
-          { kind: 'block', type: 'bs_liste_ajouter', inputs: { VAL: texte('Nouveau choix') } },
-          { kind: 'block', type: 'bs_liste_retirer', inputs: { NUM: nombre(1) } },
-          { kind: 'block', type: 'bs_liste_vider' },
-          { kind: 'label', text: 'Tableaux' },
-          { kind: 'block', type: 'bs_tableau_ajouter', inputs: { LIGNE: listeTextes('Dupont', 'Marie') } },
-          { kind: 'block', type: 'bs_tableau_supprimer', inputs: { NUM: nombre(1) } },
-          { kind: 'block', type: 'bs_tableau_remplacer', inputs: { NUM: nombre(1), LIGNE: listeTextes('Dupont', 'Marie') } },
-          { kind: 'block', type: 'bs_tableau_ecrire_cellule', inputs: { COL: texte('Nom'), NUM: nombre(1), VAL: texte('Martin') } },
-          { kind: 'block', type: 'bs_tableau_vider' },
-          { kind: 'block', type: 'bs_tableau_trier', inputs: { COL: texte('Nom') } },
-          { kind: 'block', type: 'bs_tableau_cellule', inputs: { COL: texte('Nom'), NUM: nombre(1) } },
-          { kind: 'block', type: 'bs_tableau_ligne', inputs: { NUM: nombre(1) } },
-          { kind: 'block', type: 'bs_tableau_colonne', inputs: { COL: texte('Nom') } },
-          { kind: 'block', type: 'bs_tableau_chercher', inputs: { COL: texte('Nom'), VAL: texte('Dupont') } },
-          { kind: 'block', type: 'bs_tableau_csv' },
-          { kind: 'block', type: 'bs_tableau_remplir_csv' },
-          { kind: 'label', text: 'Arborescences' },
-          { kind: 'block', type: 'bs_arbre_ajouter', inputs: { VAL: texte('Chats'), DANS: texte('Animaux') } },
-          { kind: 'block', type: 'bs_arbre_supprimer', inputs: { CHEMIN: texte('Animaux › Chats') } },
-          { kind: 'block', type: 'bs_arbre_ctrl' },
-          { kind: 'block', type: 'bs_arbre_enfants', inputs: { CHEMIN: texte('Animaux') } },
-          { kind: 'label', text: 'Barre d\'état' },
-          { kind: 'block', type: 'bs_barreetat_ecrire', inputs: { VAL: texte('Prêt'), NUM: nombre(1) } },
-          { kind: 'block', type: 'bs_barreetat_case', inputs: { NUM: nombre(1) } },
-          { kind: 'label', text: 'Graphiques' },
-          { kind: 'block', type: 'bs_graphique_ajouter', inputs: { VAL: nombre(10), ETIQ: texte('Sam') } },
-          { kind: 'block', type: 'bs_graphique_vider' },
-          { kind: 'label', text: 'Caméra' },
-          { kind: 'block', type: 'bs_camera_ctrl' },
-          { kind: 'block', type: 'bs_camera_photo' },
-          { kind: 'block', type: 'bs_camera_photo_dans' },
-          { kind: 'block', type: 'bs_quand_camera_mouvement' },
-          { kind: 'label', text: 'Menus' },
-          { kind: 'block', type: 'bs_menu_actif' },
-          { kind: 'label', text: 'Minuteurs et sons' },
-          { kind: 'block', type: 'bs_minuteur_ctrl' },
-          { kind: 'block', type: 'bs_sonctrl' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Fenêtres', colour: COULEUR_FENETRES, contents: [
-          { kind: 'button', text: '🪟 Créer une autre fenêtre…', callbackKey: 'nouvelleFenetre', 'web-class': 'bouton-fenetre' },
-          { kind: 'block', type: 'bs_fenetre_ouvrir' },
-          { kind: 'block', type: 'bs_fenetre_ouvrir', fields: { MODE: 'attendre' } },
-          { kind: 'block', type: 'bs_fenetre_fermer' },
-          { kind: 'block', type: 'bs_quand_fenetre' },
-          { kind: 'block', type: 'bs_fenetre_titre', inputs: { VAL: texte('Nouveau titre') } },
-          { kind: 'block', type: 'bs_fenetre_ouverte' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Clavier et souris', colour: COULEUR_ENTREES, contents: [
-          { kind: 'label', text: 'Clavier' },
-          { kind: 'block', type: 'bs_quand_touche' },
-          { kind: 'block', type: 'bs_touche_enfoncee', fields: { TOUCHE: 'droite' } },
-          { kind: 'block', type: 'bs_derniere_touche' },
-          { kind: 'label', text: 'Souris' },
-          { kind: 'block', type: 'bs_quand_souris_ctrl' },
-          { kind: 'block', type: 'bs_quand_souris_fenetre' },
-          { kind: 'block', type: 'bs_souris_fenetre' },
-          { kind: 'block', type: 'bs_souris_fenetre', fields: { QUOI: 'y' } },
-          { kind: 'block', type: 'bs_souris_enfoncee' },
-          { kind: 'label', text: 'Pour les jeux' },
-          { kind: 'block', type: 'bs_se_touchent' },
-          { kind: 'block', type: 'bs_ecrire', fields: { PROP: 'deplacable' }, inputs: { VAL: { shadow: { type: 'logic_boolean' } } } }
-        ]
-      },
-      {
-        kind: 'category', name: 'Sprites', colour: COULEUR_SPRITES, contents: [
+  const GENERAUX = [
+    {
+      kind: 'category', name: 'Événements', colour: COULEUR_EVENEMENTS, contents: [
+        { kind: 'block', type: 'bs_quand_demarre' },
+        { kind: 'block', type: 'bs_quand_touche' },
+        { kind: 'block', type: 'bs_toutes_les', inputs: { SEC: nombre(1) } },
+        etiquette('Messages entre les scripts'),
+        { kind: 'block', type: 'bs_envoyer_message' },
+        { kind: 'block', type: 'bs_quand_message' },
+        etiquette('Les événements d\'un contrôle (« quand Bouton1 est cliqué »…) sont dans sa catégorie, en bas.')
+      ]
+    },
+    {
+      kind: 'category', name: 'Clavier et souris', colour: COULEUR_ENTREES, contents: [
+        etiquette('Clavier'),
+        { kind: 'block', type: 'bs_quand_touche' },
+        { kind: 'block', type: 'bs_touche_enfoncee', fields: { TOUCHE: 'droite' } },
+        { kind: 'block', type: 'bs_derniere_touche' },
+        etiquette('Souris'),
+        { kind: 'block', type: 'bs_quand_souris_fenetre' },
+        { kind: 'block', type: 'bs_souris_fenetre' },
+        { kind: 'block', type: 'bs_souris_fenetre', fields: { QUOI: 'y' } },
+        { kind: 'block', type: 'bs_souris_enfoncee' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Dialogue', colour: COULEUR_INTERFACE, contents: [
+        { kind: 'block', type: 'bs_message', inputs: { VAL: texte('Bonjour !') } },
+        { kind: 'block', type: 'bs_demander', inputs: { VAL: texte('Comment tu t\'appelles ?') } },
+        { kind: 'block', type: 'bs_demander_nombre', inputs: { VAL: texte('Quel âge as-tu ?') } },
+        { kind: 'block', type: 'bs_confirmer', inputs: { VAL: texte('Veux-tu continuer ?') } },
+        {
+          kind: 'block', type: 'bs_choisir',
+          inputs: { VAL: texte('Quelle couleur préfères-tu ?'), LISTE: listeTextes('Rouge', 'Vert', 'Bleu') }
+        },
+        { kind: 'block', type: 'bs_nombre' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Sons et temps', colour: COULEUR_SONS, contents: [
+        { kind: 'button', text: '🎵 Importer un son…', callbackKey: 'importerSon' },
+        { kind: 'button', text: '🎤 Enregistrer avec le micro…', callbackKey: 'enregistrerSon' },
+        { kind: 'button', text: '🎹 Composer une musique 8 bits…', callbackKey: 'composerMusique' },
+        { kind: 'block', type: 'bs_son' },
+        { kind: 'block', type: 'bs_son_mode' },
+        { kind: 'block', type: 'bs_son_arreter' },
+        { kind: 'block', type: 'bs_sons_arreter' },
+        { kind: 'block', type: 'bs_son_volume', fields: { SON: '*' }, inputs: { VOL: nombre(30) } },
+        etiquette('Voix'),
+        { kind: 'block', type: 'bs_dire', inputs: { VAL: texte('Bonjour, je suis ton ordinateur !') }, fields: { ATTENDRE: 'oui' } },
+        { kind: 'block', type: 'bs_voix_regler', inputs: { VITESSE: nombre(1), HAUTEUR: nombre(1) } },
+        { kind: 'block', type: 'bs_voix_taire' },
+        etiquette('Musique et temps'),
+        { kind: 'block', type: 'bs_note', inputs: { SEC: nombre(0.5) } },
+        { kind: 'block', type: 'bs_attendre', inputs: { SEC: nombre(1) } },
+        { kind: 'block', type: 'bs_maintenant' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Mémoire', colour: COULEUR_MEMOIRE, contents: [
+        { kind: 'block', type: 'bs_memoriser', inputs: { VAL: texte('Marie'), NOM: texte('prénom') } },
+        { kind: 'block', type: 'bs_memoire', inputs: { NOM: texte('prénom') } },
+        { kind: 'block', type: 'bs_oublier', inputs: { NOM: texte('prénom') } },
+        { kind: 'block', type: 'bs_tout_oublier' },
+        etiquette('Fichiers (pour plus de choix : un contrôle 📁 Fichier)'),
+        { kind: 'block', type: 'bs_fichier_enregistrer', inputs: { VAL: texte('Bonjour !'), NOM: texte('mon fichier.txt') } },
+        { kind: 'block', type: 'bs_fichier_ouvrir' }
+      ]
+    },
+    { kind: 'sep' },
+    {
+      kind: 'category', name: 'Logique', categorystyle: 'logic_category', contents: [
+        { kind: 'block', type: 'controls_if' },
+        { kind: 'block', type: 'controls_if', extraState: { hasElse: true } },
+        { kind: 'block', type: 'logic_compare' },
+        { kind: 'block', type: 'logic_operation' },
+        { kind: 'block', type: 'logic_negate' },
+        { kind: 'block', type: 'logic_boolean' },
+        { kind: 'block', type: 'logic_ternary' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Boucles', categorystyle: 'loop_category', contents: [
+        { kind: 'block', type: 'bs_attendre', inputs: { SEC: nombre(1) } },
+        { kind: 'block', type: 'bs_toujours' },
+        { kind: 'block', type: 'controls_repeat_ext', inputs: { TIMES: nombre(10) } },
+        { kind: 'block', type: 'controls_whileUntil' },
+        { kind: 'block', type: 'controls_for', inputs: { FROM: nombre(1), TO: nombre(10), BY: nombre(1) } },
+        { kind: 'block', type: 'controls_forEach' },
+        { kind: 'block', type: 'controls_flow_statements' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Maths', categorystyle: 'math_category', contents: [
+        { kind: 'block', type: 'math_number' },
+        { kind: 'block', type: 'math_arithmetic', inputs: { A: nombre(1), B: nombre(1) } },
+        { kind: 'block', type: 'math_single' },
+        { kind: 'block', type: 'math_round' },
+        { kind: 'block', type: 'math_modulo' },
+        { kind: 'block', type: 'math_number_property' },
+        { kind: 'block', type: 'math_random_int', inputs: { FROM: nombre(1), TO: nombre(100) } },
+        { kind: 'block', type: 'math_random_float' },
+        { kind: 'block', type: 'math_constrain', inputs: { VALUE: nombre(50), LOW: nombre(0), HIGH: nombre(100) } },
+        { kind: 'block', type: 'math_on_list' },
+        { kind: 'block', type: 'math_trig', inputs: { NUM: nombre(45) } },
+        { kind: 'block', type: 'math_constant' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Texte', categorystyle: 'text_category', contents: [
+        { kind: 'block', type: 'text' },
+        { kind: 'block', type: 'bs_emoji' },
+        { kind: 'block', type: 'text_join' },
+        { kind: 'block', type: 'bs_retour_ligne' },
+        { kind: 'block', type: 'text_append', inputs: { TEXT: texte('') } },
+        { kind: 'block', type: 'text_length' },
+        { kind: 'block', type: 'text_isEmpty' },
+        { kind: 'block', type: 'bs_contient', inputs: { VAL: texte('jour') } },
+        { kind: 'block', type: 'text_indexOf', inputs: { FIND: texte('jour') } },
+        { kind: 'block', type: 'text_charAt', inputs: { AT: nombre(1) } },
+        { kind: 'block', type: 'text_getSubstring', inputs: { AT1: nombre(1), AT2: nombre(3) } },
+        { kind: 'block', type: 'text_replace', inputs: { FROM: texte('a'), TO: texte('b') } },
+        { kind: 'block', type: 'text_count', inputs: { SUB: texte('a') } },
+        { kind: 'block', type: 'text_changeCase' },
+        { kind: 'block', type: 'text_trim' },
+        { kind: 'block', type: 'text_reverse' },
+        { kind: 'block', type: 'bs_nombre' },
+        { kind: 'block', type: 'bs_couleur' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Listes', categorystyle: 'list_category', contents: [
+        { kind: 'block', type: 'lists_create_empty' },
+        { kind: 'block', type: 'lists_create_with' },
+        { kind: 'block', type: 'lists_length' },
+        { kind: 'block', type: 'lists_isEmpty' },
+        { kind: 'block', type: 'lists_repeat', inputs: { NUM: nombre(5) } },
+        { kind: 'block', type: 'bs_liste_contient' },
+        { kind: 'block', type: 'lists_getIndex' },
+        { kind: 'block', type: 'lists_setIndex' },
+        { kind: 'block', type: 'lists_indexOf' },
+        { kind: 'block', type: 'lists_getSublist', inputs: { AT1: nombre(1), AT2: nombre(3) } },
+        { kind: 'block', type: 'lists_sort' },
+        { kind: 'block', type: 'lists_reverse' },
+        { kind: 'block', type: 'lists_split', inputs: { DELIM: texte(',') } }
+      ]
+    },
+    { kind: 'category', name: 'Variables', categorystyle: 'variable_category', custom: 'VARIABLE' },
+    { kind: 'category', name: 'Fonctions', categorystyle: 'procedure_category', custom: 'PROCEDURE' }
+  ];
+
+  // Avancé : les blocs où l'on choisit le contrôle dans une liste (utile avec « 👉 moi » dans les clones).
+  const TOUS_LES_CONTROLES = {
+    kind: 'category', name: 'Tous les contrôles', colour: COULEUR_CONTROLES, toolboxitemid: 'tous-les-controles', contents: [
+      etiquette('Blocs où l\'on choisit le contrôle (et « 👉 moi » pour un clone)'),
+      { kind: 'block', type: 'bs_ecrire', inputs: { VAL: texte('Bonjour') } },
+      { kind: 'block', type: 'bs_lire' },
+      { kind: 'block', type: 'bs_couleur' },
+      { kind: 'block', type: 'bs_quand_clic' },
+      { kind: 'block', type: 'bs_quand_change' },
+      { kind: 'block', type: 'bs_quand_souris_ctrl' },
+      { kind: 'block', type: 'bs_se_touchent' },
+      { kind: 'block', type: 'bs_placer', inputs: { X: nombre(0), Y: nombre(0) } },
+      { kind: 'block', type: 'bs_glisser', inputs: { X: nombre(200), Y: nombre(100), SEC: nombre(1) } },
+      { kind: 'block', type: 'bs_radio_groupe' },
+      { kind: 'block', type: 'bs_supprimer_clone' }
+    ]
+  };
+
+  // Valeur proposée dans « mettre … à » : celle du contrôle dans le concepteur, quand c'est possible.
+  const PROPS_NOMBRE = ['x', 'y', 'largeur', 'hauteur', 'taillePolice', 'valeur', 'min', 'max', 'pas', 'numero', 'volume',
+    'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs'];
+  const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre'];
+  const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
+  const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee'];
+
+  function valeurProposee(c, prop) {
+    if (PROPS_COULEUR.includes(prop)) return couleurOmbre();
+    if (PROPS_LISTE.includes(prop)) return undefined;
+    if (PROPS_NOMBRE.includes(prop)) {
+      const v = Number(c[prop]);
+      return nombre(Number.isFinite(v) ? v : prop === 'numero' ? 1 : prop === 'direction' ? 90 : 0);
+    }
+    if (PROPS_OUI_NON.includes(prop)) return ombre('logic_boolean', { BOOL: prop === 'visible' ? 'FALSE' : 'TRUE' });
+    const v = typeof c[prop] === 'string' && c[prop].length < 60 ? c[prop] : '';
+    return texte(v);
+  }
+
+  function couleurDuType(type) {
+    if (type === 'sprite') return COULEUR_SPRITES;
+    if (type === 'zonedessin') return COULEUR_DESSIN;
+    if (type === 'basedonnees') return COULEUR_BASE;
+    if (type === 'fichier') return COULEUR_FICHIERS;
+    if (type === 'son' || type === 'video') return COULEUR_SONS;
+    if (type === 'minuteur') return COULEUR_EVENEMENTS;
+    return COULEUR_CONTROLES;
+  }
+
+  // Les blocs d'un contrôle : ses événements, ses actions, puis ses propriétés (lire / mettre).
+  function blocsDuControle(c) {
+    const t = c.type;
+    const b = (type, inputs, champs, autres) => Object.assign(
+      { kind: 'block', type, fields: Object.assign({ CTRL: c.id }, champs) }, inputs && { inputs }, autres);
+    const evenements = [], actions = [];
+    const visible = !BlocRuntime.INVISIBLES.includes(t);
+
+    if (TYPES_CHANGE.includes(t)) evenements.push(b('bs_quand_change'));
+    if (t === 'zonedessin') evenements.push(b('bs_quand_glisse'));
+    if (t === 'camera') evenements.push(b('bs_quand_camera_mouvement'));
+    if (t === 'son' || t === 'video') evenements.push(b('bs_quand_son_fin'));
+    if (t === 'minuteur') evenements.push(b('bs_quand_minuteur'));
+    if (t === 'fichier') evenements.push(b('bs_quand_fichier_depose'));
+    if (visible) evenements.push(b('bs_quand_clic'), b('bs_quand_souris_ctrl'));
+    if (CLONABLES.includes(t)) evenements.push(b('bs_quand_clone'));
+
+    const mouvement = () => [
+      etiquette('Mouvement'),
+      b('bs_avancer', { PAS: nombre(10) }),
+      b('bs_deplacer', { DX: nombre(10), DY: nombre(0) }),
+      b('bs_placer', { X: nombre(0), Y: nombre(0) }),
+      b('bs_placer_sur'),
+      b('bs_glisser', { X: nombre(200), Y: nombre(100), SEC: nombre(1) }),
+      b('bs_orienter', { DIR: nombre(90) }),
+      b('bs_orienter_vers'),
+      b('bs_tourner_direction', { DEG: nombre(15) }),
+      b('bs_direction'),
+      b('bs_rebondir'),
+      b('bs_touche_bord'),
+      b('bs_distance'),
+      b('bs_se_touchent')
+    ];
+    const clones = () => [
+      etiquette('Clones'),
+      b('bs_creer_clone'),
+      { kind: 'block', type: 'bs_supprimer_clone' },
+      b('bs_supprimer_clones'),
+      b('bs_nombre_clones')
+    ];
+
+    switch (t) {
+      case 'sprite':
+        actions.push(
           { kind: 'button', text: '🎨 Dessiner un sprite…', callbackKey: 'nouveauSprite', 'web-class': 'bouton-sprite' },
           { kind: 'button', text: '📁 Importer une image…', callbackKey: 'importerSprite', 'web-class': 'bouton-sprite' },
-          { kind: 'label', text: 'Costumes et animation' },
-          { kind: 'block', type: 'bs_sprite_animer' },
-          { kind: 'block', type: 'bs_sprite_arreter' },
-          { kind: 'block', type: 'bs_sprite_suivant' },
-          { kind: 'block', type: 'bs_sprite_costume', inputs: { VAL: nombre(1) } },
-          { kind: 'block', type: 'bs_sprite_numero' },
-          { kind: 'label', text: 'Orientation' },
-          { kind: 'block', type: 'bs_sprite_regarder' },
-          { kind: 'block', type: 'bs_sprite_tourner', inputs: { DEG: nombre(15) } },
-          { kind: 'label', text: 'Effets' },
-          { kind: 'block', type: 'bs_sprite_taille', inputs: { VAL: nombre(150) } },
-          { kind: 'block', type: 'bs_sprite_grandir', inputs: { VAL: nombre(10) } },
-          { kind: 'block', type: 'bs_sprite_transparence', inputs: { VAL: nombre(50) } },
-          { kind: 'block', type: 'bs_sprite_fondu', inputs: { SEC: nombre(1) } },
-          { kind: 'label', text: 'Changer d\'image' },
-          { kind: 'block', type: 'bs_sprite_changer' },
-          { kind: 'label', text: 'Clones' },
-          { kind: 'block', type: 'bs_quand_clone' },
-          { kind: 'block', type: 'bs_creer_clone' },
-          { kind: 'block', type: 'bs_supprimer_clone' },
-          { kind: 'block', type: 'bs_supprimer_clones' },
-          { kind: 'block', type: 'bs_nombre_clones' },
-          { kind: 'label', text: 'Pour les jeux' },
-          { kind: 'block', type: 'bs_se_touchent' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Mouvement', colour: COULEUR_MOUVEMENT, contents: [
-          { kind: 'block', type: 'bs_avancer', inputs: { PAS: nombre(10) } },
-          { kind: 'block', type: 'bs_deplacer', inputs: { DX: nombre(10), DY: nombre(0) } },
-          { kind: 'block', type: 'bs_placer', inputs: { X: nombre(0), Y: nombre(0) } },
-          { kind: 'block', type: 'bs_placer_sur' },
-          { kind: 'block', type: 'bs_glisser', inputs: { X: nombre(200), Y: nombre(100), SEC: nombre(1) } },
-          { kind: 'label', text: 'Direction' },
-          { kind: 'block', type: 'bs_orienter', inputs: { DIR: nombre(90) } },
-          { kind: 'block', type: 'bs_orienter_vers' },
-          { kind: 'block', type: 'bs_tourner_direction', inputs: { DEG: nombre(15) } },
-          { kind: 'block', type: 'bs_direction' },
-          { kind: 'label', text: 'Bords et distances' },
-          { kind: 'block', type: 'bs_rebondir' },
-          { kind: 'block', type: 'bs_touche_bord' },
-          { kind: 'block', type: 'bs_distance' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Dessin', colour: COULEUR_DESSIN, contents: [
-          { kind: 'block', type: 'bs_dessin_couleur', inputs: { VAL: { shadow: { type: 'bs_couleur' } } } },
-          { kind: 'block', type: 'bs_dessin_epaisseur', inputs: { VAL: nombre(3) } },
-          { kind: 'block', type: 'bs_dessin_trait', inputs: { X1: nombre(10), Y1: nombre(10), X2: nombre(100), Y2: nombre(80) } },
-          { kind: 'block', type: 'bs_dessin_rectangle', inputs: { X: nombre(20), Y: nombre(20), L: nombre(80), H: nombre(50) } },
-          { kind: 'block', type: 'bs_dessin_cercle', inputs: { X: nombre(60), Y: nombre(60), R: nombre(30) } },
-          { kind: 'block', type: 'bs_dessin_point', inputs: { X: nombre(50), Y: nombre(50) } },
-          { kind: 'block', type: 'bs_dessin_texte', inputs: { TXT: texte('Bonjour'), X: nombre(10), Y: nombre(10), T: nombre(20) } },
-          { kind: 'block', type: 'bs_dessin_effacer' },
-          { kind: 'block', type: 'bs_souris' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Dialogue', colour: COULEUR_INTERFACE, contents: [
-          { kind: 'block', type: 'bs_message', inputs: { VAL: texte('Bonjour !') } },
-          { kind: 'block', type: 'bs_demander', inputs: { VAL: texte('Comment tu t\'appelles ?') } },
-          { kind: 'block', type: 'bs_demander_nombre', inputs: { VAL: texte('Quel âge as-tu ?') } },
-          { kind: 'block', type: 'bs_confirmer', inputs: { VAL: texte('Veux-tu continuer ?') } },
-          {
-            kind: 'block', type: 'bs_choisir',
-            inputs: {
-              VAL: texte('Quelle couleur préfères-tu ?'),
-              LISTE: {
-                block: {
-                  type: 'lists_create_with', extraState: { itemCount: 3 },
-                  inputs: { ADD0: texte('Rouge'), ADD1: texte('Vert'), ADD2: texte('Bleu') }
-                }
-              }
-            }
-          },
-          { kind: 'block', type: 'bs_nombre' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Mémoire', colour: COULEUR_MEMOIRE, contents: [
-          { kind: 'block', type: 'bs_memoriser', inputs: { VAL: texte('Marie'), NOM: texte('prénom') } },
-          { kind: 'block', type: 'bs_memoire', inputs: { NOM: texte('prénom') } },
-          { kind: 'block', type: 'bs_oublier', inputs: { NOM: texte('prénom') } },
-          { kind: 'block', type: 'bs_tout_oublier' },
-          { kind: 'label', text: 'Fichiers (avec un contrôle 📁 Fichier)' },
-          { kind: 'block', type: 'bs_fichier_ouvrir_avec' },
-          { kind: 'block', type: 'bs_fichier_contenu' },
-          { kind: 'block', type: 'bs_fichier_enregistrer_avec', inputs: { VAL: texte('Bonjour !') } },
-          { kind: 'block', type: 'bs_fichier_annule' },
-          { kind: 'block', type: 'bs_fichier_nom' },
-          { kind: 'block', type: 'bs_fichier_ouvrir_dans' },
-          { kind: 'block', type: 'bs_fichier_enregistrer_de' },
-          { kind: 'block', type: 'bs_quand_fichier_depose' },
-          { kind: 'label', text: 'Fichiers (sans contrôle)' },
-          { kind: 'block', type: 'bs_fichier_enregistrer', inputs: { VAL: texte('Bonjour !'), NOM: texte('mon fichier.txt') } },
-          { kind: 'block', type: 'bs_fichier_ouvrir' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Base de données', colour: COULEUR_BASE, contents: [
-          { kind: 'label', text: 'Ajouter et montrer' },
-          { kind: 'block', type: 'bs_base_ajouter' },
-          { kind: 'block', type: 'bs_base_afficher' },
-          { kind: 'label', text: 'Chercher' },
-          { kind: 'block', type: 'bs_base_chercher', inputs: { VAL: texte('') } },
-          { kind: 'block', type: 'bs_base_premiere', inputs: { VAL: texte('') } },
-          { kind: 'block', type: 'bs_base_choisie' },
-          { kind: 'label', text: 'Lire et modifier une fiche' },
-          { kind: 'block', type: 'bs_base_champ', inputs: { N: nombre(1) } },
-          { kind: 'block', type: 'bs_base_modifier', inputs: { N: nombre(1), VAL: texte('') } },
-          { kind: 'block', type: 'bs_base_supprimer', inputs: { N: { block: { type: 'bs_base_choisie' } } } },
-          { kind: 'label', text: 'Toute la base' },
-          { kind: 'block', type: 'bs_base_nombre' },
-          { kind: 'block', type: 'bs_base_trier' },
-          { kind: 'block', type: 'bs_base_colonne' },
-          { kind: 'block', type: 'bs_base_vider' },
-          { kind: 'label', text: 'Fichiers (CSV, lisible par Excel)' },
-          { kind: 'block', type: 'bs_base_csv' },
-          { kind: 'block', type: 'bs_base_remplir' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Sons et temps', colour: COULEUR_SONS, contents: [
-          { kind: 'button', text: '🎵 Importer un son…', callbackKey: 'importerSon' },
-          { kind: 'button', text: '🎤 Enregistrer avec le micro…', callbackKey: 'enregistrerSon' },
-          { kind: 'button', text: '🎹 Composer une musique 8 bits…', callbackKey: 'composerMusique' },
-          { kind: 'block', type: 'bs_son' },
-          { kind: 'block', type: 'bs_son_mode' },
-          { kind: 'label', text: 'Contrôles Son' },
-          { kind: 'block', type: 'bs_sonctrl' },
-          { kind: 'block', type: 'bs_quand_son_fin' },
-          { kind: 'label', text: 'Sons de la bibliothèque' },
-          { kind: 'block', type: 'bs_son_arreter' },
-          { kind: 'block', type: 'bs_sons_arreter' },
-          { kind: 'block', type: 'bs_son_volume', fields: { SON: '*' }, inputs: { VOL: nombre(30) } },
-          { kind: 'label', text: 'Voix' },
-          { kind: 'block', type: 'bs_dire', inputs: { VAL: texte('Bonjour, je suis ton ordinateur !') }, fields: { ATTENDRE: 'oui' } },
-          { kind: 'block', type: 'bs_voix_regler', inputs: { VITESSE: nombre(1), HAUTEUR: nombre(1) } },
-          { kind: 'block', type: 'bs_voix_taire' },
-          { kind: 'label', text: 'Musique et temps' },
-          { kind: 'block', type: 'bs_note', inputs: { SEC: nombre(0.5) } },
-          { kind: 'block', type: 'bs_maintenant' }
-        ]
-      },
-      { kind: 'sep' },
-      {
-        kind: 'category', name: 'Logique', categorystyle: 'logic_category', contents: [
-          { kind: 'block', type: 'controls_if' },
-          { kind: 'block', type: 'controls_if', extraState: { hasElse: true } },
-          { kind: 'block', type: 'logic_compare' },
-          { kind: 'block', type: 'logic_operation' },
-          { kind: 'block', type: 'logic_negate' },
-          { kind: 'block', type: 'logic_boolean' },
-          { kind: 'block', type: 'logic_ternary' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Boucles', categorystyle: 'loop_category', contents: [
-          { kind: 'block', type: 'bs_attendre', inputs: { SEC: nombre(1) } },
-          { kind: 'block', type: 'bs_toujours' },
-          { kind: 'block', type: 'controls_repeat_ext', inputs: { TIMES: nombre(10) } },
-          { kind: 'block', type: 'controls_whileUntil' },
-          {
-            kind: 'block', type: 'controls_for',
-            inputs: { FROM: nombre(1), TO: nombre(10), BY: nombre(1) }
-          },
-          { kind: 'block', type: 'controls_forEach' },
-          { kind: 'block', type: 'controls_flow_statements' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Maths', categorystyle: 'math_category', contents: [
-          { kind: 'block', type: 'math_number' },
-          { kind: 'block', type: 'math_arithmetic', inputs: { A: nombre(1), B: nombre(1) } },
-          { kind: 'block', type: 'math_single' },
-          { kind: 'block', type: 'math_round' },
-          { kind: 'block', type: 'math_modulo' },
-          { kind: 'block', type: 'math_number_property' },
-          { kind: 'block', type: 'math_random_int', inputs: { FROM: nombre(1), TO: nombre(100) } },
-          { kind: 'block', type: 'math_random_float' },
-          { kind: 'block', type: 'math_constrain', inputs: { VALUE: nombre(50), LOW: nombre(0), HIGH: nombre(100) } },
-          { kind: 'block', type: 'math_on_list' },
-          { kind: 'block', type: 'math_trig', inputs: { NUM: nombre(45) } },
-          { kind: 'block', type: 'math_constant' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Texte', categorystyle: 'text_category', contents: [
-          { kind: 'block', type: 'text' },
-          { kind: 'block', type: 'bs_emoji' },
-          { kind: 'block', type: 'text_join' },
-          { kind: 'block', type: 'bs_retour_ligne' },
-          { kind: 'block', type: 'text_append', inputs: { TEXT: texte('') } },
-          { kind: 'block', type: 'text_length' },
-          { kind: 'block', type: 'text_isEmpty' },
-          { kind: 'block', type: 'bs_contient', inputs: { VAL: texte('jour') } },
-          { kind: 'block', type: 'text_indexOf', inputs: { FIND: texte('jour') } },
-          { kind: 'block', type: 'text_charAt', inputs: { AT: nombre(1) } },
-          { kind: 'block', type: 'text_getSubstring', inputs: { AT1: nombre(1), AT2: nombre(3) } },
-          { kind: 'block', type: 'text_replace', inputs: { FROM: texte('a'), TO: texte('b') } },
-          { kind: 'block', type: 'text_count', inputs: { SUB: texte('a') } },
-          { kind: 'block', type: 'text_changeCase' },
-          { kind: 'block', type: 'text_trim' },
-          { kind: 'block', type: 'text_reverse' },
-          { kind: 'block', type: 'bs_nombre' }
-        ]
-      },
-      {
-        kind: 'category', name: 'Listes', categorystyle: 'list_category', contents: [
-          { kind: 'block', type: 'lists_create_empty' },
-          { kind: 'block', type: 'lists_create_with' },
-          { kind: 'block', type: 'lists_length' },
-          { kind: 'block', type: 'lists_isEmpty' },
-          { kind: 'block', type: 'lists_repeat', inputs: { NUM: nombre(5) } },
-          { kind: 'block', type: 'bs_liste_contient' },
-          { kind: 'block', type: 'lists_getIndex' },
-          { kind: 'block', type: 'lists_setIndex' },
-          { kind: 'block', type: 'lists_indexOf' },
-          { kind: 'block', type: 'lists_getSublist', inputs: { AT1: nombre(1), AT2: nombre(3) } },
-          { kind: 'block', type: 'lists_sort' },
-          { kind: 'block', type: 'lists_reverse' },
-          { kind: 'block', type: 'lists_split', inputs: { DELIM: texte(',') } }
-        ]
-      },
-      { kind: 'sep' },
-      { kind: 'category', name: 'Variables', categorystyle: 'variable_category', custom: 'VARIABLE' },
-      { kind: 'category', name: 'Fonctions', categorystyle: 'procedure_category', custom: 'PROCEDURE' }
-    ]
+          etiquette('Costumes et animation'),
+          b('bs_sprite_animer'), b('bs_sprite_arreter'), b('bs_sprite_suivant'),
+          b('bs_sprite_costume', { VAL: nombre(1) }), b('bs_sprite_numero'),
+          b('bs_sprite_changer'),
+          etiquette('Orientation et effets'),
+          b('bs_sprite_regarder'), b('bs_sprite_tourner', { DEG: nombre(15) }),
+          b('bs_sprite_taille', { VAL: nombre(150) }), b('bs_sprite_grandir', { VAL: nombre(10) }),
+          b('bs_sprite_transparence', { VAL: nombre(50) }), b('bs_sprite_fondu', { SEC: nombre(1) }),
+          ...mouvement(), ...clones());
+        break;
+      case 'image': case 'etiquette':
+        actions.push(...mouvement(), ...clones());
+        break;
+      case 'zonedessin':
+        actions.push(etiquette('Dessin'),
+          b('bs_dessin_couleur', { VAL: couleurOmbre() }),
+          b('bs_dessin_epaisseur', { VAL: nombre(3) }),
+          b('bs_dessin_trait', { X1: nombre(10), Y1: nombre(10), X2: nombre(100), Y2: nombre(80) }),
+          b('bs_dessin_rectangle', { X: nombre(20), Y: nombre(20), L: nombre(80), H: nombre(50) }),
+          b('bs_dessin_cercle', { X: nombre(60), Y: nombre(60), R: nombre(30) }),
+          b('bs_dessin_point', { X: nombre(50), Y: nombre(50) }),
+          b('bs_dessin_texte', { TXT: texte('Bonjour'), X: nombre(10), Y: nombre(10), T: nombre(20) }),
+          b('bs_dessin_effacer'),
+          etiquette('Souris'),
+          b('bs_souris'), b('bs_souris', null, { QUOI: 'y' }));
+        break;
+      case 'listederoulante': case 'zoneliste':
+        actions.push(b('bs_liste_ajouter', { VAL: texte('Nouveau choix') }), b('bs_liste_retirer', { NUM: nombre(1) }), b('bs_liste_vider'));
+        break;
+      case 'tableau':
+        actions.push(
+          b('bs_tableau_ajouter', { LIGNE: listeTextes('Dupont', 'Marie') }),
+          b('bs_tableau_supprimer', { NUM: nombre(1) }),
+          b('bs_tableau_remplacer', { NUM: nombre(1), LIGNE: listeTextes('Dupont', 'Marie') }),
+          b('bs_tableau_ecrire_cellule', { COL: texte('Nom'), NUM: nombre(1), VAL: texte('Martin') }),
+          b('bs_tableau_vider'),
+          b('bs_tableau_trier', { COL: texte('Nom') }),
+          b('bs_tableau_cellule', { COL: texte('Nom'), NUM: nombre(1) }),
+          b('bs_tableau_ligne', { NUM: nombre(1) }),
+          b('bs_tableau_colonne', { COL: texte('Nom') }),
+          b('bs_tableau_chercher', { COL: texte('Nom'), VAL: texte('Dupont') }),
+          b('bs_base_choisie'),
+          etiquette('Fichiers (CSV, lisible par Excel)'),
+          b('bs_tableau_csv'), b('bs_tableau_remplir_csv'));
+        break;
+      case 'graphique':
+        actions.push(b('bs_graphique_ajouter', { VAL: nombre(10), ETIQ: texte('Sam') }), b('bs_graphique_vider'));
+        break;
+      case 'arborescence':
+        actions.push(
+          b('bs_arbre_ajouter', { VAL: texte('Chats'), DANS: texte('Animaux') }),
+          b('bs_arbre_supprimer', { CHEMIN: texte('Animaux › Chats') }),
+          b('bs_arbre_ctrl'),
+          b('bs_arbre_enfants', { CHEMIN: texte('Animaux') }));
+        break;
+      case 'barreetat':
+        actions.push(b('bs_barreetat_ecrire', { VAL: texte('Prêt'), NUM: nombre(1) }), b('bs_barreetat_case', { NUM: nombre(1) }));
+        break;
+      case 'camera':
+        actions.push(b('bs_camera_ctrl'), b('bs_camera_ctrl', null, { ACTION: 'eteindre' }), b('bs_camera_photo'), b('bs_camera_photo_dans'));
+        break;
+      case 'son': case 'video':
+        actions.push(b('bs_sonctrl'), b('bs_sonctrl', null, { ACTION: 'arreter' }));
+        break;
+      case 'minuteur':
+        actions.push(b('bs_minuteur_ctrl'), b('bs_minuteur_ctrl', null, { ACTION: 'arreter' }));
+        break;
+      case 'boutonradio':
+        actions.push({ kind: 'block', type: 'bs_radio_groupe', fields: { GROUPE: c.groupe || 'groupe1' } });
+        break;
+      case 'fichier':
+        actions.push(
+          b('bs_fichier_ouvrir_avec'), b('bs_fichier_contenu'),
+          b('bs_fichier_enregistrer_avec', { VAL: texte('Bonjour !') }),
+          b('bs_fichier_annule'), b('bs_fichier_nom'),
+          etiquette('Raccourcis : un tableau, une base, une image, un dessin, une photo'),
+          b('bs_fichier_ouvrir_dans'), b('bs_fichier_enregistrer_de'));
+        break;
+      case 'basedonnees':
+        actions.push(
+          etiquette('Ajouter et montrer'),
+          b('bs_base_ajouter', null, null, { extraState: { champs: (c.champs || []).slice() } }),
+          b('bs_base_afficher'),
+          etiquette('Chercher'),
+          b('bs_base_chercher', { VAL: texte('') }),
+          b('bs_base_premiere', { VAL: texte('') }),
+          etiquette('Lire et modifier une fiche'),
+          b('bs_base_champ', { N: nombre(1) }),
+          b('bs_base_modifier', { N: nombre(1), VAL: texte('') }),
+          b('bs_base_supprimer', { N: nombre(1) }),
+          etiquette('Toute la base'),
+          b('bs_base_nombre'), b('bs_base_trier'), b('bs_base_colonne'), b('bs_base_vider'),
+          etiquette('Fichiers (CSV, lisible par Excel)'),
+          b('bs_base_csv'), b('bs_base_remplir'));
+        break;
+    }
+
+    // Propriétés : « … de Bouton1 » et « mettre … de Bouton1 à … », pour chacune.
+    const proprietes = [];
+    const ecriture = proprietesPour(t, true).map(o => o[1]);
+    for (const [, prop] of proprietesPour(t, false)) {
+      proprietes.push(b('bs_lire', null, { PROP: prop }));
+      if (ecriture.includes(prop)) {
+        const v = valeurProposee(c, prop);
+        proprietes.push(b('bs_ecrire', v ? { VAL: v } : undefined, { PROP: prop }));
+      }
+    }
+
+    return [
+      ...(evenements.length ? [etiquette('Événements'), ...evenements] : []),
+      ...(actions.length && actions[0].kind !== 'label' && actions[0].kind !== 'button' ? [etiquette('Actions')] : []),
+      ...actions,
+      ...(proprietes.length ? [etiquette('Propriétés'), ...proprietes] : [])
+    ];
+  }
+
+  // Une fenêtre : ses propres blocs, puis une catégorie par contrôle posé dessus.
+  function categorieFenetre(f, principale, icones) {
+    const contenu = [];
+    if (principale) {
+      contenu.push(
+        { kind: 'button', text: '🪟 Créer une autre fenêtre…', callbackKey: 'nouvelleFenetre', 'web-class': 'bouton-fenetre' },
+        { kind: 'block', type: 'bs_quand_demarre' },
+        { kind: 'block', type: 'bs_fond_fenetre', inputs: { VAL: couleurOmbre() } });
+      if (BlocRuntime.cheminsMenus(f.menus).length) {
+        contenu.push(etiquette('Menus'), { kind: 'block', type: 'bs_quand_menu' }, { kind: 'block', type: 'bs_menu_actif' });
+      }
+    } else {
+      const fen = (type, champs, inputs) => Object.assign({ kind: 'block', type, fields: Object.assign({ FENETRE: f.id }, champs) }, inputs && { inputs });
+      contenu.push(
+        fen('bs_fenetre_ouvrir'), fen('bs_fenetre_ouvrir', { MODE: 'attendre' }),
+        fen('bs_fenetre_fermer'),
+        fen('bs_quand_fenetre'), fen('bs_quand_fenetre', { QUOI: 'fermeture' }),
+        fen('bs_fenetre_titre', null, { VAL: texte(f.titre || f.nom) }),
+        fen('bs_fenetre_ouverte'));
+    }
+    const ctrls = BlocStudio.controles().filter(c => (c.fenetre || '') === (principale ? '' : f.id));
+    if (!ctrls.length) contenu.push(etiquette('Posez des contrôles sur cette fenêtre (onglet Fenêtre) : chacun aura ici ses blocs.'));
+    for (const c of ctrls) {
+      contenu.push({
+        kind: 'category', name: `${icones[c.type] || '🔹'} ${c.nom}`, colour: couleurDuType(c.type),
+        toolboxitemid: 'ctrl-' + c.id, contents: blocsDuControle(c)
+      });
+    }
+    return {
+      kind: 'category', name: '🪟 ' + (principale ? 'Fenêtre principale' : f.nom), colour: COULEUR_FENETRES,
+      toolboxitemid: 'fen-' + (principale ? 'principale' : f.id), expanded: 'true', contents: contenu
+    };
+  }
+
+  // `icones` : l'icône de chaque type de contrôle (la même que dans la palette).
+  window.BlocStudioBoite = function (icones) {
+    return {
+      kind: 'categoryToolbox',
+      contents: [
+        ...GENERAUX,
+        { kind: 'sep' },
+        categorieFenetre(BlocStudio.fenetre(), true, icones),
+        ...BlocStudio.fenetres().map(f => categorieFenetre(f, false, icones)),
+        TOUS_LES_CONTROLES
+      ]
+    };
   };
 })();
