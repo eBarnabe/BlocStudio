@@ -25,6 +25,7 @@
     taille: 'taille (%)', transparence: 'transparence (%)',
     valeurs: 'valeurs (liste)', etiquettes: 'étiquettes (liste)', genre: 'genre (barres, courbe ou secteurs)',
     maxValeurs: 'nombre maximum de valeurs',
+    motDePasse: 'caché (mot de passe)', chemin: 'chemin de l\'élément choisi',
     allumee: 'allumée', photo: 'dernière photo (image)', mouvement: 'mouvement vu (%)',
     seuilMouvement: 'seuil de mouvement (%)',
     contenu: 'contenu du fichier', nomFichier: 'nom du fichier', annule: 'annulé par l\'utilisateur',
@@ -39,7 +40,9 @@
   const PROPS_PAR_TYPE = {
     bouton: ['texte', ...TEXTE, 'active', ...POSITION],
     etiquette: ['texte', ...TEXTE, ...POSITION, 'direction'],
-    zonetexte: ['texte', ...TEXTE, 'active', ...POSITION],
+    zonetexte: ['texte', 'motDePasse', ...TEXTE, 'active', ...POSITION],
+    arborescence: ['texte', 'chemin', 'elements', ...TEXTE, ...POSITION],
+    barreetat: ['texte', ...TEXTE, 'visible'],
     casecocher: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
     image: ['image', 'couleurFond', ...POSITION, 'direction'],
     listederoulante: ['texte', 'numero', 'elements', ...TEXTE, 'active', ...POSITION],
@@ -67,7 +70,7 @@
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
@@ -80,7 +83,9 @@
     date: { texte: 'date (jj/mm/aaaa)' },
     selecteurcouleur: { texte: 'couleur choisie' },
     minuteur: { active: 'en marche' },
-    camera: { miroir: 'en miroir (comme dans une glace)' }
+    camera: { miroir: 'en miroir (comme dans une glace)' },
+    arborescence: { texte: 'élément choisi', elements: 'tous les éléments (liste de chemins)' },
+    barreetat: { texte: 'texte (cases séparées par |)' }
   };
 
   function typeDe(id) {
@@ -184,8 +189,8 @@
   Blockly.Blocks['bs_quand_change'] = {
     init() {
       evenement(this, 'quand', ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets'], 'change');
-      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau ou sur une page d'onglets, ou quand un navigateur web a fini de charger une page.");
+        'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'], 'change');
+      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page.");
     }
   };
 
@@ -940,6 +945,38 @@
 
   // ---------- Tableaux ----------
 
+  // ---------- Arborescence et barre d'état ----------
+
+  const ARBRE = { ctrl: ['arborescence'] };
+  const AIDE_CHEMIN = ' Un élément se désigne par son chemin : « Animaux › Chats » (ou « Animaux > Chats »).';
+
+  Blockly.Blocks['bs_arbre_ajouter'] = instruction(() => [
+    { nom: 'VAL', libelle: 'ajouter l\'élément' }, { nom: 'DANS', libelle: 'dans' }, 'de', ARBRE
+  ], COULEUR_CONTROLES, 'Ajoute un élément, rangé dans un autre (laissez « dans » vide pour le premier niveau).' + AIDE_CHEMIN);
+
+  Blockly.Blocks['bs_arbre_supprimer'] = instruction(() => [
+    { nom: 'CHEMIN', libelle: 'supprimer l\'élément' }, 'de', ARBRE
+  ], COULEUR_CONTROLES, 'Supprime un élément, avec tout ce qui est rangé dedans.' + AIDE_CHEMIN);
+
+  Blockly.Blocks['bs_arbre_ctrl'] = instruction(() => [
+    { champ: new Blockly.FieldDropdown([['tout déplier', 'deplier'], ['tout replier', 'replier'], ['vider', 'vider']]), nom: 'ACTION' },
+    ARBRE
+  ], COULEUR_CONTROLES, 'Ouvre ou ferme tous les dossiers de l\'arborescence, ou la vide.');
+
+  Blockly.Blocks['bs_arbre_enfants'] = valeur(() => [
+    { nom: 'CHEMIN', libelle: 'éléments rangés dans' }, 'de', ARBRE
+  ], 'Array', COULEUR_CONTROLES, 'La liste des textes des éléments rangés directement dans celui-ci (vide = ceux du premier niveau).' + AIDE_CHEMIN);
+
+  const BARRE_ETAT = { ctrl: ['barreetat'] };
+
+  Blockly.Blocks['bs_barreetat_ecrire'] = instruction(() => [
+    { nom: 'VAL', libelle: 'écrire' }, { nom: 'NUM', libelle: 'dans la case n°', check: 'Number' }, 'de', BARRE_ETAT
+  ], COULEUR_CONTROLES, 'Change le texte d\'une case de la barre d\'état (1 = la plus large, à gauche). Les cases manquantes sont ajoutées.');
+
+  Blockly.Blocks['bs_barreetat_case'] = valeur(() => [
+    { nom: 'NUM', libelle: 'texte de la case n°', check: 'Number' }, 'de', BARRE_ETAT
+  ], 'String', COULEUR_CONTROLES, 'Le texte d\'une case de la barre d\'état.');
+
   const TABLEAU = { ctrl: ['tableau'] };
   const COLONNE = libelle => ({ nom: 'COL', libelle });
   const NUMERO = libelle => ({ nom: 'NUM', libelle, check: 'Number' });
@@ -1435,6 +1472,12 @@
   gen.forBlock['bs_tableau_remplir_csv'] = b => tab(b, 'csv', val(b, 'VAL', "''"));
   gen.forBlock['bs_tableau_cellule'] = b => lireTab(b, 'cellule', num(b), col(b));
   gen.forBlock['bs_tableau_ligne'] = b => lireTab(b, 'ligne', num(b));
+  gen.forBlock['bs_arbre_ajouter'] = b => `app.arbre(${id(b)}, 'ajouter', ${val(b, 'VAL', "''")}, ${val(b, 'DANS', "''")});\n`;
+  gen.forBlock['bs_arbre_supprimer'] = b => `app.arbre(${id(b)}, 'supprimer', ${val(b, 'CHEMIN', "''")});\n`;
+  gen.forBlock['bs_arbre_ctrl'] = b => `app.arbre(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
+  gen.forBlock['bs_arbre_enfants'] = b => [`app.enfantsArbre(${id(b)}, ${val(b, 'CHEMIN', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_barreetat_ecrire'] = b => `app.barreEtat(${id(b)}, ${val(b, 'NUM', '1')}, ${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_barreetat_case'] = b => [`app.lireBarreEtat(${id(b)}, ${val(b, 'NUM', '1')})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_tableau_colonne'] = b => lireTab(b, 'colonne', col(b));
   gen.forBlock['bs_tableau_chercher'] = b => lireTab(b, 'chercher', val(b, 'VAL', "''"), col(b));
   gen.forBlock['bs_tableau_csv'] = b => lireTab(b, 'csv');
@@ -1723,6 +1766,14 @@
           { kind: 'block', type: 'bs_tableau_chercher', inputs: { COL: texte('Nom'), VAL: texte('Dupont') } },
           { kind: 'block', type: 'bs_tableau_csv' },
           { kind: 'block', type: 'bs_tableau_remplir_csv' },
+          { kind: 'label', text: 'Arborescences' },
+          { kind: 'block', type: 'bs_arbre_ajouter', inputs: { VAL: texte('Chats'), DANS: texte('Animaux') } },
+          { kind: 'block', type: 'bs_arbre_supprimer', inputs: { CHEMIN: texte('Animaux › Chats') } },
+          { kind: 'block', type: 'bs_arbre_ctrl' },
+          { kind: 'block', type: 'bs_arbre_enfants', inputs: { CHEMIN: texte('Animaux') } },
+          { kind: 'label', text: 'Barre d\'état' },
+          { kind: 'block', type: 'bs_barreetat_ecrire', inputs: { VAL: texte('Prêt'), NUM: nombre(1) } },
+          { kind: 'block', type: 'bs_barreetat_case', inputs: { NUM: nombre(1) } },
           { kind: 'label', text: 'Graphiques' },
           { kind: 'block', type: 'bs_graphique_ajouter', inputs: { VAL: nombre(10), ETIQ: texte('Sam') } },
           { kind: 'block', type: 'bs_graphique_vider' },

@@ -399,6 +399,82 @@
         ])
     },
     {
+      titre: '🔐 Carnet secret',
+      description: 'Un mot de passe pour entrer, des pages rangées dans une arborescence, une barre d\'état. Les notes sont gardées d\'une fois sur l\'autre.',
+      creer: () => {
+        // c1-c4 : l'entrée (étiquette, mot de passe, interrupteur « Montrer », bouton Entrer)
+        // c5 Pages (arborescence) · c6 Note · c7 Garder · c8 Verrouiller · c9 Etat (barre d'état) · c10 Notes (base)
+        const entree = ['c1', 'c2', 'c3', 'c4'], carnet = ['c5', 'c6', 'c7', 'c8'];
+        const montrer = (ids, oui) => ids.map(id => ecrire(id, 'visible', vrai(oui)));
+        const etat = (num, x) => bloc('bs_barreetat_ecrire', 'c9', { VAL: x, NUM: n(num) });
+        const chemin = () => lire('chemin', 'c5');
+        const ficheDeLaPage = () => bloc('bs_base_premiere', 'c10', { VAL: chemin() }, { CHAMP: 'Page', OP: 'egal' });
+        return projet(
+          { titre: 'Carnet secret', largeur: 560, hauteur: 350, couleurFond: '#f5f3ff' },
+          [
+            { type: 'etiquette', nom: 'Invitation', texte: '🔐 Mot de passe :', x: 90, y: 120, largeur: 130, hauteur: 28, taillePolice: 15 },
+            { type: 'zonetexte', nom: 'MotDePasse', motDePasse: true, x: 220, y: 118, largeur: 160, hauteur: 30 },
+            { type: 'interrupteur', nom: 'Montrer', texte: 'Montrer', x: 390, y: 122, largeur: 100, hauteur: 26 },
+            { type: 'bouton', nom: 'Entrer', texte: '🔓 Entrer', x: 220, y: 160, largeur: 160, hauteur: 34 },
+            { type: 'arborescence', nom: 'Pages', x: 10, y: 10, largeur: 190, hauteur: 300, visible: false, deplie: true,
+              arbre: 'École\n  Devoirs\n  Copains\nMaison\n  Cachettes\n  Liste de cadeaux\nIdées\n  Inventions\n  Histoires' },
+            { type: 'zonetexte', nom: 'Note', multiligne: true, x: 210, y: 10, largeur: 340, hauteur: 258, couleurFond: '#ffffff', visible: false },
+            { type: 'bouton', nom: 'Garder', texte: '💾 Garder la note', x: 210, y: 276, largeur: 160, hauteur: 34, visible: false },
+            { type: 'bouton', nom: 'Verrouiller', texte: '🔒 Verrouiller', x: 410, y: 276, largeur: 140, hauteur: 34, visible: false },
+            { type: 'barreetat', nom: 'Etat', texte: '🔒 Verrouillé|Astuce : le mot de passe est 1234', x: 0, y: 326, largeur: 560, hauteur: 24, taillePolice: 12 },
+            {
+              type: 'basedonnees', nom: 'Notes', largeur: 0, hauteur: 0, memoriser: true, champs: ['Page', 'Note'],
+              fiches: [['Maison › Cachettes', 'La clé du coffre est sous le pot de fleurs 🌼'], ['Idées › Inventions', 'Un robot qui range ma chambre 🤖']]
+            }
+          ],
+          ['numero'],
+          () => [
+            evt('bs_quand_change', 'c3', [ecrire('c2', 'motDePasse', non(lire('coche', 'c3')))]),
+            evt('bs_quand_clic', 'c4', [
+              si(compare('EQ', lire('texte', 'c2'), t('1234')),
+                [
+                  ...montrer(entree, false), ...montrer(carnet, true),
+                  ecrire('c6', 'texte', t('')),
+                  etat(1, t('🔓 Carnet ouvert')), etat(2, t('Choisissez une page à gauche')),
+                  bloc('bs_son', null, null, { SON: 'succes' })
+                ],
+                [
+                  bloc('bs_son', null, null, { SON: 'erreur' }),
+                  etat(2, t('❌ Mauvais mot de passe, essayez encore')),
+                  ecrire('c2', 'texte', t(''))
+                ])
+            ]),
+            // Une page choisie : on cherche sa note dans la base.
+            evt('bs_quand_change', 'c5', [
+              fixer('v_numero', ficheDeLaPage()),
+              si(compare('EQ', v('v_numero'), n(0)),
+                [ecrire('c6', 'texte', t(''))],
+                [ecrire('c6', 'texte', bloc('bs_base_champ', 'c10', { N: v('v_numero') }, { CHAMP: 'Note' }))]),
+              etat(2, joindre(t('📄 '), chemin()))
+            ]),
+            evt('bs_quand_clic', 'c7', [
+              si(estVide(chemin()),
+                [message(t('Choisissez d\'abord une page dans la liste de gauche.'), 'info')],
+                [
+                  fixer('v_numero', ficheDeLaPage()),
+                  si(compare('EQ', v('v_numero'), n(0)),
+                    [{
+                      type: 'bs_base_ajouter', fields: { CTRL: 'c10' }, extraState: { champs: ['Page', 'Note'] },
+                      inputs: { V0: I(chemin()), V1: I(lire('texte', 'c6')) }
+                    }],
+                    [bloc('bs_base_modifier', 'c10', { N: v('v_numero'), VAL: lire('texte', 'c6') }, { CHAMP: 'Note' })]),
+                  etat(2, joindre(t('💾 Note gardée : '), chemin()))
+                ])
+            ]),
+            evt('bs_quand_clic', 'c8', [
+              ...montrer(carnet, false), ...montrer(entree, true),
+              ecrire('c2', 'texte', t('')),
+              etat(1, t('🔒 Verrouillé')), etat(2, t('À bientôt !'))
+            ])
+          ]);
+      }
+    },
+    {
       titre: '📸 Photomaton',
       description: 'La webcam en direct : compte à rebours 3, 2, 1, photo, enregistrement en PNG, et un détecteur de mouvement.',
       creer: () => {

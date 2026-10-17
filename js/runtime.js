@@ -23,6 +23,18 @@ function BlocRuntimeFactory() {
     .bs-navigateur { border: 1px solid #94a3b8; background: #fff; }
     video.bs-video { background: #000; object-fit: contain; }
     video.bs-camera { background: #1e293b; object-fit: cover; }
+    .bs-barreetat { display: flex; background: #f0f0f0; border-top: 1px solid #c8c8c8; color: #333; }
+    .bs-barreetat > span { flex: 1; min-width: 0; display: flex; align-items: center; padding: 0 8px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 1px solid #d4d4d4; }
+    .bs-barreetat > span:first-child { flex: 2; border-left: 0; }
+    .bs-arborescence { border: 1px solid #7a7a7a; background: #fff; overflow: auto; padding: 2px 0; user-select: none; }
+    .bs-arborescence ul { list-style: none; margin: 0; padding: 0; }
+    .bs-arborescence ul ul { padding-left: 16px; }
+    .bs-arborescence li.bs-ferme > ul { display: none; }
+    .bs-noeud { display: flex; align-items: center; gap: 4px; padding: 1px 6px 1px 2px; white-space: nowrap; cursor: default; }
+    .bs-noeud:hover { background: #e5f3ff; }
+    .bs-noeud.bs-choisi { background: #cce8ff; }
+    .bs-fleche { width: 14px; flex: none; text-align: center; font-size: 10px; color: #64748b; }
     video.bs-camera.bs-miroir { transform: scaleX(-1); }
     .bs-apercu { display: flex; flex-direction: column; overflow: hidden; color: #475569; }
     .bs-apercu > div:first-child { padding: 4px 8px; background: #e8ebf0; border-bottom: 1px solid #cbd5e1;
@@ -249,6 +261,61 @@ function BlocRuntimeFactory() {
   }
 
   // ---- Tableaux ----
+  // ---- Barre d'état : des cases séparées par « | » ----
+  function remplirBarreEtat(el, cases) {
+    el.replaceChildren(...cases.map(t => {
+      const s = document.createElement('span');
+      s.textContent = enTexte(t);
+      return s;
+    }));
+  }
+
+  // ---- Arborescence ----
+  // « Animaux\n  Chats\n  Chiens\nPlantes » : un élément par ligne, décalé d'espaces pour le ranger
+  // dans celui du dessus. Chaque élément : { texte, enfants, ouvert }.
+  function lireArbre(texte) {
+    const racine = { enfants: [] }, pile = [{ retrait: -1, noeud: racine }];
+    for (const ligne of String(texte || '').split('\n')) {
+      const t = ligne.trim();
+      if (!t) continue;
+      const retrait = ligne.length - ligne.trimStart().length;
+      while (pile.length > 1 && pile[pile.length - 1].retrait >= retrait) pile.pop();
+      const n = { texte: t, enfants: [], ouvert: false };
+      pile[pile.length - 1].noeud.enfants.push(n);
+      pile.push({ retrait, noeud: n });
+    }
+    return racine.enfants;
+  }
+
+  function toutOuvrir(noeuds, ouvert) {
+    for (const n of noeuds) { n.ouvert = ouvert; toutOuvrir(n.enfants, ouvert); }
+  }
+
+  // Dessine l'arbre ; chaque ligne garde son élément (ligne.noeud).
+  function rendreArbre(el, noeuds, choisi) {
+    const liste = elements => {
+      const ul = document.createElement('ul');
+      for (const n of elements) {
+        const li = document.createElement('li');
+        if (n.enfants.length && !n.ouvert) li.className = 'bs-ferme';
+        const ligne = document.createElement('div');
+        ligne.className = 'bs-noeud' + (n === choisi ? ' bs-choisi' : '');
+        ligne.noeud = n;
+        const fleche = document.createElement('span');
+        fleche.className = 'bs-fleche';
+        fleche.textContent = n.enfants.length ? (n.ouvert ? '▾' : '▸') : '';
+        const texte = document.createElement('span');
+        texte.textContent = (n.enfants.length ? (n.ouvert ? '📂 ' : '📁 ') : '📄 ') + n.texte;
+        ligne.append(fleche, texte);
+        li.appendChild(ligne);
+        if (n.enfants.length) li.appendChild(liste(n.enfants));
+        ul.appendChild(li);
+      }
+      return ul;
+    };
+    el.replaceChildren(liste(noeuds));
+  }
+
   function rendreTableau(el, d) {
     const nbColonnes = Math.max(d.colonnes.length, ...d.lignes.map(l => l.length), 1);
     const table = document.createElement('table');
@@ -520,10 +587,21 @@ function BlocRuntimeFactory() {
           el = document.createElement('textarea');
         } else {
           el = document.createElement('input');
-          el.type = 'text';
+          el.type = c.motDePasse ? 'password' : 'text';
         }
         el.value = c.texte;
         break;
+      case 'barreetat':
+        el = document.createElement('div');
+        remplirBarreEtat(el, String(c.texte ?? '').split('|'));
+        break;
+      case 'arborescence': {
+        el = document.createElement('div');
+        const noeuds = lireArbre(c.arbre);
+        if (c.deplie !== false || prefixe === 'design') toutOuvrir(noeuds, true);
+        rendreArbre(el, noeuds, null);
+        break;
+      }
       case 'casecocher': {
         el = document.createElement('label');
         const box = document.createElement('input');
@@ -1020,6 +1098,8 @@ function BlocRuntimeFactory() {
       if (c.type === 'zonedessin') suivreSouris(el, d);
       if (c.type === 'tableau') preparerTableau(el, d);
       if (c.type === 'camera') d.surEvenement = [];
+      if (c.type === 'barreetat') d.cases = String(c.texte ?? '').split('|');
+      if (c.type === 'arborescence') preparerArbre(el, d);
       if (c.type === 'onglets') {
         d.pages = (c.pages || []).map(enTexte);
         d.page = Math.min(Math.max(0, Math.round(Number(c.page) || 0)), Math.max(0, d.pages.length - 1));
@@ -2204,6 +2284,167 @@ function BlocRuntimeFactory() {
       }
     });
 
+    // ---- Arborescence ----
+    function preparerArbre(el, d) {
+      d.noeuds = lireArbre(d.arbre);
+      if (d.deplie !== false) toutOuvrir(d.noeuds, true);
+      d.choisi = null;
+      rendreArbre(el, d.noeuds, null); // les lignes affichées doivent désigner ces éléments-là
+      const ligneDe = e => e.target.closest('.bs-noeud');
+      el.addEventListener('click', e => {
+        const ligne = ligneDe(e);
+        if (!ligne) return;
+        const n = ligne.noeud;
+        // La flèche déplie ou replie ; ailleurs, on choisit l'élément.
+        if (e.target.classList.contains('bs-fleche')) {
+          n.ouvert = !n.ouvert;
+          rendreArbre(el, d.noeuds, d.choisi);
+          return;
+        }
+        if (d.choisi === n) return;
+        d.choisi = n;
+        rendreArbre(el, d.noeuds, d.choisi);
+        el.dispatchEvent(new Event('input')); // « quand Arbre1 change »
+      });
+      el.addEventListener('dblclick', e => {
+        const ligne = ligneDe(e);
+        if (!ligne || !ligne.noeud.enfants.length) return;
+        ligne.noeud.ouvert = !ligne.noeud.ouvert;
+        rendreArbre(el, d.noeuds, d.choisi);
+      });
+    }
+
+    // « Animaux › Chats » (ou « Animaux > Chats ») → les textes de chaque niveau.
+    const partiesChemin = chemin => enTexte(chemin).split(/\s*[›>]\s*/).map(s => s.trim()).filter(Boolean);
+
+    // Élément désigné par son chemin, avec la liste qui le contient.
+    function trouverNoeud(d, chemin) {
+      let liste = d.noeuds, noeud = null, parent = null;
+      for (const p of partiesChemin(chemin)) {
+        parent = noeud;
+        noeud = liste.find(n => n.texte === p) || liste.find(n => memeNom(n.texte, p));
+        if (!noeud) return null;
+        liste = noeud.enfants;
+      }
+      return noeud && { noeud, dans: parent ? parent.enfants : d.noeuds };
+    }
+
+    function noeudExistant(d, chemin) {
+      const r = trouverNoeud(d, chemin);
+      if (!r) throw new Error(`Il n'y a pas d'élément « ${enTexte(chemin)} » dans « ${d.nom} ».`);
+      return r;
+    }
+
+    // Chemin d'un élément : « Animaux › Chats ».
+    function cheminDe(noeuds, cible, avant) {
+      for (const n of noeuds) {
+        const ici = avant ? avant + ' › ' + n.texte : n.texte;
+        if (n === cible) return ici;
+        const plus = cheminDe(n.enfants, cible, ici);
+        if (plus) return plus;
+      }
+      return '';
+    }
+
+    function tousLesChemins(noeuds, avant) {
+      return noeuds.flatMap(n => {
+        const ici = avant ? avant + ' › ' + n.texte : n.texte;
+        return [ici, ...tousLesChemins(n.enfants, ici)];
+      });
+    }
+
+    // Choisit un élément (et déplie ceux qui le contiennent pour qu'on le voie).
+    function choisirNoeud(id, chemin) {
+      const d = donnees[id];
+      if (!enTexte(chemin).trim()) d.choisi = null;
+      else {
+        d.choisi = noeudExistant(d, chemin).noeud;
+        let liste = d.noeuds;
+        for (const p of partiesChemin(chemin)) {
+          const n = liste.find(x => x.texte === p) || liste.find(x => memeNom(x.texte, p));
+          if (n !== d.choisi) n.ouvert = true;
+          liste = n.enfants;
+        }
+      }
+      rendreArbre(elements[id], d.noeuds, d.choisi);
+    }
+
+    // Ajoute un élément (et ceux qui manquent sur son chemin) : « Animaux › Chats › Persan ».
+    function ajouterChemin(d, chemin) {
+      let liste = d.noeuds, n = null;
+      for (const p of partiesChemin(chemin)) {
+        if (n) n.ouvert = n.ouvert || d.deplie !== false;
+        n = liste.find(x => x.texte === p);
+        if (!n) { n = { texte: p, enfants: [], ouvert: d.deplie !== false }; liste.push(n); }
+        liste = n.enfants;
+      }
+      return n;
+    }
+
+    function ctrlArbre(id, action, a, b) {
+      const el = ctrlDeType(id, 'arborescence', 'une arborescence');
+      const d = donnees[id];
+      switch (action) {
+        // a : texte du nouvel élément ; b : chemin de l'élément qui le contient ('' = premier niveau).
+        case 'ajouter': {
+          const texte = enTexte(a).trim();
+          if (!texte) throw new Error('Il faut un texte pour le nouvel élément.');
+          const dans = enTexte(b).trim() ? noeudExistant(d, b).noeud : null;
+          (dans ? dans.enfants : d.noeuds).push({ texte, enfants: [], ouvert: d.deplie !== false });
+          if (dans) dans.ouvert = true;
+          break;
+        }
+        case 'supprimer': {
+          const r = noeudExistant(d, a);
+          if (d.choisi && (d.choisi === r.noeud || cheminDe(r.noeud.enfants, d.choisi))) d.choisi = null;
+          r.dans.splice(r.dans.indexOf(r.noeud), 1);
+          break;
+        }
+        case 'vider': d.noeuds = []; d.choisi = null; break;
+        case 'deplier': toutOuvrir(d.noeuds, true); break;
+        case 'replier': toutOuvrir(d.noeuds, false); break;
+      }
+      rendreArbre(el, d.noeuds, d.choisi);
+    }
+
+    // Textes des éléments rangés dans `chemin` ('' = ceux du premier niveau).
+    function enfantsArbre(id, chemin) {
+      ctrlDeType(id, 'arborescence', 'une arborescence');
+      const d = donnees[id];
+      const liste = enTexte(chemin).trim() ? noeudExistant(d, chemin).noeud.enfants : d.noeuds;
+      return liste.map(n => n.texte);
+    }
+
+    function lireArbreCtrl(d, prop) {
+      switch (prop) {
+        case 'texte': return d.choisi ? d.choisi.texte : '';
+        case 'chemin': return d.choisi ? cheminDe(d.noeuds, d.choisi) : '';
+        case 'elements': return tousLesChemins(d.noeuds);
+      }
+    }
+
+    function ecrireArbreCtrl(id, prop, valeur) {
+      const d = donnees[id];
+      if (prop === 'chemin') return choisirNoeud(id, valeur);
+      // Une liste de chemins (« Animaux › Chats »…), ou un texte de lignes décalées comme dans les propriétés.
+      d.noeuds = [];
+      d.choisi = null;
+      if (Array.isArray(valeur)) valeur.forEach(c => ajouterChemin(d, c));
+      else {
+        d.noeuds = lireArbre(enTexte(valeur));
+        if (d.deplie !== false) toutOuvrir(d.noeuds, true);
+      }
+      rendreArbre(elements[id], d.noeuds, null);
+    }
+
+    // ---- Barre d'état ----
+    function caseBarre(id, numero) {
+      ctrlDeType(id, 'barreetat', 'une barre d\'état');
+      const n = Math.round(Number(numero));
+      if (!(n >= 1 && n <= 10)) throw new Error('Une barre d\'état a des cases numérotées de 1 à 10.');
+      return n - 1;
+    }
+
     // ---- Caméra ----
     function erreurCamera(e, nom) {
       switch (e && e.name) {
@@ -2441,6 +2682,9 @@ function BlocRuntimeFactory() {
         if (d.type === 'minuteur') return lireMinuteur(d, prop);
         if (d.type === 'fichier') return lireFichierCtrl(d, prop);
         if (d.type === 'camera' && ['allumee', 'photo', 'mouvement', 'miroir', 'seuilMouvement'].includes(prop)) return lireCamera(d, prop);
+        if (d.type === 'arborescence' && ['texte', 'chemin', 'elements'].includes(prop)) return lireArbreCtrl(d, prop);
+        if (d.type === 'barreetat' && prop === 'texte') return d.cases.join('|');
+        if (prop === 'motDePasse') return !!d.motDePasse;
         if (d.type === 'basedonnees') {
           if (prop === 'nombreFiches') return d.fiches.length;
           if (prop === 'champs') return d.champs.slice();
@@ -2500,6 +2744,16 @@ function BlocRuntimeFactory() {
         const d = donnees[id];
         if (d.type === 'son') return ecrireSon(d, prop, valeur);
         if (d.type === 'minuteur') return ecrireMinuteur(d, prop, valeur);
+        if (d.type === 'arborescence' && ['chemin', 'elements'].includes(prop)) return ecrireArbreCtrl(id, prop, valeur);
+        if (d.type === 'barreetat' && prop === 'texte') {
+          d.cases = enTexte(valeur).split('|');
+          return remplirBarreEtat(el, d.cases);
+        }
+        if (prop === 'motDePasse') {
+          d.motDePasse = !!valeur;
+          if (el.tagName === 'INPUT') el.type = d.motDePasse ? 'password' : 'text';
+          return;
+        }
         if (d.type === 'camera') {
           if (prop === 'allumee') { (valeur ? allumerCamera(id) : Promise.resolve(eteindreCamera(d, el))).catch(signaler); return; }
           if (prop === 'miroir') { d.miroir = !!valeur; el.classList.toggle('bs-miroir', d.miroir); return; }
@@ -3045,6 +3299,18 @@ function BlocRuntimeFactory() {
       minuteur: ctrlMinuteur,
       fichier: ctrlFichier,
       camera: ctrlCamera,
+      arbre: ctrlArbre,
+      enfantsArbre,
+      // Barre d'état : écrire dans la case n° (1, 2, 3…) ; les cases manquantes sont ajoutées.
+      barreEtat(id, numero, texte) {
+        const i = caseBarre(id, numero), d = donnees[id];
+        while (d.cases.length <= i) d.cases.push('');
+        d.cases[i] = enTexte(texte);
+        remplirBarreEtat(elements[id], d.cases);
+      },
+      lireBarreEtat(id, numero) {
+        return donnees[id].cases[caseBarre(id, numero)] ?? '';
+      },
       sprite: ctrlSprite,
       // Volume en % (0 = muet, 100 = normal) d'un son, ou de tous les sons avec '*'.
       // Il s'applique aussi aux sons déjà en train de jouer.

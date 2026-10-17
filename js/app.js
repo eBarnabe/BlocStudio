@@ -45,6 +45,10 @@
       defauts: { video: '', barreVideo: true, boucle: false, volume: 100 } },
     camera: { prefixe: 'Camera', texte: '', largeur: 320, hauteur: 240,
       defauts: { miroir: true, allumerAuDemarrage: true, seuilMouvement: 10 } },
+    arborescence: { prefixe: 'Arbre', texte: '', largeur: 200, hauteur: 180,
+      defauts: { arbre: 'Animaux\n  Chats\n  Chiens\nPlantes\n  Fleurs\n  Arbres', deplie: true } },
+    // Toujours collée en bas de sa fenêtre, sur toute la largeur (voir amarrerBarresEtat).
+    barreetat: { prefixe: 'BarreEtat', texte: 'Prêt|', largeur: 300, hauteur: 24, defauts: { taillePolice: 12 } },
     // Contrôles invisibles : ils n'ont ni position ni taille à l'écran.
     son: { prefixe: 'Son', texte: '', largeur: 0, hauteur: 0,
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
@@ -56,13 +60,18 @@
       defauts: { champs: ['Nom', 'Prénom', 'Téléphone'], fiches: [], memoriser: true } }
   };
 
+  // Entrées de la palette qui créent un contrôle d'un autre type, déjà réglé.
+  const VARIANTES = {
+    motdepasse: { type: 'zonetexte', prefixe: 'MotDePasse', valeurs: { motDePasse: true } }
+  };
+
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
   const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'onglets', 'listederoulante',
-    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date'];
+    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'arborescence', 'barreetat'];
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
@@ -70,7 +79,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -260,7 +269,19 @@
     Blockly.common.setSelected(bloc);
   }
 
+  // Une barre d'état occupe le bas de sa fenêtre, sur toute la largeur (même si la fenêtre change de taille).
+  function amarrerBarresEtat() {
+    for (const c of projet.controles) {
+      if (c.type !== 'barreetat') continue;
+      const f = (c.fenetre && projet.fenetres.find(x => x.id === c.fenetre)) || projet.fenetre;
+      c.x = 0;
+      c.y = Math.max(0, f.hauteur - c.hauteur);
+      c.largeur = f.largeur;
+    }
+  }
+
   function afficherConcepteur() {
+    amarrerBarresEtat();
     const f = fenetreCourante();
     $('titre-design').textContent = f.titre;
     const surface = $('surface-design');
@@ -295,6 +316,7 @@
       if (e.button !== 0) return;
       if (e.ctrlKey || e.shiftKey) { selectionner(c.id, true); return; }
       if (c.type === 'onglets') cliquerTitreOnglets(e, w, c);
+      if (c.type === 'barreetat') { selectionner(c.id); return; } // elle reste collée en bas
       const dejaChoisi = choisis.has(c.id);
       if (!dejaChoisi) selectionner(c.id);
       deplacerOuRedimensionner(e, w, c, e.target === poignee && choisis.size === 1, dejaChoisi);
@@ -569,10 +591,12 @@
 
   function ajouterControle(type, x, y) {
     const n = projet.controles.length;
-    const c = controle(type, 'c' + projet.prochainId++, nomUnique(TYPES[type].prefixe), {
+    const variante = VARIANTES[type];
+    if (variante) type = variante.type;
+    const c = controle(type, 'c' + projet.prochainId++, nomUnique(variante ? variante.prefixe : TYPES[type].prefixe), Object.assign({
       x: x ?? 20 + (n % 8) * 16,
       y: y ?? 20 + (n % 8) * 16
-    });
+    }, variante && variante.valeurs));
     if (fenetreActive) c.fenetre = fenetreActive;
     c.x = borner(arrondir(c.x), 0, Math.max(0, fenetreCourante().largeur - 20));
     c.y = borner(arrondir(c.y), 0, Math.max(0, fenetreCourante().hauteur - 20));
@@ -580,6 +604,7 @@
     // Un nouveau contrôle Sprite affiche d'emblée le premier sprite de la bibliothèque.
     if (type === 'sprite' && projet.sprites.length) donnerSprite(c, projet.sprites[0]);
     projet.controles.push(c);
+    if (type === 'barreetat') amarrerBarresEtat();
     rattacherAuxOnglets([c]);
     if (estInvisible(c)) afficherInvisibles();
     else $('surface-design').appendChild(creerControleDesign(c));
@@ -1028,12 +1053,36 @@
       champTexte(liste, c.type === 'cadre' ? 'Titre' : 'Texte', c.texte, v => { c.texte = v; maj(); }, multiligne);
     }
     if (c.type === 'zonetexte') {
-      champCase(liste, 'Multiligne (plusieurs lignes)', c.multiligne, v => {
-        c.multiligne = v;
-        if (v && c.hauteur < 80) c.hauteur = 100;
-        maj();
-        afficherProprietes();
-      });
+      if (!c.motDePasse) {
+        champCase(liste, 'Multiligne (plusieurs lignes)', c.multiligne, v => {
+          c.multiligne = v;
+          if (v && c.hauteur < 80) c.hauteur = 100;
+          maj();
+          afficherProprietes();
+        });
+      }
+      if (!c.multiligne) {
+        champCase(liste, 'Mot de passe (les lettres sont cachées par des •)', c.motDePasse, v => {
+          c.motDePasse = v;
+          maj();
+          afficherProprietes();
+        });
+      }
+    }
+    if (c.type === 'arborescence') {
+      champTexte(liste, 'Éléments — un par ligne ; décalez une ligne d\'espaces pour la ranger dans celle du dessus',
+        c.arbre || '', v => { c.arbre = v; maj(); }, true, 'Animaux\n  Chats\n  Chiens\nPlantes');
+      champCase(liste, 'Tout déplié au départ', c.deplie !== false, v => { c.deplie = v; maj(); });
+      liste.appendChild(el('p', 'aide',
+        'Comme l\'Explorateur de Windows : on déplie un dossier avec sa flèche ou un double-clic. ' +
+        'Double-cliquez sur l\'arborescence pour réagir quand on choisit un élément ; « chemin de l\'élément choisi » ' +
+        'donne par exemple « Animaux › Chats ».'));
+    }
+    if (c.type === 'barreetat') {
+      champTexte(liste, 'Texte des cases, séparées par |', c.texte, v => { c.texte = v; maj(); }, false, 'Prêt|Page 1');
+      liste.appendChild(el('p', 'aide',
+        'Toujours collée en bas de la fenêtre. Pour changer une case pendant le programme : ' +
+        '« écrire … dans la case n° … » (catégorie Contrôles).'));
     }
     if (c.type === 'casecocher') champCase(liste, 'Coché', c.coche, v => { c.coche = v; maj(); });
     if (c.type === 'interrupteur') champCase(liste, 'Allumé', c.coche, v => { c.coche = v; maj(); });
@@ -2318,7 +2367,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',
@@ -3092,7 +3141,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       e.preventDefault();
       surface.classList.remove('survol');
       const type = e.dataTransfer.getData('text/plain');
-      if (!TYPES[type]) return;
+      if (!TYPES[type] && !VARIANTES[type]) return;
       const r = surface.getBoundingClientRect();
       ajouterControle(type, e.clientX - r.left, e.clientY - r.top);
     });
