@@ -2757,7 +2757,8 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       trashcan: true,
       grid: { spacing: 25, length: 3, colour: '#d8dce6', snap: true },
       zoom: { controls: true, wheel: true, startScale: 0.8, maxScale: 2, minScale: 0.4 },
-      move: { scrollbars: true, drag: true, wheel: false }
+      // Molette : défiler (Maj + molette : de côté) ; Ctrl + molette : zoomer.
+      move: { scrollbars: true, drag: true, wheel: true }
     });
     $('vue-code').classList.remove('actif');
     workspace.registerButtonCallback('importerSon', importerSon);
