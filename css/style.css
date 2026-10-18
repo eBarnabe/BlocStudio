@@ -191,10 +191,8 @@ h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: var(--
 .panneau-js-titre { padding: 10px 12px; background: #1e293b; font-size: 13px; }
 .panneau-js-titre small { color: #94a3b8; }
 #code-js { flex: 1; margin: 0; padding: 12px; overflow: auto; font-size: 13px; line-height: 1.45; }
+.outils-code { position: absolute; top: 10px; right: 14px; z-index: 50; display: flex; gap: 8px; }
 .voir-js {
-  position: absolute;
-  top: 10px; right: 14px;
-  z-index: 50;
   border: 0;
   border-radius: 6px;
   padding: 6px 12px;
@@ -229,7 +227,9 @@ h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: var(--
   color: var(--rouge);
   font-size: 13px;
 }
-#vue-code.js-ouvert .voir-js { right: calc(38% + 14px); }
+#vue-code.js-ouvert .outils-code { right: calc(38% + 14px); }
+/* Infobulles des blocs coupées (bouton « 💬 Infobulles » de l'onglet Code). */
+body.sans-infobulles .blocklyTooltipDiv { display: none !important; }
 
 /* Propriétés : « 🧰 Ses blocs » ouvre la catégorie du contrôle dans l'onglet Code. */
 .bouton-ses-blocs { width: 100%; margin: 4px 0 10px; padding: 6px; cursor: pointer; }

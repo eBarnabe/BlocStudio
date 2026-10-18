@@ -3797,6 +3797,21 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     brancherFenetreExec();
     $('btn-fermer-exec').addEventListener('click', fermerExecution);
 
+    // Infobulles des blocs : on peut les couper ; BlocStudio s'en souvient.
+    const CLE_INFOBULLES = 'blocstudio.infobulles';
+    const majInfobulles = sans => {
+      document.body.classList.toggle('sans-infobulles', sans);
+      $('btn-infobulles').textContent = sans ? '💬 Infobulles : non' : '💬 Infobulles : oui';
+    };
+    let sansInfobulles = false;
+    try { sansInfobulles = localStorage.getItem(CLE_INFOBULLES) === 'non'; } catch (e) { /* rien de mémorisé */ }
+    majInfobulles(sansInfobulles);
+    $('btn-infobulles').addEventListener('click', () => {
+      sansInfobulles = !sansInfobulles;
+      majInfobulles(sansInfobulles);
+      try { localStorage.setItem(CLE_INFOBULLES, sansInfobulles ? 'non' : 'oui'); } catch (e) { /* tant pis */ }
+    });
+
     $('btn-voir-js').addEventListener('click', () => {
       const p = $('panneau-js');
       p.hidden = !p.hidden;
