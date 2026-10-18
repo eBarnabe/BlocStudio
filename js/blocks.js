@@ -517,7 +517,7 @@
   ], COULEUR_FENETRES, 'Affiche la fenêtre par-dessus la fenêtre principale. « et attendre qu\'elle soit fermée » : le reste du programme est bloqué et les blocs suivants attendent sa fermeture (idéal pour une fenêtre de réglages avec OK / Annuler).');
   Blockly.Blocks['bs_fenetre_fermer'] = instruction(() => ['fermer la fenêtre', FENETRE()],
     COULEUR_FENETRES, 'Cache la fenêtre. Ses contrôles gardent ce qu\'on y a écrit : on le retrouve si on la rouvre.');
-  Blockly.Blocks['bs_fenetre_titre'] = instruction(() => ['mettre le titre de la fenêtre', FENETRE(), { nom: 'VAL', libelle: 'à' }],
+  Blockly.Blocks['bs_fenetre_titre'] = instruction(() => ['mettre le titre de la fenêtre', { champ: new ChampFenetre(true), nom: 'FENETRE' }, { nom: 'VAL', libelle: 'à' }],
     COULEUR_FENETRES, 'Change le texte de la barre de titre de la fenêtre.');
   Blockly.Blocks['bs_fenetre_ouverte'] = valeur(() => ['la fenêtre', FENETRE(), 'est ouverte ?'], 'Boolean',
     COULEUR_FENETRES, 'Vrai si la fenêtre est affichée en ce moment.');
@@ -2324,7 +2324,8 @@
       contenu.push(
         { kind: 'button', text: '🪟 Créer une autre fenêtre…', callbackKey: 'nouvelleFenetre', 'web-class': 'bouton-fenetre' },
         { kind: 'block', type: 'bs_quand_demarre' },
-        { kind: 'block', type: 'bs_fond_fenetre', inputs: { VAL: couleurOmbre() } });
+        { kind: 'block', type: 'bs_fond_fenetre', inputs: { VAL: couleurOmbre() } },
+        { kind: 'block', type: 'bs_fenetre_titre', fields: { FENETRE: '' }, inputs: { VAL: texte(f.titre || 'Mon programme') } });
       if (BlocRuntime.cheminsMenus(f.menus).length) {
         contenu.push(etiquette('Menus'), { kind: 'block', type: 'bs_quand_menu' }, { kind: 'block', type: 'bs_menu_actif' });
       }

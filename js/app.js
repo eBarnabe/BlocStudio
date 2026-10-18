@@ -3131,6 +3131,7 @@
     $('execution').hidden = false;
     execution = BlocRuntime.lancer(projet, code, $('hote-exec'), signalerErreur, {
       modeSuivi,
+      titre: texte => { $('titre-exec').textContent = texte; },
       // Dans BlocStudio.exe, les fichiers du programme passent par la boîte « Enregistrer sous » de Windows.
       enregistrer: hote ? (nom, texte) => telecharger(nom, texte, 'text/plain') : null
     });

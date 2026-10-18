@@ -593,6 +593,76 @@
       }
     },
     {
+      titre: '💬 Messagerie',
+      description: 'Une discussion avec Robi, un petit robot : chaque message est une bulle (un clone) ajoutée dans un panneau défilant, qui descend tout en bas.',
+      creer: () => {
+        // c1 Fil (panneau défilant) · c2 Bulle (dans le panneau, cachée : ce sont ses clones qu'on voit)
+        // c3 Saisie · c4 Envoyer
+        const minuscules = x => ({ type: 'text_changeCase', fields: { CASE: 'LOWERCASE' }, inputs: { TEXT: I(x) } });
+        const contient = mot => ({ type: 'bs_contient', inputs: { DANS: I(minuscules(v('v_texte'))), VAL: I(t(mot)) } });
+        const auHasard = (...phrases) => ({ type: 'lists_getIndex', fields: { MODE: 'GET', WHERE: 'RANDOM' }, inputs: { VALUE: I(liste(...phrases.map(t))) } });
+        const titre = s => bloc('bs_fenetre_titre', null, { VAL: t(s) }, { FENETRE: '' });
+        // Une ligne de bulle pour environ 28 lettres.
+        const lignes = { type: 'math_round', fields: { OP: 'ROUNDUP' }, inputs: { NUM: I(calc('DIVIDE', { type: 'text_length', inputs: { VALUE: I(v('v_texte')) } }, n(28))) } };
+        return projet(
+          { titre: 'Messagerie', largeur: 400, hauteur: 340, couleurFond: '#f0f2f5' },
+          [
+            { type: 'panneau', nom: 'Fil', x: 10, y: 10, largeur: 380, hauteur: 276, couleurFond: '#e5ddd5', defilement: 'vertical', largeurContenu: 0, hauteurContenu: 0 },
+            { type: 'etiquette', nom: 'Bulle', panneau: 'c1', visible: false, alignement: 'centre', x: 8, y: 10, largeur: 220, hauteur: 33, couleurFond: '#ffffff' },
+            { type: 'zonetexte', nom: 'Saisie', texteInvite: 'Écris un message… (Entrée pour envoyer)', x: 10, y: 296, largeur: 288, hauteur: 32 },
+            { type: 'bouton', nom: 'Envoyer', texte: 'Envoyer ➤', x: 306, y: 296, largeur: 84, hauteur: 32, couleurFond: '#25d366', couleurTexte: '#ffffff', gras: true }
+          ],
+          ['texte', 'deMoi', 'prochainY'],
+          () => [
+            evt('bs_quand_demarre', null, [
+              fixer('v_prochainY', n(10)),
+              fixer('v_deMoi', vrai(false)),
+              fixer('v_texte', t('Salut ! Je suis Robi 🤖. Écris-moi quelque chose !')),
+              bloc('bs_creer_clone', 'c2'),
+              bloc('bs_focus', 'c3')
+            ]),
+            evt('bs_quand_clic', 'c4', [appeler('envoyer')]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [appeler('envoyer')]),
+            // Ma bulle, puis la réponse de Robi une seconde plus tard.
+            fonction('envoyer', [
+              si(non(estVide(lire('texte', 'c3'))), [
+                fixer('v_texte', lire('texte', 'c3')),
+                fixer('v_deMoi', vrai(true)),
+                bloc('bs_creer_clone', 'c2'),
+                ecrire('c3', 'texte', t('')),
+                bloc('bs_focus', 'c3'),
+                titre('Robi écrit…'),
+                attendre(1),
+                appeler('réponse de Robi'),
+                fixer('v_deMoi', vrai(false)),
+                bloc('bs_creer_clone', 'c2'),
+                titre('Messagerie')
+              ])
+            ]),
+            // Robi cherche des mots dans le message (en minuscules) ; sinon, il répond au hasard.
+            fonction('réponse de Robi', [
+              si(ou(contient('bonjour'), contient('salut')), [fixer('v_texte', t('Salut ! 👋 Comment ça va ?'))], [
+                si(contient('?'), [fixer('v_texte', t('Bonne question… Je dirais oui ! 🤔'))], [
+                  fixer('v_texte', auHasard('Ah oui ? Raconte !', 'Trop bien ! 😄', 'Intéressant…', 'Je suis d\'accord ! 👍', 'Hi hi 😊'))
+                ])
+              ])
+            ]),
+            // Chaque bulle est un clone : à droite et en vert pour moi, à gauche et en blanc pour Robi.
+            evt('bs_quand_clone', 'c2', [
+              ecrire('__moi', 'texte', v('v_texte')),
+              ecrire('__moi', 'hauteur', calc('ADD', n(14), calc('MULTIPLY', n(19), lignes))),
+              si(v('v_deMoi'),
+                [ecrire('__moi', 'x', n(136)), ecrire('__moi', 'couleurFond', t('#dcf8c6'))],
+                [ecrire('__moi', 'x', n(8)), ecrire('__moi', 'couleurFond', t('#ffffff'))]),
+              ecrire('__moi', 'y', v('v_prochainY')),
+              ecrire('__moi', 'visible', vrai(true)),
+              ajouter('v_prochainY', calc('ADD', lire('hauteur', '__moi'), n(8))),
+              bloc('bs_panneau_defiler', 'c1', null, { QUOI: 'bas' })
+            ])
+          ]);
+      }
+    },
+    {
       titre: '🧮 Quiz de calcul',
       description: '5 multiplications au hasard, un score et une barre de progression.',
       creer: () => projet(

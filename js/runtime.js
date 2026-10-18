@@ -3197,7 +3197,14 @@ function BlocRuntimeFactory() {
         const f = laFenetre(id);
         if (action === 'ouvrir') return ouvrirFenetre(f, valeur);
         if (action === 'fermer') fermerFenetre(f);
-        if (action === 'titre') f.titre.textContent = enTexte(valeur);
+        if (action === 'titre') {
+          const texte = enTexte(valeur);
+          // La fenêtre principale : dans BlocStudio, la barre de titre de l'exécution ; ailleurs, le titre de la page
+          // (celui de la fenêtre Windows dans une application exportée).
+          if (f !== principale) f.titre.textContent = texte;
+          else if (options.titre) options.titre(texte);
+          else document.title = texte;
+        }
       },
       fenetreOuverte(id) { return laFenetre(id).ouverte; },
       quandFenetre(id, quoi, fn) {
