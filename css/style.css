@@ -462,6 +462,11 @@ body.dans-hote .si-navigateur, body:not(.dans-hote) .si-hote { display: none; }
 
 /* Contrôles invisibles (Son, Minuteur) : bande sous la fenêtre du concepteur */
 .palette-sous-titre { margin-top: 14px; }
+.palette-recherche { width: 100%; margin-bottom: 4px; padding: 6px 9px; border: 1px solid var(--bord); border-radius: 7px; font: inherit; font-size: 13px; }
+.palette .palette-theme { margin: 12px 0 6px; font-size: 12px; }
+.outil small { margin-left: auto; font-size: 10.5px; color: var(--doux); font-style: italic; }
+.palette-rien { margin: 8px 2px; }
+.outil[hidden], .palette-theme[hidden] { display: none; }
 .invisibles-design {
   margin-top: 14px; padding: 8px 10px 10px;
   border: 1px dashed #94a3b8; border-radius: 8px; background: rgba(255, 255, 255, .85);

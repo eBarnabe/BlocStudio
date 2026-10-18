@@ -3534,6 +3534,85 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     brancherInterface();
   }
 
+  // ---- Palette : les contrôles rangés par thème, dans l'ordre alphabétique, avec une recherche ----
+  const THEMES_PALETTE = [
+    ['✏️ Texte', ['etiquette', 'lien', 'motdepasse', 'zonetexte']],
+    ['🔘 Boutons et choix', ['bouton', 'boutonradio', 'casecocher', 'curseur', 'interrupteur', 'listederoulante', 'selecteurcouleur',
+      'date', 'heure', 'selecteurnombre', 'zoneliste']],
+    ['📊 Données', ['arborescence', 'barreprogression', 'basedonnees', 'graphique', 'tableau']],
+    ['🖼️ Images et dessin', ['forme', 'image', 'sprite', 'zonedessin']],
+    ['🎬 Sons, vidéos et web', ['camera', 'navigateur', 'son', 'video']],
+    ['🧱 Mise en page', ['barreetat', 'barreoutils', 'cadre', 'menucontextuel', 'onglets', 'panneau']],
+    ['⚙️ Outils', ['fichier', 'minuteur']]
+  ];
+  // Autres mots qui les font trouver, dont leur nom dans Visual Basic.
+  const MOTS_PALETTE = {
+    bouton: 'Button', etiquette: 'Label texte', zonetexte: 'TextBox saisie', motdepasse: 'TextBox PasswordChar secret',
+    casecocher: 'CheckBox', boutonradio: 'RadioButton option', selecteurnombre: 'NumericUpDown', image: 'PictureBox photo',
+    forme: 'Shape Line ligne cercle rectangle triangle ovale', sprite: 'personnage jeu animation costume',
+    listederoulante: 'ComboBox', zoneliste: 'ListBox', arborescence: 'TreeView arbre', cadre: 'GroupBox Frame',
+    panneau: 'Panel défilement scroll', onglets: 'TabControl pages', curseur: 'TrackBar slider volume',
+    barreprogression: 'ProgressBar', zonedessin: 'dessin canvas peinture', tableau: 'DataGridView grille Excel',
+    graphique: 'Chart courbe histogramme', date: 'DateTimePicker calendrier', heure: 'DateTimePicker horloge',
+    selecteurcouleur: 'ColorDialog', navigateur: 'WebBrowser internet page', interrupteur: 'switch',
+    lien: 'LinkLabel internet', video: 'MediaPlayer film', camera: 'webcam photo', barreetat: 'StatusStrip',
+    barreoutils: 'ToolStrip', son: 'musique mp3 bruit', minuteur: 'Timer chronomètre', menucontextuel: 'ContextMenuStrip clic droit',
+    basedonnees: 'fiches enregistrer', fichier: 'OpenFileDialog SaveFileDialog ouvrir enregistrer'
+  };
+
+  function organiserPalette() {
+    const palette = document.querySelector('.palette');
+    const outils = [...palette.querySelectorAll('.outil')];
+    const aide = palette.querySelector('.aide');
+    const nomOutil = o => o.lastChild.textContent.trim();
+    const recherche = el('input', 'palette-recherche');
+    recherche.type = 'search';
+    recherche.placeholder = '🔍 Chercher…';
+    recherche.title = 'Son nom, à quoi il sert, ou son nom dans Visual Basic (TextBox, Timer…). Entrée : l\'ajouter à la fenêtre.';
+    palette.querySelector('h3').after(recherche);
+    const rangés = new Set();
+    const sections = [];
+    for (const [nom, types] of [...THEMES_PALETTE, ['🧩 Autres', null]]) {
+      const liste = outils.filter(o => !rangés.has(o) && (!types || types.includes(o.dataset.type)))
+        .sort((a, b) => nomOutil(a).localeCompare(nomOutil(b), 'fr', { sensitivity: 'base', ignorePunctuation: true })); // « d'heure » après « de date »
+      if (!liste.length) continue;
+      const titre = el('h3', 'palette-theme', nom);
+      aide.before(titre, ...liste);
+      liste.forEach(o => {
+        rangés.add(o);
+        const type = VARIANTES[o.dataset.type]?.type || o.dataset.type;
+        o.dataset.mots = sansAccents(`${nomOutil(o)} ${MOTS_PALETTE[o.dataset.type] || ''} ${nom}`);
+        if (estInvisible({ type })) {
+          o.appendChild(el('small', null, 'invisible'));
+          o.title = (o.title ? o.title + '. ' : '') + 'Invisible : il ne se voit pas dans la fenêtre du programme, il travaille en coulisses.';
+        }
+      });
+      sections.push({ titre, liste });
+    }
+    const rien = el('p', 'aide palette-rien', 'Aucun contrôle ne correspond.');
+    rien.hidden = true;
+    aide.before(rien);
+    const filtrer = () => {
+      const mots = sansAccents(recherche.value).split(/\s+/).filter(Boolean);
+      let visibles = 0;
+      for (const s of sections) {
+        let n = 0;
+        s.liste.forEach(o => { o.hidden = !mots.every(m => o.dataset.mots.includes(m)); if (!o.hidden) n++; });
+        s.titre.hidden = !n;
+        visibles += n;
+      }
+      rien.hidden = visibles > 0;
+    };
+    recherche.addEventListener('input', filtrer);
+    recherche.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { recherche.value = ''; filtrer(); }
+      if (e.key === 'Enter') {
+        const premier = palette.querySelector('.outil:not([hidden])'); // le premier affiché
+        if (premier) { ajouterControle(premier.dataset.type); recherche.value = ''; filtrer(); }
+      }
+    });
+  }
+
   // ---- Galerie des exemples : des cartes rangées par thème, avec une recherche ----
   const THEMES_EXEMPLES = [['debut', '🌱 Pour débuter'], ['applications', '🗂️ Applications'], ['jeux', '🎮 Jeux'],
     ['multimedia', '🎨 Images, sons et caméra']];
@@ -3590,7 +3669,8 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     document.querySelectorAll('.onglet').forEach(o =>
       o.addEventListener('click', () => afficherVue(o.dataset.vue)));
 
-    // Palette : glisser-déposer ou simple clic.
+    // Palette : rangée par thème ; glisser-déposer ou simple clic.
+    organiserPalette();
     document.querySelectorAll('.outil').forEach(o => {
       o.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', o.dataset.type));
       o.addEventListener('click', () => ajouterControle(o.dataset.type));
