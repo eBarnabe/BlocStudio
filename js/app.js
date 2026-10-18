@@ -1496,7 +1496,7 @@
   }
 
   const TYPES_FICHIER_EDITEUR = {
-    texte: 'Texte (.txt)', csv: 'Tableur (.csv, lisible par Excel)', image: 'Image (PNG, JPG, GIF…)', tous: 'Tous les fichiers'
+    texte: 'Texte (.txt)', csv: 'Tableur (.csv, lisible par Excel)', image: 'Image (PNG, JPG, GIF…)', son: 'Son (MP3, WAV, OGG…)', tous: 'Tous les fichiers'
   };
 
   // Menu qui s'ouvre au clic droit sur ce contrôle (ou sur le fond de cette fenêtre).
@@ -1537,7 +1537,7 @@
     choix.addEventListener('change', () => {
       c.typeFichier = choix.value;
       // Le nom proposé prend l'extension qui va avec.
-      const ext = { texte: '.txt', csv: '.csv', image: '.png' }[c.typeFichier];
+      const ext = { texte: '.txt', csv: '.csv', image: '.png', son: '.mp3' }[c.typeFichier];
       if (ext && c.nomPropose) c.nomPropose = c.nomPropose.replace(/\.[a-z0-9]{1,5}$/i, '') + ext;
       maj();
       afficherProprietes();

@@ -621,6 +621,7 @@ function BlocRuntimeFactory() {
     texte: { accept: '.txt,text/plain', extension: '.txt', mime: 'text/plain', description: 'Texte' },
     csv: { accept: '.csv,text/csv', extension: '.csv', mime: 'text/csv', description: 'Tableur (CSV)' },
     image: { accept: 'image/*', extension: '.png', mime: 'image/png', description: 'Image' },
+    son: { accept: 'audio/*,.mp3,.wav,.ogg,.m4a', extension: '.mp3', mime: 'audio/mpeg', description: 'Son' },
     tous: { accept: '', extension: '.txt', mime: 'application/octet-stream', description: 'Fichier' }
   };
 
@@ -1685,6 +1686,25 @@ function BlocRuntimeFactory() {
       }
     }
 
+    // Un son ouvert avec un contrôle Fichier : on peut donner son contenu, ou simplement le nom du fichier ouvert.
+    // Il est ajouté aux sons du programme (une seule fois) et se joue comme les autres.
+    function sonDeFichier(valeur) {
+      const texte = enTexte(valeur);
+      const f = Object.values(donnees).find(x => x.type === 'fichier' && x.contenu && (x.contenu === texte || x.nomFichier === texte.trim()));
+      if (f && f.luEnTexte) {
+        throw new Error(`« ${f.nom} » a lu « ${f.nomFichier} » comme du texte : il ne peut pas se jouer. ` +
+          `Dans les propriétés de ${f.nom}, choisissez « Type de fichier proposé : Son ».`);
+      }
+      const adresse = f ? f.contenu : texte;
+      if (!/^data:/.test(adresse)) return null;
+      let s = [...sonsProjet.values()].find(x => x.donnees === adresse);
+      if (!s) {
+        s = { id: 'fichier' + sonsProjet.size, nom: f ? f.nomFichier : 'son du fichier', donnees: adresse };
+        sonsProjet.set(s.id, s);
+      }
+      return s;
+    }
+
     function lireSon(d, prop) {
       switch (prop) {
         case 'son': return sonsProjet.get(d.son)?.nom ?? '';
@@ -1700,8 +1720,8 @@ function BlocRuntimeFactory() {
         case 'son': {
           // On désigne un son par son nom (celui du Sommaire).
           const nom = enTexte(valeur).trim();
-          const s = [...sonsProjet.values()].find(x => x.nom === nom || x.id === nom);
-          if (!s) throw new Error(`Il n'y a pas de son nommé « ${nom} » dans le projet.`);
+          const s = [...sonsProjet.values()].find(x => x.nom === nom || x.id === nom) || sonDeFichier(valeur);
+          if (!s) throw new Error(`Il n'y a pas de son nommé « ${nom} » dans le projet (ni de fichier son ouvert avec ce nom).`);
           const rejouer = d.etat === 'lecture';
           couperCtrlSon(d);
           d.son = s.id;
@@ -2467,7 +2487,12 @@ function BlocRuntimeFactory() {
       });
     }
 
-    // Une image se lit en « adresse » (data:…), utilisable par un contrôle Image ; le reste en texte.
+    // Avec « Tous les fichiers », une image ou un son se lit en « adresse », le reste en texte.
+    function luEnAdresse(type, fichier) {
+      return type === 'image' || type === 'son' || (type === 'tous' && /^(image|audio)\//.test(fichier.type));
+    }
+
+    // Une image ou un son se lit en « adresse » (data:…), utilisable par un contrôle Image ou Son ; le reste en texte.
     function lireContenu(fichier, enImage) {
       if (enImage) {
         return new Promise((ok, erreur) => {
@@ -2519,6 +2544,7 @@ function BlocRuntimeFactory() {
     // Les « sortes » de contrôles qu'on peut remplir depuis un fichier, ou enregistrer.
     const AVEC_FICHIER_CSV = ['tableau', 'basedonnees'];
     const AVEC_FICHIER_IMAGE = ['image', 'zonedessin'];
+    const AVEC_FICHIER_SON = ['son'];
 
     // Le contenu d'un fichier lu comme du texte n'est pas une image : on le dit clairement plutôt que d'afficher du vide.
     function verifierImage(id, valeur) {
@@ -2539,10 +2565,9 @@ function BlocRuntimeFactory() {
           d.annule = !f;
           if (!f) return;
           d.nomFichier = f.name;
-          // « Tous les fichiers » : une image est lue comme une image, le reste comme du texte.
-          const enImage = d.typeFichier === 'image' || (d.typeFichier === 'tous' && /^image\//.test(f.type));
-          d.luEnTexte = !enImage;
-          d.contenu = await lireContenu(f, enImage);
+          const enAdresse = luEnAdresse(d.typeFichier, f);
+          d.luEnTexte = !enAdresse;
+          d.contenu = await lireContenu(f, enAdresse);
           return;
         }
         case 'enregistrer': {
@@ -2555,15 +2580,17 @@ function BlocRuntimeFactory() {
         case 'ouvrirDans': {
           ctrl(a);
           const cible = donnees[a];
-          const enImage = AVEC_FICHIER_IMAGE.includes(cible.type);
-          if (!enImage && !AVEC_FICHIER_CSV.includes(cible.type)) {
-            throw new Error(`On ne peut pas ouvrir un fichier dans « ${cible.nom} » : choisissez un tableau, une base de données, une image ou une zone de dessin.`);
+          const enImage = AVEC_FICHIER_IMAGE.includes(cible.type), enSon = AVEC_FICHIER_SON.includes(cible.type);
+          if (!enImage && !enSon && !AVEC_FICHIER_CSV.includes(cible.type)) {
+            throw new Error(`On ne peut pas ouvrir un fichier dans « ${cible.nom} » : choisissez un tableau, une base de données, une image, une zone de dessin ou un son.`);
           }
-          const f = await choisirFichierAOuvrir(enImage ? 'image' : 'csv');
+          const f = await choisirFichierAOuvrir(enImage ? 'image' : enSon ? 'son' : 'csv');
           d.annule = !f;
           if (!f) return;
           d.nomFichier = f.name;
-          d.contenu = await lireContenu(f, enImage);
+          d.luEnTexte = !(enImage || enSon);
+          d.contenu = await lireContenu(f, enImage || enSon);
+          if (enSon) return app.ecrire(a, 'son', d.contenu);
           if (cible.type === 'tableau') app.tableau(a, 'csv', d.contenu);
           else if (cible.type === 'basedonnees') app.base(a, 'csv', d.contenu);
           else if (cible.type === 'image') app.ecrire(a, 'image', d.contenu);
@@ -2613,7 +2640,8 @@ function BlocRuntimeFactory() {
       e.preventDefault();
       for (const d of recepteurs) {
         try {
-          d.contenu = await lireContenu(f, d.typeFichier === 'image');
+          d.luEnTexte = !luEnAdresse(d.typeFichier, f);
+          d.contenu = await lireContenu(f, !d.luEnTexte);
           d.nomFichier = f.name;
           d.annule = false;
           d.surEvenement.forEach(h => h());

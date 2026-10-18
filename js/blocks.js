@@ -29,7 +29,7 @@
     allumee: 'allumée', photo: 'dernière photo (image)', mouvement: 'mouvement vu (%)',
     seuilMouvement: 'seuil de mouvement (%)',
     contenu: 'contenu du fichier', nomFichier: 'nom du fichier', annule: 'annulé par l\'utilisateur',
-    nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, image ou tous)',
+    nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, image, son ou tous)',
     nombreFiches: 'nombre de fiches', champs: 'champs (liste)', memoriser: 'garder les fiches d\'une fois à l\'autre',
     adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)',
     infobulle: 'infobulle (texte au survol)', gras: 'en gras', italique: 'en italique',
@@ -728,15 +728,15 @@
   const FICHIER = { ctrl: ['fichier'] };
 
   Blockly.Blocks['bs_fichier_ouvrir_avec'] = instruction(() => ['ouvrir un fichier avec', FICHIER], COULEUR_FICHIERS,
-    'Montre la fenêtre « Ouvrir » de Windows ; le programme attend le choix. Ensuite : « contenu du fichier » (un texte, ou une image pour un contrôle Image), « nom du fichier », ou « annulé ? » si l\'utilisateur a fermé la fenêtre sans choisir.');
+    'Montre la fenêtre « Ouvrir » de Windows ; le programme attend le choix. Ensuite : « contenu du fichier » (un texte, une image pour un contrôle Image, ou un son pour un contrôle Son), « nom du fichier », ou « annulé ? » si l\'utilisateur a fermé la fenêtre sans choisir.');
 
   Blockly.Blocks['bs_fichier_enregistrer_avec'] = instruction(() => [
     { nom: 'VAL', libelle: 'enregistrer le texte' }, 'avec', FICHIER
   ], COULEUR_FICHIERS, 'Montre la fenêtre « Enregistrer sous » de Windows, avec le nom proposé dans les propriétés du contrôle (ou celui du fichier ouvert).');
 
   Blockly.Blocks['bs_fichier_ouvrir_dans'] = instruction(() => [
-    'ouvrir avec', FICHIER, 'un fichier dans', { ctrl: ['tableau', 'basedonnees', 'image', 'zonedessin'], nom: 'CIBLE' }
-  ], COULEUR_FICHIERS, 'Raccourci : un fichier CSV (Excel) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin.');
+    'ouvrir avec', FICHIER, 'un fichier dans', { ctrl: ['tableau', 'basedonnees', 'image', 'zonedessin', 'son'], nom: 'CIBLE' }
+  ], COULEUR_FICHIERS, 'Raccourci : un fichier CSV (Excel) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin ; un son (MP3, WAV…) va dans un contrôle Son, prêt à jouer.');
 
   Blockly.Blocks['bs_fichier_enregistrer_de'] = instruction(() => [
     'enregistrer', { ctrl: ['tableau', 'basedonnees', 'zonedessin', 'camera'], nom: 'CIBLE' }, 'dans un fichier avec', FICHIER
