@@ -37,7 +37,7 @@
     ajustement: 'ajustement (entiere, etiree ou recadree)', texteInvite: 'texte d\'invite (grisé)',
     lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)',
     couleurBordure: 'couleur du trait', epaisseur: 'épaisseur du trait', sens: 'sens de la ligne (horizontale, verticale, descendante ou montante)',
-    heures: 'heures', minutes: 'minutes', cliquable: 'cliquable (un clic choisit la valeur)',
+    heures: 'heures', minutes: 'minutes', orientation: 'orientation (horizontale ou verticale)', cliquable: 'cliquable (un clic choisit la valeur)',
     defilementY: 'défilement vertical (en pixels depuis le haut)', defilementX: 'défilement horizontal (en pixels depuis la gauche)',
     hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
     defilement: 'sens du défilement (vertical, horizontal ou deux)'
@@ -57,7 +57,7 @@
     casecocher: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
     image: ['image', 'ajustement', 'bordure', 'couleurFond', ...POSITION, 'direction'],
     listederoulante: ['texte', 'numero', 'elements', 'trie', ...TEXTE, 'active', ...POSITION],
-    curseur: ['valeur', 'min', 'max', 'pas', 'active', ...POSITION],
+    curseur: ['valeur', 'min', 'max', 'pas', 'orientation', 'couleurBarre', 'couleurFond', 'active', ...POSITION],
     barreprogression: ['valeur', 'max', 'cliquable', 'couleurBarre', 'couleurFond', ...POSITION],
     zonedessin: ['couleurFond', ...POSITION],
     boutonradio: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
@@ -92,6 +92,7 @@
     interrupteur: { coche: 'allumé' },
     onglets: { numero: 'n° de la page affichée', texte: 'titre de la page affichée', elements: 'titres des pages (liste)' },
     graphique: { texte: 'titre', couleurBarre: 'couleur des barres / de la courbe' },
+    curseur: { couleurBarre: 'couleur du curseur' },
     cadre: { texte: 'titre' },
     tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
     date: { texte: 'date (jj/mm/aaaa)' },
@@ -2110,7 +2111,7 @@
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee', 'cliquable',
     'gras', 'italique', 'lectureSeule', 'trie'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
-  const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical' };
+  const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical', orientation: 'verticale' };
 
   function valeurProposee(c, prop) {
     if (PROPS_COULEUR.includes(prop)) return couleurOmbre();

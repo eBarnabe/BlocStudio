@@ -1325,6 +1325,14 @@
         g => champNombre(g, 'Pas', c.pas ?? 1, v => { c.pas = v > 0 ? v : 1; maj(); }),
         g => champNombre(g, 'Valeur', c.valeur, v => { c.valeur = v; maj(); })
       ]);
+      champChoix(liste, 'Orientation', [['horizontale', '↔ Horizontale'], ['verticale', '↕ Verticale']], c.orientation || 'horizontale', v => {
+        // On le tourne : la largeur et la hauteur s'échangent.
+        if ((v === 'verticale') === (c.largeur > c.hauteur)) [c.largeur, c.hauteur] = [c.hauteur, c.largeur];
+        c.orientation = v;
+        maj();
+        afficherProprietes();
+      });
+      champCouleur(liste, 'Couleur du curseur', c.couleurBarre || '#4f46e5', v => { c.couleurBarre = v; maj(); });
     }
     if (c.type === 'tableau') {
       champTexte(liste, 'Colonnes (une par ligne)', c.colonnes.join('\n'),

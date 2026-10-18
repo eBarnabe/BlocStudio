@@ -71,7 +71,16 @@ function BlocRuntimeFactory() {
     .bs-zoneliste option { padding: 3px 8px; }
     .bs-zoneliste option:checked { background: #4f46e5 linear-gradient(#4f46e5, #4f46e5); color: #fff; }
     .bs-selecteurnombre { border: 1px solid #7a7a7a; padding: 2px 4px 2px 8px; background: #fff; }
-    .bs-curseur { accent-color: #4f46e5; cursor: pointer; }
+    /* Curseur dessiné ici (le curseur de Windows ignore la couleur de fond) : --couleur, --part (rempli), --sens. */
+    .bs-curseur { -webkit-appearance: none; appearance: none; background: transparent; cursor: pointer; border-radius: 4px;
+      --couleur: #4f46e5; --part: 50%; --sens: to right; }
+    .bs-curseur::-webkit-slider-runnable-track { height: 6px; border-radius: 3px;
+      background: linear-gradient(var(--sens), var(--couleur) var(--part), #cbd5e1 var(--part)); }
+    .bs-curseur::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; margin-top: -5px;
+      border-radius: 50%; background: var(--couleur); border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,.4); }
+    .bs-curseur.bs-vertical { writing-mode: vertical-lr; direction: rtl; --sens: to top; }
+    .bs-curseur.bs-vertical::-webkit-slider-runnable-track { height: auto; width: 6px; }
+    .bs-curseur.bs-vertical::-webkit-slider-thumb { margin-top: 0; margin-left: -5px; }
     .bs-barreprogression { background: #e5e7eb; border: 1px solid #cbd5e1; border-radius: 4px;
       overflow: hidden; }
     .bs-barre { height: 100%; width: 0; transition: width .2s ease-out; }
@@ -284,6 +293,17 @@ function BlocRuntimeFactory() {
     };
     document.addEventListener('pointerdown', ailleurs, true);
     return barre;
+  }
+
+  // ---- Curseur : sa couleur, son sens (la valeur monte vers le haut à la verticale), sa partie remplie ----
+  function majCurseur(el, c) {
+    el.classList.toggle('bs-vertical', c.orientation === 'verticale');
+    el.style.setProperty('--couleur', couleur(c.couleurBarre || '#4f46e5'));
+    partCurseur(el);
+  }
+  function partCurseur(el) {
+    const min = Number(el.min) || 0, max = Number(el.max), v = Number(el.value) || 0;
+    el.style.setProperty('--part', (max > min ? (v - min) / (max - min) * 100 : 0) + '%');
   }
 
   // ---- Panneau défilant ----
@@ -773,6 +793,7 @@ function BlocRuntimeFactory() {
         el.max = c.max ?? 100;
         el.step = c.pas || 1;
         el.value = c.valeur ?? 50;
+        el.addEventListener('input', () => partCurseur(el));
         break;
       case 'barreprogression':
         el = document.createElement('div');
@@ -879,6 +900,7 @@ function BlocRuntimeFactory() {
     el.className = 'bs-ctrl bs-' + c.type + (el.className ? ' ' + el.className : '');
     appliquerStyle(el, c);
     if (c.type === 'forme') rendreForme(el, c);
+    if (c.type === 'curseur') majCurseur(el, c);
     if (c.type === 'panneau') sensDefilement(el, c.defilement);
     return el;
   }
@@ -3367,6 +3389,7 @@ function BlocRuntimeFactory() {
         }
         if (prop === 'trie') return !!d.trie;
         if (prop === 'cliquable') return !!d.cliquable;
+        if (prop === 'orientation') return d.orientation === 'verticale' ? 'verticale' : 'horizontale';
         if (d.type === 'panneau') {
           if (prop === 'defilementX') return Math.round(el.scrollLeft);
           if (prop === 'defilementY') return Math.round(el.scrollTop);
@@ -3493,6 +3516,12 @@ function BlocRuntimeFactory() {
           if (prop === 'epaisseur') d.epaisseur = Math.max(0, Number(valeur) || 0);
           if (prop === 'couleurBordure') d.couleurBordure = enTexte(valeur);
           return rendreForme(el, d);
+        }
+        if (d.type === 'curseur' && (prop === 'orientation' || prop === 'couleurBarre')) {
+          if (prop === 'couleurBarre') d.couleurBarre = valeur;
+          else d.orientation = /^vert/i.test(enTexte(valeur).trim()) ? 'verticale' : 'horizontale';
+          majCurseur(el, d);
+          return;
         }
         if (prop === 'cliquable' && d.type === 'barreprogression') {
           d.cliquable = !!valeur;
@@ -3641,6 +3670,7 @@ function BlocRuntimeFactory() {
         }
         if (d.type === 'graphique') dessinerGraphique(el, d); // taille, couleurs du texte ou du fond
         if (prop === 'largeur' || prop === 'hauteur') agrandirPanneau(d);
+        if (d.type === 'curseur') partCurseur(el); // valeur, minimum ou maximum
         if (d.type === 'forme' && prop === 'couleurFond') rendreForme(el, d);
         if (d.type === 'onglets') {
           if (prop === 'visible') majOnglets(id);
