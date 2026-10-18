@@ -11,6 +11,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -212,6 +213,7 @@ namespace BlocStudio
         {
             if (message != null && message.StartsWith("notification:")) { Notifier(message.Substring(13)); return; }
             if (message != null && message.StartsWith("imprimer:")) { Imprimer(message.Substring(9)); return; }
+            if (message != null && message.StartsWith("web:")) { LireWeb(message.Substring(4)); return; }
             if (message == null || !message.StartsWith("taille:")) return;
             string[] t = message.Substring(7).Split('x');
             int l, h;
@@ -281,6 +283,34 @@ namespace BlocStudio
                 try { vue.CoreWebView2.PostWebMessageAsString("imprime"); } catch { }
                 Activate();
             }
+        }
+
+        // Les blocs « lire les données de » et « météo » : quand une page web n'a pas le droit de lire un site,
+        // c'est l'application qui le lit (« web:N\nadresse ») et renvoie « web:N\ncode\ntexte » (code 0 : pas de réponse).
+        async void LireWeb(string message)
+        {
+            int i = message.IndexOf('\n');
+            if (i < 0) return;
+            string id = message.Substring(0, i), adresse = message.Substring(i + 1), reponse;
+            try
+            {
+                Uri uri = new Uri(adresse);
+                if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) throw new ArgumentException("adresse non web");
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                using (var client = new WebClient())
+                {
+                    client.Encoding = Encoding.UTF8;
+                    client.Headers[HttpRequestHeader.UserAgent] = "BlocStudio";
+                    reponse = "200\n" + await client.DownloadStringTaskAsync(uri);
+                }
+            }
+            catch (WebException ex)
+            {
+                var r = ex.Response as HttpWebResponse;
+                reponse = (r != null ? (int)r.StatusCode : 0) + "\n" + ex.Message;
+            }
+            catch (Exception ex) { reponse = "0\n" + ex.Message; }
+            try { vue.CoreWebView2.PostWebMessageAsString("web:" + id + "\n" + reponse); } catch { }
         }
 
         void Ramener()

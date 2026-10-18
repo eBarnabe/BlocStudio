@@ -2851,6 +2851,129 @@ function BlocRuntimeFactory() {
       });
     }
 
+    // ---- Données d'Internet ----
+    // D'abord directement ; si le site ne le permet pas à une page web (ou en cas d'échec), BlocStudio et les
+    // applications exportées font la demande eux-mêmes (« web:N\nadresse » → « web:N\ncode\ntexte »).
+    const hoteWeb = window.chrome && window.chrome.webview;
+    const attentesWeb = new Map();
+    let numeroWeb = 0;
+    if (hoteWeb) {
+      ecouter(hoteWeb, 'message', e => {
+        if (typeof e.data !== 'string' || !e.data.startsWith('web:')) return;
+        const i = e.data.indexOf('\n'), j = e.data.indexOf('\n', i + 1);
+        const fini = attentesWeb.get(e.data.slice(4, i));
+        if (!fini) return;
+        attentesWeb.delete(e.data.slice(4, i));
+        fini({ code: Number(e.data.slice(i + 1, j)) || 0, texte: e.data.slice(j + 1) });
+      });
+    }
+    const adresseDonnees = v => {
+      const a = enTexte(v).trim();
+      if (!a) throw new Error('Il manque l\'adresse des données à lire.');
+      return /^[a-z][a-z0-9+.-]*:/i.test(a) ? a : 'https://' + a;
+    };
+    const echecWeb = (url, raison) => new Error(`Impossible de lire « ${url} » : ${raison}`);
+    const raisonCode = code => code === 404 ? 'cette adresse n\'existe pas (erreur 404).'
+      : code === 401 || code === 403 ? `le site refuse de répondre (erreur ${code} : il faut peut-être une clé ou un compte).`
+      : code === 429 ? 'trop de demandes à la suite : attendez un peu (erreur 429).'
+      : `le site a répondu par l'erreur ${code}.`;
+    function demanderHoteWeb(url) {
+      const id = String(++numeroWeb);
+      return new Promise((ok, erreur) => {
+        const temps = setTimeout(() => { attentesWeb.delete(id); erreur(echecWeb(url, 'le site met trop de temps à répondre.')); }, 20000);
+        attentesWeb.set(id, r => {
+          clearTimeout(temps);
+          if (r.code >= 200 && r.code < 300) ok(r.texte);
+          else erreur(echecWeb(url, r.code ? raisonCode(r.code) : 'pas de connexion à Internet, ou adresse introuvable.'));
+        });
+        hoteWeb.postMessage(`web:${id}\n${url}`);
+      });
+    }
+    async function lireWeb(adresse) {
+      const url = adresseDonnees(adresse);
+      if (!/^https?:/i.test(url)) throw echecWeb(url, 'seules les adresses web (http ou https) se lisent.');
+      let reponse;
+      try {
+        reponse = await fetch(url);
+      } catch (e) {
+        // Refusé à une page web, ou pas de réseau : l'application Windows essaie à son tour.
+        if (hoteWeb) return demanderHoteWeb(url);
+        throw echecWeb(url, 'pas de connexion à Internet, ou le site ne permet pas aux pages web de le lire.');
+      }
+      if (!reponse.ok) throw echecWeb(url, raisonCode(reponse.status));
+      return reponse.text();
+    }
+
+    // « current.temperature_2m », « results.1.name » : les numéros de liste commencent à 1, comme dans les blocs.
+    function valeurJson(donnees, chemin) {
+      let v = donnees;
+      if (typeof v === 'string') {
+        try { v = JSON.parse(v); } catch (e) { throw new Error('Ces données ne sont pas au format JSON : impossible d\'y chercher une valeur.'); }
+      }
+      for (const morceau of enTexte(chemin).split(/[.\/]|\[|\]/).map(m => m.trim()).filter(Boolean)) {
+        if (v === null || typeof v !== 'object') return '';
+        if (Array.isArray(v)) {
+          const n = Math.round(Number(morceau));
+          if (!(n >= 1)) return '';
+          v = v[n - 1];
+        } else {
+          const cle = Object.keys(v).find(k => k === morceau) ?? Object.keys(v).find(k => k.toLowerCase() === morceau.toLowerCase());
+          v = cle === undefined ? undefined : v[cle];
+        }
+        if (v === undefined) return '';
+      }
+      if (v === null) return '';
+      if (Array.isArray(v)) return v.map(x => x !== null && typeof x === 'object' ? JSON.stringify(x) : x);
+      return typeof v === 'object' ? JSON.stringify(v) : v;
+    }
+
+    // ---- Météo (Open-Meteo : gratuit, sans inscription) ----
+    // Codes météo de l'OMM → [description, emoji].
+    const TEMPS_QUIL_FAIT = {
+      0: ['Ciel dégagé', '☀️'], 1: ['Plutôt dégagé', '🌤️'], 2: ['Partiellement nuageux', '⛅'], 3: ['Couvert', '☁️'],
+      45: ['Brouillard', '🌫️'], 48: ['Brouillard givrant', '🌫️'],
+      51: ['Bruine légère', '🌦️'], 53: ['Bruine', '🌦️'], 55: ['Bruine forte', '🌧️'], 56: ['Bruine verglaçante', '🌧️'], 57: ['Bruine verglaçante', '🌧️'],
+      61: ['Pluie faible', '🌦️'], 63: ['Pluie', '🌧️'], 65: ['Forte pluie', '🌧️'], 66: ['Pluie verglaçante', '🌧️'], 67: ['Pluie verglaçante', '🌧️'],
+      71: ['Neige faible', '🌨️'], 73: ['Neige', '❄️'], 75: ['Forte neige', '❄️'], 77: ['Grains de neige', '🌨️'],
+      80: ['Averses', '🌦️'], 81: ['Averses', '🌧️'], 82: ['Fortes averses', '⛈️'], 85: ['Averses de neige', '🌨️'], 86: ['Fortes averses de neige', '❄️'],
+      95: ['Orage', '⛈️'], 96: ['Orage avec grêle', '⛈️'], 99: ['Orage avec grêle', '⛈️']
+    };
+    const cacheMeteo = new Map(); // ville → { quand, valeurs } : plusieurs blocs à la suite ne redemandent pas tout
+    async function meteo(ville, quoi) {
+      // « ville trouvée ? » : vrai ou faux, sans erreur si la ville n'existe pas.
+      if (quoi === 'trouvee') {
+        try { await meteo(ville, 'ville'); return true; } catch (e) { if (e.villeInconnue) return false; throw e; }
+      }
+      const nom = enTexte(ville).trim();
+      if (!nom) throw Object.assign(new Error('Il manque le nom de la ville pour la météo.'), { villeInconnue: true });
+      const cle = nom.toLowerCase();
+      let m = cacheMeteo.get(cle);
+      if (!m || Date.now() - m.quand > 5 * 60 * 1000) {
+        const lieux = JSON.parse(await lireWeb('https://geocoding-api.open-meteo.com/v1/search?count=1&language=fr&format=json&name=' + encodeURIComponent(nom)));
+        const lieu = lieux.results && lieux.results[0];
+        if (!lieu) throw Object.assign(new Error(`Je ne trouve pas la ville « ${nom} » : vérifiez son orthographe.`), { villeInconnue: true });
+        const p = JSON.parse(await lireWeb('https://api.open-meteo.com/v1/forecast?timezone=auto&forecast_days=1' +
+          `&latitude=${lieu.latitude}&longitude=${lieu.longitude}` +
+          '&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day' +
+          '&daily=temperature_2m_max,temperature_2m_min'));
+        const c = p.current || {}, j = p.daily || {};
+        const [description, emoji] = TEMPS_QUIL_FAIT[c.weather_code] || ['Temps inconnu', '🌡️'];
+        m = {
+          quand: Date.now(),
+          valeurs: {
+            temperature: c.temperature_2m, ressenti: c.apparent_temperature, humidite: c.relative_humidity_2m,
+            vent: c.wind_speed_10m, description,
+            emoji: c.is_day === 0 && emoji === '☀️' ? '🌙' : emoji,
+            max: j.temperature_2m_max && j.temperature_2m_max[0], min: j.temperature_2m_min && j.temperature_2m_min[0],
+            ville: [lieu.name, lieu.country].filter(Boolean).join(', ')
+          }
+        };
+        cacheMeteo.set(cle, m);
+      }
+      const v = m.valeurs[quoi];
+      return v === undefined || v === null ? '' : v;
+    }
+
     // Bulle de notification dans un coin de la fenêtre (quand on n'est pas dans une application Windows).
     const ICONES_NOTIFICATION = { info: 'ℹ️', avertissement: '⚠️', erreur: '❌', aucune: '🔔' };
     function bulleNotification(titre, texte, icone) {
@@ -4222,6 +4345,9 @@ function BlocRuntimeFactory() {
         }
         await imprimerPage(titre, page);
       },
+      lireWeb,
+      valeurJson,
+      meteo,
       notifier(titre, texte, icone) {
         if (arrete) return;
         const t = enTexte(titre).trim() || principale.def.titre || 'Programme', m = enTexte(texte);

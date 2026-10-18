@@ -15,8 +15,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
@@ -266,6 +268,7 @@ namespace BlocStudio
             if (texte != null)
             {
                 if (texte.StartsWith("notification:")) BeginInvoke(new Action(() => Notifier(texte.Substring(13))));
+                if (texte.StartsWith("web:")) BeginInvoke(new Action(() => LireWeb(texte.Substring(4))));
                 return;
             }
             Dictionary<string, object> message;
@@ -293,6 +296,34 @@ namespace BlocStudio
             ToolTipIcon icone = p[0] == "info" ? ToolTipIcon.Info : p[0] == "avertissement" ? ToolTipIcon.Warning
                               : p[0] == "erreur" ? ToolTipIcon.Error : ToolTipIcon.None;
             bulle.ShowBalloonTip(6000, p[1].Length > 0 ? p[1] : "BlocStudio", p[2].Length > 0 ? p[2] : " ", icone);
+        }
+
+        // Les blocs « lire les données de » et « météo » : quand une page web n'a pas le droit de lire un site,
+        // c'est l'application qui le lit (« web:N\nadresse ») et renvoie « web:N\ncode\ntexte » (code 0 : pas de réponse).
+        async void LireWeb(string message)
+        {
+            int i = message.IndexOf('\n');
+            if (i < 0) return;
+            string id = message.Substring(0, i), adresse = message.Substring(i + 1), reponse;
+            try
+            {
+                Uri uri = new Uri(adresse);
+                if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps) throw new ArgumentException("adresse non web");
+                ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
+                using (var client = new WebClient())
+                {
+                    client.Encoding = Encoding.UTF8;
+                    client.Headers[HttpRequestHeader.UserAgent] = "BlocStudio";
+                    reponse = "200\n" + await client.DownloadStringTaskAsync(uri);
+                }
+            }
+            catch (WebException ex)
+            {
+                var r = ex.Response as HttpWebResponse;
+                reponse = (r != null ? (int)r.StatusCode : 0) + "\n" + ex.Message;
+            }
+            catch (Exception ex) { reponse = "0\n" + ex.Message; }
+            try { vue.CoreWebView2.PostWebMessageAsString("web:" + id + "\n" + reponse); } catch { }
         }
 
         void Ramener()

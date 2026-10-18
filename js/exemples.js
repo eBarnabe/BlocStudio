@@ -671,6 +671,51 @@
       }
     },
     {
+      titre: '🌦️ Météo',
+      theme: 'applications',
+      description: 'La météo en ce moment dans la ville de son choix, lue sur Internet (il faut une connexion) : température, temps qu\'il fait, vent…',
+      creer: () => {
+        // c1 Ville · c2 Voir · c3 Emoji · c4 Temperature · c5 Details · c6 Lieu
+        const meteo = quoi => bloc('bs_meteo', null, { VAL: lire('texte', 'c1') }, { QUOI: quoi });
+        const arrondi = x => ({ type: 'math_round', fields: { OP: 'ROUND' }, inputs: { NUM: I(x) } });
+        return projet(
+          { titre: 'Météo', largeur: 420, hauteur: 290, couleurFond: '#e0f2fe' },
+          [
+            { type: 'zonetexte', nom: 'Ville', texte: 'Paris', texteInvite: 'Une ville…', x: 16, y: 16, largeur: 250, hauteur: 32, taillePolice: 16 },
+            { type: 'bouton', nom: 'Voir', texte: '🔍 Voir la météo', x: 274, y: 16, largeur: 130, hauteur: 32, couleurFond: '#0369a1', couleurTexte: '#ffffff', gras: true },
+            { type: 'etiquette', nom: 'Emoji', texte: '', alignement: 'centre', x: 16, y: 92, largeur: 110, hauteur: 90, taillePolice: 60 },
+            { type: 'etiquette', nom: 'Temperature', texte: '', x: 134, y: 104, largeur: 270, hauteur: 60, taillePolice: 42, couleurTexte: '#0c4a6e', gras: true },
+            { type: 'etiquette', nom: 'Details', texte: '', x: 16, y: 190, largeur: 388, hauteur: 90, taillePolice: 14, couleurTexte: '#334155' },
+            { type: 'etiquette', nom: 'Lieu', texte: '', x: 16, y: 60, largeur: 388, hauteur: 26, taillePolice: 15, couleurTexte: '#0c4a6e', gras: true }
+          ],
+          [],
+          () => [
+            evt('bs_quand_demarre', null, [appeler('afficher la météo')]),
+            evt('bs_quand_clic', 'c2', [appeler('afficher la météo')]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [appeler('afficher la météo')]),
+            // Chaque « météo à … » lit Internet ; les suivants, dans les 5 minutes, réutilisent la même réponse.
+            fonction('afficher la météo', [
+              ecrire('c3', 'texte', t('⏳')),
+              ecrire('c4', 'texte', t('')),
+              ecrire('c5', 'texte', t('Je demande la météo sur Internet…')),
+              si(meteo('trouvee'), [
+                ecrire('c6', 'texte', joindre(t('📍 '), meteo('ville'))),
+                ecrire('c3', 'texte', meteo('emoji')),
+                ecrire('c4', 'texte', joindre(arrondi(meteo('temperature')), t(' °C'))),
+                ecrire('c5', 'texte', joindre(
+                  meteo('description'), t(', ressenti '), arrondi(meteo('ressenti')), t(' °C'), retourLigne(),
+                  t('💨 Vent : '), arrondi(meteo('vent')), t(' km/h   💧 Humidité : '), meteo('humidite'), t(' %'), retourLigne(),
+                  t('📈 Aujourd\'hui : de '), arrondi(meteo('min')), t(' à '), arrondi(meteo('max')), t(' °C')))
+              ], [
+                ecrire('c6', 'texte', t('')),
+                ecrire('c3', 'texte', t('🤷')),
+                ecrire('c5', 'texte', joindre(t('Je ne trouve pas la ville « '), lire('texte', 'c1'), t(' ». Vérifiez son orthographe.')))
+              ])
+            ])
+          ]);
+      }
+    },
+    {
       titre: '🧮 Quiz de calcul',
       theme: 'debut',
       description: '5 multiplications au hasard, un score et une barre de progression.',

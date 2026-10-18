@@ -1312,6 +1312,21 @@
     { champ: new Blockly.FieldDropdown([['ℹ️ information', 'info'], ['⚠️ avertissement', 'avertissement'], ['❌ erreur', 'erreur'], ['sans icône', 'aucune']]), nom: 'ICONE' }
   ], COULEUR_WINDOWS, 'Affiche une notification de Windows en bas à droite de l\'écran, même si la fenêtre du programme est cachée ou réduite. Un clic dessus ramène le programme devant.');
 
+  // ---------- Internet ----------
+
+  const COULEUR_INTERNET = '#0369a1';
+  Blockly.Blocks['bs_meteo'] = valeur(() => [
+    { nom: 'VAL', libelle: '☀️ météo à' }, ':',
+    { champ: new Blockly.FieldDropdown([['température (°C)', 'temperature'], ['température ressentie (°C)', 'ressenti'],
+      ['temps qu\'il fait (texte)', 'description'], ['temps qu\'il fait (emoji)', 'emoji'], ['vent (km/h)', 'vent'],
+      ['humidité (%)', 'humidite'], ['maximum du jour (°C)', 'max'], ['minimum du jour (°C)', 'min'], ['nom de la ville trouvée', 'ville'], ['ville trouvée ? (vrai ou faux)', 'trouvee']]), nom: 'QUOI' }
+  ], null, COULEUR_INTERNET, 'La météo en ce moment dans cette ville (service Open-Meteo, gratuit). Il faut une connexion à Internet ; le programme attend la réponse.');
+  Blockly.Blocks['bs_web_lire'] = valeur(() => [{ nom: 'VAL', libelle: '🌐 lire les données de' }], 'String', COULEUR_INTERNET,
+    'Le contenu d\'une adresse Internet (souvent des données au format JSON). Le programme attend la réponse. Ensuite : « valeur … dans les données ».');
+  Blockly.Blocks['bs_json_valeur'] = valeur(() => [
+    { nom: 'CHEMIN', libelle: '🌐 valeur' }, { nom: 'VAL', libelle: 'dans les données' }
+  ], null, COULEUR_INTERNET, 'Une information dans des données JSON, désignée par son chemin : « current.temperature_2m », ou « results.1.name » (les numéros de liste commencent à 1). Vide si elle n\'existe pas.');
+
   // ---------- Conversions ----------
 
   const COULEUR_CONVERSIONS = '#0f766e';
@@ -1728,6 +1743,9 @@
   gen.forBlock['bs_imprimer_fenetre'] = b => `await app.imprimer('fenetre', ${q(b.getFieldValue('FENETRE'))});\n`;
   gen.forBlock['bs_notification'] = b =>
     `app.notifier(${val(b, 'TITRE', "''")}, ${val(b, 'VAL', "''")}, ${q(b.getFieldValue('ICONE'))});\n`;
+  gen.forBlock['bs_meteo'] = b => [`(await app.meteo(${val(b, 'VAL', "''")}, ${q(b.getFieldValue('QUOI'))}))`, Order.ATOMIC];
+  gen.forBlock['bs_web_lire'] = b => [`(await app.lireWeb(${val(b, 'VAL', "''")}))`, Order.ATOMIC];
+  gen.forBlock['bs_json_valeur'] = b => [`app.valeurJson(${val(b, 'VAL', "''")}, ${val(b, 'CHEMIN', "''")})`, Order.FUNCTION_CALL];
   const genConvertir = grandeur => b =>
     [`app.convertir(${q(grandeur)}, ${val(b, 'VAL', '0')}, ${q(b.getFieldValue('DE'))}, ${q(b.getFieldValue('VERS'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_convertir_temps'] = genConvertir('temps');
@@ -2079,6 +2097,16 @@
         { kind: 'block', type: 'math_on_list' },
         { kind: 'block', type: 'math_trig', inputs: { NUM: nombre(45) } },
         { kind: 'block', type: 'math_constant' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Internet', colour: COULEUR_INTERNET, contents: [
+        etiquette('Météo (il faut une connexion à Internet)'),
+        { kind: 'block', type: 'bs_meteo', inputs: { VAL: texte('Paris') } },
+        { kind: 'block', type: 'bs_meteo', inputs: { VAL: texte('Paris') }, fields: { QUOI: 'emoji' } },
+        etiquette('Données d\'un service Internet'),
+        { kind: 'block', type: 'bs_web_lire', inputs: { VAL: texte('https://api.open-meteo.com/v1/forecast?latitude=48.85&longitude=2.35&current=temperature_2m') } },
+        { kind: 'block', type: 'bs_json_valeur', inputs: { CHEMIN: texte('current.temperature_2m') } }
       ]
     },
     {
