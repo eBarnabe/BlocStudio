@@ -17,7 +17,7 @@
     couleurTexte: 'couleur du texte', couleurFond: 'couleur de fond',
     couleurBarre: 'couleur de la barre', taillePolice: 'taille du texte',
     image: 'image (adresse)', nombreLignes: 'nombre de lignes', colonnes: 'colonnes (liste)',
-    son: 'son joué (nom)', volume: 'volume (%)', boucle: 'en boucle', enLecture: 'en train de jouer',
+    son: 'son joué (nom, ou adresse web d\'un son ou d\'une radio)', volume: 'volume (%)', boucle: 'en boucle', enLecture: 'en train de jouer',
     intervalle: 'intervalle (secondes)', deplacable: 'déplaçable à la souris',
     sprite: 'sprite affiché (nom)', costume: 'n° du costume', nomCostume: 'nom du costume',
     vitesse: 'vitesse d\'animation (images/s)', miroir: 'retourné (miroir)', rotation: 'angle (degrés)',

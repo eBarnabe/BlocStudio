@@ -1815,9 +1815,97 @@ function BlocRuntimeFactory() {
       if (l) try { l.source.stop(); } catch (e) { /* déjà fini */ }
     }
 
+    // ---- Son en ligne : un fichier son ou une radio sur Internet, joué au fur et à mesure qu'il arrive ----
+    // (d.flux : son adresse). Il passe par un lecteur audio du navigateur plutôt que d'être décodé d'avance.
+    const enFlux = d => !!d.flux && !sonsProjet.has(d.son);
+    // « https://… », « www.… », ou « site.fr/chemin » (un nom de son du projet passe avant : « clap.wav » reste un son).
+    const estAdresseSon = v => /^(https?:\/\/\S+|www\.\S+|([a-z0-9-]+\.)+[a-z]{2,}\/\S*)$/i.test(enTexte(v).trim());
+    const adresseSon = v => { const a = enTexte(v).trim(); return /^https?:\/\//i.test(a) ? a : 'https://' + a; };
+    function erreurFlux(d) {
+      return new Error(`Le son en ligne « ${d.flux} » ne peut pas être lu : adresse introuvable, pas de connexion à Internet, ` +
+        'ou format non pris en charge (MP3, AAC, OGG… fonctionnent).' + (/^http:/i.test(d.flux) ? ' Essayez la même adresse en « https:// ».' : ''));
+    }
+    function lecteurFlux(d) {
+      if (d.lecteur) return d.lecteur;
+      const a = d.lecteur = new Audio();
+      a.preload = 'metadata';
+      a.addEventListener('loadedmetadata', () => { d.duree = Number.isFinite(a.duration) ? a.duration : 0; });
+      a.addEventListener('ended', () => {
+        if (d.etat !== 'lecture') return;
+        d.etat = 'arrete';
+        d.position = 0;
+        finirFlux(d);
+        d.surEvenement.forEach(f => f()); // « quand … se termine »
+      });
+      a.addEventListener('error', () => {
+        if (d.etat !== 'lecture' || arrete) return;
+        d.etat = 'arrete';
+        finirFlux(d);
+        signaler(erreurFlux(d));
+      });
+      nettoyages.push(() => viderFlux(d));
+      return a;
+    }
+    function chargerFlux(d) {
+      const a = lecteurFlux(d);
+      if (d.lecteurAdresse !== d.flux) { a.src = d.flux; d.lecteurAdresse = d.flux; }
+      return a;
+    }
+    // Arrête le téléchargement (pour une radio, il ne finirait jamais).
+    function viderFlux(d) {
+      if (!d.lecteur) return;
+      d.lecteur.pause();
+      d.lecteur.removeAttribute('src');
+      d.lecteur.load();
+      d.lecteurAdresse = null;
+    }
+    const finirFlux = d => { const f = d.finFlux; d.finFlux = null; if (f) f(); };
+    const volumeFlux = d => { if (d.lecteur) d.lecteur.volume = volumeCtrl(d) * volumeGeneral; };
+    function jouerFlux(d, position) {
+      const a = chargerFlux(d);
+      finirFlux(d);
+      a.loop = !!d.boucle;
+      volumeFlux(d);
+      if (position > 0) { try { a.currentTime = position; } catch (e) { /* une radio n'a pas de position */ } }
+      d.etat = 'lecture';
+      const fin = new Promise(ok => { d.finFlux = ok; });
+      a.play().catch(e => {
+        if (e.name === 'AbortError' || arrete) return;
+        d.etat = 'arrete';
+        finirFlux(d);
+        signaler(e.name === 'NotAllowedError' ? new Error('Le navigateur bloque le son tant qu\'on n\'a pas cliqué dans la fenêtre.') : erreurFlux(d));
+      });
+      return fin;
+    }
+    function ctrlFlux(d, action) {
+      const a = d.lecteur;
+      switch (action) {
+        case 'jouer': jouerFlux(d, d.etat === 'arrete' ? d.position || 0 : 0); break;
+        case 'attendre': return jouerFlux(d, d.etat === 'arrete' ? d.position || 0 : 0).then(() => arrete ? JAMAIS : undefined);
+        case 'pause':
+          if (d.etat !== 'lecture' || !a) break;
+          d.position = a.currentTime;
+          a.pause();
+          d.etat = 'pause';
+          finirFlux(d);
+          break;
+        case 'reprendre':
+          if (d.etat === 'pause' && a) { d.etat = 'lecture'; a.play().catch(() => {}); }
+          else if (d.etat === 'arrete') jouerFlux(d, d.position || 0);
+          break;
+        case 'arreter':
+          viderFlux(d);
+          d.etat = 'arrete';
+          d.position = 0;
+          finirFlux(d);
+          break;
+      }
+    }
+
     function ctrlSon(id, action) {
       ctrlDeType(id, 'son', 'un contrôle Son');
       const d = donnees[id];
+      if (enFlux(d)) return ctrlFlux(d, action);
       switch (action) {
         // Arrêté : depuis le début, ou depuis la position qu'on lui a donnée (« mettre position de … à »).
         case 'jouer': jouerCtrlSon(d, d.etat === 'arrete' ? d.position || 0 : 0).catch(signaler); break;
@@ -1880,6 +1968,7 @@ function BlocRuntimeFactory() {
     // Durée du son choisi, en secondes : connue une fois le son décodé (0 en attendant, ou sans son).
     function preparerDuree(d) {
       d.duree = 0;
+      if (enFlux(d)) { chargerFlux(d); return; } // la durée arrive avec les premières données (0 pour une radio)
       const s = sonsProjet.get(d.son);
       if (!s) return;
       const jeton = d.jetonDuree = {};
@@ -1892,6 +1981,7 @@ function BlocRuntimeFactory() {
 
     // Où en est la lecture, en secondes depuis le début.
     function positionSon(d) {
+      if (enFlux(d)) return d.etat === 'lecture' && d.lecteur ? d.lecteur.currentTime : d.position || 0;
       if (d.etat === 'lecture' && d.lecture) {
         const ecoule = audio.currentTime - d.lecture.depart;
         return d.lecture.source.loop ? ecoule % d.lecture.cycle : Math.min(ecoule, d.lecture.duree);
@@ -1903,7 +1993,7 @@ function BlocRuntimeFactory() {
       switch (prop) {
         case 'duree': return Math.round((d.duree || 0) * 100) / 100;
         case 'position': return Math.round(positionSon(d) * 100) / 100;
-        case 'son': return sonsProjet.get(d.son)?.nom ?? '';
+        case 'son': return enFlux(d) ? d.flux : sonsProjet.get(d.son)?.nom ?? '';
         case 'volume': return Math.round(volumeCtrl(d) * 100);
         case 'boucle': return !!d.boucle;
         case 'enLecture': return d.etat === 'lecture';
@@ -1916,9 +2006,23 @@ function BlocRuntimeFactory() {
         case 'son': {
           // On désigne un son par son nom (celui du Sommaire).
           const nom = enTexte(valeur).trim();
-          const s = [...sonsProjet.values()].find(x => x.nom === nom || x.id === nom) || sonDeFichier(valeur);
-          if (!s) throw new Error(`Il n'y a pas de son nommé « ${nom} » dans le projet (ni de fichier son ouvert avec ce nom).`);
           const rejouer = d.etat === 'lecture';
+          // Une adresse web : un son en ligne (fichier ou radio).
+          const duProjet = [...sonsProjet.values()].find(x => x.nom === nom || x.id === nom);
+          if (!duProjet && estAdresseSon(nom)) {
+            if (enFlux(d)) viderFlux(d); else couperCtrlSon(d);
+            d.flux = adresseSon(nom);
+            d.son = '';
+            d.etat = 'arrete';
+            d.position = 0;
+            preparerDuree(d);
+            if (rejouer) jouerFlux(d, 0);
+            break;
+          }
+          const s = duProjet || sonDeFichier(valeur);
+          if (!s) throw new Error(`Il n'y a pas de son nommé « ${nom} » dans le projet (ni de fichier son ouvert avec ce nom, ni d'adresse web).`);
+          if (enFlux(d)) viderFlux(d);
+          d.flux = '';
           couperCtrlSon(d);
           d.son = s.id;
           d.etat = 'arrete';
@@ -1930,6 +2034,11 @@ function BlocRuntimeFactory() {
         // Aller à un endroit de la chanson (en secondes) : en lecture, elle continue de là.
         case 'position': {
           const p = Math.max(0, Number(valeur) || 0);
+          if (enFlux(d)) {
+            if (d.etat === 'lecture' && d.lecteur) { try { d.lecteur.currentTime = p; } catch (e) { /* une radio n'a pas de position */ } }
+            else d.position = p;
+            break;
+          }
           if (d.etat === 'lecture') jouerCtrlSon(d, p).catch(signaler);
           else d.position = d.duree ? Math.min(p, d.duree) : p;
           break;
@@ -1937,10 +2046,12 @@ function BlocRuntimeFactory() {
         case 'volume':
           d.volume = Number(valeur) || 0;
           if (d.lecture) d.lecture.volume.gain.setTargetAtTime(volumeCtrl(d), audio.currentTime, 0.02);
+          volumeFlux(d);
           break;
         case 'boucle':
           d.boucle = !!valeur;
           if (d.lecture) d.lecture.source.loop = d.boucle;
+          if (d.lecteur) d.lecteur.loop = d.boucle;
           break;
       }
     }
@@ -4434,6 +4545,7 @@ function BlocRuntimeFactory() {
           if (nom === '*') {
             volumeGeneral = v;
             if (sortie) sortie.gain.setTargetAtTime(v, audio.currentTime, 0.02);
+            for (const id in donnees) if (donnees[id].type === 'son') volumeFlux(donnees[id]);
           } else {
             volumes.set(nom, v);
             sonsEnCours.forEach(s => { if (s.nom === nom) s.volume.gain.setTargetAtTime(v, audio.currentTime, 0.02); });

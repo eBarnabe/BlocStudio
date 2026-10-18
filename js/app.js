@@ -550,7 +550,7 @@
           ? (TYPES_FICHIER_EDITEUR[c.typeFichier] || TYPES_FICHIER_EDITEUR.tous).split(' ')[0]
         : c.type === 'menucontextuel'
           ? `${BlocRuntime.elementsMenuContextuel(c.menu).length} élément(s), sur ${utilisateursMenu(c).length || 'aucun'} contrôle(s)`
-          : (projet.sons.find(s => s.id === c.son)?.nom || 'aucun son');
+          : (projet.sons.find(s => s.id === c.son)?.nom || (c.flux ? '🌐 son en ligne' : 'aucun son'));
       puce.appendChild(detail);
       puce.addEventListener('pointerdown', e => {
         e.stopPropagation();
@@ -1601,8 +1601,20 @@
     choix.add(new Option('(aucun son)', ''));
     projet.sons.forEach(s => choix.add(new Option('🎵 ' + s.nom, s.id)));
     choix.value = projet.sons.some(s => s.id === c.son) ? c.son : '';
-    choix.addEventListener('change', () => { c.son = choix.value; maj(); afficherProprietes(); });
+    choix.addEventListener('change', () => { c.son = choix.value; if (c.son) c.flux = ''; maj(); afficherProprietes(); });
     d.appendChild(choix);
+    // Ou un son en ligne : un fichier son ou une radio sur Internet (joué si aucun son du projet n'est choisi).
+    champTexte(liste, '…ou un son en ligne : adresse web d\'un fichier son (MP3…) ou d\'une radio', c.flux || '', v => {
+      c.flux = v.trim();
+      if (c.flux) { c.son = ''; choix.value = ''; }
+      maj();
+      afficherInvisibles();
+    });
+    if (c.flux && !c.son) {
+      const ecouteEnLigne = el('button', null, '▶ Écouter le son en ligne');
+      ecouteEnLigne.addEventListener('click', () => ecouterEnLigne(c.flux, ecouteEnLigne));
+      prop(liste, '').appendChild(ecouteEnLigne);
+    }
 
     // Le son choisi s'écoute et se découpe ici ; on peut aussi en ajouter un nouveau.
     const boutons = document.createElement('div');
@@ -1643,6 +1655,34 @@
     liste.appendChild(el('p', 'aide',
       'Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer « quand il se termine ». ' +
       'Ses autres blocs : bouton 🧰 ci-dessus.'));
+  }
+
+  // Écoute d'un son en ligne dans le concepteur (▶ / ■).
+  let lecteurEnLigne = null;
+  function ecouterEnLigne(adresse, bouton) {
+    if (lecteurEnLigne) {
+      lecteurEnLigne.pause();
+      lecteurEnLigne.removeAttribute('src');
+      lecteurEnLigne.load();
+      const etaitCelui = lecteurEnLigne.bouton === bouton;
+      lecteurEnLigne.bouton.textContent = '▶ Écouter le son en ligne';
+      lecteurEnLigne = null;
+      if (etaitCelui) return;
+    }
+    const url = /^https?:\/\//i.test(adresse) ? adresse : 'https://' + adresse;
+    const a = lecteurEnLigne = new Audio(url);
+    a.bouton = bouton;
+    bouton.textContent = '⏳ Connexion…';
+    a.addEventListener('playing', () => { if (lecteurEnLigne === a) bouton.textContent = '■ Arrêter l\'écoute'; });
+    a.addEventListener('ended', () => { if (lecteurEnLigne === a) { lecteurEnLigne = null; bouton.textContent = '▶ Écouter le son en ligne'; } });
+    a.addEventListener('error', () => {
+      if (lecteurEnLigne !== a) return;
+      lecteurEnLigne = null;
+      bouton.textContent = '▶ Écouter le son en ligne';
+      alert('Ce son en ligne ne peut pas être lu : adresse introuvable, pas de connexion à Internet, ou format non pris en charge.' +
+        (/^http:/i.test(url) ? '\nEssayez la même adresse en « https:// ».' : ''));
+    });
+    a.play().catch(() => {});
   }
 
   function proprietesMinuteur(liste, c, maj) {
