@@ -1620,7 +1620,94 @@
     `<rect x=".75" y=".75" width="${largeur - 1.5}" height="${HAUTEUR_BOUTON_SI - 1.5}" rx="${HAUTEUR_BOUTON_SI / 2 - 1}" fill="#ffffff" fill-opacity=".3" stroke="#ffffff" stroke-width="1.5"/>` +
     `<text x="${largeur / 2}" y="${HAUTEUR_BOUTON_SI / 2 + taille * 0.36}" font-family="Segoe UI, sans-serif" font-size="${taille}" font-weight="700" fill="#ffffff" text-anchor="middle">${texte}</text></svg>`);
   const IMAGE_PLUS_SINON_SI = boutonSi('＋ sinon si', 88), IMAGE_PLUS_SINON = boutonSi('＋ sinon', 68), IMAGE_MOINS = boutonSi('−', 24, 17);
-  const etatSi = b => { const s = b.saveExtraState && b.saveExtraState(); return s ? JSON.stringify(s) : ''; };
+  const etatSi = b => { const s = b.saveExtraState && b.saveExtraState(true); return s ? JSON.stringify(s) : ''; };
+
+  // Un changement de forme fait par un bouton : un seul « Ctrl+Z » l'annule, avec ce qu'il a déplacé.
+  function changerForme(bloc, changer) {
+    if (bloc.isInFlyout || !bloc.workspace || bloc.workspace.options.readOnly) return;
+    const avant = etatSi(bloc);
+    const groupe = Blockly.Events.getGroup(); // dans un clic de Blockly, un groupe est peut-être déjà ouvert
+    if (!groupe) Blockly.Events.setGroup(true);
+    try {
+      const laches = changer() || [];
+      Blockly.Events.fire(new Blockly.Events.BlockChange(bloc, 'mutation', null, avant, etatSi(bloc)));
+      // Les blocs d'une partie enlevée ne sont pas perdus : ils restent à côté, détachés.
+      for (const b of laches) if (b && !b.isDisposed() && !b.getParent()) b.moveBy(40, 30);
+    } finally {
+      if (!groupe) Blockly.Events.setGroup(false);
+    }
+  }
+  const boutonBloc = (image, largeur, aide, action) => {
+    const f = new Blockly.FieldImage(image, largeur, HAUTEUR_BOUTON_SI, aide, action);
+    f.setTooltip(aide);
+    return f;
+  };
+  const sansRoue = bloc => { if (bloc.getIcon(Blockly.icons.MutatorIcon.TYPE)) bloc.removeIcon(Blockly.icons.MutatorIcon.TYPE); };
+
+  // « créer un texte avec » et « créer une liste avec » : « ＋ » ajoute une entrée, « − » enlève la dernière.
+  const IMAGE_PLUS = boutonSi('＋', 24, 16);
+  function boutonsEntrees(bloc, quoi) {
+    if (bloc.getInput('BOUTONS_ENTREES')) bloc.removeInput('BOUTONS_ENTREES');
+    const ligne = bloc.appendDummyInput('BOUTONS_ENTREES').setAlign(Blockly.inputs.Align.RIGHT);
+    ligne.appendField(boutonBloc(IMAGE_PLUS, 24, `Ajouter ${quoi}`, () => changerForme(bloc, () => {
+      bloc.itemCount_++;
+      bloc.updateShape_();
+    })));
+    if (bloc.itemCount_ > 0) {
+      ligne.appendField(boutonBloc(IMAGE_MOINS, 24, `Enlever la dernière entrée`, () => changerForme(bloc, () => {
+        const lache = bloc.getInputTargetBlock('ADD' + (bloc.itemCount_ - 1));
+        bloc.itemCount_--;
+        bloc.updateShape_();
+        return [lache];
+      })));
+    }
+  }
+  for (const [type, quoi] of [['text_join', 'un morceau de texte'], ['lists_create_with', 'un élément à la liste']]) {
+    const initAvant = Blockly.Blocks[type].init;
+    Blockly.Blocks[type].init = function () {
+      initAvant.call(this);
+      sansRoue(this);
+      const majForme = this.updateShape_;
+      this.updateShape_ = function () { majForme.call(this); boutonsEntrees(this, quoi); };
+      boutonsEntrees(this, quoi);
+    };
+  }
+
+  // Fonctions : « ＋ paramètre » demande son nom, « − » enlève le dernier ; les appels se mettent à jour.
+  const IMAGE_PLUS_PARAMETRE = boutonSi('＋ paramètre', 98);
+  function changerParametres(bloc, changer) {
+    changerForme(bloc, () => {
+      const etat = bloc.saveExtraState(true) || {};
+      etat.params = changer((etat.params || []).slice());
+      bloc.loadExtraState(etat); // met à jour le titre et les blocs qui appellent la fonction
+    });
+  }
+  for (const type of ['procedures_defnoreturn', 'procedures_defreturn']) {
+    const initAvant = Blockly.Blocks[type].init;
+    Blockly.Blocks[type].init = function () {
+      initAvant.call(this);
+      sansRoue(this);
+      const bloc = this;
+      const moins = boutonBloc(IMAGE_MOINS, 24, 'Enlever le dernier paramètre', () =>
+        changerParametres(bloc, params => params.slice(0, -1)));
+      const plus = boutonBloc(IMAGE_PLUS_PARAMETRE, 98, 'Ajouter un paramètre : une valeur donnée à la fonction quand on l\'appelle', () => {
+        if (bloc.isInFlyout || bloc.workspace.options.readOnly) return;
+        Blockly.dialog.prompt('Nom du nouveau paramètre (par exemple : nombre, prénom, vitesse) :', '', nom => {
+          nom = (nom || '').trim();
+          if (!nom) return;
+          if (bloc.arguments_.some(a => a.toLowerCase() === nom.toLowerCase())) {
+            Blockly.dialog.alert(`La fonction a déjà un paramètre « ${nom} ».`);
+            return;
+          }
+          changerParametres(bloc, params => [...params, { name: nom }]);
+        });
+      });
+      this.inputList[0].appendField(plus, 'PLUS_PARAMETRE').appendField(moins, 'MOINS_PARAMETRE');
+      const majParams = this.updateParams_;
+      this.updateParams_ = function () { majParams.call(this); moins.setVisible(this.arguments_.length > 0); };
+      moins.setVisible(this.arguments_.length > 0);
+    };
+  }
 
   // Change le nombre de « sinon si » ou le « sinon », en gardant les blocs déjà branchés ; Ctrl+Z l'annule.
   function changerSi(bloc, action, numero) {
