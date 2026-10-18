@@ -869,7 +869,7 @@ function BlocRuntimeFactory() {
         el.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
         el.allowFullscreen = true;
         el.referrerPolicy = 'strict-origin-when-cross-origin';
-        el.src = adresseWeb(c.adresse) || 'about:blank';
+        chargerNavigateur(el, adresseWeb(c.adresse));
         break;
       case 'panneau':
         el = document.createElement('div');
@@ -1110,7 +1110,33 @@ function BlocRuntimeFactory() {
     if (!a) return '';
     if (!/^[a-z][a-z0-9+.-]*:/i.test(a)) a = 'https://' + a;
     const yt = a.match(/^https?:\/\/(?:www\.|m\.)?(?:youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/)|youtu\.be\/)([\w-]{6,})/i);
-    return yt ? 'https://www.youtube.com/embed/' + yt[1] : a;
+    if (yt) return 'https://www.youtube.com/embed/' + yt[1];
+    // Une carte Google Maps (« google.fr/maps/place/Lyon », « maps.google.com/?q=Tour Eiffel ») : sa version intégrable.
+    const carte = a.match(/^https?:\/\/(?:www\.)?(?:maps\.google\.[a-z.]+|google\.[a-z.]+\/maps)(?:\/(?:search|place)\/([^/?#@]+)|[^#]*?[?&]q=([^&#]+))/i);
+    if (carte && !/[?&]output=embed/i.test(a)) return 'https://maps.google.com/maps?output=embed&q=' + (carte[1] || carte[2]);
+    return a;
+  }
+
+  // Ces sites refusent de s'afficher à l'intérieur d'un autre programme (une protection contre les imitations) :
+  // le Navigateur web montre alors un message et un bouton pour les ouvrir dans le navigateur de l'ordinateur.
+  const SITES_REFUSES = /(^|\.)(google\.[a-z.]+|bing\.com|facebook\.com|instagram\.com|twitter\.com|x\.com|amazon\.[a-z.]+|linkedin\.com|tiktok\.com|github\.com|reddit\.com|netflix\.com|whatsapp\.com|chatgpt\.com|openai\.com)$/i;
+  function siteRefuse(url) {
+    try { return SITES_REFUSES.test(new URL(url).hostname) && !/[?&]output=embed/i.test(url); } catch (e) { return false; }
+  }
+  const attribut = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  function chargerNavigateur(el, url) {
+    if (!siteRefuse(url)) {
+      el.removeAttribute('srcdoc');
+      el.src = url || 'about:blank';
+      return;
+    }
+    const site = new URL(url).hostname.replace(/^www\./, '');
+    el.removeAttribute('src');
+    el.srcdoc = '<!doctype html><meta charset="utf-8"><style>body{margin:0;height:100vh;display:flex;align-items:center;' +
+      'justify-content:center;padding:12px;box-sizing:border-box;font:14px "Segoe UI",sans-serif;background:#f8fafc;color:#334155;text-align:center}' +
+      'a{display:inline-block;margin-top:12px;padding:8px 14px;border-radius:8px;background:#2563eb;color:#fff;text-decoration:none;font-weight:600}</style>' +
+      `<div><div style="font-size:34px">🔒</div><b>${attribut(site)}</b> ne veut pas s'afficher à l'intérieur d'un programme` +
+      `<br>(c'est une protection de ce site).<br><a href="${attribut(url)}" target="_blank" rel="noopener">🌐 Ouvrir dans le navigateur</a></div>`;
   }
 
   // Ordre alphabétique « naturel » (« Élément 2 » avant « Élément 10 »), sans tenir compte des majuscules ni des accents.
@@ -3825,7 +3851,7 @@ function BlocRuntimeFactory() {
           case 'image': if (d.type === 'image') { verifierImage(id, valeur); el.src = valeur; } break;
           // Redonner la même adresse recharge la page.
           case 'adresse':
-            if (d.type === 'navigateur') { d.adresse = adresseWeb(valeur); el.src = d.adresse || 'about:blank'; }
+            if (d.type === 'navigateur') { d.adresse = adresseWeb(valeur); chargerNavigateur(el, d.adresse); }
             if (d.type === 'lien') { d.adresse = adresseWeb(valeur); if (d.adresse) el.href = d.adresse; else el.removeAttribute('href'); }
             break;
           case 'video': if (d.type === 'video') { d.video = enTexte(valeur); el.src = d.video; } break;
@@ -4347,6 +4373,13 @@ function BlocRuntimeFactory() {
       },
       lireWeb,
       valeurJson,
+      // Une adresse dans le navigateur de l'ordinateur (Edge, Chrome…), hors du programme.
+      ouvrirNavigateur(adresse) {
+        if (arrete) return;
+        const url = adresseDonnees(adresse);
+        if (!/^https?:/i.test(url)) throw new Error(`« ${url} » n'est pas une adresse web (http ou https).`);
+        window.open(url, '_blank', 'noopener');
+      },
       meteo,
       notifier(titre, texte, icone) {
         if (arrete) return;

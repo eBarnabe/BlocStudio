@@ -1385,8 +1385,10 @@
       }
     }
     if (c.type === 'navigateur') {
-      champTexte(liste, 'Adresse web (ex. : fr.wikipedia.org, ou une vidéo YouTube)', c.adresse || '',
+      champTexte(liste, 'Adresse web (ex. : fr.wikipedia.org, une vidéo YouTube, une carte Google Maps)', c.adresse || '',
         v => { c.adresse = v.trim(); maj(); });
+      liste.appendChild(el('p', 'aide', 'Google, Facebook, Amazon… refusent de s\'afficher à l\'intérieur d\'un programme : ' +
+        'le Navigateur web propose alors de les ouvrir dans le navigateur de l\'ordinateur (ou bloc « ouvrir … dans le navigateur », catégorie Internet).'));
     }
     if (c.type === 'selecteurcouleur') champCouleur(liste, 'Couleur choisie', c.texte, v => { c.texte = v; maj(); });
     if (c.type === 'barreprogression') {
