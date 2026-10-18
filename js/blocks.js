@@ -1272,6 +1272,31 @@
   Blockly.Blocks['bs_voix_taire'] = instruction(() => ['🗣️ faire taire la voix'],
     COULEUR_SONS, 'Arrête immédiatement la phrase en cours (et celles qui attendaient leur tour).');
 
+  // ---------- Windows : presse-papiers, impression, notifications ----------
+
+  const COULEUR_WINDOWS = '#475569';
+  const AVEC_IMAGE = ['zonedessin', 'image', 'graphique', 'camera'];
+
+  Blockly.Blocks['bs_copier'] = instruction(() => [{ nom: 'VAL', libelle: '📋 copier' }, 'dans le presse-papiers'],
+    COULEUR_WINDOWS, 'Comme Ctrl+C : le texte peut ensuite être collé (Ctrl+V) dans n\'importe quel logiciel.');
+  Blockly.Blocks['bs_copier_image'] = instruction(() => ['📋 copier l\'image de', { ctrl: AVEC_IMAGE }, 'dans le presse-papiers'],
+    COULEUR_WINDOWS, 'Copie le dessin, l\'image, le graphique ou l\'image de la caméra : on peut ensuite la coller dans Paint, Word, un e-mail…');
+  Blockly.Blocks['bs_presse_papiers'] = valeur(() => ['📋 texte du presse-papiers'], 'String',
+    COULEUR_WINDOWS, 'Le texte copié en dernier (Ctrl+C), dans ce programme ou dans un autre logiciel. Vide s\'il n\'y a pas de texte.');
+
+  Blockly.Blocks['bs_imprimer_texte'] = instruction(() => [{ nom: 'VAL', libelle: '🖨️ imprimer le texte' }],
+    COULEUR_WINDOWS, 'Ouvre la boîte « Imprimer » de Windows avec ce texte. On peut aussi y choisir « Enregistrer au format PDF ».');
+  Blockly.Blocks['bs_imprimer'] = instruction(() => ['🖨️ imprimer', { ctrl: null }],
+    COULEUR_WINDOWS, 'Imprime un contrôle : tout le texte d\'une zone de texte, tout un tableau, un dessin, une image, un graphique… Le programme attend que la boîte « Imprimer » soit fermée.');
+  Blockly.Blocks['bs_imprimer_fenetre'] = instruction(() => ['🖨️ imprimer la fenêtre', { champ: new ChampFenetre(true), nom: 'FENETRE' }],
+    COULEUR_WINDOWS, 'Imprime la fenêtre telle qu\'on la voit (réduite si elle est plus large que la feuille).');
+
+  Blockly.Blocks['bs_notification'] = instruction(() => [
+    { nom: 'TITRE', libelle: '🔔 notification' },
+    { nom: 'VAL', libelle: 'message' },
+    { champ: new Blockly.FieldDropdown([['ℹ️ information', 'info'], ['⚠️ avertissement', 'avertissement'], ['❌ erreur', 'erreur'], ['sans icône', 'aucune']]), nom: 'ICONE' }
+  ], COULEUR_WINDOWS, 'Affiche une notification de Windows en bas à droite de l\'écran, même si la fenêtre du programme est cachée ou réduite. Un clic dessus ramène le programme devant.');
+
   Blockly.Blocks['bs_maintenant'] = valeur(() => [
     { champ: new Blockly.FieldDropdown([
       ['date du jour (jj/mm/aaaa)', 'date'], ['heure actuelle (hh:mm)', 'heure'], ['jour du mois', 'jour'],
@@ -1648,6 +1673,14 @@
     `app.dire(${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_voix_regler'] = b => `app.reglerVoix(${val(b, 'VITESSE', '1')}, ${val(b, 'HAUTEUR', '1')});\n`;
   gen.forBlock['bs_voix_taire'] = () => 'app.taireVoix();\n';
+  gen.forBlock['bs_copier'] = b => `await app.copier(${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_copier_image'] = b => `await app.copierImage(${id(b)});\n`;
+  gen.forBlock['bs_presse_papiers'] = () => ['(await app.lirePressePapiers())', Order.ATOMIC];
+  gen.forBlock['bs_imprimer_texte'] = b => `await app.imprimer('texte', ${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_imprimer'] = b => `await app.imprimer('controle', ${id(b)});\n`;
+  gen.forBlock['bs_imprimer_fenetre'] = b => `await app.imprimer('fenetre', ${q(b.getFieldValue('FENETRE'))});\n`;
+  gen.forBlock['bs_notification'] = b =>
+    `app.notifier(${val(b, 'TITRE', "''")}, ${val(b, 'VAL', "''")}, ${q(b.getFieldValue('ICONE'))});\n`;
   gen.forBlock['bs_maintenant'] = b => [`app.maintenant(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
 
   gen.forBlock['bs_quand_touche'] = b =>
@@ -1905,6 +1938,20 @@
           inputs: { VAL: texte('Quelle couleur préfères-tu ?'), LISTE: listeTextes('Rouge', 'Vert', 'Bleu') }
         },
         { kind: 'block', type: 'bs_nombre' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Windows', colour: COULEUR_WINDOWS, contents: [
+        etiquette('Notifications'),
+        { kind: 'block', type: 'bs_notification', inputs: { TITRE: texte('Rappel'), VAL: texte('C\'est l\'heure de la pause !') }, fields: { ICONE: 'info' } },
+        etiquette('Presse-papiers'),
+        { kind: 'block', type: 'bs_copier', inputs: { VAL: texte('Bonjour !') } },
+        { kind: 'block', type: 'bs_presse_papiers' },
+        { kind: 'block', type: 'bs_copier_image' },
+        etiquette('Impression'),
+        { kind: 'block', type: 'bs_imprimer_texte', inputs: { VAL: texte('Ma liste de courses') } },
+        { kind: 'block', type: 'bs_imprimer' },
+        { kind: 'block', type: 'bs_imprimer_fenetre', fields: { FENETRE: '' } }
       ]
     },
     {

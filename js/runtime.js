@@ -87,6 +87,14 @@ function BlocRuntimeFactory() {
     .bs-tableau tbody tr.bs-choisie { background: #4f46e5; color: #fff; }
     .bs-date, .bs-heure { border: 1px solid #7a7a7a; padding: 2px 6px; background: #fff; }
     .bs-forme svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .bs-notifications { position: absolute; right: 10px; bottom: 10px; z-index: 100001; display: flex; flex-direction: column; gap: 8px;
+      align-items: flex-end; pointer-events: none; }
+    .bs-notification { display: flex; gap: 10px; width: 260px; max-width: calc(100vw - 40px); padding: 10px 12px; border-radius: 8px;
+      background: #1f2937; color: #f9fafb; font: 13px "Segoe UI", sans-serif; box-shadow: 0 6px 20px rgba(0,0,0,.35);
+      pointer-events: auto; cursor: pointer; transition: opacity .4s, transform .4s; }
+    .bs-notification.bs-cachee { opacity: 0; transform: translateY(10px); }
+    .bs-notification strong { display: block; margin-bottom: 2px; }
+    .bs-notification div { white-space: pre-wrap; overflow-wrap: anywhere; }
     .bs-selecteurcouleur { padding: 1px 2px; border: 1px solid #7a7a7a; background: #fff; cursor: pointer; }
 
     .bs-menus { position: relative; z-index: 10; display: flex; height: 26px; box-sizing: border-box;
@@ -2531,6 +2539,173 @@ function BlocRuntimeFactory() {
       return Uint8Array.from(atob(url.slice(url.indexOf(',') + 1)), c => c.charCodeAt(0));
     }
 
+    // ---- Presse-papiers et impression ----
+    // L'image que montre un contrôle (zone de dessin, graphique, image, caméra), dans une toile.
+    async function toileDe(id) {
+      ctrl(id);
+      const d = donnees[id], el = elements[id];
+      let source = el, l = d.largeur, h = d.hauteur;
+      if (d.type === 'image') {
+        source = await chargerImage(el.src);
+        l = source.naturalWidth; h = source.naturalHeight;
+      } else if (d.type === 'camera') {
+        if (!el.videoWidth) throw new Error(`« ${d.nom} » n'est pas allumée : utilisez d'abord le bloc « allumer ${d.nom} ».`);
+        l = el.videoWidth; h = el.videoHeight;
+      } else if (d.type !== 'zonedessin' && d.type !== 'graphique') {
+        throw new Error(`« ${d.nom} » ne montre pas d'image : choisissez une zone de dessin, une image, un graphique ou une caméra.`);
+      }
+      const toile = document.createElement('canvas');
+      toile.width = Math.max(1, Math.round(l));
+      toile.height = Math.max(1, Math.round(h));
+      const g = toile.getContext('2d');
+      if (d.type === 'zonedessin') {
+        g.fillStyle = d.couleurFond ? couleur(d.couleurFond) : '#ffffff';
+        g.fillRect(0, 0, toile.width, toile.height);
+      }
+      g.drawImage(source, 0, 0, toile.width, toile.height);
+      return toile;
+    }
+
+    // Copie d'un morceau de la fenêtre pour l'imprimer : les dessins deviennent des images,
+    // les zones de saisie gardent ce qu'on y a écrit.
+    function copieImprimable(el) {
+      const copie = el.cloneNode(true);
+      const avant = [el, ...el.querySelectorAll('*')], apres = [copie, ...copie.querySelectorAll('*')];
+      avant.forEach((o, i) => {
+        const c = apres[i];
+        if (o instanceof HTMLCanvasElement || (o instanceof HTMLVideoElement && o.videoWidth)) {
+          const img = document.createElement('img');
+          let toile = o;
+          if (o instanceof HTMLVideoElement) {
+            toile = document.createElement('canvas');
+            toile.width = o.videoWidth; toile.height = o.videoHeight;
+            toile.getContext('2d').drawImage(o, 0, 0);
+          }
+          try { img.src = toile.toDataURL('image/png'); } catch (e) { /* image d'un autre site : on la laisse vide */ }
+          img.className = c.className;
+          img.style.cssText = c.style.cssText;
+          c.replaceWith(img);
+        } else if (o instanceof HTMLTextAreaElement) {
+          c.textContent = o.value;
+        } else if (o instanceof HTMLInputElement) {
+          if (o.type === 'checkbox' || o.type === 'radio') c.toggleAttribute('checked', o.checked);
+          else c.setAttribute('value', o.value);
+        } else if (o instanceof HTMLSelectElement) {
+          [...c.options].forEach((opt, k) => opt.toggleAttribute('selected', o.options[k] && o.options[k].selected));
+        } else if (o instanceof HTMLIFrameElement) {
+          const p = document.createElement('div');
+          p.style.cssText = c.style.cssText + ';border:1px solid #999;display:flex;align-items:center;justify-content:center';
+          p.textContent = '🌐 ' + (o.src || 'page web');
+          c.replaceWith(p);
+        }
+      });
+      return copie;
+    }
+
+    // Ce qu'on imprime pour un contrôle : tout son texte, tout son tableau, ou ce qu'il montre.
+    async function pageDeControle(id) {
+      ctrl(id);
+      const d = donnees[id], el = elements[id];
+      if (INVISIBLES.includes(d.type)) throw new Error(`« ${d.nom} » ne se voit pas dans la fenêtre : il n'y a rien à imprimer.`);
+      if (d.type === 'zonetexte' && !d.motDePasse) return pageDeTexte(el.value);
+      if (['zonedessin', 'graphique', 'image', 'camera'].includes(d.type)) {
+        const img = document.createElement('img');
+        img.src = (await toileDe(id)).toDataURL('image/png');
+        return img;
+      }
+      const copie = copieImprimable(el);
+      Object.assign(copie.style, { position: 'relative', left: '0', top: '0', transform: 'none' });
+      if (d.type === 'tableau') Object.assign(copie.style, { height: 'auto', overflow: 'visible' });
+      return copie;
+    }
+
+    function pageDeTexte(texte) {
+      const p = document.createElement('pre');
+      p.className = 'bs-impression-texte';
+      p.textContent = enTexte(texte);
+      return p;
+    }
+
+    // Une fenêtre telle qu'on la voit, réduite si elle est plus large que la feuille.
+    function pageDeFenetre(f) {
+      const copie = copieImprimable(f.surface);
+      const t = tailles[f === principale ? '' : f.def.id];
+      Object.assign(copie.style, { position: 'relative', left: '0', top: '0', width: t.largeur + 'px', height: t.hauteur + 'px', border: '1px solid #999' });
+      const cadre = document.createElement('div');
+      cadre.style.zoom = Math.min(1, 680 / Math.max(1, t.largeur));
+      cadre.appendChild(copie);
+      return cadre;
+    }
+
+    // La page est mise dans un cadre caché, puis la boîte « Imprimer » de Windows s'ouvre.
+    async function imprimerPage(titre, contenu) {
+      const cadre = document.createElement('iframe');
+      cadre.className = 'bs-impression';
+      cadre.style.cssText = 'position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+      document.body.appendChild(cadre);
+      const doc = cadre.contentDocument;
+      doc.open();
+      doc.write('<!doctype html><html><head><meta charset="utf-8"><title></title><style>' + STYLE +
+        ' body { margin: 0; font-family: "Segoe UI", sans-serif; color: #000; background: #fff; }' +
+        ' .bs-impression-texte { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font: 12pt "Segoe UI", sans-serif; }' +
+        ' img { max-width: 100%; } * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }' +
+        '</style></head><body></body></html>');
+      doc.close();
+      doc.title = enTexte(titre);
+      doc.body.appendChild(doc.adoptNode(contenu));
+      await Promise.all([...doc.images].map(i => i.decode().catch(() => {})));
+      // Application Windows : sa fenêtre peut être petite, l'aperçu s'ouvre dans une fenêtre « Impression » à part.
+      const webview = window.chrome && window.chrome.webview;
+      if (dansExe && webview) {
+        const page = '<!doctype html>' + doc.documentElement.outerHTML;
+        cadre.remove();
+        const fini = new Promise(ok => attentesImpression.push(ok));
+        webview.postMessage('imprimer:' + page);
+        return fini;
+      }
+      try {
+        cadre.contentWindow.focus();
+        cadre.contentWindow.print(); // attend que la boîte « Imprimer » soit fermée
+      } finally {
+        setTimeout(() => cadre.remove(), 1000);
+      }
+    }
+
+    // L'application Windows répond « imprime » quand sa fenêtre « Impression » est fermée.
+    const attentesImpression = [];
+    if (dansExe && window.chrome && window.chrome.webview) {
+      window.chrome.webview.addEventListener('message', e => {
+        if (e.data === 'imprime') attentesImpression.splice(0).forEach(ok => ok());
+      });
+    }
+
+    // Bulle de notification dans un coin de la fenêtre (quand on n'est pas dans une application Windows).
+    const ICONES_NOTIFICATION = { info: 'ℹ️', avertissement: '⚠️', erreur: '❌', aucune: '🔔' };
+    function bulleNotification(titre, texte, icone) {
+      let pile = principale.surface.querySelector(':scope > .bs-notifications');
+      if (!pile) {
+        pile = document.createElement('div');
+        pile.className = 'bs-notifications';
+        principale.surface.appendChild(pile);
+      }
+      const bulle = document.createElement('div');
+      bulle.className = 'bs-notification bs-cachee';
+      const i = document.createElement('span');
+      i.textContent = ICONES_NOTIFICATION[icone] || ICONES_NOTIFICATION.aucune;
+      const corps = document.createElement('span');
+      const t = document.createElement('strong');
+      t.textContent = titre;
+      const m = document.createElement('div');
+      m.textContent = texte;
+      corps.append(t, m);
+      bulle.append(i, corps);
+      pile.appendChild(bulle);
+      requestAnimationFrame(() => bulle.classList.remove('bs-cachee'));
+      const fermer = () => { bulle.classList.add('bs-cachee'); setTimeout(() => bulle.remove(), 400); };
+      bulle.addEventListener('click', fermer);
+      setTimeout(fermer, 6000);
+    }
+
     // Une image dans une zone de dessin : ajustée à la zone, sans être déformée.
     async function dessinerImage(id, url) {
       const img = await chargerImage(url);
@@ -3756,6 +3931,62 @@ function BlocRuntimeFactory() {
       },
       taireVoix() {
         if (window.speechSynthesis) window.speechSynthesis.cancel();
+      },
+      // ---- Presse-papiers, impression, notifications ----
+      async copier(valeur) {
+        const texte = enTexte(valeur);
+        try {
+          await navigator.clipboard.writeText(texte);
+          return;
+        } catch (e) { /* autre méthode, ci-dessous */ }
+        const actif = document.activeElement;
+        const zone = document.createElement('textarea');
+        zone.value = texte;
+        zone.style.cssText = 'position:fixed;left:-9999px;top:0';
+        document.body.appendChild(zone);
+        zone.select();
+        const ok = document.execCommand('copy');
+        zone.remove();
+        if (actif && actif.focus) actif.focus();
+        if (!ok) throw new Error('Windows n\'a pas permis de copier le texte dans le presse-papiers.');
+      },
+      async lirePressePapiers() {
+        try {
+          return await navigator.clipboard.readText();
+        } catch (e) {
+          throw new Error('Windows n\'a pas permis de lire le presse-papiers (la fenêtre du programme doit être active).');
+        }
+      },
+      async copierImage(id) {
+        const toile = await toileDe(id);
+        const png = await new Promise(ok => toile.toBlob(ok, 'image/png'));
+        try {
+          await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
+        } catch (e) {
+          throw new Error('Windows n\'a pas permis de copier l\'image dans le presse-papiers.');
+        }
+      },
+      // quoi : 'texte' (a = le texte), 'controle' (a = son id) ou 'fenetre' (a = son id, '' = principale).
+      async imprimer(quoi, a) {
+        if (arrete) return;
+        let titre = principale.def.titre || 'Programme', page;
+        if (quoi === 'texte') page = pageDeTexte(a);
+        else if (quoi === 'controle') { page = await pageDeControle(a); titre = donnees[a].nom; }
+        else {
+          const f = laFenetre(a);
+          page = pageDeFenetre(f);
+          titre = f.def.titre || f.def.nom || titre;
+        }
+        await imprimerPage(titre, page);
+      },
+      notifier(titre, texte, icone) {
+        if (arrete) return;
+        const t = enTexte(titre).trim() || principale.def.titre || 'Programme', m = enTexte(texte);
+        const genre = ICONES_NOTIFICATION[icone] ? icone : 'aucune';
+        const webview = window.chrome && window.chrome.webview;
+        // Dans BlocStudio ou dans une application exportée : une vraie notification de Windows.
+        if (webview) webview.postMessage(`notification:${genre}\n${t.replace(/\n/g, ' ')}\n${m}`);
+        else bulleNotification(t, m, genre);
       },
       arreterSons() {
         app.taireVoix();

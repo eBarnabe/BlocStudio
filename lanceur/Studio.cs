@@ -176,7 +176,8 @@ namespace BlocStudio
             // la page est celle de BlocStudio, livrée avec l'application.
             web.PermissionRequested += (s, e) =>
             {
-                if (e.PermissionKind == CoreWebView2PermissionKind.Microphone || e.PermissionKind == CoreWebView2PermissionKind.Camera)
+                if (e.PermissionKind == CoreWebView2PermissionKind.Microphone || e.PermissionKind == CoreWebView2PermissionKind.Camera
+                    || e.PermissionKind == CoreWebView2PermissionKind.ClipboardRead)
                     e.State = CoreWebView2PermissionState.Allow;
             };
             web.DocumentTitleChanged += (s, e) =>
@@ -259,11 +260,45 @@ namespace BlocStudio
 
         void Recevoir(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
+            // Un programme testé envoie du texte (« notification:… ») ; l'éditeur, des objets.
+            string texte = null;
+            try { texte = e.TryGetWebMessageAsString(); } catch { }
+            if (texte != null)
+            {
+                if (texte.StartsWith("notification:")) BeginInvoke(new Action(() => Notifier(texte.Substring(13))));
+                return;
+            }
             Dictionary<string, object> message;
             try { message = json.Deserialize<Dictionary<string, object>>(e.WebMessageAsJson); }
             catch { return; }
             // La boîte « Enregistrer sous » est modale : on l'ouvre en dehors de l'événement WebView2.
             BeginInvoke(new Action(() => { Traiter(message); RendreClavier(); }));
+        }
+
+        // Le bloc « notification » : « ICONE\nTITRE\nMESSAGE ». Un clic dessus ramène BlocStudio devant.
+        NotifyIcon bulle;
+        void Notifier(string message)
+        {
+            string[] p = message.Split(new[] { '\n' }, 3);
+            if (p.Length < 3) return;
+            if (bulle == null)
+            {
+                bulle = new NotifyIcon { Icon = Icon ?? SystemIcons.Application, Text = "BlocStudio" };
+                bulle.BalloonTipClicked += (s, e) => { Ramener(); bulle.Visible = false; };
+                bulle.BalloonTipClosed += (s, e) => bulle.Visible = false;
+                bulle.Click += (s, e) => Ramener();
+                FormClosed += (s, e) => bulle.Dispose();
+            }
+            bulle.Visible = true;
+            ToolTipIcon icone = p[0] == "info" ? ToolTipIcon.Info : p[0] == "avertissement" ? ToolTipIcon.Warning
+                              : p[0] == "erreur" ? ToolTipIcon.Error : ToolTipIcon.None;
+            bulle.ShowBalloonTip(6000, p[1].Length > 0 ? p[1] : "BlocStudio", p[2].Length > 0 ? p[2] : " ", icone);
+        }
+
+        void Ramener()
+        {
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            Activate();
         }
 
         void Traiter(Dictionary<string, object> message)

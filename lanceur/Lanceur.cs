@@ -210,6 +210,8 @@ namespace BlocStudio
         // Le bloc « changer la taille de la fenêtre » envoie « taille:LARGEURxHAUTEUR » (en pixels CSS).
         void MessageRecu(string message)
         {
+            if (message != null && message.StartsWith("notification:")) { Notifier(message.Substring(13)); return; }
+            if (message != null && message.StartsWith("imprimer:")) { Imprimer(message.Substring(9)); return; }
             if (message == null || !message.StartsWith("taille:")) return;
             string[] t = message.Substring(7).Split('x');
             int l, h;
@@ -218,6 +220,73 @@ namespace BlocStudio
             Size taille = TailleEcran(Math.Max(l, 100), Math.Max(h, 60));
             Rectangle ecran = Screen.FromControl(this).WorkingArea;
             ClientSize = new Size(Math.Min(taille.Width, ecran.Width), Math.Min(taille.Height, ecran.Height));
+        }
+
+        // Le bloc « notification » envoie « notification:ICONE\nTITRE\nMESSAGE » : une notification de Windows.
+        // Un clic dessus ramène la fenêtre devant.
+        NotifyIcon bulle;
+        void Notifier(string message)
+        {
+            string[] p = message.Split(new[] { '\n' }, 3);
+            if (p.Length < 3) return;
+            if (bulle == null)
+            {
+                bulle = new NotifyIcon { Icon = Icon ?? SystemIcons.Application };
+                bulle.BalloonTipClicked += (s, e) => { Ramener(); bulle.Visible = false; };
+                bulle.BalloonTipClosed += (s, e) => bulle.Visible = false;
+                bulle.Click += (s, e) => Ramener();
+                FormClosed += (s, e) => bulle.Dispose();
+            }
+            bulle.Text = Text.Length > 63 ? Text.Substring(0, 63) : Text;
+            bulle.Visible = true;
+            ToolTipIcon icone = p[0] == "info" ? ToolTipIcon.Info : p[0] == "avertissement" ? ToolTipIcon.Warning
+                              : p[0] == "erreur" ? ToolTipIcon.Error : ToolTipIcon.None;
+            bulle.ShowBalloonTip(6000, p[1].Length > 0 ? p[1] : Text, p[2].Length > 0 ? p[2] : " ", icone);
+        }
+
+        // Les blocs « imprimer » envoient « imprimer:PAGE » : l'aperçu s'ouvre dans une fenêtre à part, assez grande
+        // même si celle du programme est petite. Quand elle est fermée, on répond « imprime » au programme.
+        async void Imprimer(string page)
+        {
+            string fichier = Path.Combine(Lanceur.DossierDonnees, "impression.html");
+            try
+            {
+                File.WriteAllText(fichier, page, new UTF8Encoding(false));
+                using (var fenetre = new Form())
+                {
+                    fenetre.Text = "Impression – " + Text;
+                    fenetre.Icon = Icon;
+                    fenetre.ShowInTaskbar = false;
+                    fenetre.StartPosition = FormStartPosition.CenterScreen;
+                    Rectangle ecran = Screen.FromControl(this).WorkingArea;
+                    Size taille = TailleEcran(900, 700);
+                    fenetre.ClientSize = new Size(Math.Min(taille.Width, ecran.Width - 40), Math.Min(taille.Height, ecran.Height - 40));
+                    var apercu = new Microsoft.Web.WebView2.WinForms.WebView2 { Dock = DockStyle.Fill };
+                    fenetre.Controls.Add(apercu);
+                    fenetre.Show(this);
+                    await apercu.EnsureCoreWebView2Async(vue.CoreWebView2.Environment);
+                    apercu.CoreWebView2.Settings.AreDevToolsEnabled = false;
+                    apercu.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+                    var chargee = new System.Threading.Tasks.TaskCompletionSource<bool>();
+                    apercu.CoreWebView2.NavigationCompleted += (s, e) => chargee.TrySetResult(true);
+                    apercu.CoreWebView2.Navigate(new Uri(fichier).AbsoluteUri);
+                    await chargee.Task;
+                    await apercu.CoreWebView2.ExecuteScriptAsync("window.print()"); // se termine quand l'aperçu est fermé
+                }
+            }
+            catch { }
+            finally
+            {
+                try { File.Delete(fichier); } catch { }
+                try { vue.CoreWebView2.PostWebMessageAsString("imprime"); } catch { }
+                Activate();
+            }
+        }
+
+        void Ramener()
+        {
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            Activate();
         }
 
         async System.Threading.Tasks.Task Demarrer()
@@ -245,6 +314,12 @@ namespace BlocStudio
             reglages.IsZoomControlEnabled = false;
             reglages.AreBrowserAcceleratorKeysEnabled = false;
 
+            // Le bloc « texte du presse-papiers » : le programme est celui de l'utilisateur, on le laisse lire.
+            vue.CoreWebView2.PermissionRequested += (s, e) =>
+            {
+                if (e.PermissionKind == Microsoft.Web.WebView2.Core.CoreWebView2PermissionKind.ClipboardRead)
+                    e.State = Microsoft.Web.WebView2.Core.CoreWebView2PermissionState.Allow;
+            };
             vue.CoreWebView2.WebMessageReceived += (s, e) =>
             {
                 try { MessageRecu(e.TryGetWebMessageAsString()); } catch { }
