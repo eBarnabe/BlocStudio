@@ -10,10 +10,7 @@
   <header class="barre">
     <div class="logo"><span class="logo-cube">◆</span> BlocStudio</div>
     <div class="actions">
-      <div class="menu-conteneur">
-        <button id="btn-exemples" title="Ouvrir un programme d'exemple">📚 Exemples</button>
-        <div id="menu-exemples" class="menu" hidden></div>
-      </div>
+      <button id="btn-exemples" title="Ouvrir un programme d'exemple">📚 Exemples</button>
       <button id="btn-nouveau" title="Nouveau projet">📄 Nouveau</button>
       <button id="btn-ouvrir" title="Ouvrir un projet (.bstudio)">📂 Ouvrir</button>
       <button id="btn-enregistrer" title="Enregistrer le projet (Ctrl+S)">💾 Enregistrer</button>
@@ -157,6 +154,18 @@
         <button id="btn-lancer-exe" class="si-hote secondaire">▶ Lancer</button>
         <button id="btn-fermer-info-exe">J'ai compris</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Galerie des exemples, rangés par thème -->
+  <div id="galerie" class="voile modale" hidden>
+    <div class="galerie-boite" role="dialog" aria-labelledby="galerie-titre">
+      <div class="galerie-tete">
+        <h2 id="galerie-titre">📚 Exemples</h2>
+        <input id="galerie-recherche" type="search" placeholder="Chercher : jeu, clone, fichier, son…" autocomplete="off">
+        <button id="btn-galerie-fermer" class="fermer" title="Fermer (Échap)">✕</button>
+      </div>
+      <div id="galerie-contenu" class="galerie-contenu"></div>
     </div>
   </div>
 

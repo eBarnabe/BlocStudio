@@ -286,6 +286,31 @@ h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: var(--
 }
 .actions .menu-item:hover { background: #eef2ff; }
 .menu-item strong { display: block; font-size: 15px; }
+
+/* ---------- Galerie des exemples ---------- */
+.galerie-boite {
+  display: flex; flex-direction: column;
+  width: min(1000px, 94vw); max-height: 88vh;
+  border-radius: 12px; background: var(--panneau);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, .35);
+  overflow: hidden;
+}
+.galerie-tete { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--bord); }
+.galerie-tete h2 { margin: 0; font-size: 20px; white-space: nowrap; }
+.galerie-tete input { flex: 1; min-width: 0; padding: 8px 12px; border: 1px solid var(--bord); border-radius: 8px; font: inherit; }
+.galerie-tete .fermer { font-size: 18px; }
+.galerie-contenu { overflow: auto; padding: 4px 18px 18px; }
+.galerie-theme { margin: 16px 0 8px; }
+.galerie-grille { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+.carte-exemple {
+  display: grid; grid-template-columns: 44px 1fr; grid-template-rows: auto 1fr; column-gap: 10px;
+  padding: 12px; border: 1px solid var(--bord); border-radius: 10px;
+  background: #fff; color: inherit; text-align: left;
+}
+.carte-exemple:hover, .carte-exemple:focus-visible { border-color: var(--accent); background: #eef2ff; outline: none; }
+.carte-icone { grid-row: span 2; font-size: 32px; line-height: 1.1; text-align: center; }
+.carte-exemple strong { font-size: 15px; }
+.carte-desc { margin-top: 3px; font-size: 12.5px; line-height: 1.35; color: var(--doux); }
 .menu-item span { display: block; margin-top: 2px; font-size: 12.5px; color: var(--doux); }
 
 /* Palette plus compacte maintenant qu'elle contient 13 contrôles */

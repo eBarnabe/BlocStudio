@@ -272,6 +272,7 @@
   const exemples = [
     {
       titre: '👋 Bonjour',
+      theme: 'debut',
       description: 'Le tout premier programme : une question, un bouton, une réponse.',
       creer: () => projet(
         { titre: 'Mon premier programme', largeur: 440, hauteur: 190 },
@@ -292,6 +293,7 @@
     },
     {
       titre: '📋 Fiche d\'inscription',
+      theme: 'debut',
       description: 'Un formulaire : boutons radio, cadre, sélecteur de nombre, texte sur plusieurs lignes.',
       creer: () => projet(
         { titre: 'Inscription au club', largeur: 440, hauteur: 390 },
@@ -324,6 +326,7 @@
     },
     {
       titre: '✅ Liste de tâches',
+      theme: 'applications',
       description: 'Ajouter, terminer et effacer des tâches dans une zone de liste.',
       creer: () => projet(
         { titre: 'Ma liste de tâches', largeur: 380, hauteur: 330 },
@@ -354,6 +357,7 @@
     },
     {
       titre: '🎨 Mini-Paint',
+      theme: 'multimedia',
       description: 'Un logiciel de dessin : couleurs, épaisseur du crayon, effacer, ouvrir une image et enregistrer son dessin en PNG.',
       creer: () => projet(
         { titre: 'Mini-Paint', largeur: 600, hauteur: 380 },
@@ -400,6 +404,7 @@
     },
     {
       titre: '🔐 Carnet secret',
+      theme: 'applications',
       description: 'Un mot de passe pour entrer, des pages rangées dans une arborescence, une barre d\'état. Les notes sont gardées d\'une fois sur l\'autre.',
       creer: () => {
         // c1-c4 : l'entrée (étiquette, mot de passe, interrupteur « Montrer », bouton Entrer)
@@ -476,6 +481,7 @@
     },
     {
       titre: '📸 Photomaton',
+      theme: 'multimedia',
       description: 'La webcam en direct : compte à rebours 3, 2, 1, photo, enregistrement en PNG, et un détecteur de mouvement.',
       creer: () => {
         // c1 Camera · c2 Photo (image) · c3 bouton Photo · c4 interrupteur · c5 bouton Enregistrer
@@ -526,6 +532,7 @@
     },
     {
       titre: '📝 Bloc-notes',
+      theme: 'applications',
       description: 'Un petit traitement de texte : menus Fichier, barre d\'outils, menu au clic droit sur le texte, glisser-déposer d\'un fichier. On peut agrandir la fenêtre : le texte suit (ancrage).',
       creer: () => {
         // c1 Texte · c2 Etat · c3 FichierTexte (contrôle Fichier, invisible)
@@ -594,6 +601,7 @@
     },
     {
       titre: '💬 Messagerie',
+      theme: 'applications',
       description: 'Une discussion avec Robi, un petit robot : chaque message est une bulle (un clone) ajoutée dans un panneau défilant, qui descend tout en bas.',
       creer: () => {
         // c1 Fil (panneau défilant) · c2 Bulle (dans le panneau, cachée : ce sont ses clones qu'on voit)
@@ -664,6 +672,7 @@
     },
     {
       titre: '🧮 Quiz de calcul',
+      theme: 'debut',
       description: '5 multiplications au hasard, un score et une barre de progression.',
       creer: () => projet(
         { titre: 'Quiz de calcul', largeur: 400, hauteur: 220 },
@@ -698,6 +707,7 @@
     },
     {
       titre: '⏱️ Compte à rebours',
+      theme: 'debut',
       description: 'Choisis une durée avec le curseur, puis lance le minuteur.',
       creer: () => projet(
         { titre: 'Compte à rebours', largeur: 360, hauteur: 260 },
@@ -739,6 +749,7 @@
     },
     {
       titre: '⚽ Balle qui rebondit',
+      theme: 'jeux',
       description: 'Une animation avec « répéter indéfiniment » et « attendre ».',
       creer: () => projet(
         { titre: 'Balle qui rebondit', largeur: 420, hauteur: 300 },
@@ -775,6 +786,7 @@
     },
     {
       titre: '📇 Carnet d\'adresses',
+      theme: 'applications',
       description: 'Un tableau qui garde ses contacts d\'une fois sur l\'autre, des menus, l\'export vers Excel.',
       creer: () => {
         const compteur = () => ecrire('c11', 'texte',
@@ -852,6 +864,7 @@
     },
     {
       titre: '📚 Ma bibliothèque',
+      theme: 'applications',
       description: 'Une base de données de livres : ajouter, chercher, trier, supprimer. Les livres sont gardés d\'une fois sur l\'autre.',
       creer: () => {
         // c1-c6 saisie · c7 Ajouter · c8 Supprimer · c9 Trier · c10-c11 recherche
@@ -932,6 +945,7 @@
     },
     {
       titre: '🪙 Attrape la pièce',
+      theme: 'jeux',
       description: 'Un vrai petit jeu : sprites animés, clavier ou souris, minuteur, musique de fond et record.',
       creer: () => {
         // c1 Score · c2 Vies · c3 Piece · c4 Panier · c5 Consigne · c6 Musique (Son) · c7 Chute (Minuteur)
@@ -1012,6 +1026,7 @@
     },
     {
       titre: '☄️ Pluie de météorites',
+      theme: 'jeux',
       description: 'Un jeu avec des clones : des météorites de plus en plus nombreuses, à éviter avec la souris ou les flèches.',
       creer: () => {
         // c1 Score · c2 Vaisseau · c3 Meteorite (cachée : ce sont ses clones qui tombent) · c4 Consigne · c5 Apparition (Minuteur)
@@ -1092,6 +1107,7 @@
     },
     {
       titre: '👻 Chasse aux fantômes',
+      theme: 'jeux',
       description: 'Clique sur les fantômes avant qu\'ils ne deviennent trop gros ! Effets de sprite (taille, fondu) et musique composée dans le studio 8 bits.',
       creer: () => {
         // c1 Score · c2 Vies · c3 Fantome (caché : ce sont ses clones qui hantent la fenêtre)
@@ -1191,6 +1207,7 @@
     },
     {
       titre: '🪟 Plusieurs fenêtres',
+      theme: 'debut',
       description: 'Une fenêtre de réglages (OK / Annuler) et une fenêtre « À propos » : comment ouvrir d\'autres fenêtres et récupérer ce qu\'on y a saisi.',
       creer: () => {
         // Fenêtre principale : c1 Bonjour · c2 Reglages (bouton) · c3 Info

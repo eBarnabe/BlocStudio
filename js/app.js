@@ -3534,6 +3534,58 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     brancherInterface();
   }
 
+  // ---- Galerie des exemples : des cartes rangées par thème, avec une recherche ----
+  const THEMES_EXEMPLES = [['debut', '🌱 Pour débuter'], ['applications', '🗂️ Applications'], ['jeux', '🎮 Jeux'],
+    ['multimedia', '🎨 Images, sons et caméra']];
+  const sansAccents = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  function ouvrirGalerie() {
+    $('galerie-recherche').value = '';
+    remplirGalerie();
+    $('galerie').hidden = false;
+    $('galerie-contenu').scrollTop = 0;
+    $('galerie-recherche').focus();
+  }
+
+  function fermerGalerie() {
+    $('galerie').hidden = true;
+  }
+
+  function remplirGalerie() {
+    // Tous les mots cherchés doivent se trouver dans le titre, la description ou le thème.
+    const mots = sansAccents($('galerie-recherche').value).split(/\s+/).filter(Boolean);
+    const contenu = $('galerie-contenu');
+    contenu.replaceChildren();
+    const themes = THEMES_EXEMPLES.map(([t]) => t);
+    for (const [theme, nom] of THEMES_EXEMPLES) {
+      const liste = BlocStudioExemples.filter(ex => (themes.includes(ex.theme) ? ex.theme : 'debut') === theme &&
+        mots.every(m => sansAccents(`${ex.titre} ${ex.description} ${nom}`).includes(m)));
+      if (!liste.length) continue;
+      contenu.appendChild(el('h3', 'galerie-theme', nom));
+      const grille = el('div', 'galerie-grille');
+      for (const ex of liste) {
+        const [icone, ...titre] = ex.titre.split(' ');
+        const carte = el('button', 'carte-exemple');
+        carte.title = 'Ouvrir l\'exemple « ' + titre.join(' ') + ' »';
+        carte.append(el('span', 'carte-icone', icone), el('strong', null, titre.join(' ')), el('span', 'carte-desc', ex.description));
+        carte.addEventListener('click', () => ouvrirExemple(ex));
+        grille.appendChild(carte);
+      }
+      contenu.appendChild(grille);
+    }
+    if (!contenu.children.length) {
+      contenu.appendChild(el('p', 'aide', `Aucun exemple ne correspond à « ${$('galerie-recherche').value.trim()} ».`));
+    }
+  }
+
+  function ouvrirExemple(ex) {
+    fermerGalerie();
+    const nom = ex.titre.replace(/^\S+\s/, '');
+    if (projet.controles.length && !confirm(`Ouvrir l'exemple « ${nom} » ? Il remplacera le projet actuel (pensez à l'enregistrer avant).`)) return;
+    chargerExemple(ex);
+    afficherVue('vue-fenetre');
+  }
+
   function brancherInterface() {
     document.querySelectorAll('.onglet').forEach(o =>
       o.addEventListener('click', () => afficherVue(o.dataset.vue)));
@@ -3577,31 +3629,20 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     window.addEventListener('resize', fermerMenuContextuel);
     $('choix-controle').addEventListener('change', e => selectionner(e.target.value || null));
 
-    // Menu des exemples
-    const menu = $('menu-exemples');
-    for (const ex of BlocStudioExemples) {
-      const item = document.createElement('button');
-      item.className = 'menu-item';
-      const titre = document.createElement('strong');
-      titre.textContent = ex.titre;
-      const desc = document.createElement('span');
-      desc.textContent = ex.description;
-      item.append(titre, desc);
-      item.addEventListener('click', () => {
-        menu.hidden = true;
-        if (projet.controles.length && !confirm(`Ouvrir l'exemple « ${ex.titre.replace(/^\S+\s/, '')} » ? Il remplacera le projet actuel (pensez à l'enregistrer avant).`)) return;
-        chargerExemple(ex);
-        afficherVue('vue-fenetre');
-      });
-      menu.appendChild(item);
-    }
-    $('btn-exemples').addEventListener('click', e => {
-      e.stopPropagation();
-      menu.hidden = !menu.hidden;
+    // Galerie des exemples
+    $('btn-exemples').addEventListener('click', ouvrirGalerie);
+    $('btn-galerie-fermer').addEventListener('click', fermerGalerie);
+    $('galerie').addEventListener('pointerdown', e => { if (e.target === $('galerie')) fermerGalerie(); }); // clic à côté
+    $('galerie').addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); fermerGalerie(); }
+      // Entrée dans la recherche : s'il ne reste qu'un exemple, on l'ouvre.
+      if (e.key === 'Enter' && e.target === $('galerie-recherche')) {
+        const cartes = $('galerie-contenu').querySelectorAll('.carte-exemple');
+        if (cartes.length === 1) cartes[0].click();
+      }
     });
-    document.addEventListener('click', e => {
-      if (!menu.hidden && !menu.contains(e.target)) menu.hidden = true;
-    });
+    $('galerie-recherche').addEventListener('input', remplirGalerie);
+    remplirGalerie();
 
     $('btn-nouveau').addEventListener('click', () => {
       if (confirm('Commencer un nouveau projet ? Pensez à enregistrer le projet actuel avant.')) {
