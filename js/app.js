@@ -72,8 +72,7 @@
 
   // Entrées de la palette qui créent un contrôle d'un autre type, déjà réglé.
   const VARIANTES = {
-    motdepasse: { type: 'zonetexte', prefixe: 'MotDePasse', valeurs: { motDePasse: true } },
-    ligne: { type: 'forme', prefixe: 'Ligne', valeurs: { genre: 'ligne', largeur: 160, hauteur: 12, couleurBordure: '#334155' } }
+    motdepasse: { type: 'zonetexte', prefixe: 'MotDePasse', valeurs: { motDePasse: true } }
   };
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
@@ -1357,7 +1356,13 @@
       [['rectangle', '▭ Rectangle'], ['arrondi', '▢ Rectangle arrondi'], ['ovale', '⬭ Ovale (ou cercle si elle est carrée)'],
         ['triangle', '△ Triangle'], ['ligne', '╱ Ligne']].forEach(([v, t]) => choix.add(new Option(t, v)));
       choix.value = c.genre || 'rectangle';
-      choix.addEventListener('change', () => { c.genre = choix.value; maj(); afficherProprietes(); });
+      choix.addEventListener('change', () => {
+        // Devenue une ligne : un trait fin (horizontal par défaut) plutôt qu'un grand carré.
+        if (choix.value === 'ligne' && c.genre !== 'ligne' && (c.sens || 'horizontale') === 'horizontale') c.hauteur = 12;
+        c.genre = choix.value;
+        maj();
+        afficherProprietes();
+      });
       d.appendChild(choix);
       if (c.genre === 'ligne') {
         champChoix(liste, 'Sens de la ligne', [['horizontale', '—'], ['verticale', '|'], ['descendante', '╲'], ['montante', '╱']],
