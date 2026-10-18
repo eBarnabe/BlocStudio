@@ -1665,6 +1665,7 @@ function BlocRuntimeFactory() {
         if (arrete || d.jeton !== jeton) return;
         const [debut, fin] = extraitSon(s, tampon);
         const duree = fin - debut;
+        d.duree = duree;
         const depuis = Math.min(Math.max(0, position || 0), Math.max(0, duree - 0.001));
         const source = audio.createBufferSource();
         source.buffer = tampon;
@@ -1710,7 +1711,8 @@ function BlocRuntimeFactory() {
       ctrlDeType(id, 'son', 'un contrôle Son');
       const d = donnees[id];
       switch (action) {
-        case 'jouer': jouerCtrlSon(d, 0).catch(signaler); break;
+        // Arrêté : depuis le début, ou depuis la position qu'on lui a donnée (« mettre position de … à »).
+        case 'jouer': jouerCtrlSon(d, d.etat === 'arrete' ? d.position || 0 : 0).catch(signaler); break;
         case 'attendre': return jouerCtrlSon(d, 0).then(() => arrete ? JAMAIS : undefined);
         case 'pause':
           if (d.etat !== 'lecture') break;
@@ -1767,8 +1769,32 @@ function BlocRuntimeFactory() {
       return s;
     }
 
+    // Durée du son choisi, en secondes : connue une fois le son décodé (0 en attendant, ou sans son).
+    function preparerDuree(d) {
+      d.duree = 0;
+      const s = sonsProjet.get(d.son);
+      if (!s) return;
+      const jeton = d.jetonDuree = {};
+      decoderSon(s.donnees).then(tampon => {
+        if (d.jetonDuree !== jeton) return; // un autre son a été choisi entre-temps
+        const [debut, fin] = extraitSon(s, tampon);
+        d.duree = fin - debut;
+      }, () => { /* l'erreur sera signalée à la lecture */ });
+    }
+
+    // Où en est la lecture, en secondes depuis le début.
+    function positionSon(d) {
+      if (d.etat === 'lecture' && d.lecture) {
+        const ecoule = audio.currentTime - d.lecture.depart;
+        return d.lecture.source.loop ? ecoule % d.lecture.cycle : Math.min(ecoule, d.lecture.duree);
+      }
+      return d.position || 0;
+    }
+
     function lireSon(d, prop) {
       switch (prop) {
+        case 'duree': return Math.round((d.duree || 0) * 100) / 100;
+        case 'position': return Math.round(positionSon(d) * 100) / 100;
         case 'son': return sonsProjet.get(d.son)?.nom ?? '';
         case 'volume': return Math.round(volumeCtrl(d) * 100);
         case 'boucle': return !!d.boucle;
@@ -1789,7 +1815,15 @@ function BlocRuntimeFactory() {
           d.son = s.id;
           d.etat = 'arrete';
           d.position = 0;
+          preparerDuree(d);
           if (rejouer) jouerCtrlSon(d, 0).catch(signaler);
+          break;
+        }
+        // Aller à un endroit de la chanson (en secondes) : en lecture, elle continue de là.
+        case 'position': {
+          const p = Math.max(0, Number(valeur) || 0);
+          if (d.etat === 'lecture') jouerCtrlSon(d, p).catch(signaler);
+          else d.position = d.duree ? Math.min(p, d.duree) : p;
           break;
         }
         case 'volume':
@@ -4182,6 +4216,7 @@ function BlocRuntimeFactory() {
       // « quand la fenêtre démarre » (qui peuvent ainsi les modifier).
       for (const id in donnees) {
         const d = donnees[id];
+        if (d.type === 'son') preparerDuree(d);
         if (d.type === 'son' && d.autoDemarrage) ctrlSon(id, 'jouer');
         if (d.type === 'minuteur' && d.active !== false) demarrerMinuteur(d);
         if (d.type === 'camera' && d.allumerAuDemarrage !== false) allumerCamera(id).catch(signaler);

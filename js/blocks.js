@@ -76,7 +76,7 @@
     interrupteur: ['coche', 'texte', ...TEXTE, 'active', ...POSITION],
     lien: ['texte', 'adresse', ...TEXTE, 'alignement', ...POSITION],
     video: ['enLecture', 'position', 'duree', 'volume', 'boucle', 'video', ...POSITION],
-    son: ['son', 'volume', 'boucle', 'enLecture'],
+    son: ['son', 'enLecture', 'position', 'duree', 'volume', 'boucle'],
     minuteur: ['intervalle', 'active'],
     basedonnees: ['nombreFiches', 'champs', 'memoriser'],
     fichier: ['contenu', 'nomFichier', 'annule', 'nomPropose', 'typeFichier'],
@@ -84,7 +84,7 @@
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
