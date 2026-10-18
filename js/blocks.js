@@ -37,7 +37,7 @@
     ajustement: 'ajustement (entiere, etiree ou recadree)', texteInvite: 'texte d\'invite (grisé)',
     lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)',
     couleurBordure: 'couleur du trait', epaisseur: 'épaisseur du trait', sens: 'sens de la ligne (horizontale, verticale, descendante ou montante)',
-    heures: 'heures', minutes: 'minutes',
+    heures: 'heures', minutes: 'minutes', cliquable: 'cliquable (un clic choisit la valeur)',
     defilementY: 'défilement vertical (en pixels depuis le haut)', defilementX: 'défilement horizontal (en pixels depuis la gauche)',
     hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
     defilement: 'sens du défilement (vertical, horizontal ou deux)'
@@ -58,7 +58,7 @@
     image: ['image', 'ajustement', 'bordure', 'couleurFond', ...POSITION, 'direction'],
     listederoulante: ['texte', 'numero', 'elements', 'trie', ...TEXTE, 'active', ...POSITION],
     curseur: ['valeur', 'min', 'max', 'pas', 'active', ...POSITION],
-    barreprogression: ['valeur', 'max', 'couleurBarre', 'couleurFond', ...POSITION],
+    barreprogression: ['valeur', 'max', 'cliquable', 'couleurBarre', 'couleurFond', ...POSITION],
     zonedessin: ['couleurFond', ...POSITION],
     boutonradio: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
     cadre: ['texte', ...TEXTE, ...POSITION],
@@ -203,12 +203,12 @@
   };
 
   const TYPES_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau', 'barreprogression'];
 
   Blockly.Blocks['bs_quand_change'] = {
     init() {
       evenement(this, 'quand', TYPES_CHANGE, 'change');
-      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page, ou quand un panneau défilant défile.");
+      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page, ou quand un panneau défilant défile, ou quand on clique sur une barre de progression « cliquable ».");
     }
   };
 
@@ -2107,7 +2107,7 @@
     'defilementX', 'defilementY', 'largeurContenu', 'hauteurContenu'];
   const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre', 'couleurBordure'];
   const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
-  const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee',
+  const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee', 'cliquable',
     'gras', 'italique', 'lectureSeule', 'trie'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
   const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical' };

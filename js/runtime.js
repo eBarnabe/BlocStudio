@@ -1413,6 +1413,24 @@ function BlocRuntimeFactory() {
           el.dispatchEvent(new Event('input')); // « quand Onglets1 change »
         });
       }
+      // Barre « cliquable » : un clic (ou un glisser) choisit la valeur à cet endroit, puis « quand … change ».
+      if (c.type === 'barreprogression') {
+        el.style.cursor = c.cliquable ? 'pointer' : '';
+        const choisir = e => {
+          if (!d.cliquable) return;
+          const r = el.getBoundingClientRect();
+          const part = Math.min(1, Math.max(0, (e.clientX - r.left) / (r.width || 1)));
+          d.valeur = Math.round(part * (Number(d.max) || 0) * 100) / 100;
+          majBarre(el, d);
+          el.dispatchEvent(new Event('input'));
+        };
+        el.addEventListener('pointerdown', e => {
+          if (!d.cliquable || e.button !== 0) return;
+          try { el.setPointerCapture(e.pointerId); } catch (err) { /* pas grave */ }
+          choisir(e);
+        });
+        el.addEventListener('pointermove', e => { if (e.buttons & 1) choisir(e); });
+      }
       if (c.type === 'graphique') {
         d.valeurs = (c.valeurs || []).map(v => Number(v) || 0);
         d.etiquettes = (c.etiquettes || []).map(enTexte);
@@ -3348,6 +3366,7 @@ function BlocRuntimeFactory() {
           if (prop === 'longueurMax') return el.maxLength > 0 ? el.maxLength : 0;
         }
         if (prop === 'trie') return !!d.trie;
+        if (prop === 'cliquable') return !!d.cliquable;
         if (d.type === 'panneau') {
           if (prop === 'defilementX') return Math.round(el.scrollLeft);
           if (prop === 'defilementY') return Math.round(el.scrollTop);
@@ -3474,6 +3493,11 @@ function BlocRuntimeFactory() {
           if (prop === 'epaisseur') d.epaisseur = Math.max(0, Number(valeur) || 0);
           if (prop === 'couleurBordure') d.couleurBordure = enTexte(valeur);
           return rendreForme(el, d);
+        }
+        if (prop === 'cliquable' && d.type === 'barreprogression') {
+          d.cliquable = !!valeur;
+          el.style.cursor = d.cliquable ? 'pointer' : '';
+          return;
         }
         if (prop === 'trie' && estListe(d.type)) {
           d.trie = !!valeur;

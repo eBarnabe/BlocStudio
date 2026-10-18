@@ -85,7 +85,7 @@
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau', 'barreprogression'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
@@ -1382,6 +1382,12 @@
         g => champNombre(g, 'Maximum', c.max, v => { c.max = v; maj(); })
       ]);
       champCouleur(liste, 'Couleur de la barre', c.couleurBarre, v => { c.couleurBarre = v; maj(); });
+      champCase(liste, 'Cliquable : un clic (ou un glisser) choisit la valeur, puis « quand … change »', c.cliquable,
+        v => { c.cliquable = v; maj(); afficherProprietes(); });
+      if (c.cliquable) {
+        liste.appendChild(el('p', 'aide', 'Par exemple pour un lecteur de musique : dans « quand ' + c.nom +
+          ' change », mettre la position du son à la valeur de ' + c.nom + ' (avec le maximum = la durée du son).'));
+      }
     }
 
     if (c.type === 'panneau') {
