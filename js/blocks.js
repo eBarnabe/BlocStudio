@@ -37,7 +37,7 @@
     ajustement: 'ajustement (entiere, etiree ou recadree)', texteInvite: 'texte d\'invite (grisé)',
     lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)',
     couleurBordure: 'couleur du trait', epaisseur: 'épaisseur du trait', sens: 'sens de la ligne (horizontale, verticale, descendante ou montante)',
-    heures: 'heures', minutes: 'minutes', orientation: 'orientation (horizontale ou verticale)', cliquable: 'cliquable (un clic choisit la valeur)',
+    heures: 'heures', minutes: 'minutes', collision: 'collisions (precise : au pixel près, ou rectangle)', orientation: 'orientation (horizontale ou verticale)', cliquable: 'cliquable (un clic choisit la valeur)',
     defilementY: 'défilement vertical (en pixels depuis le haut)', defilementX: 'défilement horizontal (en pixels depuis la gauche)',
     hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
     defilement: 'sens du défilement (vertical, horizontal ou deux)'
@@ -81,7 +81,7 @@
     basedonnees: ['nombreFiches', 'champs', 'memoriser'],
     fichier: ['contenu', 'nomFichier', 'annule', 'nomPropose', 'typeFichier'],
     camera: ['allumee', 'mouvement', 'photo', 'miroir', 'seuilMouvement', ...POSITION],
-    sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', ...POSITION, 'direction']
+    sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', 'collision', ...POSITION, 'direction']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
   const LECTURE_SEULE = { arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
@@ -398,6 +398,15 @@
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, 'touche',
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, '?'
   ], 'Boolean', COULEUR_ENTREES, 'Vrai si les deux contrôles se chevauchent (et sont visibles). Parfait pour les jeux : le panier attrape-t-il la pièce ?');
+
+  Blockly.Blocks['bs_cote_contact'] = valeur(() => [
+    'de quel côté', { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, 'touche',
+    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, '?'
+  ], 'String', COULEUR_ENTREES, 'Pour les jeux de plateforme : « bas » s\'il est posé dessus, « haut » s\'il s\'y cogne la tête, « gauche » ou « droite » s\'il le touche par ce côté. Vide s\'ils ne se touchent pas.');
+  Blockly.Blocks['bs_touche_couleur'] = valeur(() => [
+    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, 'touche la couleur',
+    { nom: 'COUL' }, '?'
+  ], 'Boolean', COULEUR_ENTREES, 'Vrai si une partie visible du contrôle est sur cette couleur : les murs d\'un labyrinthe dessiné, une flaque peinte dans une zone de dessin, une forme, une image…');
 
   // ---------- Sprites ----------
 
@@ -2042,6 +2051,9 @@
   gen.forBlock['bs_derniere_touche'] = () => ['app.derniereTouche()', Order.FUNCTION_CALL];
   gen.forBlock['bs_souris_fenetre'] = b => [`app.sourisFenetre(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_souris_enfoncee'] = () => ["app.sourisFenetre('enfonce')", Order.FUNCTION_CALL];
+  gen.forBlock['bs_cote_contact'] = b =>
+    [`app.coteContact(${id(b)}, ${codeCtrl(b.getFieldValue('CTRL2'))})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_touche_couleur'] = b => [`app.toucheCouleur(${id(b)}, ${val(b, 'COUL', "'noir'")})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_se_touchent'] = b =>
     [`app.seTouchent(${id(b)}, ${codeCtrl(b.getFieldValue('CTRL2'))})`, Order.FUNCTION_CALL];
 
@@ -2456,6 +2468,8 @@
       { kind: 'block', type: 'bs_quand_change' },
       { kind: 'block', type: 'bs_quand_souris_ctrl' },
       { kind: 'block', type: 'bs_se_touchent' },
+      { kind: 'block', type: 'bs_cote_contact' },
+      { kind: 'block', type: 'bs_touche_couleur', inputs: { COUL: couleurOmbre() } },
       { kind: 'block', type: 'bs_placer', inputs: { X: nombre(0), Y: nombre(0) } },
       { kind: 'block', type: 'bs_glisser', inputs: { X: nombre(200), Y: nombre(100), SEC: nombre(1) } },
       { kind: 'block', type: 'bs_radio_groupe' },
@@ -2472,7 +2486,7 @@
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee', 'cliquable',
     'gras', 'italique', 'lectureSeule', 'trie'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
-  const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical', orientation: 'verticale' };
+  const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical', orientation: 'verticale', collision: 'rectangle' };
 
   function valeurProposee(c, prop) {
     if (PROPS_COULEUR.includes(prop)) return couleurOmbre();
@@ -2530,7 +2544,9 @@
       b('bs_rebondir'),
       b('bs_touche_bord'),
       b('bs_distance'),
-      b('bs_se_touchent')
+      b('bs_se_touchent'),
+      b('bs_cote_contact'),
+      b('bs_touche_couleur', { COUL: couleurOmbre() })
     ];
     const clones = () => [
       etiquette('Clones'),

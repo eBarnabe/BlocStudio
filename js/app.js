@@ -2022,6 +2022,8 @@
     costume.value = Math.min(Number(c.costume) || 0, s.costumes.length - 1);
     costume.addEventListener('change', () => { c.costume = Number(costume.value); maj(); });
     dc.appendChild(costume);
+    champChoix(liste, 'Collisions (blocs « touche… »)', [['precise', '✨ Au pixel près'], ['rectangle', '▭ Rectangle']],
+      c.collision === 'rectangle' ? 'rectangle' : 'precise', v => { c.collision = v; maj(); });
 
     // Agrandissement « entier » : les pixels restent tous de la même taille.
     const dt = prop(liste, `Taille à l'écran (le dessin fait ${s.taille} × ${s.taille} pixels)`);

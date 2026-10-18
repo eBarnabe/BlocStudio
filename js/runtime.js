@@ -672,7 +672,9 @@ function BlocRuntimeFactory() {
 
   // Partie non transparente d'un costume (en fractions de sa taille), pour que
   // « … touche … ? » ignore les bords vides de l'image. null : costume entièrement vide.
+  // Son masque (1 = pixel visible) sert aux collisions au pixel près.
   const contours = new Map();
+  const masques = new Map(); // données du costume → { L, H, plein: Uint8Array }
   function contourCostume(donnees) {
     if (contours.has(donnees)) return contours.get(donnees);
     contours.set(donnees, undefined); // pas encore calculé : on utilise tout le rectangle
@@ -686,10 +688,12 @@ function BlocRuntimeFactory() {
       const g = c.getContext('2d');
       g.drawImage(img, 0, 0);
       const px = g.getImageData(0, 0, L, H).data;
+      const plein = new Uint8Array(L * H);
       let x0 = L, y0 = H, x1 = -1, y1 = -1;
       for (let y = 0; y < H; y++) {
         for (let x = 0; x < L; x++) {
           if (px[(y * L + x) * 4 + 3] > 32) {
+            plein[y * L + x] = 1;
             if (x < x0) x0 = x;
             if (x > x1) x1 = x;
             if (y < y0) y0 = y;
@@ -698,6 +702,7 @@ function BlocRuntimeFactory() {
         }
       }
       contours.set(donnees, x1 < 0 ? null : { x0: x0 / L, y0: y0 / H, x1: (x1 + 1) / L, y1: (y1 + 1) / H });
+      masques.set(donnees, { L, H, plein });
     };
     img.src = donnees;
     return undefined;
@@ -2263,10 +2268,60 @@ function BlocRuntimeFactory() {
       const contour = contourCostume(costume.donnees);
       if (contour === null) return null; // costume vide : il ne touche rien
       const b = contour || { x0: 0, y0: 0, x1: 1, y1: 1 }; // contour pas encore calculé : tout le carré
-      const cote = Math.min(r.l, r.h) * echelleSprite(d);
-      const ox = r.x + (r.l - cote) / 2, oy = r.y + (r.h - cote) / 2;
-      const x0 = d.miroir ? 1 - b.x1 : b.x0, x1 = d.miroir ? 1 - b.x0 : b.x1;
-      return { x: ox + x0 * cote, y: oy + b.y0 * cote, l: (x1 - x0) * cote, h: (b.y1 - b.y0) * cote };
+      // Les quatre coins de la partie visible, tournés comme le sprite : la zone les entoure.
+      const p = poseSprite(d);
+      const coins = [[b.x0, b.y0], [b.x1, b.y0], [b.x0, b.y1], [b.x1, b.y1]].map(([u, v]) => depuisCostume(p, u, v));
+      const xs = coins.map(c => c[0]), ys = coins.map(c => c[1]);
+      const x = Math.min(...xs), y = Math.min(...ys);
+      return { x, y, l: Math.max(...xs) - x, h: Math.max(...ys) - y };
+    }
+
+    // Comment un sprite est posé : centre, côté du carré de son costume (avec sa taille), angle, miroir.
+    // Comme l'affichage : le costume est centré, puis retourné (miroir), agrandi et tourné autour du centre.
+    function poseSprite(d) {
+      return {
+        cx: d.x + d.largeur / 2, cy: d.y + d.hauteur / 2,
+        cote: Math.min(d.largeur, d.hauteur) * echelleSprite(d),
+        a: (Number(d.rotation) || 0) * Math.PI / 180, miroir: !!d.miroir
+      };
+    }
+    function depuisCostume(p, u, v) {
+      let dx = (u - 0.5) * p.cote, dy = (v - 0.5) * p.cote;
+      if (p.miroir) dx = -dx;
+      const c = Math.cos(p.a), s = Math.sin(p.a);
+      return [p.cx + dx * c - dy * s, p.cy + dx * s + dy * c];
+    }
+    function versCostume(p, x, y) {
+      const dx0 = x - p.cx, dy0 = y - p.cy, c = Math.cos(-p.a), s = Math.sin(-p.a);
+      let dx = dx0 * c - dy0 * s;
+      const dy = dx0 * s + dy0 * c;
+      if (p.miroir) dx = -dx;
+      return [dx / p.cote + 0.5, dy / p.cote + 0.5];
+    }
+    // Le masque du costume si les collisions de ce sprite sont « au pixel près » (et le masque prêt).
+    function masqueDe(id) {
+      const d = donnees[id];
+      if (d.type !== 'sprite' || d.collision === 'rectangle') return null;
+      const costume = costumesDe(d)[d.costume];
+      return costume ? masques.get(costume.donnees) || null : null;
+    }
+    // Ce point de l'écran est-il sur une partie visible du contrôle ?
+    function pleinEn(id, masque, x, y) {
+      if (!masque) return true;
+      const [u, v] = versCostume(poseSprite(donnees[id]), x, y);
+      if (u < 0 || v < 0 || u >= 1 || v >= 1) return false;
+      return masque.plein[Math.floor(v * masque.H) * masque.L + Math.floor(u * masque.L)] === 1;
+    }
+    // Parcourt les points communs aux deux zones (tous les pixels, ou un sur deux si la zone est grande).
+    function pointsCommuns(a, b, action) {
+      const x0 = Math.max(a.x, b.x), x1 = Math.min(a.x + a.l, b.x + b.l);
+      const y0 = Math.max(a.y, b.y), y1 = Math.min(a.y + a.h, b.y + b.h);
+      if (x1 <= x0 || y1 <= y0) return false;
+      const pas = Math.max(1, Math.ceil(Math.sqrt((x1 - x0) * (y1 - y0) / 20000)));
+      for (let y = y0 + pas / 2; y < y1; y += pas) {
+        for (let x = x0 + pas / 2; x < x1; x += pas) if (action(x, y)) return true;
+      }
+      return false;
     }
     const JAMAIS = new Promise(() => {});
 
@@ -2618,7 +2673,126 @@ function BlocRuntimeFactory() {
       if (id1 === id2 || elements[id1].style.display === 'none' || elements[id2].style.display === 'none') return false;
       const a = zoneDe(id1), b = zoneDe(id2);
       if (!a || !b) return false;
-      return a.x < b.x + b.l && b.x < a.x + a.l && a.y < b.y + b.h && b.y < a.y + a.h;
+      if (!(a.x < b.x + b.l && b.x < a.x + a.l && a.y < b.y + b.h && b.y < a.y + a.h)) return false;
+      // Sprites « au pixel près » : il faut qu'un pixel visible de l'un recouvre un pixel visible de l'autre.
+      const m1 = masqueDe(id1), m2 = masqueDe(id2);
+      if (!m1 && !m2) return true;
+      return pointsCommuns(a, b, (x, y) => pleinEn(id1, m1, x, y) && pleinEn(id2, m2, x, y));
+    }
+
+    // De quel côté le premier touche-t-il le second ? « bas » : il est posé dessus ; « haut » : il s'y cogne la tête ;
+    // « gauche » / « droite » : il le touche par ce côté-là. '' s'ils ne se touchent pas.
+    function coteContact(id1, id2) {
+      ctrl(id1);
+      ctrl(id2);
+      for (const a of famille(id1)) {
+        for (const b of famille(id2)) {
+          if (!seChevauchent(a, b)) continue;
+          const za = zoneDe(a), zb = zoneDe(b);
+          const ox = Math.min(za.x + za.l, zb.x + zb.l) - Math.max(za.x, zb.x);
+          const oy = Math.min(za.y + za.h, zb.y + zb.h) - Math.max(za.y, zb.y);
+          if (ox < oy) return za.x + za.l / 2 < zb.x + zb.l / 2 ? 'droite' : 'gauche';
+          return za.y + za.h / 2 < zb.y + zb.h / 2 ? 'bas' : 'haut';
+        }
+      }
+      return '';
+    }
+
+    // ---- « … touche la couleur … ? » : ce qui est dessous (zone de dessin, image, forme, fond d'un contrôle) ----
+    const pipette = document.createElement('canvas').getContext('2d', { willReadFrequently: true });
+    function enRvb(valeur) {
+      pipette.clearRect(0, 0, 1, 1);
+      pipette.fillStyle = '#000';
+      pipette.fillStyle = couleur(enTexte(valeur));
+      pipette.fillRect(0, 0, 1, 1);
+      return [...pipette.getImageData(0, 0, 1, 1).data.slice(0, 3)];
+    }
+    const proches = (a, b) => (a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2 < 60 * 60;
+    const imagesLues = new Map(); // adresse d'une image → ses pixels (ou null si on ne peut pas les lire)
+    function pixelsImage(img) {
+      if (!img.complete || !img.naturalWidth) return null;
+      if (imagesLues.has(img.src)) return imagesLues.get(img.src);
+      let r = null;
+      try {
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        const g = c.getContext('2d');
+        g.drawImage(img, 0, 0);
+        r = { L: c.width, H: c.height, px: g.getImageData(0, 0, c.width, c.height).data };
+      } catch (e) { /* image d'un autre site : illisible */ }
+      imagesLues.set(img.src, r);
+      return r;
+    }
+    // Une fonction (x, y) → [r, v, b] ou null (rien de visible là), pour ce contrôle.
+    function lecteurCouleur(id) {
+      const d = donnees[id], el = elements[id];
+      const fond = d.couleurFond ? enRvb(d.couleurFond) : null;
+      if (d.type === 'zonedessin') {
+        const g = el.getContext('2d');
+        const kx = el.width / d.largeur, ky = el.height / d.hauteur;
+        let px = null; // lus une seule fois, au premier point
+        return (x, y) => {
+          if (!px) px = g.getImageData(0, 0, el.width, el.height).data;
+          const u = Math.floor((x - d.x) * kx), v = Math.floor((y - d.y) * ky);
+          if (u < 0 || v < 0 || u >= el.width || v >= el.height) return fond;
+          const i = (v * el.width + u) * 4;
+          return px[i + 3] > 128 ? [px[i], px[i + 1], px[i + 2]] : fond;
+        };
+      }
+      if (d.type === 'image') {
+        const im = pixelsImage(el);
+        if (!im) return () => fond;
+        // Où l'image est dessinée dans le contrôle, selon son ajustement.
+        const mode = AJUSTEMENTS[d.ajustement] || 'contain';
+        let l = d.largeur, h = d.hauteur;
+        if (mode !== 'fill') {
+          const k = (mode === 'cover' ? Math.max : Math.min)(d.largeur / im.L, d.hauteur / im.H);
+          l = im.L * k; h = im.H * k;
+        }
+        const ox = d.x + (d.largeur - l) / 2, oy = d.y + (d.hauteur - h) / 2;
+        return (x, y) => {
+          const u = Math.floor((x - ox) / l * im.L), v = Math.floor((y - oy) / h * im.H);
+          if (u < 0 || v < 0 || u >= im.L || v >= im.H) return fond;
+          const i = (v * im.L + u) * 4;
+          return im.px[i + 3] > 128 ? [im.px[i], im.px[i + 1], im.px[i + 2]] : fond;
+        };
+      }
+      if (d.type === 'forme') {
+        const trait = enRvb(d.couleurBordure || '#1e3a8a');
+        return (x, y) => {
+          const u = (x - d.x) / d.largeur, v = (y - d.y) / d.hauteur;
+          if (d.genre === 'ovale' && (u - 0.5) ** 2 + (v - 0.5) ** 2 > 0.25) return null;
+          if (d.genre === 'triangle' && Math.abs(u - 0.5) > v / 2) return null;
+          if (d.genre === 'ligne') return trait;
+          return fond;
+        };
+      }
+      return () => fond;
+    }
+    function toucheCouleur(id, voulue) {
+      ctrl(id);
+      const cible = enRvb(voulue);
+      for (const m of famille(id)) {
+        const zm = zoneDe(m);
+        if (!zm || elements[m].style.display === 'none') continue;
+        const masque = masqueDe(m);
+        for (const o in donnees) {
+          const d = donnees[o];
+          if (o === m || famille(id).includes(o) || INVISIBLES.includes(d.type) || elements[o].style.display === 'none') continue;
+          if ((d.fenetre || '') !== (donnees[m].fenetre || '') || (d.panneau || '') !== (donnees[m].panneau || '')) continue;
+          const zo = { x: d.x, y: d.y, l: d.largeur, h: d.hauteur };
+          let lire = null;
+          const trouve = pointsCommuns(zm, zo, (x, y) => {
+            if (!pleinEn(m, masque, x, y)) return false;
+            if (!lire) lire = lecteurCouleur(o);
+            const c = lire(x, y);
+            return !!c && proches(c, cible);
+          });
+          if (trouve) return true;
+        }
+      }
+      return false;
     }
 
     // ---- Événements des contrôles ----
@@ -3650,6 +3824,8 @@ function BlocRuntimeFactory() {
       quandSouris(quoi, fn) { actionsSouris[quoi].push(quoi === 'bouge' ? sansEmpiler(proteger(fn)) : proteger(fn)); },
       sourisFenetre(quoi) { return quoi === 'enfonce' ? souris.enfonce : souris[quoi] ?? 0; },
       seTouchent,
+      coteContact,
+      toucheCouleur,
       toutesLes(secondes, fn) {
         const ms = Math.max(20, Number(secondes) * 1000 || 1000);
         minuteurs.push(setInterval(sansEmpiler(proteger(fn)), ms));
@@ -3691,6 +3867,7 @@ function BlocRuntimeFactory() {
         }
         if (prop === 'trie') return !!d.trie;
         if (prop === 'cliquable') return !!d.cliquable;
+        if (prop === 'collision' && d.type === 'sprite') return d.collision === 'rectangle' ? 'rectangle' : 'precise';
         if (prop === 'orientation') return d.orientation === 'verticale' ? 'verticale' : 'horizontale';
         if (d.type === 'panneau') {
           if (prop === 'defilementX') return Math.round(el.scrollLeft);
@@ -3823,6 +4000,10 @@ function BlocRuntimeFactory() {
           if (prop === 'couleurBarre') d.couleurBarre = valeur;
           else d.orientation = /^vert/i.test(enTexte(valeur).trim()) ? 'verticale' : 'horizontale';
           majCurseur(el, d);
+          return;
+        }
+        if (prop === 'collision' && d.type === 'sprite') {
+          d.collision = /rect/i.test(enTexte(valeur)) ? 'rectangle' : 'precise';
           return;
         }
         if (prop === 'cliquable' && d.type === 'barreprogression') {
