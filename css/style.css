@@ -463,7 +463,12 @@ body.dans-hote .si-navigateur, body:not(.dans-hote) .si-hote { display: none; }
 /* Contrôles invisibles (Son, Minuteur) : bande sous la fenêtre du concepteur */
 .palette-sous-titre { margin-top: 14px; }
 .palette-recherche { width: 100%; margin-bottom: 4px; padding: 6px 9px; border: 1px solid var(--bord); border-radius: 7px; font: inherit; font-size: 13px; }
-.palette .palette-theme { margin: 12px 0 6px; font-size: 12px; }
+.palette .palette-theme { display: flex; align-items: center; gap: 4px; margin: 12px 0 6px; font-size: 12px; cursor: pointer; user-select: none; border-radius: 4px; }
+.palette .palette-theme:hover, .palette .palette-theme:focus-visible { color: var(--accent); outline: none; }
+.palette-fleche::before { content: '▾'; display: inline-block; width: 12px; transition: transform .15s; }
+.palette-theme.replie .palette-fleche::before { transform: rotate(-90deg); }
+.palette-nombre { margin-left: auto; font-weight: normal; text-transform: none; opacity: 0; }
+.palette-theme.replie .palette-nombre, .palette-theme:hover .palette-nombre { opacity: 1; }
 .outil small { margin-left: auto; font-size: 10.5px; color: var(--doux); font-style: italic; }
 .palette-rien { margin: 8px 2px; }
 .outil[hidden], .palette-theme[hidden] { display: none; }

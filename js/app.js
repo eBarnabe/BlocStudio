@@ -3572,11 +3572,26 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     palette.querySelector('h3').after(recherche);
     const rangés = new Set();
     const sections = [];
+    // Thèmes repliés (un clic sur leur titre) : BlocStudio s'en souvient d'une fois sur l'autre.
+    const CLE_REPLIES = 'blocstudio.palette.replies';
+    let replies = new Set();
+    try { replies = new Set(JSON.parse(localStorage.getItem(CLE_REPLIES)) || []); } catch (e) { /* rien de mémorisé */ }
+    const memoriserReplies = () => { try { localStorage.setItem(CLE_REPLIES, JSON.stringify([...replies])); } catch (e) { /* tant pis */ } };
     for (const [nom, types] of [...THEMES_PALETTE, ['🧩 Autres', null]]) {
       const liste = outils.filter(o => !rangés.has(o) && (!types || types.includes(o.dataset.type)))
         .sort((a, b) => nomOutil(a).localeCompare(nomOutil(b), 'fr', { sensitivity: 'base', ignorePunctuation: true })); // « d'heure » après « de date »
       if (!liste.length) continue;
-      const titre = el('h3', 'palette-theme', nom);
+      const titre = el('h3', 'palette-theme');
+      titre.append(el('span', 'palette-fleche'), el('span', null, nom), el('small', 'palette-nombre', `(${liste.length})`));
+      titre.tabIndex = 0;
+      titre.title = 'Cliquer pour replier ou déplier ce thème';
+      const basculer = () => {
+        if (replies.has(nom)) replies.delete(nom); else replies.add(nom);
+        memoriserReplies();
+        filtrer();
+      };
+      titre.addEventListener('click', basculer);
+      titre.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); basculer(); } });
       aide.before(titre, ...liste);
       liste.forEach(o => {
         rangés.add(o);
@@ -3587,22 +3602,30 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
           o.title = (o.title ? o.title + '. ' : '') + 'Invisible : il ne se voit pas dans la fenêtre du programme, il travaille en coulisses.';
         }
       });
-      sections.push({ titre, liste });
+      sections.push({ nom, titre, liste });
     }
     const rien = el('p', 'aide palette-rien', 'Aucun contrôle ne correspond.');
     rien.hidden = true;
     aide.before(rien);
-    const filtrer = () => {
+    // Pendant une recherche, on montre ce qui correspond, même dans un thème replié.
+    function filtrer() {
       const mots = sansAccents(recherche.value).split(/\s+/).filter(Boolean);
-      let visibles = 0;
+      let trouves = 0;
       for (const s of sections) {
+        const replie = !mots.length && replies.has(s.nom);
         let n = 0;
-        s.liste.forEach(o => { o.hidden = !mots.every(m => o.dataset.mots.includes(m)); if (!o.hidden) n++; });
+        s.liste.forEach(o => {
+          const ok = mots.every(m => o.dataset.mots.includes(m));
+          o.hidden = !ok || replie;
+          if (ok) n++;
+        });
         s.titre.hidden = !n;
-        visibles += n;
+        s.titre.classList.toggle('replie', replie);
+        trouves += n;
       }
-      rien.hidden = visibles > 0;
-    };
+      rien.hidden = trouves > 0;
+    }
+    filtrer();
     recherche.addEventListener('input', filtrer);
     recherche.addEventListener('keydown', e => {
       if (e.key === 'Escape') { recherche.value = ''; filtrer(); }
