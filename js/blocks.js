@@ -1611,6 +1611,72 @@
   Blockly.Blocks['bs_contient'] = blocContient('text_blocks');
   Blockly.Blocks['bs_liste_contient'] = blocContient('list_blocks');
 
+  // ---------- Bloc « si » : des boutons sur le bloc ----------
+  // À la place de la petite roue de Blockly (une bulle où il fallait faire glisser « sinon si » dans « si ») :
+  // « ＋ sinon si » et « ＋ sinon » en bas du bloc, et un « − » sur chaque partie pour l'enlever.
+  const HAUTEUR_BOUTON_SI = 22;
+  const boutonSi = (texte, largeur, taille = 13) => 'data:image/svg+xml,' + encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${largeur}" height="${HAUTEUR_BOUTON_SI}">` +
+    `<rect x=".75" y=".75" width="${largeur - 1.5}" height="${HAUTEUR_BOUTON_SI - 1.5}" rx="${HAUTEUR_BOUTON_SI / 2 - 1}" fill="#ffffff" fill-opacity=".3" stroke="#ffffff" stroke-width="1.5"/>` +
+    `<text x="${largeur / 2}" y="${HAUTEUR_BOUTON_SI / 2 + taille * 0.36}" font-family="Segoe UI, sans-serif" font-size="${taille}" font-weight="700" fill="#ffffff" text-anchor="middle">${texte}</text></svg>`);
+  const IMAGE_PLUS_SINON_SI = boutonSi('＋ sinon si', 88), IMAGE_PLUS_SINON = boutonSi('＋ sinon', 68), IMAGE_MOINS = boutonSi('−', 24, 17);
+  const etatSi = b => { const s = b.saveExtraState && b.saveExtraState(); return s ? JSON.stringify(s) : ''; };
+
+  // Change le nombre de « sinon si » ou le « sinon », en gardant les blocs déjà branchés ; Ctrl+Z l'annule.
+  function changerSi(bloc, action, numero) {
+    if (bloc.isInFlyout || !bloc.workspace || bloc.workspace.options.readOnly) return;
+    const valeurs = [null], instructions = [null], laches = [];
+    for (let i = 1; bloc.getInput('IF' + i); i++) {
+      valeurs.push(bloc.getInput('IF' + i).connection.targetConnection);
+      instructions.push(bloc.getInput('DO' + i).connection.targetConnection);
+    }
+    let sinon = bloc.getInput('ELSE') ? bloc.getInput('ELSE').connection.targetConnection : null;
+    let avecSinon = !!bloc.getInput('ELSE');
+    if (action === 'ajouterSinonSi') { valeurs.push(null); instructions.push(null); }
+    if (action === 'ajouterSinon') avecSinon = true;
+    if (action === 'enleverSinonSi') laches.push(...valeurs.splice(numero, 1), ...instructions.splice(numero, 1));
+    if (action === 'enleverSinon') { laches.push(sinon); sinon = null; avecSinon = false; }
+    const avant = etatSi(bloc);
+    const groupe = Blockly.Events.getGroup(); // dans un clic de Blockly, un groupe est peut-être déjà ouvert
+    if (!groupe) Blockly.Events.setGroup(true);
+    try {
+      bloc.elseifCount_ = valeurs.length - 1;
+      bloc.elseCount_ = avecSinon ? 1 : 0;
+      bloc.updateShape_();
+      bloc.reconnectChildBlocks_(valeurs, instructions, sinon);
+      Blockly.Events.fire(new Blockly.Events.BlockChange(bloc, 'mutation', null, avant, etatSi(bloc)));
+      // Les blocs de la partie enlevée ne sont pas perdus : ils restent à côté, détachés.
+      for (const c of laches) if (c && !c.getSourceBlock().getParent()) c.getSourceBlock().moveBy(40, 30);
+    } finally {
+      if (!groupe) Blockly.Events.setGroup(false);
+    }
+  }
+
+  function boutonsSi(bloc) {
+    const bouton = (image, largeur, aide, action, numero) => {
+      const f = new Blockly.FieldImage(image, largeur, HAUTEUR_BOUTON_SI, aide, () => changerSi(bloc, action, numero));
+      f.setTooltip(aide);
+      return f;
+    };
+    for (let i = 1; bloc.getInput('IF' + i); i++) {
+      bloc.getInput('IF' + i).appendField(bouton(IMAGE_MOINS, 24, 'Enlever ce « sinon si »', 'enleverSinonSi', i));
+    }
+    if (bloc.getInput('ELSE')) bloc.getInput('ELSE').appendField(bouton(IMAGE_MOINS, 24, 'Enlever le « sinon »', 'enleverSinon'));
+    if (bloc.getInput('BOUTONS_SI')) bloc.removeInput('BOUTONS_SI');
+    const ligne = bloc.appendDummyInput('BOUTONS_SI');
+    ligne.appendField(bouton(IMAGE_PLUS_SINON_SI, 88, 'Ajouter une autre condition à tester (« sinon si »)', 'ajouterSinonSi'));
+    if (!bloc.getInput('ELSE')) ligne.appendField(bouton(IMAGE_PLUS_SINON, 68, 'Ajouter ce qu\'il faut faire si aucune condition n\'est vraie (« sinon »)', 'ajouterSinon'));
+  }
+
+  const initSi = Blockly.Blocks['controls_if'].init;
+  Blockly.Blocks['controls_if'].init = function () {
+    initSi.call(this);
+    if (this.getIcon(Blockly.icons.MutatorIcon.TYPE)) this.removeIcon(Blockly.icons.MutatorIcon.TYPE);
+    const majForme = this.updateShape_;
+    this.updateShape_ = function () { majForme.call(this); boutonsSi(this); };
+    boutonsSi(this);
+  };
+
   // Libellés de Blockly plus parlants pour les débutants.
   Object.assign(Blockly.Msg, {
     LOGIC_TERNARY_CONDITION: 'si',
