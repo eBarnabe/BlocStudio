@@ -1312,6 +1312,30 @@
     { champ: new Blockly.FieldDropdown([['ℹ️ information', 'info'], ['⚠️ avertissement', 'avertissement'], ['❌ erreur', 'erreur'], ['sans icône', 'aucune']]), nom: 'ICONE' }
   ], COULEUR_WINDOWS, 'Affiche une notification de Windows en bas à droite de l\'écran, même si la fenêtre du programme est cachée ou réduite. Un clic dessus ramène le programme devant.');
 
+  // ---------- Conversions ----------
+
+  const COULEUR_CONVERSIONS = '#0f766e';
+  const UNITES_TEMPS = [['secondes', 'secondes'], ['minutes', 'minutes'], ['heures', 'heures'], ['jours', 'jours'],
+    ['semaines', 'semaines'], ['millisecondes', 'millisecondes']];
+  const UNITES_DISTANCE = [['mètres', 'metres'], ['centimètres', 'centimetres'], ['millimètres', 'millimetres'],
+    ['kilomètres', 'kilometres'], ['pouces', 'pouces'], ['pieds', 'pieds'], ['miles', 'miles']];
+  const UNITES_TEMPERATURE = [['°C (Celsius)', 'celsius'], ['°F (Fahrenheit)', 'fahrenheit'], ['K (kelvins)', 'kelvin']];
+  // « convertir [n] [unité] en [unité] » : la seconde liste propose d'abord une autre unité que la première.
+  const blocConvertir = (unites, tooltip) => valeur(() => [
+    { nom: 'VAL', libelle: '🔁 convertir', check: 'Number' },
+    { champ: new Blockly.FieldDropdown(unites), nom: 'DE' }, 'en',
+    { champ: new Blockly.FieldDropdown([unites[1], unites[0], ...unites.slice(2)]), nom: 'VERS' }
+  ], 'Number', COULEUR_CONVERSIONS, tooltip);
+  Blockly.Blocks['bs_convertir_temps'] = blocConvertir(UNITES_TEMPS, 'Par exemple 90 secondes = 1,5 minute ; 2 heures = 120 minutes.');
+  Blockly.Blocks['bs_convertir_distance'] = blocConvertir(UNITES_DISTANCE, 'Par exemple 1,5 kilomètre = 1500 mètres ; 1 pouce = 2,54 centimètres ; 1 mile = 1,609 kilomètre.');
+  Blockly.Blocks['bs_convertir_temperature'] = blocConvertir(UNITES_TEMPERATURE, 'Par exemple 20 °C = 68 °F ; 0 °C = 273,15 K ; 100 °F ≈ 37,8 °C.');
+  Blockly.Blocks['bs_temps_texte'] = valeur(() => [
+    { nom: 'VAL', libelle: '⏱️', check: 'Number' }, 'secondes en',
+    { champ: new Blockly.FieldDropdown([['« m:ss » (3:33)', 'm:ss'], ['« h:mm:ss » (0:03:33)', 'h:mm:ss']]), nom: 'FORMAT' }
+  ], 'String', COULEUR_CONVERSIONS, 'Un temps en secondes écrit comme sur un lecteur de musique ou un chronomètre : 213 → « 3:33 », 65 → « 1:05 ». Au-delà d\'une heure, les heures s\'ajoutent : « 1:02:05 ».');
+  Blockly.Blocks['bs_temps_secondes'] = valeur(() => [{ nom: 'VAL', libelle: '⏱️ le temps' }, 'en secondes'], 'Number',
+    COULEUR_CONVERSIONS, 'L\'inverse : « 3:33 » → 213 ; « 1:02:05 » → 3725 ; un simple nombre reste un nombre de secondes.');
+
   Blockly.Blocks['bs_maintenant'] = valeur(() => [
     { champ: new Blockly.FieldDropdown([
       ['date du jour (jj/mm/aaaa)', 'date'], ['heure actuelle (hh:mm)', 'heure'], ['jour du mois', 'jour'],
@@ -1698,6 +1722,13 @@
   gen.forBlock['bs_imprimer_fenetre'] = b => `await app.imprimer('fenetre', ${q(b.getFieldValue('FENETRE'))});\n`;
   gen.forBlock['bs_notification'] = b =>
     `app.notifier(${val(b, 'TITRE', "''")}, ${val(b, 'VAL', "''")}, ${q(b.getFieldValue('ICONE'))});\n`;
+  const genConvertir = grandeur => b =>
+    [`app.convertir(${q(grandeur)}, ${val(b, 'VAL', '0')}, ${q(b.getFieldValue('DE'))}, ${q(b.getFieldValue('VERS'))})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_convertir_temps'] = genConvertir('temps');
+  gen.forBlock['bs_convertir_distance'] = genConvertir('distance');
+  gen.forBlock['bs_convertir_temperature'] = genConvertir('temperature');
+  gen.forBlock['bs_temps_texte'] = b => [`app.tempsEnTexte(${val(b, 'VAL', '0')}, ${q(b.getFieldValue('FORMAT'))})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_temps_secondes'] = b => [`app.texteEnSecondes(${val(b, 'VAL', "''")})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_maintenant'] = b => [`app.maintenant(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
 
   gen.forBlock['bs_quand_touche'] = b =>
@@ -1988,7 +2019,8 @@
         etiquette('Musique et temps'),
         { kind: 'block', type: 'bs_note', inputs: { SEC: nombre(0.5) } },
         { kind: 'block', type: 'bs_attendre', inputs: { SEC: nombre(1) } },
-        { kind: 'block', type: 'bs_maintenant' }
+        { kind: 'block', type: 'bs_maintenant' },
+        { kind: 'block', type: 'bs_temps_texte', inputs: { VAL: nombre(213) } }
       ]
     },
     {
@@ -2039,6 +2071,18 @@
         { kind: 'block', type: 'math_on_list' },
         { kind: 'block', type: 'math_trig', inputs: { NUM: nombre(45) } },
         { kind: 'block', type: 'math_constant' }
+      ]
+    },
+    {
+      kind: 'category', name: 'Conversions', colour: COULEUR_CONVERSIONS, contents: [
+        etiquette('Temps'),
+        { kind: 'block', type: 'bs_temps_texte', inputs: { VAL: nombre(213) } },
+        { kind: 'block', type: 'bs_temps_secondes', inputs: { VAL: texte('3:33') } },
+        { kind: 'block', type: 'bs_convertir_temps', inputs: { VAL: nombre(90) } },
+        etiquette('Distances'),
+        { kind: 'block', type: 'bs_convertir_distance', inputs: { VAL: nombre(1) }, fields: { DE: 'kilometres', VERS: 'metres' } },
+        etiquette('Températures'),
+        { kind: 'block', type: 'bs_convertir_temperature', inputs: { VAL: nombre(20) } }
       ]
     },
     {

@@ -295,6 +295,44 @@ function BlocRuntimeFactory() {
     return barre;
   }
 
+  // ---- Conversions : temps, distances, températures ----
+  // Chaque unité vaut tant de l'unité de base (seconde, mètre) ; les températures ont leur propre calcul.
+  const UNITES = {
+    temps: { millisecondes: 0.001, secondes: 1, minutes: 60, heures: 3600, jours: 86400, semaines: 604800 },
+    distance: { millimetres: 0.001, centimetres: 0.01, metres: 1, kilometres: 1000, pouces: 0.0254, pieds: 0.3048, miles: 1609.344 }
+  };
+  const VERS_CELSIUS = { celsius: t => t, fahrenheit: t => (t - 32) * 5 / 9, kelvin: t => t - 273.15 };
+  const DEPUIS_CELSIUS = { celsius: c => c, fahrenheit: c => c * 9 / 5 + 32, kelvin: c => c + 273.15 };
+  // Sans les petites erreurs de calcul des ordinateurs (0,1 + 0,2 = 0,30000000000000004).
+  const arrondiPropre = x => Math.round(x * 1e9) / 1e9;
+  function convertir(grandeur, valeur, de, vers) {
+    const n = Number(String(valeur).replace(',', '.')) || 0;
+    if (grandeur === 'temperature') {
+      if (!VERS_CELSIUS[de] || !DEPUIS_CELSIUS[vers]) return n;
+      return arrondiPropre(DEPUIS_CELSIUS[vers](VERS_CELSIUS[de](n)));
+    }
+    const u = UNITES[grandeur];
+    if (!u || !u[de] || !u[vers]) return n;
+    return arrondiPropre(n * u[de] / u[vers]);
+  }
+  // 213 → « 3:33 » ; 3725 → « 1:02:05 » (format 'h:mm:ss' : toujours avec les heures).
+  function tempsEnTexte(secondes, format) {
+    const s = Number(String(secondes).replace(',', '.')) || 0;
+    const total = Math.floor(Math.abs(s));
+    const h = Math.floor(total / 3600), m = Math.floor(total / 60) % 60, sec = total % 60;
+    const deux = x => String(x).padStart(2, '0');
+    const texte = h > 0 || format === 'h:mm:ss' ? `${h}:${deux(m)}:${deux(sec)}` : `${Math.floor(total / 60)}:${deux(sec)}`;
+    return (s < 0 && total > 0 ? '-' : '') + texte;
+  }
+  // « 3:33 » → 213 ; « 1:02:05 » → 3725 ; « 90 » → 90.
+  function texteEnSecondes(texte) {
+    const t = String(texte ?? '').trim();
+    const negatif = t.startsWith('-');
+    const morceaux = t.replace(/^-/, '').split(':').map(x => Number(x.replace(',', '.')) || 0);
+    const s = morceaux.reduce((total, x) => total * 60 + x, 0);
+    return arrondiPropre(negatif ? -s : s);
+  }
+
   // ---- Curseur : sa couleur, son sens (la valeur monte vers le haut à la verticale), sa partie remplie ----
   function majCurseur(el, c) {
     el.classList.toggle('bs-vertical', c.orientation === 'verticale');
@@ -1657,6 +1695,7 @@ function BlocRuntimeFactory() {
 
     // L'erreur est rattachée au dernier bloc exécuté (connu seulement dans l'éditeur).
     function signaler(e) {
+      if (arrete) return; // programme arrêté : une réponse en retard (caméra, fichier…) ne s'affiche plus
       const msg = (e && e.message) ? e.message : String(e);
       if (surErreur) surErreur(msg, suivi.bloc); else alert('Erreur : ' + msg);
     }
@@ -4244,6 +4283,9 @@ function BlocRuntimeFactory() {
         try { bip(NOTES[nom] || 440, 0, duree, 'triangle', sortieAudio()); } catch (e) { /* pas de carte son */ }
         return app.attendre(duree);
       },
+      convertir,
+      tempsEnTexte,
+      texteEnSecondes,
       maintenant(quoi) {
         const d = new Date();
         const deux = n => String(n).padStart(2, '0');
