@@ -37,7 +37,10 @@
     ajustement: 'ajustement (entiere, etiree ou recadree)', texteInvite: 'texte d\'invite (grisé)',
     lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)',
     couleurBordure: 'couleur du trait', epaisseur: 'épaisseur du trait', sens: 'sens de la ligne (horizontale, verticale, descendante ou montante)',
-    heures: 'heures', minutes: 'minutes'
+    heures: 'heures', minutes: 'minutes',
+    defilementY: 'défilement vertical (en pixels depuis le haut)', defilementX: 'défilement horizontal (en pixels depuis la gauche)',
+    hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
+    defilement: 'sens du défilement (vertical, horizontal ou deux)'
   };
 
   // Les propriétés proposées dépendent du type de contrôle choisi dans le bloc.
@@ -59,6 +62,7 @@
     zonedessin: ['couleurFond', ...POSITION],
     boutonradio: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
     cadre: ['texte', ...TEXTE, ...POSITION],
+    panneau: ['defilementY', 'defilementX', 'hauteurContenu', 'largeurContenu', 'defilement', 'couleurFond', ...POSITION],
     zoneliste: ['texte', 'numero', 'elements', 'trie', ...TEXTE, 'active', ...POSITION],
     selecteurnombre: ['valeur', 'min', 'max', 'pas', ...TEXTE, 'active', ...POSITION],
     tableau: ['numero', 'texte', 'nombreLignes', 'colonnes', ...TEXTE, ...POSITION],
@@ -199,12 +203,12 @@
   };
 
   const TYPES_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau'];
 
   Blockly.Blocks['bs_quand_change'] = {
     init() {
       evenement(this, 'quand', TYPES_CHANGE, 'change');
-      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page.");
+      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page, ou quand un panneau défilant défile.");
     }
   };
 
@@ -1272,6 +1276,16 @@
   Blockly.Blocks['bs_voix_taire'] = instruction(() => ['🗣️ faire taire la voix'],
     COULEUR_SONS, 'Arrête immédiatement la phrase en cours (et celles qui attendaient leur tour).');
 
+  // ---------- Panneau défilant ----------
+
+  const PANNEAU = { ctrl: ['panneau'] };
+  Blockly.Blocks['bs_panneau_defiler'] = instruction(() => [
+    '📜 faire défiler', PANNEAU,
+    { champ: new Blockly.FieldDropdown([['tout en bas', 'bas'], ['tout en haut', 'haut'], ['tout à gauche', 'gauche'], ['tout à droite', 'droite']]), nom: 'QUOI' }
+  ], COULEUR_CONTROLES, 'Fait défiler le panneau jusqu\'au bout. « tout en bas » : idéal après avoir ajouté un message ou une ligne.');
+  Blockly.Blocks['bs_panneau_montrer'] = instruction(() => ['📜 faire défiler', PANNEAU, 'pour montrer', { ctrl: null, nom: 'CIBLE' }],
+    COULEUR_CONTROLES, 'Fait défiler le panneau juste ce qu\'il faut pour qu\'on voie ce contrôle en entier (il doit être posé dans le panneau).');
+
   // ---------- Windows : presse-papiers, impression, notifications ----------
 
   const COULEUR_WINDOWS = '#475569';
@@ -1673,6 +1687,8 @@
     `app.dire(${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_voix_regler'] = b => `app.reglerVoix(${val(b, 'VITESSE', '1')}, ${val(b, 'HAUTEUR', '1')});\n`;
   gen.forBlock['bs_voix_taire'] = () => 'app.taireVoix();\n';
+  gen.forBlock['bs_panneau_defiler'] = b => `app.defilerPanneau(${id(b)}, ${q(b.getFieldValue('QUOI'))});\n`;
+  gen.forBlock['bs_panneau_montrer'] = b => `app.defilerPanneau(${id(b)}, 'controle', ${codeCtrl(b.getFieldValue('CIBLE'))});\n`;
   gen.forBlock['bs_copier'] = b => `await app.copier(${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_copier_image'] = b => `await app.copierImage(${id(b)});\n`;
   gen.forBlock['bs_presse_papiers'] = () => ['(await app.lirePressePapiers())', Order.ATOMIC];
@@ -2087,13 +2103,14 @@
 
   // Valeur proposée dans « mettre … à » : celle du contrôle dans le concepteur, quand c'est possible.
   const PROPS_NOMBRE = ['x', 'y', 'largeur', 'hauteur', 'taillePolice', 'valeur', 'min', 'max', 'pas', 'numero', 'volume',
-    'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax', 'epaisseur', 'heures', 'minutes'];
+    'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax', 'epaisseur', 'heures', 'minutes',
+    'defilementX', 'defilementY', 'largeurContenu', 'hauteurContenu'];
   const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre', 'couleurBordure'];
   const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee',
     'gras', 'italique', 'lectureSeule', 'trie'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
-  const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree' };
+  const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical' };
 
   function valeurProposee(c, prop) {
     if (PROPS_COULEUR.includes(prop)) return couleurOmbre();
@@ -2214,6 +2231,13 @@
       case 'graphique':
         actions.push(b('bs_graphique_ajouter', { VAL: nombre(10), ETIQ: texte('Sam') }), b('bs_graphique_vider'));
         break;
+      case 'panneau': {
+        // « pour montrer » propose d'abord un contrôle posé dans ce panneau.
+        const dedans = BlocStudio.controles().find(o => o.panneau === c.id);
+        actions.push(b('bs_panneau_defiler'), b('bs_panneau_defiler', null, { QUOI: 'haut' }),
+          b('bs_panneau_montrer', null, dedans ? { CIBLE: dedans.id } : {}));
+        break;
+      }
       case 'arborescence':
         actions.push(
           b('bs_arbre_ajouter', { VAL: texte('Chats'), DANS: texte('Animaux') }),

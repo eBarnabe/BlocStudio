@@ -48,6 +48,8 @@ function BlocRuntimeFactory() {
     .bs-onglets-titres button.bs-actif { position: relative; top: 1px; margin-top: 0; padding-bottom: 6px; background: #fff; }
     .bs-onglets-corps { flex: 1; border: 1px solid #a3acb9; border-radius: 0 6px 6px 6px; background: #fff; }
     .bs-hors-page { display: none !important; }
+    .bs-panneau { border: 1px solid #a3acb9; overflow: hidden auto; }
+    .bs-panneau-contenu { position: relative; min-width: 100%; min-height: 100%; }
     .bs-interrupteur { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
     .bs-interrupteur input { position: absolute; opacity: 0; width: 0; height: 0; margin: 0; }
     .bs-interrupteur i { position: relative; flex: none; width: 38px; height: 22px; border-radius: 11px;
@@ -282,6 +284,26 @@ function BlocRuntimeFactory() {
     };
     document.addEventListener('pointerdown', ailleurs, true);
     return barre;
+  }
+
+  // ---- Panneau défilant ----
+  // Ses contrôles sont dans son contenu : leurs X et Y comptent depuis le coin du contenu, qui s'étend
+  // (au moins) jusqu'à MARGE_PANNEAU pixels après le dernier, ou jusqu'à la taille de contenu choisie.
+  const MARGE_PANNEAU = 10;
+  const SENS_DEFILEMENT = { vertical: ['hidden', 'auto'], horizontal: ['auto', 'hidden'], deux: ['auto', 'auto'] };
+  function sensDefilement(el, sens) {
+    const [x, y] = SENS_DEFILEMENT[sens] || SENS_DEFILEMENT.vertical;
+    el.style.overflowX = x;
+    el.style.overflowY = y;
+  }
+  // Taille du contenu d'un panneau, d'après ses contrôles (des objets avec x, y, largeur, hauteur).
+  function tailleContenuPanneau(p, enfants) {
+    let l = Number(p.largeurContenu) || 0, h = Number(p.hauteurContenu) || 0;
+    for (const o of enfants) {
+      l = Math.max(l, (Number(o.x) || 0) + (Number(o.largeur) || 0) + MARGE_PANNEAU);
+      h = Math.max(h, (Number(o.y) || 0) + (Number(o.hauteur) || 0) + MARGE_PANNEAU);
+    }
+    return { largeur: Math.round(l), hauteur: Math.round(h) };
   }
 
   // ---- Heures « hh:mm » ----
@@ -787,6 +809,10 @@ function BlocRuntimeFactory() {
         el.referrerPolicy = 'strict-origin-when-cross-origin';
         el.src = adresseWeb(c.adresse) || 'about:blank';
         break;
+      case 'panneau':
+        el = document.createElement('div');
+        el.appendChild(document.createElement('div')).className = 'bs-panneau-contenu';
+        break;
       case 'onglets':
         el = document.createElement('div');
         el.appendChild(document.createElement('div')).className = 'bs-onglets-titres';
@@ -853,6 +879,7 @@ function BlocRuntimeFactory() {
     el.className = 'bs-ctrl bs-' + c.type + (el.className ? ' ' + el.className : '');
     appliquerStyle(el, c);
     if (c.type === 'forme') rendreForme(el, c);
+    if (c.type === 'panneau') sensDefilement(el, c.defilement);
     return el;
   }
 
@@ -1074,7 +1101,7 @@ function BlocRuntimeFactory() {
       background: c.couleurFond ? couleur(c.couleurFond) : '',
       fontSize: (c.taillePolice || 14) + 'px',
       display: c.visible === false ? 'none' : '',
-      zIndex: c.type === 'cadre' || c.type === 'onglets' ? 0 : 1
+      zIndex: c.type === 'cadre' || c.type === 'onglets' || c.type === 'panneau' ? 0 : 1
     });
     if (c.type === 'sprite') el.style.objectFit = 'contain';
     appliquerApparence(el, c);
@@ -1237,6 +1264,7 @@ function BlocRuntimeFactory() {
       const cadres = ids.filter(id => donnees[id].type === 'cadre');
       const parentDe = id => {
         const d = donnees[id];
+        if (d.panneau && ids.includes(d.panneau)) return d.panneau;
         if (d.onglets && ids.includes(d.onglets)) return d.onglets;
         const cx = d.x + d.largeur / 2, cy = d.y + d.hauteur / 2;
         return cadres.filter(p => {
@@ -1252,7 +1280,9 @@ function BlocRuntimeFactory() {
       const ecartDe = (id, profondeur = 0) => {
         if (ecarts[id]) return ecarts[id];
         const p = parents[id];
-        const e = p && profondeur < 20 ? ecartDe(p, profondeur + 1) : { x: 0, y: 0, l: dl, h: dh };
+        let e = p && profondeur < 20 ? ecartDe(p, profondeur + 1) : { x: 0, y: 0, l: dl, h: dh };
+        // Dans un panneau, les positions comptent depuis son contenu : seul son changement de taille compte.
+        if (p && p === donnees[id].panneau) e = { x: 0, y: 0, l: e.l, h: e.h };
         const a = donnees[id].type === 'barreetat' ? 'bgd' : donnees[id].type === 'barreoutils' ? 'hgd' : String(donnees[id].ancrage ?? 'hg');
         const [x, l] = suivre(a.includes('g'), a.includes('d'), e.x, e.l);
         const [y, h] = suivre(a.includes('h'), a.includes('b'), e.y, e.h);
@@ -1389,6 +1419,30 @@ function BlocRuntimeFactory() {
         while (d.etiquettes.length < d.valeurs.length) d.etiquettes.push('');
       }
     }
+
+    // Panneaux défilants : chaque contrôle posé dedans rejoint son contenu (des panneaux peuvent en contenir d'autres).
+    const estPanneau = id => !!donnees[id] && donnees[id].type === 'panneau';
+    for (const id in donnees) {
+      const d = donnees[id];
+      if (!d.panneau) continue;
+      if (estPanneau(d.panneau) && d.panneau !== id && !INVISIBLES.includes(d.type)) elements[d.panneau].firstChild.appendChild(elements[id]);
+      else delete d.panneau;
+    }
+    function majPanneau(id) {
+      if (!estPanneau(id)) return;
+      const enfants = Object.values(donnees).filter(o => o.panneau === id && !INVISIBLES.includes(o.type));
+      const t = tailleContenuPanneau(donnees[id], enfants);
+      Object.assign(elements[id].firstChild.style, { width: t.largeur + 'px', height: t.hauteur + 'px' });
+    }
+    // Un contrôle qui bouge ou grandit dans un panneau : le contenu s'agrandit s'il le faut (sans tout recalculer).
+    function agrandirPanneau(d) {
+      if (!d.panneau || !estPanneau(d.panneau)) return;
+      const s = elements[d.panneau].firstChild.style;
+      const l = d.x + d.largeur + MARGE_PANNEAU, h = d.y + d.hauteur + MARGE_PANNEAU;
+      if (l > (parseFloat(s.width) || 0)) s.width = Math.round(l) + 'px';
+      if (h > (parseFloat(s.height) || 0)) s.height = Math.round(h) + 'px';
+    }
+    for (const id in donnees) majPanneau(id);
 
     // Montre les contrôles de la page affichée, cache ceux des autres pages
     // (et tout le contenu si les onglets eux-mêmes sont cachés). Des onglets peuvent en contenir d'autres.
@@ -2327,6 +2381,7 @@ function BlocRuntimeFactory() {
       else if (evenement === 'sort') el.addEventListener('pointerleave', appel);
       else if (evenement === 'change') {
         if (d.type === 'navigateur') el.addEventListener('load', appel); // une page a fini de charger
+        else if (d.type === 'panneau') el.addEventListener('scroll', appel); // il défile
         else if (estCase(d.type)) el.querySelector('input').addEventListener('change', appel);
         else el.addEventListener('input', appel);
       } else if (evenement === 'glisser') {
@@ -2400,6 +2455,7 @@ function BlocRuntimeFactory() {
       d.y = Math.round(y * 100) / 100;
       el.style.left = d.x + 'px';
       el.style.top = d.y + 'px';
+      agrandirPanneau(d);
     }
 
     function mouvement(id, action, a, b, c) {
@@ -3251,6 +3307,13 @@ function BlocRuntimeFactory() {
           if (prop === 'longueurMax') return el.maxLength > 0 ? el.maxLength : 0;
         }
         if (prop === 'trie') return !!d.trie;
+        if (d.type === 'panneau') {
+          if (prop === 'defilementX') return Math.round(el.scrollLeft);
+          if (prop === 'defilementY') return Math.round(el.scrollTop);
+          if (prop === 'defilement') return SENS_DEFILEMENT[d.defilement] ? d.defilement : 'vertical';
+          if (prop === 'largeurContenu') return Math.round(el.scrollWidth);
+          if (prop === 'hauteurContenu') return Math.round(el.scrollHeight);
+        }
         if (d.type === 'heure' && (prop === 'heures' || prop === 'minutes')) {
           const [h, m] = (el.value || '0:0').split(':').map(Number);
           return prop === 'heures' ? h : m;
@@ -3343,6 +3406,19 @@ function BlocRuntimeFactory() {
             if (n > 0) el.maxLength = n; else el.removeAttribute('maxlength');
             return;
           }
+        }
+        if (d.type === 'panneau' && ['defilementX', 'defilementY', 'defilement', 'largeurContenu', 'hauteurContenu'].includes(prop)) {
+          if (prop === 'defilementX') el.scrollLeft = Number(valeur) || 0;
+          else if (prop === 'defilementY') el.scrollTop = Number(valeur) || 0;
+          else if (prop === 'defilement') {
+            const sens = enTexte(valeur).trim().toLowerCase().replace('les deux', 'deux');
+            d.defilement = SENS_DEFILEMENT[sens] ? sens : 'vertical';
+            sensDefilement(el, d.defilement);
+          } else {
+            d[prop] = Math.max(0, Number(valeur) || 0);
+            majPanneau(id);
+          }
+          return;
         }
         if (d.type === 'heure' && (prop === 'heures' || prop === 'minutes')) {
           const [h, m] = (el.value || '0:0').split(':').map(Number);
@@ -3499,6 +3575,7 @@ function BlocRuntimeFactory() {
           case 'boucle': if (d.type === 'video') el.loop = !!valeur; break;
         }
         if (d.type === 'graphique') dessinerGraphique(el, d); // taille, couleurs du texte ou du fond
+        if (prop === 'largeur' || prop === 'hauteur') agrandirPanneau(d);
         if (d.type === 'forme' && prop === 'couleurFond') rendreForme(el, d);
         if (d.type === 'onglets') {
           if (prop === 'visible') majOnglets(id);
@@ -3932,6 +4009,35 @@ function BlocRuntimeFactory() {
       taireVoix() {
         if (window.speechSynthesis) window.speechSynthesis.cancel();
       },
+      // ---- Panneau défilant ----
+      // quoi : 'haut', 'bas', 'gauche', 'droite', ou 'controle' (cible : un contrôle posé dans le panneau).
+      defilerPanneau(id, quoi, cible) {
+        ctrlDeType(id, 'panneau', 'un panneau défilant');
+        const el = elements[id];
+        let x = el.scrollLeft, y = el.scrollTop;
+        if (quoi === 'haut') y = 0;
+        else if (quoi === 'bas') y = el.scrollHeight;
+        else if (quoi === 'gauche') x = 0;
+        else if (quoi === 'droite') x = el.scrollWidth;
+        else {
+          ctrl(cible);
+          // Position du contrôle dans le contenu du panneau (il peut être dans un panneau lui-même dans celui-ci).
+          let o = donnees[cible], cx = 0, cy = 0, n = 0;
+          const t = { l: o.largeur, h: o.hauteur };
+          while (o && o.panneau !== id && n++ < 50) {
+            cx += o.x; cy += o.y;
+            o = estPanneau(o.panneau) ? donnees[o.panneau] : null;
+          }
+          if (!o) throw new Error(`« ${donnees[cible].nom} » n'est pas posé dans « ${donnees[id].nom} ».`);
+          cx += o.x; cy += o.y;
+          // On fait défiler juste ce qu'il faut pour le voir en entier.
+          if (cy < el.scrollTop) y = cy - MARGE_PANNEAU;
+          else if (cy + t.h > el.scrollTop + el.clientHeight) y = cy + t.h + MARGE_PANNEAU - el.clientHeight;
+          if (cx < el.scrollLeft) x = cx - MARGE_PANNEAU;
+          else if (cx + t.l > el.scrollLeft + el.clientWidth) x = cx + t.l + MARGE_PANNEAU - el.clientWidth;
+        }
+        el.scrollTo(Math.max(0, x), Math.max(0, y));
+      },
       // ---- Presse-papiers, impression, notifications ----
       async copier(valeur) {
         const texte = enTexte(valeur);
@@ -4127,7 +4233,8 @@ function BlocRuntimeFactory() {
   }
 
   return { lancer, creerElement, appliquerStyle, couleur, lireMenus, cheminsMenus, creerBarreMenus, HAUTEUR_MENUS,
-    elementsMenuContextuel, elementsBarreOutils, decoderSon, extraitSon, contexteAudio, INVISIBLES };
+    elementsMenuContextuel, elementsBarreOutils, decoderSon, extraitSon, contexteAudio, INVISIBLES,
+    tailleContenuPanneau, sensDefilement };
 }
 
 const BlocRuntime = BlocRuntimeFactory();

@@ -23,6 +23,8 @@
     boutonradio: { prefixe: 'Radio', texte: 'Option', largeur: 150, hauteur: 24,
       defauts: { groupe: 'groupe1' } },
     cadre: { prefixe: 'Cadre', texte: 'Groupe', largeur: 220, hauteur: 140 },
+    panneau: { prefixe: 'Panneau', texte: '', largeur: 240, hauteur: 160,
+      defauts: { defilement: 'vertical', largeurContenu: 0, hauteurContenu: 400, couleurFond: '#ffffff' } },
     zoneliste: { prefixe: 'ZoneListe', texte: '', largeur: 160, hauteur: 120,
       defauts: { elements: ['Élément 1', 'Élément 2', 'Élément 3'] } },
     selecteurnombre: { prefixe: 'Nombre', texte: '', largeur: 90, hauteur: 28,
@@ -83,13 +85,13 @@
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
     casecocher: 'Case à cocher', image: 'Image', listederoulante: 'Liste déroulante',
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
-    boutonradio: 'Bouton radio', cadre: 'Cadre', zoneliste: 'Zone de liste',
+    boutonradio: 'Bouton radio', cadre: 'Cadre', panneau: 'Panneau défilant', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
     selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', barreoutils: 'Barre d\'outils', menucontextuel: 'Menu contextuel', heure: 'Sélecteur d\'heure', forme: 'Forme', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
   };
@@ -306,7 +308,7 @@
     surface.style.height = f.hauteur + 'px';
     surface.style.background = BlocRuntime.couleur(f.couleurFond || '#f0f0f0');
     surface.innerHTML = '';
-    for (const c of projet.controles) if (!estInvisible(c) && dansFenetreActive(c)) surface.appendChild(creerControleDesign(c));
+    poserControlesDesign(surface);
     afficherInvisibles();
     afficherOngletsFenetres();
 
@@ -332,6 +334,8 @@
       if (e.button === 2) { if (!choisis.has(c.id)) selectionner(c.id); return; } // clic droit : menu
       if (e.button !== 0) return;
       if (e.ctrlKey || e.shiftKey) { selectionner(c.id, true); return; }
+      // Sur la barre de défilement d'un panneau : on le fait défiler, sans le déplacer.
+      if (c.type === 'panneau' && surBarreDefilement(e, w.firstChild)) { if (!choisis.has(c.id)) selectionner(c.id); return; }
       if (c.type === 'onglets') cliquerTitreOnglets(e, w, c);
       if (AMARRES.includes(c.type)) { selectionner(c.id); return; } // elle reste collée en bas (ou en haut)
       const dejaChoisi = choisis.has(c.id);
@@ -339,8 +343,97 @@
       deplacerOuRedimensionner(e, w, c, e.target === poignee && choisis.size === 1, dejaChoisi);
     });
 
-    w.addEventListener('dblclick', () => ouvrirEvenement(c));
+    w.addEventListener('dblclick', e => { e.stopPropagation(); ouvrirEvenement(c); }); // pas aussi celui du panneau autour
+    if (c.type === 'panneau') {
+      const p = w.firstChild;
+      p.addEventListener('scroll', () => { defilDesign[c.id] = { x: p.scrollLeft, y: p.scrollTop }; });
+    }
     return w;
+  }
+
+  // ---- Panneau défilant ----
+  // Un contrôle lâché dans un panneau en fait partie : `panneau` (id du panneau). Ses X et Y comptent alors
+  // depuis le coin du contenu du panneau (comme dans Visual Basic), et il défile avec lui, dans le concepteur aussi.
+  const defilDesign = {}; // id du panneau → { x, y } : où il est défilé dans le concepteur
+  const panneauDe = c => c.panneau ? projet.controles.find(o => o.id === c.panneau && o.type === 'panneau') : null;
+  function dansPanneau(c, p) {
+    for (let o = panneauDe(c), n = 0; o && n < 50; o = panneauDe(o), n++) if (o === p) return true;
+    return false;
+  }
+  const contenuDesign = id => elementDesign(id)?.querySelector(':scope > .bs-panneau > .bs-panneau-contenu');
+  // La liste, plus tout ce qui est posé dans ses panneaux (et dans les panneaux de ceux-ci).
+  const avecContenu = liste => [...liste,
+    ...projet.controles.filter(o => !liste.includes(o) && liste.some(p => p.type === 'panneau' && dansPanneau(o, p)))];
+  const surBarreDefilement = (e, p) => {
+    const r = p.getBoundingClientRect();
+    return e.clientX >= r.left + p.clientLeft + p.clientWidth || e.clientY >= r.top + p.clientTop + p.clientHeight;
+  };
+
+  function poserControlesDesign(surface) {
+    const tous = projet.controles.filter(c => !estInvisible(c) && dansFenetreActive(c));
+    const enveloppes = new Map(tous.map(c => [c.id, creerControleDesign(c)]));
+    for (const c of tous) {
+      const p = panneauDe(c);
+      const dans = p && enveloppes.get(p.id);
+      (dans ? dans.querySelector(':scope > .bs-panneau > .bs-panneau-contenu') : surface).appendChild(enveloppes.get(c.id));
+    }
+    for (const c of tous) if (c.type === 'panneau') majContenuDesign(c);
+  }
+
+  // Le contenu s'étend jusqu'au dernier contrôle (ou à la taille choisie) ; on retrouve où il était défilé.
+  function majContenuDesign(p) {
+    const contenu = contenuDesign(p.id);
+    if (!contenu) return;
+    const t = BlocRuntime.tailleContenuPanneau(p, projet.controles.filter(o => o.panneau === p.id && !estInvisible(o)));
+    Object.assign(contenu.style, { width: t.largeur + 'px', height: t.hauteur + 'px' });
+    const s = defilDesign[p.id];
+    if (s) { contenu.parentNode.scrollLeft = s.x; contenu.parentNode.scrollTop = s.y; }
+  }
+
+  // Au début d'un déplacement : les contrôles tirés hors de leur panneau passent dans la fenêtre,
+  // à l'endroit où on les voit (sinon le panneau les cacherait dès qu'ils sortent de son cadre).
+  function sortirDesPanneaux(liste) {
+    const surface = $('surface-design'), s = surface.getBoundingClientRect();
+    for (const o of liste) {
+      if (!o.panneau) continue;
+      const w = elementDesign(o.id);
+      if (!w) continue;
+      const r = w.getBoundingClientRect();
+      o.x = Math.round(r.left - s.left);
+      o.y = Math.round(r.top - s.top);
+      delete o.panneau;
+      surface.appendChild(w);
+      placer(w, o);
+    }
+  }
+
+  // Après un déplacement : un contrôle lâché dans un panneau en fait partie (le plus intérieur, s'il y en a
+  // plusieurs l'un dans l'autre), et ses X et Y se comptent depuis le coin du contenu, là où il est défilé.
+  function rattacherAuxPanneaux(liste) {
+    const s = $('surface-design').getBoundingClientRect();
+    for (const c of liste) {
+      if (estInvisible(c) || c.panneau || AMARRES.includes(c.type) || c.type === 'onglets') continue;
+      const cx = s.left + c.x + c.largeur / 2, cy = s.top + c.y + c.hauteur / 2;
+      let choix = null, profondeur = -1;
+      for (const p of projet.controles) {
+        if (p.type !== 'panneau' || p === c || dansPanneau(p, c) || !dansFenetreActive(p)) continue;
+        const el = elementDesign(p.id)?.firstChild;
+        if (!el || !el.getClientRects().length) continue; // caché (sur une autre page d'onglets)
+        const r = el.getBoundingClientRect();
+        const x0 = r.left + el.clientLeft, y0 = r.top + el.clientTop;
+        if (cx < x0 || cx > x0 + el.clientWidth || cy < y0 || cy > y0 + el.clientHeight) continue;
+        let n = 0;
+        for (let o = panneauDe(p); o && n < 50; o = panneauDe(o)) n++;
+        if (n >= profondeur) { choix = p; profondeur = n; } // à égalité, le dernier : celui de devant
+      }
+      if (!choix) continue;
+      const cr = contenuDesign(choix.id).getBoundingClientRect();
+      c.panneau = choix.id;
+      c.x = Math.max(0, arrondir(s.left + c.x - cr.left));
+      c.y = Math.max(0, arrondir(s.top + c.y - cr.top));
+      delete c.onglets;
+      delete c.page;
+    }
   }
 
   const creerElementDesign = c =>
@@ -368,9 +461,10 @@
   // Après un déplacement : un contrôle lâché sur des onglets rejoint la page affichée
   // (s'il était déjà sur ces onglets, il garde sa page) ; lâché ailleurs, il les quitte.
   function rattacherAuxOnglets(liste) {
-    const tous = projet.controles.filter(o => o.type === 'onglets' && dansFenetreActive(o) && !horsPage(o));
+    const tous = projet.controles.filter(o => o.type === 'onglets' && dansFenetreActive(o) && !horsPage(o) && !o.panneau);
     for (const c of liste) {
       if (estInvisible(c)) continue;
+      if (c.panneau) { delete c.onglets; delete c.page; continue; } // il suit son panneau
       const cx = c.x + c.largeur / 2, cy = c.y + c.hauteur / 2;
       const o = tous.filter(o => o !== c && !estDans(o, c) && cx >= o.x && cx <= o.x + o.largeur &&
         cy >= o.y + HAUTEUR_TITRES_ONGLETS && cy <= o.y + o.hauteur).at(-1);
@@ -473,11 +567,14 @@
     Object.assign(w.style, {
       left: c.x + 'px', top: c.y + 'px',
       width: c.largeur + 'px', height: c.hauteur + 'px',
-      zIndex: c.type === 'cadre' || c.type === 'onglets' ? 0 : 1 // cadres et onglets restent derrière
+      zIndex: c.type === 'cadre' || c.type === 'onglets' || c.type === 'panneau' ? 0 : 1 // cadres, onglets et panneaux restent derrière
     });
     w.hidden = horsPage(c);
     w.classList.toggle('cache', c.visible === false);
     marquerSelection(w);
+    if (c.type === 'panneau') majContenuDesign(c);
+    const p = panneauDe(c);
+    if (p) majContenuDesign(p);
   }
 
   const elementDesign = id => document.querySelector(`.d-ctrl[data-id="${id}"]`);
@@ -522,12 +619,15 @@
   // bords et leurs centres sur ceux des autres contrôles et de la fenêtre. Alt : sans aimant.
   function deplacerOuRedimensionner(e, w, c, redim, dejaChoisi) {
     const f = fenetreCourante();
-    const bouges = redim ? [c] : selectionnes().filter(o => !estInvisible(o) && dansFenetreActive(o));
+    let bouges = redim ? [c] : selectionnes().filter(o => !estInvisible(o) && dansFenetreActive(o));
+    // Ce qui est posé dans un panneau qui bouge suit déjà son panneau.
+    if (!redim) bouges = bouges.filter(o => !bouges.some(p => p.type === 'panneau' && dansPanneau(o, p)));
     // Un cadre emporte avec lui les contrôles posés à l'intérieur.
     if (!redim) {
       for (const cadre of bouges.filter(o => o.type === 'cadre')) {
         for (const o of projet.controles) {
-          if (!bouges.includes(o) && !estInvisible(o) && dansFenetreActive(o) && dedans(o, cadre)) bouges.push(o);
+          if (!bouges.includes(o) && !estInvisible(o) && dansFenetreActive(o) && (o.panneau || '') === (cadre.panneau || '') &&
+            dedans(o, cadre)) bouges.push(o);
         }
       }
     }
@@ -536,10 +636,15 @@
         for (const o of projet.controles) if (!bouges.includes(o) && estDans(o, onglets)) bouges.push(o);
       }
     }
-    const depart = bouges.map(o => ({ o, x: o.x, y: o.y, w: elementDesign(o.id) }));
-    const boite = enveloppe(bouges);
-    const autres = projet.controles.filter(o => !bouges.includes(o) && !estInvisible(o) && dansFenetreActive(o)).map(rectDe);
-    autres.push({ x: 0, y: 0, l: f.largeur, h: f.hauteur }); // les bords et le centre de la fenêtre
+    // Dans un panneau, X et Y ne comptent pas depuis la fenêtre : on n'aimante qu'avec les contrôles de la fenêtre.
+    let depart, boite, autres;
+    const preparer = () => {
+      depart = bouges.map(o => ({ o, x: o.x, y: o.y, w: elementDesign(o.id) }));
+      boite = enveloppe(bouges);
+      autres = redim && c.panneau ? [] : projet.controles.filter(o => !bouges.includes(o) && !estInvisible(o) && dansFenetreActive(o) && !o.panneau).map(rectDe);
+      if (!(redim && c.panneau)) autres.push({ x: 0, y: 0, l: f.largeur, h: f.hauteur }); // les bords et le centre de la fenêtre
+    };
+    preparer();
     const origine = { x: e.clientX, y: e.clientY, l: c.largeur, h: c.hauteur };
     let bouge = false;
     try { w.setPointerCapture(e.pointerId); } catch (err) { /* pas grave */ }
@@ -547,6 +652,11 @@
       const dx = ev.clientX - origine.x;
       const dy = ev.clientY - origine.y;
       if (!bouge && Math.abs(dx) + Math.abs(dy) < 3) return; // un simple clic ne déplace rien
+      if (!bouge && !redim && bouges.some(o => o.panneau)) {
+        sortirDesPanneaux(bouges);
+        preparer();
+        try { w.setPointerCapture(ev.pointerId); } catch (err) { /* pas grave */ }
+      }
       bouge = true;
       const lignes = [];
       if (redim) {
@@ -587,8 +697,10 @@
       if (!bouge && dejaChoisi && choisis.size > 1) return selectionner(c.id);
       if (bouge) {
         if (!redim) {
+          rattacherAuxPanneaux(bouges);
           rattacherAuxOnglets(bouges);
-          replacerTout();
+          if (projet.controles.some(o => o.type === 'panneau')) afficherConcepteur();
+          else replacerTout();
         }
         afficherProprietes();
         planifierSauvegarde();
@@ -604,8 +716,11 @@
 
   function rafraichirControle(c) {
     if (estInvisible(c)) return afficherInvisibles();
+    if (c.type === 'panneau') return afficherConcepteur(); // ses contrôles sont dedans
     const ancien = document.querySelector(`.d-ctrl[data-id="${c.id}"]`);
     if (ancien) ancien.replaceWith(creerControleDesign(c));
+    const p = panneauDe(c);
+    if (p) majContenuDesign(p);
   }
 
   function ajouterControle(type, x, y) {
@@ -624,16 +739,19 @@
     if (type === 'sprite' && projet.sprites.length) donnerSprite(c, projet.sprites[0]);
     projet.controles.push(c);
     if (AMARRES.includes(type)) amarrerBarresEtat();
+    rattacherAuxPanneaux([c]);
     rattacherAuxOnglets([c]);
     if (estInvisible(c)) afficherInvisibles();
+    else if (c.panneau) afficherConcepteur();
     else $('surface-design').appendChild(creerControleDesign(c));
     selectionner(c.id);
     planifierSauvegarde();
   }
 
   function supprimerControles(ids) {
-    const liste = projet.controles.filter(c => ids.includes(c.id));
+    const liste = avecContenu(projet.controles.filter(c => ids.includes(c.id)));
     if (!liste.length) return;
+    ids = liste.map(c => c.id);
     const lies = workspace.getAllBlocks(false).filter(b => b.getField('CTRL') && ids.includes(b.getFieldValue('CTRL')));
     const quoi = liste.length > 1 ? `ces ${liste.length} contrôles` : `« ${liste[0].nom} »`;
     if (lies.length && !confirm(`${lies.length} bloc(s) utilisent ${quoi}. Ils seront supprimés aussi. Continuer ?`)) return;
@@ -723,8 +841,18 @@
       }
       const zone = { x: Math.min(x, depart.x), y: Math.min(y, depart.y), l: Math.abs(x - depart.x), h: Math.abs(y - depart.y) };
       Object.assign(cadre.style, { left: zone.x + 'px', top: zone.y + 'px', width: zone.l + 'px', height: zone.h + 'px' });
-      const pris = projet.controles.filter(c => !estInvisible(c) && dansFenetreActive(c) &&
-        c.x < zone.x + zone.l && c.x + c.largeur > zone.x && c.y < zone.y + zone.h && c.y + c.hauteur > zone.y).map(c => c.id);
+      const pris = projet.controles.filter(c => {
+        if (estInvisible(c) || !dansFenetreActive(c)) return false;
+        let x = c.x, y = c.y;
+        if (c.panneau) { // dans un panneau : là où on le voit
+          const w = elementDesign(c.id);
+          if (!w || !w.getClientRects().length) return false;
+          const q = w.getBoundingClientRect();
+          x = q.left - r.left;
+          y = q.top - r.top;
+        }
+        return x < zone.x + zone.l && x + c.largeur > zone.x && y < zone.y + zone.h && y + c.hauteur > zone.y;
+      }).map(c => c.id);
       const ids = [...new Set([...avant, ...pris])];
       if (ids.join() !== derniers) {
         derniers = ids.join();
@@ -748,7 +876,7 @@
   let pressePapiers = null;   // { controles, fenetre, collages }
 
   function copier() {
-    const liste = selectionnes();
+    const liste = avecContenu(selectionnes());
     if (!liste.length) return;
     pressePapiers = { controles: structuredClone(liste), fenetre: fenetreActive, collages: 0 };
     $('astuce').textContent = (liste.length > 1 ? `📄 ${liste.length} contrôles copiés` : `📄 « ${liste[0].nom} » copié`) +
@@ -784,6 +912,9 @@
     for (const c of colles) {
       if (nouveauxIds[c.onglets]) c.onglets = nouveauxIds[c.onglets];
       else delete c.onglets; // collé seul : il rejoindra la page affichée là où il tombe
+      // Dans un panneau : copié avec lui, ou collé seul dans le même panneau (s'il existe encore, dans cette fenêtre).
+      if (nouveauxIds[c.panneau]) c.panneau = nouveauxIds[c.panneau];
+      else if (!(c.panneau && source.fenetre === fenetreActive && projet.controles.some(o => o.id === c.panneau && o.type === 'panneau'))) delete c.panneau;
     }
     rattacherAuxOnglets(colles.filter(c => !ids.includes(c.onglets)));
     afficherConcepteur();
@@ -792,7 +923,7 @@
   }
 
   function dupliquer() {
-    const liste = selectionnes();
+    const liste = avecContenu(selectionnes());
     if (liste.length) coller({ controles: structuredClone(liste), fenetre: fenetreActive, collages: 0 });
   }
 
@@ -1253,6 +1384,21 @@
       champCouleur(liste, 'Couleur de la barre', c.couleurBarre, v => { c.couleurBarre = v; maj(); });
     }
 
+    if (c.type === 'panneau') {
+      champChoix(liste, 'Défilement', [['vertical', '↕ Vertical'], ['horizontal', '↔ Horizontal'], ['deux', '✥ Les deux']],
+        c.defilement || 'vertical', v => { c.defilement = v; maj(); });
+      groupe(liste, [
+        g => champNombre(g, 'Largeur du contenu', c.largeurContenu || 0, v => { c.largeurContenu = Math.max(0, v); maj(); }),
+        g => champNombre(g, 'Hauteur du contenu', c.hauteurContenu || 0, v => { c.hauteurContenu = Math.max(0, v); maj(); })
+      ]);
+      liste.appendChild(el('p', 'aide',
+        'Posez des contrôles dedans : ils défilent avec lui. Faites défiler le panneau (molette ou barre de défilement) ' +
+        'pour en poser plus bas. Le contenu s\'agrandit tout seul jusqu\'au dernier contrôle ; « Hauteur du contenu » réserve de la place en plus.'));
+    }
+    if (panneauDe(c)) {
+      liste.appendChild(el('p', 'aide', `Posé dans « ${panneauDe(c).nom} » : X et Y comptent depuis le coin de son contenu. ` +
+        'Pour l\'en sortir, tirez-le hors du panneau.'));
+    }
     groupe(liste, [
       g => champNombre(g, 'X', c.x, v => { c.x = v; maj(); }),
       g => champNombre(g, 'Y', c.y, v => { c.y = v; maj(); }),
@@ -2574,7 +2720,7 @@
 
   const ICONES_TYPES = {
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
-    selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲',
+    selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲', panneau: '📜',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
     selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', heure: '🕒', forme: '🔷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
@@ -2598,7 +2744,7 @@
     switch (r.type) {
       case 'bs_quand_demarre': return 'quand la fenêtre démarre';
       case 'bs_quand_clic': return `quand ${ctrl()} est cliqué`;
-      case 'bs_quand_change': return `quand ${ctrl()} change`;
+      case 'bs_quand_change': return `quand ${ctrl()} ${projet.controles.find(x => x.id === r.getFieldValue('CTRL'))?.type === 'panneau' ? 'défile' : 'change'}`;
       case 'bs_quand_glisse': return `quand on glisse dans ${ctrl()}`;
       case 'bs_quand_son_fin': return `quand ${ctrl()} se termine`;
       case 'bs_quand_minuteur': return `quand ${ctrl()} sonne`;
@@ -3521,7 +3667,9 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       const deplacement = { ArrowLeft: [-pas, 0], ArrowRight: [pas, 0], ArrowUp: [0, -pas], ArrowDown: [0, pas] }[e.key];
       if (deplacement) {
         e.preventDefault();
-        for (const c of selectionnes().filter(o => !estInvisible(o))) {
+        const choisisVisibles = selectionnes().filter(o => !estInvisible(o));
+        // Ce qui est dans un panneau qui bouge suit déjà son panneau.
+        for (const c of choisisVisibles.filter(o => !choisisVisibles.some(p => p.type === 'panneau' && dansPanneau(o, p)))) {
           c.x += deplacement[0];
           c.y += deplacement[1];
           const w = elementDesign(c.id);
