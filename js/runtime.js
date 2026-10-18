@@ -299,7 +299,10 @@ function BlocRuntimeFactory() {
   // Chaque unité vaut tant de l'unité de base (seconde, mètre) ; les températures ont leur propre calcul.
   const UNITES = {
     temps: { millisecondes: 0.001, secondes: 1, minutes: 60, heures: 3600, jours: 86400, semaines: 604800 },
-    distance: { millimetres: 0.001, centimetres: 0.01, metres: 1, kilometres: 1000, pouces: 0.0254, pieds: 0.3048, miles: 1609.344 }
+    distance: { millimetres: 0.001, centimetres: 0.01, metres: 1, kilometres: 1000, pouces: 0.0254, pieds: 0.3048, miles: 1609.344 },
+    masse: { milligrammes: 0.000001, grammes: 0.001, kilogrammes: 1, tonnes: 1000, livres: 0.45359237, onces: 0.028349523125 },
+    volume: { millilitres: 0.001, centilitres: 0.01, decilitres: 0.1, litres: 1, metrescubes: 1000,
+      cuillerescafe: 0.005, cuillerescsoupe: 0.015, gallons: 3.785411784 }
   };
   const VERS_CELSIUS = { celsius: t => t, fahrenheit: t => (t - 32) * 5 / 9, kelvin: t => t - 273.15 };
   const DEPUIS_CELSIUS = { celsius: c => c, fahrenheit: c => c * 9 / 5 + 32, kelvin: c => c + 273.15 };

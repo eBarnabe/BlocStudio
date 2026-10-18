@@ -1319,6 +1319,10 @@
     ['semaines', 'semaines'], ['millisecondes', 'millisecondes']];
   const UNITES_DISTANCE = [['mètres', 'metres'], ['centimètres', 'centimetres'], ['millimètres', 'millimetres'],
     ['kilomètres', 'kilometres'], ['pouces', 'pouces'], ['pieds', 'pieds'], ['miles', 'miles']];
+  const UNITES_MASSE = [['grammes', 'grammes'], ['kilogrammes', 'kilogrammes'], ['milligrammes', 'milligrammes'],
+    ['tonnes', 'tonnes'], ['livres (lb)', 'livres'], ['onces (oz)', 'onces']];
+  const UNITES_VOLUME = [['litres', 'litres'], ['millilitres', 'millilitres'], ['centilitres', 'centilitres'], ['décilitres', 'decilitres'],
+    ['mètres cubes', 'metrescubes'], ['cuillères à café', 'cuillerescafe'], ['cuillères à soupe', 'cuillerescsoupe'], ['gallons (US)', 'gallons']];
   const UNITES_TEMPERATURE = [['°C (Celsius)', 'celsius'], ['°F (Fahrenheit)', 'fahrenheit'], ['K (kelvins)', 'kelvin']];
   // « convertir [n] [unité] en [unité] » : la seconde liste propose d'abord une autre unité que la première.
   const blocConvertir = (unites, tooltip) => valeur(() => [
@@ -1328,6 +1332,8 @@
   ], 'Number', COULEUR_CONVERSIONS, tooltip);
   Blockly.Blocks['bs_convertir_temps'] = blocConvertir(UNITES_TEMPS, 'Par exemple 90 secondes = 1,5 minute ; 2 heures = 120 minutes.');
   Blockly.Blocks['bs_convertir_distance'] = blocConvertir(UNITES_DISTANCE, 'Par exemple 1,5 kilomètre = 1500 mètres ; 1 pouce = 2,54 centimètres ; 1 mile = 1,609 kilomètre.');
+  Blockly.Blocks['bs_convertir_masse'] = blocConvertir(UNITES_MASSE, 'Par exemple 1,5 kilogramme = 1500 grammes ; 1 livre ≈ 453,6 grammes ; 1 tonne = 1000 kilogrammes.');
+  Blockly.Blocks['bs_convertir_volume'] = blocConvertir(UNITES_VOLUME, 'Par exemple 1 litre = 1000 millilitres = 100 centilitres ; une cuillère à café = 5 mL, à soupe = 15 mL ; 1 gallon US ≈ 3,785 litres.');
   Blockly.Blocks['bs_convertir_temperature'] = blocConvertir(UNITES_TEMPERATURE, 'Par exemple 20 °C = 68 °F ; 0 °C = 273,15 K ; 100 °F ≈ 37,8 °C.');
   Blockly.Blocks['bs_temps_texte'] = valeur(() => [
     { nom: 'VAL', libelle: '⏱️', check: 'Number' }, 'secondes en',
@@ -1727,6 +1733,8 @@
   gen.forBlock['bs_convertir_temps'] = genConvertir('temps');
   gen.forBlock['bs_convertir_distance'] = genConvertir('distance');
   gen.forBlock['bs_convertir_temperature'] = genConvertir('temperature');
+  gen.forBlock['bs_convertir_masse'] = genConvertir('masse');
+  gen.forBlock['bs_convertir_volume'] = genConvertir('volume');
   gen.forBlock['bs_temps_texte'] = b => [`app.tempsEnTexte(${val(b, 'VAL', '0')}, ${q(b.getFieldValue('FORMAT'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_temps_secondes'] = b => [`app.texteEnSecondes(${val(b, 'VAL', "''")})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_maintenant'] = b => [`app.maintenant(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
@@ -2081,6 +2089,10 @@
         { kind: 'block', type: 'bs_convertir_temps', inputs: { VAL: nombre(90) } },
         etiquette('Distances'),
         { kind: 'block', type: 'bs_convertir_distance', inputs: { VAL: nombre(1) }, fields: { DE: 'kilometres', VERS: 'metres' } },
+        etiquette('Masses'),
+        { kind: 'block', type: 'bs_convertir_masse', inputs: { VAL: nombre(1.5) }, fields: { DE: 'kilogrammes', VERS: 'grammes' } },
+        etiquette('Volumes'),
+        { kind: 'block', type: 'bs_convertir_volume', inputs: { VAL: nombre(1) }, fields: { DE: 'litres', VERS: 'centilitres' } },
         etiquette('Températures'),
         { kind: 'block', type: 'bs_convertir_temperature', inputs: { VAL: nombre(20) } }
       ]
