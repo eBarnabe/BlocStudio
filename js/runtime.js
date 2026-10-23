@@ -2112,6 +2112,8 @@ function BlocRuntimeFactory() {
     const PROPS_GRAPHIQUE = ['texte', 'valeurs', 'etiquettes', 'genre', 'couleurBarre', 'maxValeurs'];
     const spriteDe = d => spritesProjet.get(d.sprite);
     const costumesDe = d => (spriteDe(d) && spriteDe(d).costumes) || [];
+    // Zone de collision réglée dans l'éditeur de sprite ({ x0, y0, x1, y1 } en fractions du costume), ou null.
+    const zoneCollision = d => (spriteDe(d) && spriteDe(d).zone) || null;
     const majSprite = d => afficherSprite(elements[d.id], d, spriteDe(d));
     const vitesseDe = d => Math.min(60, Math.max(0.1, Number(d.vitesse ?? (spriteDe(d) && spriteDe(d).vitesse) ?? 8) || 8));
 
@@ -2267,7 +2269,14 @@ function BlocRuntimeFactory() {
       if (!costume) return r;
       const contour = contourCostume(costume.donnees);
       if (contour === null) return null; // costume vide : il ne touche rien
-      const b = contour || { x0: 0, y0: 0, x1: 1, y1: 1 }; // contour pas encore calculé : tout le carré
+      let b = contour || { x0: 0, y0: 0, x1: 1, y1: 1 }; // contour pas encore calculé : tout le carré
+      // Zone de collision du sprite : en « rectangle », c'est elle ; au pixel près, la partie visible qui y est.
+      const z = zoneCollision(d);
+      if (z && d.collision === 'rectangle') b = z;
+      else if (z) {
+        b = { x0: Math.max(b.x0, z.x0), y0: Math.max(b.y0, z.y0), x1: Math.min(b.x1, z.x1), y1: Math.min(b.y1, z.y1) };
+        if (b.x1 <= b.x0 || b.y1 <= b.y0) return null; // rien de visible dans la zone
+      }
       // Les quatre coins de la partie visible, tournés comme le sprite : la zone les entoure.
       const p = poseSprite(d);
       const coins = [[b.x0, b.y0], [b.x1, b.y0], [b.x0, b.y1], [b.x1, b.y1]].map(([u, v]) => depuisCostume(p, u, v));
@@ -2309,7 +2318,8 @@ function BlocRuntimeFactory() {
     function pleinEn(id, masque, x, y) {
       if (!masque) return true;
       const [u, v] = versCostume(poseSprite(donnees[id]), x, y);
-      if (u < 0 || v < 0 || u >= 1 || v >= 1) return false;
+      const z = zoneCollision(donnees[id]) || { x0: 0, y0: 0, x1: 1, y1: 1 };
+      if (u < z.x0 || v < z.y0 || u >= z.x1 || v >= z.y1) return false;
       return masque.plein[Math.floor(v * masque.H) * masque.L + Math.floor(u * masque.L)] === 1;
     }
     // Parcourt les points communs aux deux zones (tous les pixels, ou un sur deux si la zone est grande).

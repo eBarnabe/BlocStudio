@@ -2142,9 +2142,9 @@
       {
         texte: '📦 Sprite pour un autre projet (.bsprite)',
         action: () => {
-          const { nom, taille, lisse, vitesse, costumes } = s;
+          const { nom, taille, lisse, vitesse, zone, costumes } = s;
           telechargerOuSignaler(nomDeFichier(s.nom) + '.bsprite',
-            JSON.stringify({ format: 'BlocStudio-sprite', version: 1, sprite: { nom, taille, lisse, vitesse, costumes } }), 'application/json');
+            JSON.stringify({ format: 'BlocStudio-sprite', version: 1, sprite: { nom, taille, lisse, vitesse, zone, costumes } }), 'application/json');
         }
       }
     ]);
@@ -2163,6 +2163,7 @@
     const sprite = {
       id: 'spr_' + nouvelId(), nom: nomSpriteLibre(String(s.nom || fichier.name.replace(/\.[^.]+$/, ''))),
       taille: Math.max(1, Number(s.taille) || 32), lisse: !!s.lisse, vitesse: Number(s.vitesse) || 8,
+      zone: EditeurSprite.zoneValide(s.zone),
       costumes: s.costumes.map((c, i) => ({ nom: String(c.nom || 'costume ' + (i + 1)), donnees: c.donnees }))
     };
     projet.sprites.push(sprite);

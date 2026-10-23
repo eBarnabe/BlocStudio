@@ -22,7 +22,8 @@
     ['rect', '▭', 'Rectangle'],
     ['rectPlein', '■', 'Rectangle plein'],
     ['ellipse', '◯', 'Ellipse'],
-    ['ellipsePleine', '⬤', 'Ellipse pleine']
+    ['ellipsePleine', '⬤', 'Ellipse pleine'],
+    ['zone', '🎯', 'Zone de collision : tracez le rectangle qui compte pour les blocs « touche… » (clic droit : toute l\'image)']
   ];
   const ACTIONS = [
     ['annuler', '↶', 'Annuler (Ctrl+Z)'],
@@ -39,8 +40,9 @@
   const $ = id => document.getElementById(id);
 
   // État de l'éditeur. Chaque costume garde ses pixels (RGBA) pendant l'édition.
+  // `zone` : zone de collision du sprite, { x0, y0, x1, y1 } en fractions du costume (null : toute l'image).
   const e = {
-    ouvert: false, N: 32, lisse: false, vitesse: 8, costumes: [], courant: 0,
+    ouvert: false, N: 32, lisse: false, vitesse: 8, costumes: [], courant: 0, zone: null,
     outil: 'crayon', couleur: [0, 0, 0, 255], epaisseur: 1, symetrie: false, oignon: true,
     histo: [], refaire: [], trace: null, survol: null, cellule: 13,
     lecture: true, image: 0, horloge: 0, nomsPris: [], resoudre: null
@@ -286,11 +288,11 @@
   }
 
   function photo() {
-    return { N: e.N, lisse: e.lisse, courant: e.courant, costumes: e.costumes.map(c => ({ nom: c.nom, px: c.px.slice() })) };
+    return { N: e.N, lisse: e.lisse, courant: e.courant, zone: e.zone, costumes: e.costumes.map(c => ({ nom: c.nom, px: c.px.slice() })) };
   }
 
   function retrouver(p) {
-    Object.assign(e, { N: p.N, lisse: p.lisse, courant: p.courant, costumes: p.costumes });
+    Object.assign(e, { N: p.N, lisse: p.lisse, courant: p.courant, zone: p.zone, costumes: p.costumes });
     majTout();
   }
 
@@ -378,6 +380,22 @@
       g.fillStyle = 'rgba(124, 58, 237, .55)';
       g.fillRect(L / 2 - 1, 0, 2, L);
     }
+    // Zone de collision : cadre pointillé rouge ; avec l'outil 🎯, le reste de l'image est voilé.
+    if (e.zone) {
+      const z = e.zone, x = z.x0 * L, y = z.y0 * L, l = (z.x1 - z.x0) * L, h = (z.y1 - z.y0) * L;
+      if (e.outil === 'zone') {
+        g.fillStyle = 'rgba(15, 23, 42, .35)';
+        g.fillRect(0, 0, L, y);
+        g.fillRect(0, y + h, L, L - y - h);
+        g.fillRect(0, y, x, h);
+        g.fillRect(x + l, y, L - x - l, h);
+      }
+      g.strokeStyle = '#dc2626';
+      g.lineWidth = 2;
+      g.setLineDash([6, 4]);
+      g.strokeRect(x + 1, y + 1, l - 2, h - 2);
+      g.setLineDash([]);
+    }
     // Pixels que le crayon va toucher
     if (e.survol && !e.trace) {
       const ep = ['crayon', 'gomme', 'ligne', 'rect', 'rectPlein', 'ellipse', 'ellipsePleine'].includes(e.outil) ? e.epaisseur : 1;
@@ -432,6 +450,26 @@
     $('es-couleur').style.background = hex;
     $('es-couleur-perso').value = hex;
     document.querySelectorAll('#es-palette button').forEach(b => b.classList.toggle('actif', b.dataset.couleur === hex));
+    majZone();
+  }
+
+  function majZone() {
+    const z = e.zone, N = e.N;
+    $('es-zone-texte').textContent = z
+      ? `Pixels ${Math.round(z.x0 * N)} à ${Math.round(z.x1 * N) - 1} en x, ${Math.round(z.y0 * N)} à ${Math.round(z.y1 * N) - 1} en y.`
+      : 'Toute l\'image. Avec l\'outil 🎯, tracez un rectangle pour la réduire.';
+    $('es-zone-tout').disabled = !z;
+  }
+
+  // Zone de collision tracée de la case (x0, y0) à la case (x, y), bords compris.
+  function tracerZone(t, x, y) {
+    const N = e.N;
+    e.zone = {
+      x0: Math.min(t.x0, x) / N, y0: Math.min(t.y0, y) / N,
+      x1: (Math.max(t.x0, x) + 1) / N, y1: (Math.max(t.y0, y) + 1) / N
+    };
+    // Toute l'image : pas besoin de zone.
+    if (e.zone.x0 === 0 && e.zone.y0 === 0 && e.zone.x1 === 1 && e.zone.y1 === 1) e.zone = null;
   }
 
   function majTout() {
@@ -501,6 +539,18 @@
     toile.addEventListener('pointerdown', ev => {
       ev.preventDefault();
       const { x, y } = cellule(ev);
+      if (e.outil === 'zone') {
+        memoriser();
+        if (ev.button === 2) e.zone = null;
+        else {
+          e.trace = { outil: 'zone', x0: x, y0: y };
+          tracerZone(e.trace, x, y);
+          try { toile.setPointerCapture(ev.pointerId); } catch (err) { /* pas grave */ }
+        }
+        dessiner();
+        majOutils();
+        return;
+      }
       const outil = ev.button === 2 ? 'gomme' : e.outil;
       const c = outil === 'gomme' ? TRANSPARENT : e.couleur;
       const px = courant().px;
@@ -530,7 +580,8 @@
       e.survol = { x, y };
       $('es-position').textContent = `x ${x} · y ${y}`;
       const t = e.trace;
-      if (t && (t.outil === 'crayon' || t.outil === 'gomme')) {
+      if (t && t.outil === 'zone') { tracerZone(t, x, y); majZone(); }
+      else if (t && (t.outil === 'crayon' || t.outil === 'gomme')) {
         ligne(courant().px, t.x, t.y, x, y, t.c);
         t.x = x;
         t.y = y;
@@ -619,6 +670,12 @@
       demarrerApercu();
     });
     $('es-lecture').addEventListener('click', () => { e.lecture = !e.lecture; demarrerApercu(); });
+    $('es-zone-tout').addEventListener('click', () => {
+      memoriser();
+      e.zone = null;
+      dessiner();
+      majOutils();
+    });
 
     $('es-c-nouveau').addEventListener('click', () => actionCostume('nouveau'));
     $('es-c-dupliquer').addEventListener('click', () => actionCostume('dupliquer'));
@@ -658,7 +715,7 @@
     Object.assign(e, {
       N, lisse: !!(sprite && sprite.lisse), vitesse: (sprite && sprite.vitesse) || 8,
       courant: 0, histo: [], refaire: [], trace: null, survol: null, lecture: true,
-      nomsPris: options.nomsPris || []
+      nomsPris: options.nomsPris || [], zone: zoneValide(sprite && sprite.zone)
     });
     e.costumes = [];
     for (const c of (sprite && sprite.costumes) || []) {
@@ -678,6 +735,11 @@
     return resultat;
   }
 
+  function zoneValide(z) {
+    if (!z || ![z.x0, z.y0, z.x1, z.y1].every(v => typeof v === 'number' && v >= 0 && v <= 1)) return null;
+    return z.x1 > z.x0 && z.y1 > z.y0 ? { x0: z.x0, y0: z.y0, x1: z.x1, y1: z.y1 } : null;
+  }
+
   function valider() {
     const nom = $('es-nom').value.trim();
     if (!nom) { $('es-erreur').textContent = 'Donnez un nom à ce sprite.'; return $('es-nom').focus(); }
@@ -686,7 +748,7 @@
       return $('es-nom').focus();
     }
     fermer({
-      nom, taille: e.N, lisse: e.lisse, vitesse: e.vitesse,
+      nom, taille: e.N, lisse: e.lisse, vitesse: e.vitesse, zone: e.zone,
       costumes: e.costumes.map(c => ({ nom: c.nom, donnees: versCanvas(c.px, e.N).toDataURL('image/png') }))
     });
   }
@@ -701,5 +763,5 @@
   }
 
   construire();
-  window.EditeurSprite = { ouvrir, choisirFichier, TAILLES };
+  window.EditeurSprite = { ouvrir, choisirFichier, zoneValide, TAILLES };
 })();
