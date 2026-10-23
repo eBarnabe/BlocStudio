@@ -217,6 +217,43 @@
     };
   }
 
+  // Casse-briques : raquette (barre au milieu d'un carré de 32), balle (disque de 16) et brique
+  // (barre de 16, un costume par couleur de rangée). Les bords vides ne comptent pas dans les collisions.
+  function spriteRaquette() {
+    const donnees = costume(32, (x, y) => {
+      if (y < 13 || y > 18 || ((y === 13 || y === 18) && (x === 0 || x === 31))) return null;
+      if (x <= 2 || x >= 29) return '#f472b6';
+      return y === 13 ? '#e0f2fe' : y === 18 ? '#0369a1' : '#38bdf8';
+    });
+    return { id: 'spr_raquette', nom: 'Raquette', taille: 32, lisse: false, vitesse: 8, costumes: [{ nom: 'raquette', donnees }] };
+  }
+
+  function spriteBalle() {
+    const donnees = costume(16, (x, y) => {
+      const d = (x + 0.5 - 8) ** 2 + (y + 0.5 - 8) ** 2;
+      if (d > 25) return null;
+      return (x + 0.5 - 6.5) ** 2 + (y + 0.5 - 6.5) ** 2 <= 2.5 ? '#ffffff' : d > 16 ? '#94a3b8' : '#e2e8f0';
+    });
+    return { id: 'spr_balle', nom: 'Balle', taille: 16, lisse: false, vitesse: 8, costumes: [{ nom: 'balle', donnees }] };
+  }
+
+  function spriteBrique() {
+    const teintes = [
+      ['rouge', '#ff8fab', '#ff004d', '#9f0035'], ['orange', '#ffd08a', '#ffa300', '#b45309'],
+      ['jaune', '#fff7a8', '#ffec27', '#b8a000'], ['vert', '#9dffb0', '#00e436', '#008751'],
+      ['bleu', '#a8e4ff', '#29adff', '#1e40af']
+    ];
+    const costumes = teintes.map(([nom, clair, base, fonce]) => ({
+      nom,
+      donnees: costume(16, (x, y) => {
+        if (y < 5 || y > 10) return null;
+        if (y === 10 || x === 15) return fonce;
+        return y === 5 || x === 0 ? clair : base;
+      })
+    }));
+    return { id: 'spr_brique', nom: 'Brique', taille: 16, lisse: false, vitesse: 8, costumes };
+  }
+
   // Musique un peu inquiétante (la mineur), écrite comme dans le studio 8 bits :
   // on peut la retoucher avec « 🎹 Modifier » dans le Sommaire.
   function musiqueFantomes() {
@@ -1247,6 +1284,123 @@
               donnees: StudioMusique.enWav(StudioMusique.rendre(musique)) }
           : { id: 'son_fantomes', nom: 'musique des fantômes', donnees: musiqueDeFond() }];
         p.sprites = [spriteFantome()];
+        return p;
+      }
+    },
+    {
+      titre: '🧱 Casse-briques',
+      theme: 'jeux',
+      description: 'Casse toutes les briques avec la balle ! Rebond « en visant » sur la raquette : touche-la près du bout pour envoyer la balle en biais.',
+      creer: () => {
+        // c1 Score · c2 Vies · c3 Raquette · c4 Balle · c5 Brique (cachée : ce sont ses clones qui forment le mur)
+        // c6 Consigne
+        const score = () => ecrire('c1', 'texte', joindre(t('Score : '), v('v_score')));
+        const vies = () => ecrire('c2', 'texte', joindre(t('Vies : '), v('v_vies')));
+        const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record casse-briques') }) });
+        const rebond = (qui, sur, mode) => ({ type: 'bs_rebondir_sur', fields: { CTRL: qui, CTRL2: sur, MODE: mode } });
+        const bouger = dx => [
+          si(v('v_enJeu'), [
+            bloc('bs_deplacer', 'c3', { DX: n(dx), DY: n(0) }),
+            bloc('bs_rebondir', 'c3') // garde la raquette dans la fenêtre
+          ])
+        ];
+        const finir = (texte, son) => [
+          fixer('v_enJeu', vrai(false)),
+          ecrire('c4', 'visible', vrai(false)),
+          bloc('bs_son', null, null, { SON: son }),
+          si(compare('GT', v('v_score'), record()), [
+            bloc('bs_memoriser', null, { VAL: v('v_score'), NOM: t('record casse-briques') })
+          ]),
+          ecrire('c6', 'texte', joindre(t(texte), v('v_score'), retourLigne(),
+            t('Record : '), record(), retourLigne(), retourLigne(), t('Clique (ou Espace) pour rejouer.'))),
+          ecrire('c6', 'visible', vrai(true))
+        ];
+        const p = projet(
+          { titre: 'Casse-briques', largeur: 480, hauteur: 360, couleurFond: '#0f172a' },
+          [
+            { type: 'etiquette', nom: 'Score', texte: 'Score : 0', x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, couleurTexte: '#fde68a' },
+            { type: 'etiquette', nom: 'Vies', texte: 'Vies : 3', x: 370, y: 6, largeur: 100, hauteur: 28, taillePolice: 18, couleurTexte: '#f9a8d4' },
+            { type: 'sprite', nom: 'Raquette', sprite: 'spr_raquette', costume: 0, x: 192, y: 290, largeur: 96, hauteur: 96 },
+            { type: 'sprite', nom: 'Balle', sprite: 'spr_balle', costume: 0, visible: false, x: 224, y: 300, largeur: 32, hauteur: 32 },
+            { type: 'sprite', nom: 'Brique', sprite: 'spr_brique', costume: 0, visible: false, x: 20, y: 35, largeur: 48, hauteur: 48 },
+            {
+              type: 'etiquette', nom: 'Consigne', x: 40, y: 150, largeur: 400, hauteur: 130, taillePolice: 18, couleurTexte: '#e0e7ff',
+              texte: 'Casse toutes les briques !\n\nSouris ou flèches ← → pour la raquette.\nTouche-la près du bout pour viser.\nClique (ou appuie sur Espace) pour commencer.'
+            }
+          ],
+          ['score', 'vies', 'enJeu', 'briques', 'vitesse', 'ligne', 'colonne'],
+          () => [
+            evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            fonction('nouvelle partie', [
+              bloc('bs_supprimer_clones', 'c5'),
+              fixer('v_score', n(0)), fixer('v_vies', n(3)), fixer('v_briques', n(0)), fixer('v_enJeu', vrai(true)),
+              score(), vies(),
+              ecrire('c6', 'visible', vrai(false)),
+              // Le mur : 5 rangées de 8 briques. On place l'original (caché), puis on le clone.
+              pour('v_ligne', 1, 5, [
+                pour('v_colonne', 1, 8, [
+                  bloc('bs_placer', 'c5', {
+                    X: calc('ADD', n(20), calc('MULTIPLY', calc('MINUS', v('v_colonne'), n(1)), n(56))),
+                    Y: calc('ADD', n(35), calc('MULTIPLY', calc('MINUS', v('v_ligne'), n(1)), n(24)))
+                  }),
+                  bloc('bs_sprite_costume', 'c5', { VAL: v('v_ligne') }),
+                  bloc('bs_creer_clone', 'c5'),
+                  ajouter('v_briques', n(1))
+                ])
+              ]),
+              appeler('servir'),
+              // La balle avance ; si elle passe sous la raquette, une vie est perdue.
+              tantQue(v('v_enJeu'), [
+                bloc('bs_avancer', 'c4', { PAS: v('v_vitesse') }),
+                si(compare('GT', lire('y', 'c4'), n(322)), [appeler('balle perdue')], [
+                  bloc('bs_rebondir', 'c4'),
+                  rebond('c4', 'c3', 'viser')
+                ]),
+                attendre(0.02)
+              ])
+            ]),
+            fonction('servir', [
+              bloc('bs_placer', 'c4', { X: calc('ADD', lire('x', 'c3'), n(32)), Y: n(300) }),
+              bloc('bs_orienter', 'c4', { DIR: hasard(-40, 40) }),
+              fixer('v_vitesse', n(5)),
+              ecrire('c4', 'visible', vrai(true)),
+              attendre(0.6)
+            ]),
+            fonction('balle perdue', [
+              ajouter('v_vies', n(-1)), vies(),
+              si(compare('LTE', v('v_vies'), n(0)), finir('Perdu ! Score : ', 'erreur'), [
+                bloc('bs_son', null, null, { SON: 'erreur' }),
+                appeler('servir')
+              ])
+            ]),
+            // Chaque brique surveille la balle : touchée, elle la renvoie et disparaît.
+            evt('bs_quand_clone', 'c5', [
+              ecrire('__moi', 'visible', vrai(true)),
+              tantQue(v('v_enJeu'), [
+                si({ type: 'bs_se_touchent', fields: { CTRL: '__moi', CTRL2: 'c4' } }, [
+                  rebond('c4', '__moi', 'normal'),
+                  bloc('bs_son', null, null, { SON: 'clic' }),
+                  ajouter('v_score', n(10)), score(),
+                  ajouter('v_vitesse', n(0.1)),
+                  ajouter('v_briques', n(-1)),
+                  si(compare('EQ', v('v_briques'), n(0)), finir('Bravo, toutes les briques sont cassées ! Score : ', 'succes')),
+                  bloc('bs_supprimer_clone')
+                ]),
+                attendre(0.02)
+              ])
+            ]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'gauche' }, bouger(-20)),
+            evtChamps('bs_quand_touche', { TOUCHE: 'droite' }, bouger(20)),
+            evtChamps('bs_quand_souris_fenetre', { QUOI: 'bouge' }, [
+              si(v('v_enJeu'), [
+                ecrire('c3', 'x', calc('MINUS', { type: 'bs_souris_fenetre', fields: { QUOI: 'x' } }, n(48))),
+                bloc('bs_rebondir', 'c3')
+              ])
+            ])
+          ]);
+        p.sprites = [spriteRaquette(), spriteBalle(), spriteBrique()];
         return p;
       }
     },
