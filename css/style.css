@@ -231,6 +231,25 @@ h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: var(--
 /* Infobulles des blocs coupées (bouton « 💬 Infobulles » de l'onglet Code). */
 body.sans-infobulles .blocklyTooltipDiv { display: none !important; }
 
+/* Bloc « 💬 commentaire » : texte en italique, et sa boîte de saisie. */
+.blocklyText.bs-commentaire-texte { font-style: italic; }
+.bs-commentaire-voile {
+  position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center;
+  background: rgba(15, 23, 42, .45);
+}
+.bs-commentaire-boite {
+  width: min(520px, 92vw); padding: 16px; border-radius: 10px; background: #fff;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, .35);
+}
+.bs-commentaire-boite h3 { margin: 0 0 10px; font-size: 16px; }
+.bs-commentaire-boite textarea {
+  box-sizing: border-box; width: 100%; padding: 8px; border: 1px solid #cbd2e1; border-radius: 6px;
+  font: inherit; font-size: 14px; resize: vertical;
+}
+.bs-commentaire-boutons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+.bs-commentaire-boutons button { padding: 6px 16px; border: 1px solid #cbd2e1; border-radius: 6px; background: #f6f7fb; cursor: pointer; }
+.bs-commentaire-boutons button.principal { border-color: #5f8a6a; background: #5f8a6a; color: #fff; }
+
 /* Propriétés : « 🧰 Ses blocs » ouvre la catégorie du contrôle dans l'onglet Code. */
 .bouton-ses-blocs { width: 100%; margin: 4px 0 10px; padding: 6px; cursor: pointer; }
 

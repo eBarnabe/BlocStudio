@@ -167,6 +167,7 @@
     if (projet.blocs) {
       try {
         Blockly.serialization.workspaces.load(projet.blocs, workspace);
+        convertirBulles();
       } catch (e) {
         console.error(e);
         alert('Certains blocs n\'ont pas pu être chargés.');
@@ -177,6 +178,34 @@
     majBoite();
     majCodeJs();
     repartirHistorique();
+  }
+
+  // Projets d'avant le bloc « 💬 » : chaque bulle de commentaire de Blockly devient un bloc commentaire,
+  // juste au-dessus du bloc (ou de l'instruction qui contient la valeur), ou en premier dans un « quand… ».
+  function convertirBulles() {
+    for (const b of workspace.getAllBlocks(false)) {
+      const texte = (b.getCommentText() || '').trim();
+      if (b.getCommentText() !== null) b.setCommentText(null);
+      if (!texte || texte === Blockly.Msg.PROCEDURES_DEFNORETURN_COMMENT) continue; // texte mis d'office par Blockly
+      const note = workspace.newBlock('bs_commentaire');
+      note.loadExtraState({ texte });
+      note.initSvg();
+      let cible = b;
+      while (cible.outputConnection && cible.getParent()) cible = cible.getParent();
+      const entree = cible.inputList.find(i => i.type === Blockly.inputs.inputTypes.STATEMENT);
+      const pos = cible.getRelativeToSurfaceXY();
+      if (cible.previousConnection && cible.previousConnection.targetConnection) {
+        cible.previousConnection.targetConnection.connect(note.previousConnection); // le bloc passe sous le commentaire
+      } else if (cible.previousConnection) {
+        note.moveTo(new Blockly.utils.Coordinate(pos.x, pos.y));
+        note.nextConnection.connect(cible.previousConnection);
+      } else if (entree) {
+        entree.connection.connect(note.previousConnection);
+      } else {
+        note.moveTo(new Blockly.utils.Coordinate(pos.x, pos.y - 60));
+      }
+      note.render();
+    }
   }
 
   function chargerExemple(exemple) {
@@ -3562,7 +3591,9 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       grid: { spacing: 25, length: 3, colour: '#d8dce6', snap: true },
       zoom: { controls: true, wheel: true, startScale: 0.8, maxScale: 2, minScale: 0.4 },
       // Molette : défiler (Maj + molette : de côté) ; Ctrl + molette : zoomer.
-      move: { scrollbars: true, drag: true, wheel: true }
+      move: { scrollbars: true, drag: true, wheel: true },
+      // Pas de bulles de commentaire de Blockly : on commente avec le bloc « 💬 » (convertirBulles).
+      comments: false
     });
     $('vue-code').classList.remove('actif');
     workspace.registerButtonCallback('importerSon', importerSon);
@@ -3572,7 +3603,18 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     workspace.registerButtonCallback('importerSprite', importerSprite);
     workspace.registerButtonCallback('nouvelleFenetre', nouvelleFenetre);
 
-    workspace.addChangeListener(Blockly.Events.disableOrphans);
+    workspace.addChangeListener(e => {
+      Blockly.Events.disableOrphans(e);
+      // Un commentaire peut rester seul, comme une note posée à côté des blocs.
+      if (e.type !== Blockly.Events.BLOCK_MOVE && e.type !== Blockly.Events.BLOCK_CREATE) return;
+      const b = workspace.getBlockById(e.blockId);
+      if (b && b.type === 'bs_commentaire' && !b.getParent() && b.hasDisabledReason('ORPHANED_BLOCK')) {
+        const groupe = Blockly.Events.getGroup();
+        Blockly.Events.setGroup(e.group);
+        b.setDisabledReason(false, 'ORPHANED_BLOCK');
+        Blockly.Events.setGroup(groupe);
+      }
+    });
     workspace.addChangeListener(e => {
       if (e.isUiEvent) return;
       if (!groupesInternes.has(e.group)) oublierBlocsHistorique();

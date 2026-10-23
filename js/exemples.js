@@ -118,6 +118,15 @@
   const evtChamps = (type, champs, blocs) => Object.assign(evt(type, null, blocs), { fields: champs });
   const appeler = nom => ({ type: 'procedures_callnoreturn', extraState: { name: nom } });
 
+  // Commentaires (bloc « 💬 ») : `note` se glisse parmi les blocs, au-dessus de ceux qu'elle explique ;
+  // `presentation` reste seule, en haut du programme, pour en donner l'idée générale.
+  const note = texte => ({ type: 'bs_commentaire', extraState: { texte } });
+  function presentation(texte) {
+    const b = { type: 'bs_commentaire', x: 20, y, extraState: { texte } };
+    y += 40 + 32 * Math.ceil(texte.length / 56);
+    return b;
+  }
+
   // Costume de sprite dessiné pixel par pixel : `dessin(x, y)` renvoie la couleur (ou rien = transparent).
   function costume(taille, dessin) {
     const c = document.createElement('canvas');
@@ -321,7 +330,9 @@
         ],
         [],
         () => [
+          presentation('Le tout premier programme : quand on clique sur le bouton, il lit le prénom écrit dans la case et répond « Bonjour … ! ».'),
           evt('bs_quand_clic', 'c3', [
+            note('Clic sur « Dire bonjour » : si la case Prenom est vide, on prévient. Sinon, on écrit « Bonjour » + le prénom dans l\'étiquette Resultat.'),
             si({ type: 'text_isEmpty', inputs: { VALUE: I(lire('texte', 'c2')) } },
               [message(t("Écris d'abord ton prénom !"), 'attention')],
               [ecrire('c4', 'texte', joindre(t('Bonjour '), lire('texte', 'c2'), t(' !')))])
@@ -350,7 +361,9 @@
         ],
         [],
         () => [
+          presentation('Un formulaire : quand on valide, le programme rassemble tout ce qui a été saisi dans un seul message.'),
           evt('bs_quand_clic', 'c12', [
+            note('Le prénom est obligatoire. Ensuite, « créer un texte avec » colle les morceaux : prénom, âge, activité (le bouton radio coché du groupe « activite ») et présentation.'),
             si(estVide(lire('texte', 'c3')),
               [message(t('Merci d\'indiquer ton prénom.'), 'attention')],
               [message(joindre(
@@ -377,17 +390,21 @@
         ],
         [],
         () => [
+          presentation('Une zone de liste (Taches) qu\'on remplit et qu\'on vide avec trois boutons.'),
           evt('bs_quand_clic', 'c3', [
+            note('➕ Ajouter : la tâche écrite dans la case va à la fin de la liste, puis la case est vidée pour la suivante.'),
             si(estVide(lire('texte', 'c2')),
               [message(t('Écris d\'abord une tâche dans la case.'), 'attention')],
               [listeAjouter('c4', lire('texte', 'c2')), ecrire('c2', 'texte', t(''))])
           ]),
           evt('bs_quand_clic', 'c5', [
+            note('✔ Terminée : « numéro choisi » vaut 0 si aucune tâche n\'est sélectionnée ; sinon, on retire celle-là.'),
             si(compare('EQ', lire('numero', 'c4'), n(0)),
               [message(t('Clique d\'abord sur une tâche dans la liste.'), 'info')],
               [listeRetirer('c4', lire('numero', 'c4')), message(t('Bravo, une tâche de moins !'), 'succes')])
           ]),
           evt('bs_quand_clic', 'c6', [
+            note('🗑️ Tout effacer : on demande d\'abord confirmation.'),
             si(confirmer('Effacer toutes les tâches ?'), [listeVider('c4')])
           ])
         ])
@@ -414,29 +431,36 @@
         ],
         [],
         () => [
+          presentation('Un logiciel de dessin. Quand la souris bouge avec le bouton enfoncé, la Toile trace un petit trait entre l\'ancienne position de la souris et la nouvelle : mis bout à bout, ces traits font le dessin.'),
           evt('bs_quand_demarre', null, [
+            note('Au départ, le crayon prend la couleur et l\'épaisseur choisies à droite.'),
             dessin('bs_dessin_couleur', 'c1', { VAL: lire('texte', 'c3') }),
             dessin('bs_dessin_epaisseur', 'c1', { VAL: lire('valeur', 'c5') })
           ]),
           evt('bs_quand_glisse', 'c1', [
+            note('Un trait de l\'ancienne position de la souris (px, py) à la nouvelle (x, y).'),
             dessin('bs_dessin_trait', 'c1', {
               X1: souris('px', 'c1'), Y1: souris('py', 'c1'), X2: souris('x', 'c1'), Y2: souris('y', 'c1')
             })
           ]),
           evt('bs_quand_clic', 'c1', [
+            note('Un simple clic dessine un point.'),
             dessin('bs_dessin_point', 'c1', { X: souris('x', 'c1'), Y: souris('y', 'c1') })
           ]),
           evt('bs_quand_change', 'c3', [
+            note('Nouvelle couleur choisie dans la liste : le crayon change.'),
             dessin('bs_dessin_couleur', 'c1', { VAL: lire('texte', 'c3') })
           ]),
           evt('bs_quand_change', 'c5', [
+            note('Le curseur règle l\'épaisseur du crayon.'),
             dessin('bs_dessin_epaisseur', 'c1', { VAL: lire('valeur', 'c5') })
           ]),
           evt('bs_quand_clic', 'c6', [
+            note('On demande avant d\'effacer, pour ne pas perdre un dessin par erreur.'),
             si(confirmer('Effacer tout le dessin ?'), [dessin('bs_dessin_effacer', 'c1')])
           ]),
-          evt('bs_quand_clic', 'c8', [bloc('bs_fichier_ouvrir_dans', 'c10', null, { CIBLE: 'c1' })]),
-          evt('bs_quand_clic', 'c9', [bloc('bs_fichier_enregistrer_de', 'c10', null, { CIBLE: 'c1' })])
+          evt('bs_quand_clic', 'c8', [note('Le contrôle Fichier fait tout : la fenêtre « Ouvrir » de Windows, puis l\'image posée dans la Toile.'), bloc('bs_fichier_ouvrir_dans', 'c10', null, { CIBLE: 'c1' })]),
+          evt('bs_quand_clic', 'c9', [note('Enregistre le dessin de la Toile dans une image PNG.'), bloc('bs_fichier_enregistrer_de', 'c10', null, { CIBLE: 'c1' })])
         ])
     },
     {
@@ -471,8 +495,10 @@
           ],
           ['numero'],
           () => [
-            evt('bs_quand_change', 'c3', [ecrire('c2', 'motDePasse', non(lire('coche', 'c3')))]),
+            presentation('Deux « écrans » dans la même fenêtre : l\'entrée (mot de passe) et le carnet. On passe de l\'un à l\'autre en cachant certains contrôles et en montrant les autres. Les notes sont rangées dans la base de données Notes : une fiche par page.'),
+            evt('bs_quand_change', 'c3', [note('L\'interrupteur « Montrer » affiche le mot de passe en clair, ou le cache.'), ecrire('c2', 'motDePasse', non(lire('coche', 'c3')))]),
             evt('bs_quand_clic', 'c4', [
+              note('Le bon mot de passe cache l\'entrée et montre le carnet. Sinon : un son d\'erreur, et la case est vidée.'),
               si(compare('EQ', lire('texte', 'c2'), t('1234')),
                 [
                   ...montrer(entree, false), ...montrer(carnet, true),
@@ -488,6 +514,7 @@
             ]),
             // Une page choisie : on cherche sa note dans la base.
             evt('bs_quand_change', 'c5', [
+              note('Une page choisie dans l\'arborescence : on cherche sa fiche dans la base (0 = pas encore de note) et on affiche sa note.'),
               fixer('v_numero', ficheDeLaPage()),
               si(compare('EQ', v('v_numero'), n(0)),
                 [ecrire('c6', 'texte', t(''))],
@@ -495,6 +522,7 @@
               etat(2, joindre(t('📄 '), chemin()))
             ]),
             evt('bs_quand_clic', 'c7', [
+              note('💾 Garder : si la page n\'a pas encore de fiche, on en ajoute une ; sinon, on modifie sa note.'),
               si(estVide(chemin()),
                 [message(t('Choisissez d\'abord une page dans la liste de gauche.'), 'info')],
                 [
@@ -509,6 +537,7 @@
                 ])
             ]),
             evt('bs_quand_clic', 'c8', [
+              note('🔒 Verrouiller : le carnet disparaît, l\'entrée revient.'),
               ...montrer(carnet, false), ...montrer(entree, true),
               ecrire('c2', 'texte', t('')),
               etat(1, t('🔒 Verrouillé')), etat(2, t('À bientôt !'))
@@ -539,8 +568,10 @@
           ],
           [],
           () => [
-            evt('bs_quand_demarre', null, [ecrire('c5', 'active', vrai(false))]),
+            presentation('La caméra filme en direct. Le bouton lance un compte à rebours, prend la photo et la montre à droite ; on peut ensuite l\'enregistrer.'),
+            evt('bs_quand_demarre', null, [note('Pas encore de photo : rien à enregistrer, le bouton est grisé.'), ecrire('c5', 'active', vrai(false))]),
             evt('bs_quand_clic', 'c3', [
+              note('Le bouton est grisé pendant le compte à rebours, pour ne pas le relancer. Puis 3, 2, 1 : un chiffre et un bip par seconde.'),
               ecrire('c3', 'active', vrai(false)),
               ecrire('c6', 'visible', vrai(true)),
               ...compte('3'), ...compte('2'), ...compte('1'),
@@ -553,13 +584,15 @@
               ecrire('c3', 'active', vrai(true))
             ]),
             evt('bs_quand_clic', 'c5', [
+              note('« annulé ? » est vrai si on a fermé la fenêtre « Enregistrer » sans choisir de fichier.'),
               bloc('bs_fichier_enregistrer_de', 'c8', null, { CIBLE: 'c1' }),
               si(non(bloc('bs_fichier_annule', 'c8')), [
                 ecrire('c7', 'texte', joindre(t('💾 '), bloc('bs_fichier_nom', 'c8')))
               ])
             ]),
-            evt('bs_quand_change', 'c4', [ecrire('c1', 'allumee', lire('coche', 'c4'))]),
+            evt('bs_quand_change', 'c4', [note('L\'interrupteur allume ou éteint la caméra.'), ecrire('c1', 'allumee', lire('coche', 'c4'))]),
             evt('bs_quand_camera_mouvement', 'c1', [
+              note('La caméra compare chaque image à la précédente : si assez de pixels changent, c\'est un mouvement.'),
               ecrire('c7', 'texte', t('👀 Ça bouge !')),
               attendre(1),
               ecrire('c7', 'texte', t(''))
@@ -599,6 +632,7 @@
           ],
           [],
           () => [
+            presentation('Le menu Fichier et la barre d\'outils font la même chose : chacun envoie juste un message (« nouveau », « ouvrir », « enregistrer »). Le travail n\'est écrit qu\'une fois, dans « quand je reçois … ».'),
             evtMenu('Fichier › Nouveau', [envoyer('nouveau')]),
             evtMenu('Fichier › Ouvrir…', [envoyer('ouvrir')]),
             evtMenu('Fichier › Enregistrer…', [envoyer('enregistrer')]),
@@ -606,12 +640,14 @@
             quandOutil('📂 Ouvrir', [envoyer('ouvrir')]),
             quandOutil('💾 Enregistrer', [envoyer('enregistrer')]),
             quandMessage('nouveau', [
+              note('On demande avant d\'effacer le texte.'),
               si(confirmer('Effacer le texte pour commencer un nouveau document ?'), [
                 ecrire('c1', 'texte', t('')),
                 etat(t('📄 Nouveau document'))
               ])
             ]),
             quandMessage('ouvrir', [
+              note('La fenêtre « Ouvrir » de Windows. Si on n\'a pas annulé, le contenu du fichier va dans le texte et son nom dans la ligne d\'état.'),
               bloc('bs_fichier_ouvrir_avec', 'c3'),
               si(non(annule()), [
                 ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),
@@ -619,17 +655,19 @@
               ])
             ]),
             quandMessage('enregistrer', [
+              note('La fenêtre « Enregistrer sous », puis le texte est écrit dans le fichier choisi.'),
               { type: 'bs_fichier_enregistrer_avec', fields: { CTRL: 'c3' }, inputs: { VAL: I(lire('texte', 'c1')) } },
               si(annule(),
                 [etat(t('Enregistrement annulé.'))],
                 [etat(joindre(t('💾 Enregistré : '), nomFichier()))])
             ]),
-            quandMenuTexte('🔠 MAJUSCULES', [ecrire('c1', 'texte', casse('UPPERCASE'))]),
+            quandMenuTexte('🔠 MAJUSCULES', [note('Le menu du clic droit sur le texte (menu contextuel MenuTexte).'), ecrire('c1', 'texte', casse('UPPERCASE'))]),
             quandMenuTexte('🔡 minuscules', [ecrire('c1', 'texte', casse('LOWERCASE'))]),
             quandMenuTexte('🧹 Tout effacer', [
               si(confirmer('Effacer tout le texte ?'), [ecrire('c1', 'texte', t(''))])
             ]),
             evt('bs_quand_fichier_depose', 'c3', [
+              note('Un fichier glissé sur la fenêtre est ouvert directement.'),
               ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),
               etat(joindre(t('📄 '), nomFichier(), t(' (déposé)')))
             ])
@@ -659,7 +697,9 @@
           ],
           ['texte', 'deMoi', 'prochainY'],
           () => [
+            presentation('Chaque message est une bulle : un clone de l\'étiquette Bulle (cachée), posé dans le panneau défilant Fil. La variable prochainY retient où poser la bulle suivante.'),
             evt('bs_quand_demarre', null, [
+              note('Robi dit bonjour : on prépare le texte de sa bulle, puis on la crée.'),
               fixer('v_prochainY', n(10)),
               fixer('v_deMoi', vrai(false)),
               fixer('v_texte', t('Salut ! Je suis Robi 🤖. Écris-moi quelque chose !')),
@@ -667,9 +707,10 @@
               bloc('bs_focus', 'c3')
             ]),
             evt('bs_quand_clic', 'c4', [appeler('envoyer')]),
-            evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [appeler('envoyer')]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [note('Entrée envoie le message, comme le bouton.'), appeler('envoyer')]),
             // Ma bulle, puis la réponse de Robi une seconde plus tard.
             fonction('envoyer', [
+              note('Ma bulle d\'abord, puis la réponse de Robi une seconde plus tard (« Robi écrit… » dans la barre de titre en attendant).'),
               si(non(estVide(lire('texte', 'c3'))), [
                 fixer('v_texte', lire('texte', 'c3')),
                 fixer('v_deMoi', vrai(true)),
@@ -686,6 +727,7 @@
             ]),
             // Robi cherche des mots dans le message (en minuscules) ; sinon, il répond au hasard.
             fonction('réponse de Robi', [
+              note('Robi cherche des mots dans le message (mis en minuscules pour trouver aussi « Bonjour ») ; sinon, il répond une phrase au hasard.'),
               si(ou(contient('bonjour'), contient('salut')), [fixer('v_texte', t('Salut ! 👋 Comment ça va ?'))], [
                 si(contient('?'), [fixer('v_texte', t('Bonne question… Je dirais oui ! 🤔'))], [
                   fixer('v_texte', auHasard('Ah oui ? Raconte !', 'Trop bien ! 😄', 'Intéressant…', 'Je suis d\'accord ! 👍', 'Hi hi 😊'))
@@ -694,6 +736,7 @@
             ]),
             // Chaque bulle est un clone : à droite et en vert pour moi, à gauche et en blanc pour Robi.
             evt('bs_quand_clone', 'c2', [
+              note('Une nouvelle bulle : son texte, sa hauteur (une ligne pour environ 28 lettres), à droite en vert pour moi ou à gauche en blanc pour Robi. Puis le fil descend tout en bas.'),
               ecrire('__moi', 'texte', v('v_texte')),
               ecrire('__moi', 'hauteur', calc('ADD', n(14), calc('MULTIPLY', n(19), lignes))),
               si(v('v_deMoi'),
@@ -727,11 +770,13 @@
           ],
           [],
           () => [
-            evt('bs_quand_demarre', null, [appeler('afficher la météo')]),
+            presentation('Le bloc « météo à … » demande la météo sur Internet (service Open-Meteo) pour la ville écrite dans la case.'),
+            evt('bs_quand_demarre', null, [note('Au lancement, on montre déjà la météo de la ville écrite dans la case.'), appeler('afficher la météo')]),
             evt('bs_quand_clic', 'c2', [appeler('afficher la météo')]),
             evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [appeler('afficher la météo')]),
             // Chaque « météo à … » lit Internet ; les suivants, dans les 5 minutes, réutilisent la même réponse.
             fonction('afficher la météo', [
+              note('« trouvée ? » est faux si la ville est inconnue (ou sans Internet). Sinon, on lit chaque information : ville, emoji, température, vent…'),
               ecrire('c3', 'texte', t('⏳')),
               ecrire('c4', 'texte', t('')),
               ecrire('c5', 'texte', t('Je demande la météo sur Internet…')),
@@ -766,12 +811,15 @@
         ],
         ['score', 'a', 'b', 'question', 'reponse'],
         () => [
+          presentation('Une boucle « pour » pose 5 questions : la variable question compte de 1 à 5. La barre de progression montre où on en est.'),
           evt('bs_quand_clic', 'c2', [
+            note('Le bouton est grisé pendant le quiz, et le score repart de 0.'),
             ecrire('c2', 'active', vrai(false)),
             fixer('v_score', n(0)),
             ecrire('c4', 'texte', t('Score : 0 / 5')),
             pour('v_question', 1, 5, [
               ecrire('c3', 'valeur', calc('MINUS', v('v_question'), n(1))),
+              note('Deux nombres au hasard entre 2 et 10, puis on demande le résultat de leur multiplication.'),
               fixer('v_a', hasard(2, 10)),
               fixer('v_b', hasard(2, 10)),
               fixer('v_reponse', demanderNombre(joindre(
@@ -802,13 +850,16 @@
         ],
         ['reste'],
         () => [
+          presentation('Le curseur choisit la durée ; une boucle compte à rebours, une seconde à la fois.'),
           evt('bs_quand_change', 'c2', [
+            note('Le curseur bouge : on met à jour le texte, le grand chiffre et la barre.'),
             ecrire('c1', 'texte', joindre(t('Durée : '), lire('valeur', 'c2'), t(' secondes'))),
             ecrire('c3', 'texte', lire('valeur', 'c2')),
             ecrire('c4', 'max', lire('valeur', 'c2')),
             ecrire('c4', 'valeur', lire('valeur', 'c2'))
           ]),
           evt('bs_quand_clic', 'c5', [
+            note('Pendant le décompte, le bouton et le curseur sont grisés. La variable reste diminue de 1 chaque seconde, jusqu\'à 0.'),
             ecrire('c5', 'active', vrai(false)),
             ecrire('c2', 'active', vrai(false)),
             fixer('v_reste', lire('valeur', 'c2')),
@@ -841,14 +892,17 @@
         ],
         ['x', 'y', 'vx', 'vy'],
         () => [
+          presentation('Une animation dessinée : à chaque tour de boucle, on efface, on dessine la balle, puis on la déplace de vx et vy. Au bord, la vitesse change de signe : la balle repart dans l\'autre sens.'),
           evt('bs_quand_demarre', null, [
             fixer('v_x', n(60)), fixer('v_y', n(60)), fixer('v_vx', n(4)), fixer('v_vy', n(3)),
             dessin('bs_dessin_couleur', 'c1', { VAL: couleur('rouge') }),
             toujours([
+              note('Une image de l\'animation : 50 par seconde, grâce à « attendre 0,02 ».'),
               dessin('bs_dessin_effacer', 'c1'),
               dessin('bs_dessin_cercle', 'c1', { X: v('v_x'), Y: v('v_y'), R: n(16) }, { PLEIN: 'TRUE' }),
               ajouter('v_x', v('v_vx')),
               ajouter('v_y', v('v_vy')),
+              note('Bord gauche ou droit : vx change de signe. Bord du haut ou du bas : vy.'),
               si(ou(compare('LT', v('v_x'), n(16)), compare('GT', v('v_x'), n(384))),
                 [fixer('v_vx', calc('MINUS', n(0), v('v_vx')))]),
               si(ou(compare('LT', v('v_y'), n(16)), compare('GT', v('v_y'), n(224))),
@@ -857,6 +911,7 @@
             ])
           ]),
           evt('bs_quand_clic', 'c1', [
+            note('Clic sur le terrain : une couleur au hasard dans la liste.'),
             dessin('bs_dessin_couleur', 'c1', {
               VAL: { type: 'lists_getIndex', fields: { MODE: 'GET', WHERE: 'RANDOM' }, inputs: { VALUE: I({
                 type: 'lists_create_with', extraState: { itemCount: 5 },
@@ -899,8 +954,10 @@
           ],
           ['contenu'],
           () => [
+            presentation('Le tableau Contacts a sa case « garder » cochée : son contenu est retrouvé au prochain lancement. Le menu Fichier l\'exporte au format CSV, que lit Excel.'),
             evt('bs_quand_demarre', null, [compteur()]),
             evt('bs_quand_clic', 'c7', [
+              note('➕ Ajouter : une ligne avec les trois cases, puis on les vide.'),
               si(estVide(lire('texte', 'c2')),
                 [message(t('Écrivez au moins un nom.'), 'attention')],
                 [
@@ -911,11 +968,13 @@
                 ])
             ]),
             evt('bs_quand_change', 'c10', [
+              note('Clic sur une ligne du tableau : ses valeurs reviennent dans les cases.'),
               ecrire('c2', 'texte', cellule('Nom')),
               ecrire('c4', 'texte', cellule('Prénom')),
               ecrire('c6', 'texte', cellule('Téléphone'))
             ]),
             evt('bs_quand_clic', 'c8', [
+              note('« numéro choisi » vaut 0 si aucune ligne n\'est sélectionnée.'),
               si(compare('EQ', choisie, n(0)),
                 [message(t('Cliquez d\'abord sur un contact dans le tableau.'))],
                 [si(confirmer('Supprimer ce contact ?'), [
@@ -928,6 +987,7 @@
               bloc('bs_fichier_enregistrer', null, { VAL: bloc('bs_tableau_csv', 'c10'), NOM: t('contacts.csv') })
             ]),
             evtMenu('Fichier › Importer un fichier CSV…', [
+              note('« ouvrir un fichier » donne un texte vide si on annule.'),
               fixer('v_contenu', { type: 'bs_fichier_ouvrir' }),
               si({ type: 'logic_negate', inputs: { BOOL: I(estVide(v('v_contenu'))) } }, [
                 bloc('bs_tableau_remplir_csv', 'c10', { VAL: v('v_contenu') }),
@@ -982,9 +1042,11 @@
           ],
           ['trouves'],
           () => [
+            presentation('Les livres sont rangés dans une base de données (Bibliotheque) ; le tableau Livres ne fait que les montrer. La fonction actualiser remplit le tableau, avec ou sans recherche.'),
             evt('bs_quand_demarre', null, [appeler('actualiser')]),
             // Montre toute la base, ou seulement les livres dont le titre ou l'auteur contient la recherche.
             fonction('actualiser', [
+              note('Recherche vide : toute la base. Sinon, on cherche dans les titres, puis dans les auteurs si aucun titre ne correspond.'),
               si(estVide(recherche()),
                 [bloc('bs_base_afficher', 'c14', null, { TAB: 'c12' })],
                 [
@@ -997,6 +1059,7 @@
               ecrire('c13', 'texte', joindre(bloc('bs_base_nombre', 'c14'), t(' livre(s) dans la bibliothèque · gardés d\'une fois sur l\'autre')))
             ]),
             evt('bs_quand_clic', 'c7', [
+              note('Une nouvelle fiche : titre, auteur et année.'),
               si(estVide(lire('texte', 'c2')),
                 [message(t('Écrivez au moins le titre du livre.'), 'attention')],
                 [
@@ -1007,6 +1070,7 @@
                 ])
             ]),
             evt('bs_quand_clic', 'c8', [
+              note('« fiche choisie » : celle de la ligne sélectionnée dans le tableau (0 = aucune).'),
               si(compare('EQ', choisie(), n(0)),
                 [message(t('Cliquez d\'abord sur un livre dans le tableau.'), 'info')],
                 [
@@ -1021,7 +1085,7 @@
               bloc('bs_base_trier', 'c14', null, { CHAMP: 'Titre', SENS: 'croissant' }),
               appeler('actualiser')
             ]),
-            evt('bs_quand_change', 'c11', [appeler('actualiser')])
+            evt('bs_quand_change', 'c11', [note('La recherche se refait à chaque lettre tapée.'), appeler('actualiser')])
           ]);
       }
     },
@@ -1052,10 +1116,12 @@
           ],
           ['score', 'vies', 'vitesse', 'enJeu'],
           () => [
+            presentation('Le minuteur Chute fait avancer le jeu : toutes les 0,03 seconde, la pièce descend et on regarde si le panier la touche. La variable enJeu vaut vrai pendant une partie.'),
             evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
+              note('Tout remettre à zéro, puis démarrer le minuteur et la musique.'),
               fixer('v_score', n(0)), fixer('v_vies', n(3)), fixer('v_vitesse', n(3)), fixer('v_enJeu', vrai(true)),
               score(), vies(),
               ecrire('c5', 'visible', vrai(false)),
@@ -1064,10 +1130,12 @@
               bloc('bs_sonctrl', 'c6', null, { ACTION: 'jouer' })
             ]),
             fonction('replacer la pièce', [
+              note('La pièce repart d\'en haut (au-dessus de la fenêtre), à un endroit au hasard.'),
               ecrire('c3', 'y', n(-50)),
               ecrire('c3', 'x', hasard(10, 420))
             ]),
             evt('bs_quand_minuteur', 'c7', [
+              note('Les flèches enfoncées déplacent le panier, sans sortir de la fenêtre. Puis la pièce descend ; elle tombe un peu plus vite à chaque pièce attrapée.'),
               si(et(touche('gauche'), compare('GT', x('c4'), n(0))), [ecrire('c4', 'x', calc('MINUS', x('c4'), n(8)))]),
               si(et(touche('droite'), compare('LT', x('c4'), n(408))), [ecrire('c4', 'x', calc('ADD', x('c4'), n(8)))]),
               ecrire('c3', 'y', calc('ADD', yy('c3'), v('v_vitesse'))),
@@ -1077,6 +1145,7 @@
                 ajouter('v_vitesse', n(0.3)),
                 appeler('replacer la pièce')
               ]),
+              note('Pièce ratée (sortie par le bas) : une vie de moins.'),
               si(compare('GT', yy('c3'), n(360)), [
                 bloc('bs_son', null, null, { SON: 'erreur' }),
                 ajouter('v_vies', n(-1)), vies(),
@@ -1085,9 +1154,11 @@
               ])
             ]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'bouge' }, [
+              note('Le panier suit la souris (on retire la moitié de sa largeur pour le centrer).'),
               si(v('v_enJeu'), [ecrire('c4', 'x', calc('MINUS', { type: 'bs_souris_fenetre', fields: { QUOI: 'x' } }, n(36)))])
             ]),
             fonction('fin de partie', [
+              note('Le record est gardé en mémoire d\'une fois sur l\'autre.'),
               bloc('bs_minuteur_ctrl', 'c7', null, { ACTION: 'arreter' }),
               bloc('bs_sonctrl', 'c6', null, { ACTION: 'arreter' }),
               fixer('v_enJeu', vrai(false)),
@@ -1135,10 +1206,12 @@
           ],
           ['score', 'enJeu'],
           () => [
+            presentation('Un jeu avec des clones : Meteorite reste cachée, ce sont ses copies qui tombent. Le minuteur Apparition en crée une à chaque tic, de plus en plus souvent.'),
             evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
+              note('Plus aucune météorite, score à zéro, et le minuteur démarre.'),
               bloc('bs_supprimer_clones', 'c3'),
               fixer('v_score', n(0)), score(),
               fixer('v_enJeu', vrai(true)),
@@ -1148,12 +1221,14 @@
             ]),
             // Chaque « tic » fait apparaître une météorite, de plus en plus souvent.
             evt('bs_quand_minuteur', 'c5', [
+              note('Chaque tic : une météorite de plus, un point, et le minuteur accélère (jusqu\'à une toutes les 0,2 seconde).'),
               bloc('bs_creer_clone', 'c3'),
               ajouter('v_score', n(1)), score(),
               si(compare('GT', intervalle(), n(0.2)), [ecrire('c5', 'intervalle', calc('MINUS', intervalle(), n(0.01)))])
             ]),
             // La vie d'un clone : il apparaît en haut, tombe, et disparaît en bas.
             evt('bs_quand_clone', 'c3', [
+              note('La vie d\'un clone : il apparaît en haut à un endroit au hasard, tombe un peu en biais et disparaît en bas. « 👉 moi » désigne ce clone-là.'),
               bloc('bs_placer', '__moi', { X: hasard(0, 432), Y: n(-48) }),
               bloc('bs_orienter', '__moi', { DIR: hasard(160, 200) }),
               ecrire('__moi', 'visible', vrai(true)),
@@ -1164,12 +1239,13 @@
                 attendre(0.02)
               ])
             ]),
-            evtChamps('bs_quand_touche', { TOUCHE: 'gauche' }, bouger(-14)),
+            evtChamps('bs_quand_touche', { TOUCHE: 'gauche' }, [note('Les flèches déplacent le vaisseau ; « rebondir » le garde dans la fenêtre.'), ...bouger(-14)]),
             evtChamps('bs_quand_touche', { TOUCHE: 'droite' }, bouger(14)),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'bouge' }, [
               si(v('v_enJeu'), [ecrire('c2', 'x', calc('MINUS', { type: 'bs_souris_fenetre', fields: { QUOI: 'x' } }, n(24)))])
             ]),
             fonction('fin de partie', [
+              note('« si enJeu » évite de finir deux fois quand deux météorites touchent le vaisseau en même temps.'),
               si(v('v_enJeu'), [
                 fixer('v_enJeu', vrai(false)),
                 bloc('bs_minuteur_ctrl', 'c5', null, { ACTION: 'arreter' }),
@@ -1216,10 +1292,12 @@
           ],
           ['score', 'vies', 'enJeu'],
           () => [
+            presentation('Les fantômes sont des clones de Fantome (caché). Un fantôme attrapé devient un peu transparent : c\'est le signal, pour sa propre boucle, qu\'il doit s\'arrêter.'),
             evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
+              note('Tout remettre à zéro, puis démarrer le minuteur et la musique.'),
               bloc('bs_supprimer_clones', 'c3'),
               fixer('v_score', n(0)), fixer('v_vies', n(3)), fixer('v_enJeu', vrai(true)),
               score(), vies(),
@@ -1230,11 +1308,13 @@
             ]),
             // Les fantômes arrivent de plus en plus souvent.
             evt('bs_quand_minuteur', 'c5', [
+              note('Un fantôme de plus, et le prochain arrivera un peu plus vite.'),
               bloc('bs_creer_clone', 'c3'),
               si(compare('GT', intervalle(), n(0.45)), [ecrire('c5', 'intervalle', calc('MINUS', intervalle(), n(0.03)))])
             ]),
             // La vie d'un fantôme : il apparaît tout petit, en fondu, puis grossit…
             evt('bs_quand_clone', 'c3', [
+              note('Il apparaît petit et en fondu, puis grossit tant que la partie continue, qu\'il n\'est pas attrapé et qu\'il fait moins de 160 %.'),
               bloc('bs_placer', '__moi', { X: hasard(20, 396), Y: hasard(50, 276) }), // il reste dans la fenêtre même à 160 %
               bloc('bs_sprite_taille', '__moi', { VAL: n(40) }),
               fondu('apparaitre', 0.5),
@@ -1243,6 +1323,7 @@
                 attendre(0.05)
               ]),
               // … et s'il devient trop gros sans avoir été attrapé, il s'échappe.
+              note('Trop gros sans avoir été attrapé : il s\'échappe, une vie de moins.'),
               si(et(v('v_enJeu'), libre()), [
                 bloc('bs_son', null, null, { SON: 'erreur' }),
                 ajouter('v_vies', n(-1)), vies(),
@@ -1255,6 +1336,7 @@
             ]),
             // Un clic sur un fantôme (un clone) : attrapé !
             evt('bs_quand_clic', 'c3', [
+              note('Un clic sur un fantôme : attrapé ! Il devient transparent à 10 %, ce qui arrête sa boucle.'),
               si(et(v('v_enJeu'), libre()), [
                 bloc('bs_sprite_transparence', '__moi', { VAL: n(10) }),
                 bloc('bs_son', null, null, { SON: 'piece' }),
@@ -1264,6 +1346,7 @@
               ])
             ]),
             fonction('fin de partie', [
+              note('Le record est gardé en mémoire d\'une fois sur l\'autre.'),
               si(v('v_enJeu'), [
                 fixer('v_enJeu', vrai(false)),
                 bloc('bs_minuteur_ctrl', 'c5', null, { ACTION: 'arreter' }),
@@ -1330,6 +1413,7 @@
           ],
           ['score', 'vies', 'enJeu', 'briques', 'vitesse', 'ligne', 'colonne'],
           () => [
+            presentation('Le mur est fait de clones de Brique. Chaque brique surveille elle-même la balle : touchée, elle la fait rebondir et disparaît. La balle, elle, ne s\'occupe que des bords et de la raquette.'),
             evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
@@ -1339,6 +1423,7 @@
               score(), vies(),
               ecrire('c6', 'visible', vrai(false)),
               // Le mur : 5 rangées de 8 briques. On place l'original (caché), puis on le clone.
+              note('Le mur : 5 rangées de 8 briques. On place l\'original (caché), on lui met le costume de sa rangée (5 couleurs), puis on le clone.'),
               pour('v_ligne', 1, 5, [
                 pour('v_colonne', 1, 8, [
                   bloc('bs_placer', 'c5', {
@@ -1352,6 +1437,7 @@
               ]),
               appeler('servir'),
               // La balle avance ; si elle passe sous la raquette, une vie est perdue.
+              note('La boucle du jeu : la balle avance. Sous la raquette, une vie est perdue ; sinon, elle rebondit sur les bords, et sur la raquette « en visant ».'),
               tantQue(v('v_enJeu'), [
                 bloc('bs_avancer', 'c4', { PAS: v('v_vitesse') }),
                 si(compare('GT', lire('y', 'c4'), n(322)), [appeler('balle perdue')], [
@@ -1362,6 +1448,7 @@
               ])
             ]),
             fonction('servir', [
+              note('La balle repart du milieu de la raquette, vers le haut, un peu au hasard.'),
               bloc('bs_placer', 'c4', { X: calc('ADD', lire('x', 'c3'), n(32)), Y: n(300) }),
               bloc('bs_orienter', 'c4', { DIR: hasard(-40, 40) }),
               fixer('v_vitesse', n(5)),
@@ -1377,6 +1464,7 @@
             ]),
             // Chaque brique surveille la balle : touchée, elle la renvoie et disparaît.
             evt('bs_quand_clone', 'c5', [
+              note('Chaque brique : touchée par la balle, elle la renvoie (« si Balle touche 👉 moi, rebondir »), compte les points, puis se supprime.'),
               ecrire('__moi', 'visible', vrai(true)),
               tantQue(v('v_enJeu'), [
                 si({ type: 'bs_se_touchent', fields: { CTRL: '__moi', CTRL2: 'c4' } }, [
@@ -1394,6 +1482,7 @@
             evtChamps('bs_quand_touche', { TOUCHE: 'gauche' }, bouger(-20)),
             evtChamps('bs_quand_touche', { TOUCHE: 'droite' }, bouger(20)),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'bouge' }, [
+              note('La raquette suit la souris ; « rebondir » la garde dans la fenêtre.'),
               si(v('v_enJeu'), [
                 ecrire('c3', 'x', calc('MINUS', { type: 'bs_souris_fenetre', fields: { QUOI: 'x' } }, n(48))),
                 bloc('bs_rebondir', 'c3')
@@ -1431,9 +1520,11 @@
           ],
           ['valide'],
           () => [
+            presentation('Trois fenêtres : la principale, Parametres et APropos. « ouvrir … et attendre » met le programme en pause jusqu\'à la fermeture : idéal pour une boîte OK / Annuler.'),
             // La fenêtre de réglages bloque le reste du programme : les blocs qui suivent
             // attendent qu'on l'ait fermée, puis lisent ce qu'on y a saisi.
             evt('bs_quand_clic', 'c2', [
+              note('La variable valide dira si on a fermé avec OK (vrai) ou avec Annuler (faux).'),
               fixer('v_valide', vrai(false)),
               ouvrir('f2', true),
               si(v('v_valide'), [
@@ -1446,12 +1537,12 @@
                 ecrire('c3', 'texte', t('Réglages annulés : rien n\'a changé.'))
               ])
             ]),
-            evt('bs_quand_clic', 'c8', [fixer('v_valide', vrai(true)), fermer('f2')]),
+            evt('bs_quand_clic', 'c8', [note('OK : on retient que les réglages sont validés, puis on ferme.'), fixer('v_valide', vrai(true)), fermer('f2')]),
             evt('bs_quand_clic', 'c9', [fermer('f2')]),
             evtChamps('bs_quand_fenetre', { FENETRE: 'f2', QUOI: 'ouverture' }, [
               bloc('bs_fenetre_titre', null, { VAL: t('Réglages') }, { FENETRE: 'f2' })
             ]),
-            evtMenu('Aide › À propos', [ouvrir('f3', false)]),
+            evtMenu('Aide › À propos', [note('« ouvrir » sans attendre : la fenêtre À propos ne bloque rien.'), ouvrir('f3', false)]),
             evt('bs_quand_clic', 'c11', [fermer('f3')])
           ]);
         p.fenetres = [

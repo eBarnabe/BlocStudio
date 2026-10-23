@@ -1779,6 +1779,101 @@
     boutonsSi(this);
   };
 
+  // ---------- Commentaire ----------
+  // Un bloc qui ne fait rien : il explique les blocs qui le suivent (comme « ' » en Visual Basic).
+  // Son texte est coupé en lignes pour rester lisible ; « ✎ » ouvre une boîte pour le modifier.
+  const COULEUR_COMMENTAIRE = '#5f8a6a';
+  const LARGEUR_COMMENTAIRE = 56; // caractères par ligne affichée
+  const IMAGE_CRAYON = boutonSi('✎', 24, 15);
+  const RETRAIT_COMMENTAIRE = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="1"/>');
+
+  function lignesCommentaire(texte) {
+    const lignes = [];
+    for (const paragraphe of String(texte).split('\n')) {
+      let ligne = '';
+      for (const mot of paragraphe.split(/\s+/).filter(Boolean)) {
+        if (ligne && (ligne + ' ' + mot).length > LARGEUR_COMMENTAIRE) { lignes.push(ligne); ligne = mot; }
+        else ligne = ligne ? ligne + ' ' + mot : mot;
+      }
+      lignes.push(ligne);
+    }
+    return lignes;
+  }
+
+  // Petite boîte de saisie sur plusieurs lignes (Ctrl+Entrée : OK ; Échap : Annuler).
+  function saisirCommentaire(texte, valider) {
+    const voile = document.createElement('div');
+    voile.className = 'bs-commentaire-voile';
+    const boite = document.createElement('div');
+    boite.className = 'bs-commentaire-boite';
+    const titre = document.createElement('h3');
+    titre.textContent = '💬 Commentaire';
+    const zone = document.createElement('textarea');
+    zone.value = texte;
+    zone.rows = 6;
+    zone.placeholder = 'Expliquez ce que font les blocs en dessous…';
+    const boutons = document.createElement('div');
+    boutons.className = 'bs-commentaire-boutons';
+    const annuler = document.createElement('button');
+    annuler.textContent = 'Annuler';
+    annuler.className = 'secondaire';
+    const ok = document.createElement('button');
+    ok.textContent = 'OK';
+    ok.className = 'principal';
+    boutons.append(annuler, ok);
+    boite.append(titre, zone, boutons);
+    voile.appendChild(boite);
+    document.body.appendChild(voile);
+    const fermer = garder => {
+      voile.remove();
+      if (garder) valider(zone.value.replace(/\s+$/, ''));
+    };
+    ok.addEventListener('click', () => fermer(true));
+    annuler.addEventListener('click', () => fermer(false));
+    voile.addEventListener('pointerdown', e => { if (e.target === voile) fermer(false); });
+    zone.addEventListener('keydown', e => {
+      if (e.key === 'Escape') fermer(false);
+      else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) fermer(true);
+      e.stopPropagation(); // les raccourcis de Blockly (Suppr, Ctrl+Z…) ne doivent pas agir pendant la saisie
+    });
+    zone.focus();
+    zone.select();
+  }
+
+  Blockly.Blocks['bs_commentaire'] = {
+    init() {
+      this.texte_ = 'Expliquez ici ce que font les blocs en dessous.';
+      this.setColour(COULEUR_COMMENTAIRE);
+      this.setPreviousStatement(true);
+      this.setNextStatement(true);
+      this.setTooltip('Un commentaire : il explique le programme et ne fait rien quand le programme tourne. ' +
+        'Cliquez sur ✎ pour l\'écrire. Il peut aussi rester seul, à côté des blocs, comme une note.');
+      this.suppressPrefixSuffix = true; // pas d'arrêt dessus en mode pas à pas
+      this.majCommentaire_();
+    },
+    saveExtraState() { return { texte: this.texte_ }; },
+    loadExtraState(etat) {
+      this.texte_ = String((etat && etat.texte) || '');
+      this.majCommentaire_();
+    },
+    majCommentaire_() {
+      for (let i = 0; this.getInput('LIGNE' + i); i++) this.removeInput('LIGNE' + i);
+      lignesCommentaire(this.texte_ || '(commentaire vide)').forEach((ligne, i) => {
+        const entree = this.appendDummyInput('LIGNE' + i);
+        if (i === 0) {
+          entree.appendField(boutonBloc(IMAGE_CRAYON, 24, 'Modifier le commentaire', () => {
+            if (this.isInFlyout || this.workspace.options.readOnly) return;
+            saisirCommentaire(this.texte_, texte => changerForme(this, () => {
+              this.texte_ = texte;
+              this.majCommentaire_();
+            }));
+          }));
+        } else entree.appendField(new Blockly.FieldImage(RETRAIT_COMMENTAIRE, 24, 1)); // aligné sous le texte de la 1re ligne
+        entree.appendField(new Blockly.FieldLabel(ligne, 'bs-commentaire-texte'));
+      });
+    }
+  };
+
   // Libellés de Blockly plus parlants pour les débutants.
   Object.assign(Blockly.Msg, {
     LOGIC_TERNARY_CONDITION: 'si',
@@ -2158,6 +2253,7 @@
   gen.forBlock['bs_radio_groupe'] = b => [`app.radioCoche(${q(b.getFieldValue('GROUPE'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_emoji'] = b => [q(b.getFieldValue('EMOJI')), Order.ATOMIC];
   gen.forBlock['bs_retour_ligne'] = () => ["'\\n'", Order.ATOMIC];
+  gen.forBlock['bs_commentaire'] = b => b.texte_.split('\n').map(l => '// ' + l).join('\n') + '\n';
 
   gen.forBlock['bs_dessin_couleur'] = b => `app.dessin(${id(b)}, 'couleur', ${val(b, 'VAL', "'noir'")});\n`;
   gen.forBlock['bs_dessin_epaisseur'] = b => `app.dessin(${id(b)}, 'epaisseur', ${val(b, 'VAL', '2')});\n`;
@@ -2280,6 +2376,13 @@
         { kind: 'block', type: 'bs_envoyer_message' },
         { kind: 'block', type: 'bs_quand_message' },
         etiquette('Les événements d\'un contrôle (« quand Bouton1 est cliqué »…) sont dans sa catégorie, en bas.')
+      ]
+    },
+    {
+      kind: 'category', name: 'Commentaires', colour: COULEUR_COMMENTAIRE, contents: [
+        etiquette('Expliquez votre programme : un commentaire ne fait rien quand le programme tourne.'),
+        { kind: 'block', type: 'bs_commentaire' },
+        etiquette('Glissez-le au-dessus des blocs qu\'il explique (ou en premier dans un « quand… »).')
       ]
     },
     {
