@@ -1785,7 +1785,32 @@
   const COULEUR_COMMENTAIRE = '#5f8a6a';
   const LARGEUR_COMMENTAIRE = 56; // caractères par ligne affichée
   const IMAGE_CRAYON = boutonSi('✎', 24, 15);
-  const RETRAIT_COMMENTAIRE = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="1"/>');
+  const INTERLIGNE_COMMENTAIRE = 20; // pixels d'une ligne à la suivante
+  const MARGE_COMMENTAIRE = 4;       // au-dessus et au-dessous du texte
+
+  // Texte sur plusieurs lignes serrées, dans un seul champ (une rangée de bloc par ligne serait trop espacée).
+  const mesure = document.createElement('canvas').getContext('2d');
+  class ChampLignes extends Blockly.FieldLabel {
+    render_() {
+      const c = this.getConstants(), texte = this.textElement_;
+      if (!texte) return;
+      while (texte.firstChild) texte.removeChild(texte.firstChild);
+      const marge = c.FIELD_BORDER_RECT_X_PADDING;
+      mesure.font = `italic ${c.FIELD_TEXT_FONTWEIGHT} ${c.FIELD_TEXT_FONTSIZE}pt ${c.FIELD_TEXT_FONTFAMILY}`;
+      let largeur = 0;
+      const lignes = String(this.getValue()).split('\n');
+      lignes.forEach((ligne, i) => {
+        const morceau = Blockly.utils.dom.createSvgElement('tspan', { x: marge, dy: i ? INTERLIGNE_COMMENTAIRE : 0 }, texte);
+        morceau.textContent = ligne.replace(/ /g, ' ') || ' ';
+        largeur = Math.max(largeur, mesure.measureText(ligne).width);
+      });
+      this.size_.width = Math.ceil(largeur) + 2 * marge;
+      this.size_.height = c.FIELD_TEXT_HEIGHT + INTERLIGNE_COMMENTAIRE * (lignes.length - 1) + 2 * MARGE_COMMENTAIRE;
+      texte.setAttribute('x', marge);
+      // 1re ligne : à la hauteur d'un texte d'une ligne ; les suivantes descendent avec « dy ».
+      texte.setAttribute('y', MARGE_COMMENTAIRE + (c.FIELD_TEXT_BASELINE_CENTER ? c.FIELD_TEXT_HEIGHT / 2 : c.FIELD_TEXT_BASELINE));
+    }
+  }
 
   function lignesCommentaire(texte) {
     const lignes = [];
@@ -1857,20 +1882,17 @@
       this.majCommentaire_();
     },
     majCommentaire_() {
-      for (let i = 0; this.getInput('LIGNE' + i); i++) this.removeInput('LIGNE' + i);
-      lignesCommentaire(this.texte_ || '(commentaire vide)').forEach((ligne, i) => {
-        const entree = this.appendDummyInput('LIGNE' + i);
-        if (i === 0) {
-          entree.appendField(boutonBloc(IMAGE_CRAYON, 24, 'Modifier le commentaire', () => {
-            if (this.isInFlyout || this.workspace.options.readOnly) return;
-            saisirCommentaire(this.texte_, texte => changerForme(this, () => {
-              this.texte_ = texte;
-              this.majCommentaire_();
-            }));
+      const lignes = lignesCommentaire(this.texte_ || '(commentaire vide)').join('\n');
+      if (this.getField('TEXTE')) return this.setFieldValue(lignes, 'TEXTE');
+      this.appendDummyInput('NOTE')
+        .appendField(boutonBloc(IMAGE_CRAYON, 24, 'Modifier le commentaire', () => {
+          if (this.isInFlyout || this.workspace.options.readOnly) return;
+          saisirCommentaire(this.texte_, texte => changerForme(this, () => {
+            this.texte_ = texte;
+            this.majCommentaire_();
           }));
-        } else entree.appendField(new Blockly.FieldImage(RETRAIT_COMMENTAIRE, 24, 1)); // aligné sous le texte de la 1re ligne
-        entree.appendField(new Blockly.FieldLabel(ligne, 'bs-commentaire-texte'));
-      });
+        }))
+        .appendField(new ChampLignes(lignes, 'bs-commentaire-texte'), 'TEXTE');
     }
   };
 

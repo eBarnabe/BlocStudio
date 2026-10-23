@@ -232,7 +232,7 @@ h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; color: var(--
 body.sans-infobulles .blocklyTooltipDiv { display: none !important; }
 
 /* Bloc « 💬 commentaire » : texte en italique, et sa boîte de saisie. */
-.blocklyText.bs-commentaire-texte { font-style: italic; }
+.blocklyText.bs-commentaire-texte { font-style: italic !important; }
 .bs-commentaire-voile {
   position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center;
   background: rgba(15, 23, 42, .45);
