@@ -2939,6 +2939,30 @@ function BlocRuntimeFactory() {
           if (dx || dy) poser(id, d.x + dx, d.y + dy);
           break;
         }
+        case 'rebondirSur': {
+          // S'il touche l'autre contrôle (ou l'un de ses clones) en allant vers lui, il repart dans l'autre sens,
+          // comme sur un bord : rebond horizontal s'il le touche par un côté, vertical par-dessus ou par-dessous.
+          // Il est aussi ressorti de l'autre, pour ne pas rester collé dedans.
+          ctrl(a);
+          const autre = famille(a).find(x => x !== id && seChevauchent(id, x));
+          if (!autre) break;
+          const za = zoneDe(id), zb = zoneDe(autre);
+          const ox = Math.min(za.x + za.l, zb.x + zb.l) - Math.max(za.x, zb.x);
+          const oy = Math.min(za.y + za.h, zb.y + zb.h) - Math.max(za.y, zb.y);
+          const r = directionDe(d) * Math.PI / 180, vx = Math.sin(r), vy = -Math.cos(r);
+          let dir = directionDe(d);
+          if (ox < oy) {
+            const aGauche = za.x + za.l / 2 < zb.x + zb.l / 2;
+            if (aGauche ? vx > 0 : vx < 0) dir = -dir;
+            poser(id, d.x + (aGauche ? -ox : ox), d.y);
+          } else {
+            const dessus = za.y + za.h / 2 < zb.y + zb.h / 2;
+            if (dessus ? vy > 0 : vy < 0) dir = 180 - dir;
+            poser(id, d.x, d.y + (dessus ? -oy : oy));
+          }
+          d.direction = normaliser(dir);
+          break;
+        }
       }
     }
 

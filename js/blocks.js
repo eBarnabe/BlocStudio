@@ -587,6 +587,9 @@
     COULEUR_MOUVEMENT, 'Change la direction (sens des aiguilles d\'une montre si le nombre est positif). ' + DIRECTIONS);
   Blockly.Blocks['bs_rebondir'] = instruction(() => ['si', BOUGE, 'touche un bord, rebondir'],
     COULEUR_MOUVEMENT, 'Si le contrôle sort de la fenêtre, il est remis dedans et repart dans l\'autre sens. À mettre dans une boucle, après « avancer ».');
+  Blockly.Blocks['bs_rebondir_sur'] = instruction(() => ['si', BOUGE, 'touche',
+    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, ', rebondir'],
+    COULEUR_MOUVEMENT, 'S\'il touche l\'autre contrôle, il repart dans l\'autre sens (comme sur un bord) et en est ressorti. Parfait pour une balle sur une raquette ou des briques. À mettre dans une boucle, après « avancer ».');
   Blockly.Blocks['bs_touche_bord'] = valeur(() => [BOUGE, 'touche un bord ?'], 'Boolean',
     COULEUR_MOUVEMENT, 'Vrai si le contrôle touche ou dépasse un bord de la fenêtre.');
   Blockly.Blocks['bs_distance'] = valeur(() => ['distance entre', BOUGE, 'et', { champ: champCible(false), nom: 'CIBLE' }], 'Number',
@@ -2118,6 +2121,7 @@
   gen.forBlock['bs_orienter_vers'] = b => mv(b, 'orienterVers', q(b.getFieldValue('CIBLE')));
   gen.forBlock['bs_tourner_direction'] = b => mv(b, 'tourner', val(b, 'DEG', '15'));
   gen.forBlock['bs_rebondir'] = b => mv(b, 'rebondir');
+  gen.forBlock['bs_rebondir_sur'] = b => mv(b, 'rebondirSur', codeCtrl(b.getFieldValue('CTRL2')));
   gen.forBlock['bs_touche_bord'] = b => [`app.toucheBord(${id(b)})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_distance'] = b => [`app.distance(${id(b)}, ${q(b.getFieldValue('CIBLE'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_direction'] = b => [`app.lire(${id(b)}, 'direction')`, Order.FUNCTION_CALL];
@@ -2470,6 +2474,7 @@
       { kind: 'block', type: 'bs_se_touchent' },
       { kind: 'block', type: 'bs_cote_contact' },
       { kind: 'block', type: 'bs_touche_couleur', inputs: { COUL: couleurOmbre() } },
+      { kind: 'block', type: 'bs_rebondir_sur' },
       { kind: 'block', type: 'bs_placer', inputs: { X: nombre(0), Y: nombre(0) } },
       { kind: 'block', type: 'bs_glisser', inputs: { X: nombre(200), Y: nombre(100), SEC: nombre(1) } },
       { kind: 'block', type: 'bs_radio_groupe' },
@@ -2510,6 +2515,12 @@
     return COULEUR_CONTROLES;
   }
 
+  // Un autre contrôle visible (un sprite de préférence), pour « si … touche …, rebondir ».
+  function autreControle(c) {
+    const autres = BlocStudio.controles().filter(x => x !== c && !BlocRuntime.INVISIBLES.includes(x.type));
+    return (autres.find(x => x.type === 'sprite') || autres[0] || c).id;
+  }
+
   // Les blocs d'un contrôle : ses événements, ses actions, puis ses propriétés (lire / mettre).
   function blocsDuControle(c) {
     const t = c.type;
@@ -2542,6 +2553,7 @@
       b('bs_tourner_direction', { DEG: nombre(15) }),
       b('bs_direction'),
       b('bs_rebondir'),
+      b('bs_rebondir_sur', null, { CTRL2: autreControle(c) }),
       b('bs_touche_bord'),
       b('bs_distance'),
       b('bs_se_touchent'),
