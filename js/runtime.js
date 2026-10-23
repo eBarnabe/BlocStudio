@@ -2943,6 +2943,8 @@ function BlocRuntimeFactory() {
           // S'il touche l'autre contrôle (ou l'un de ses clones) en allant vers lui, il repart dans l'autre sens,
           // comme sur un bord : rebond horizontal s'il le touche par un côté, vertical par-dessus ou par-dessous.
           // Il est aussi ressorti de l'autre, pour ne pas rester collé dedans.
+          // b === 'viser' (casse-briques) : sur le dessus ou le dessous, l'angle dépend de l'endroit touché :
+          // tout droit au milieu, jusqu'à 60° de biais aux bouts.
           ctrl(a);
           const autre = famille(a).find(x => x !== id && seChevauchent(id, x));
           if (!autre) break;
@@ -2957,7 +2959,12 @@ function BlocRuntimeFactory() {
             poser(id, d.x + (aGauche ? -ox : ox), d.y);
           } else {
             const dessus = za.y + za.h / 2 < zb.y + zb.h / 2;
-            if (dessus ? vy > 0 : vy < 0) dir = 180 - dir;
+            if (dessus ? vy > 0 : vy < 0) {
+              if (b === 'viser') {
+                const t = Math.max(-1, Math.min(1, (za.x + za.l / 2 - zb.x - zb.l / 2) / (zb.l / 2 || 1)));
+                dir = dessus ? t * 60 : 180 - t * 60;
+              } else dir = 180 - dir;
+            }
             poser(id, d.x, d.y + (dessus ? -oy : oy));
           }
           d.direction = normaliser(dir);

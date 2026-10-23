@@ -588,8 +588,11 @@
   Blockly.Blocks['bs_rebondir'] = instruction(() => ['si', BOUGE, 'touche un bord, rebondir'],
     COULEUR_MOUVEMENT, 'Si le contrôle sort de la fenêtre, il est remis dedans et repart dans l\'autre sens. À mettre dans une boucle, après « avancer ».');
   Blockly.Blocks['bs_rebondir_sur'] = instruction(() => ['si', BOUGE, 'touche',
-    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, ', rebondir'],
-    COULEUR_MOUVEMENT, 'S\'il touche l\'autre contrôle, il repart dans l\'autre sens (comme sur un bord) et en est ressorti. Parfait pour une balle sur une raquette ou des briques. À mettre dans une boucle, après « avancer ».');
+    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, ', rebondir',
+    { champ: new Blockly.FieldDropdown([['normalement', 'normal'], ['en visant', 'viser']]), nom: 'MODE' }],
+    COULEUR_MOUVEMENT, 'S\'il touche l\'autre contrôle, il repart dans l\'autre sens (comme sur un bord) et en est ressorti. ' +
+    '« En visant » (casse-briques) : sur le dessus ou le dessous, il repart tout droit s\'il touche le milieu, et de plus en plus en biais vers les bouts. ' +
+    'À mettre dans une boucle, après « avancer ».');
   Blockly.Blocks['bs_touche_bord'] = valeur(() => [BOUGE, 'touche un bord ?'], 'Boolean',
     COULEUR_MOUVEMENT, 'Vrai si le contrôle touche ou dépasse un bord de la fenêtre.');
   Blockly.Blocks['bs_distance'] = valeur(() => ['distance entre', BOUGE, 'et', { champ: champCible(false), nom: 'CIBLE' }], 'Number',
@@ -2121,7 +2124,7 @@
   gen.forBlock['bs_orienter_vers'] = b => mv(b, 'orienterVers', q(b.getFieldValue('CIBLE')));
   gen.forBlock['bs_tourner_direction'] = b => mv(b, 'tourner', val(b, 'DEG', '15'));
   gen.forBlock['bs_rebondir'] = b => mv(b, 'rebondir');
-  gen.forBlock['bs_rebondir_sur'] = b => mv(b, 'rebondirSur', codeCtrl(b.getFieldValue('CTRL2')));
+  gen.forBlock['bs_rebondir_sur'] = b => mv(b, 'rebondirSur', codeCtrl(b.getFieldValue('CTRL2')), q(b.getFieldValue('MODE') || 'normal'));
   gen.forBlock['bs_touche_bord'] = b => [`app.toucheBord(${id(b)})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_distance'] = b => [`app.distance(${id(b)}, ${q(b.getFieldValue('CIBLE'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_direction'] = b => [`app.lire(${id(b)}, 'direction')`, Order.FUNCTION_CALL];
