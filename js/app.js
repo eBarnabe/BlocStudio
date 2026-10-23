@@ -734,8 +734,6 @@
     c.x = borner(arrondir(c.x), 0, Math.max(0, fenetreCourante().largeur - 20));
     c.y = borner(arrondir(c.y), 0, Math.max(0, fenetreCourante().hauteur - 20));
     if (['etiquette', 'bouton', 'casecocher', 'interrupteur', 'lien'].includes(type)) c.texte = TYPES[type].texte;
-    // Un nouveau contrôle Sprite affiche d'emblée le premier sprite de la bibliothèque.
-    if (type === 'sprite' && projet.sprites.length) donnerSprite(c, projet.sprites[0]);
     projet.controles.push(c);
     if (AMARRES.includes(type)) amarrerBarresEtat();
     rattacherAuxPanneaux([c]);
@@ -2010,7 +2008,18 @@
     bouton('🎨 Modifier', () => modifierSprite(s), !!s);
     bouton('➕ Dessiner…', () => nouveauSprite(choisir));
     bouton('📁 Importer…', () => importerSprite(choisir));
+    // Un sprite affiché par plusieurs contrôles : le modifier les change tous.
+    const autres = s ? projet.controles.filter(x => x !== c && x.type === 'sprite' && x.sprite === s.id) : [];
+    if (autres.length) bouton('🧬 Copie à part', () => {
+      const copie = Object.assign(structuredClone(s), { id: 'spr_' + nouvelId(), nom: nomSpriteLibre(s.nom + ' copie') });
+      projet.sprites.push(copie);
+      c.sprite = copie.id;
+      apresChangementSprites();
+    });
     prop(liste, '').appendChild(boutons);
+    if (autres.length) liste.appendChild(el('p', 'aide',
+      `⚠️ Ce sprite est aussi affiché par ${autres.map(x => x.nom).join(', ')} : « Modifier » les changera aussi. ` +
+      '« Copie à part » donne à ce contrôle son propre exemplaire.'));
     if (!s) {
       liste.appendChild(el('p', 'aide', 'Choisissez un sprite, dessinez-en un ou importez une image (PNG, JPG, GIF animé…).'));
       return;
