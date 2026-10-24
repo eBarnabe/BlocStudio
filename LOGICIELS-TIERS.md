@@ -34,7 +34,7 @@ Les blocs **Météo** (catégorie Internet) interrogent ce service gratuit, sans
 
 Seuls le nom de la ville demandée, puis ses coordonnées, lui sont envoyés.
 
-- Données : Open-Meteo.com, sous licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Un programme qui affiche ces données doit citer la source, par exemple « Météo : Open-Meteo.com ».
+- Données : Open-Meteo.com, sous licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Un programme qui affiche ces données doit citer la source, par exemple « Météo : Open-Meteo.com » (comme le lien en bas de l'exemple Météo).
 - Conditions d'utilisation : https://open-meteo.com/en/terms (usage non commercial gratuit)
 
 ### Sites affichés par les programmes

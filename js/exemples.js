@@ -791,22 +791,27 @@
       theme: 'applications',
       description: 'La météo en ce moment dans la ville de son choix, lue sur Internet (il faut une connexion) : température, temps qu\'il fait, vent…',
       creer: () => {
-        // c1 Ville · c2 Voir · c3 Emoji · c4 Temperature · c5 Details · c6 Lieu
+        // c1 Ville · c2 Voir · c3 Emoji · c4 Temperature · c5 Details · c6 Lieu · c7 Source (lien vers Open-Meteo)
         const meteo = quoi => bloc('bs_meteo', null, { VAL: lire('texte', 'c1') }, { QUOI: quoi });
         const arrondi = x => ({ type: 'math_round', fields: { OP: 'ROUND' }, inputs: { NUM: I(x) } });
         return projet(
-          { titre: 'Météo', largeur: 420, hauteur: 290, couleurFond: '#e0f2fe' },
+          { titre: 'Météo', largeur: 420, hauteur: 312, couleurFond: '#e0f2fe' },
           [
             { type: 'zonetexte', nom: 'Ville', texte: 'Paris', texteInvite: 'Une ville…', x: 16, y: 16, largeur: 250, hauteur: 32, taillePolice: 16 },
             { type: 'bouton', nom: 'Voir', texte: '🔍 Voir la météo', x: 274, y: 16, largeur: 130, hauteur: 32, couleurFond: '#0369a1', couleurTexte: '#ffffff', gras: true },
             { type: 'etiquette', nom: 'Emoji', texte: '', alignement: 'centre', x: 16, y: 92, largeur: 110, hauteur: 90, taillePolice: 60 },
             { type: 'etiquette', nom: 'Temperature', texte: '', x: 134, y: 104, largeur: 270, hauteur: 60, taillePolice: 42, couleurTexte: '#0c4a6e', gras: true },
             { type: 'etiquette', nom: 'Details', texte: '', x: 16, y: 190, largeur: 388, hauteur: 90, taillePolice: 14, couleurTexte: '#334155' },
-            { type: 'etiquette', nom: 'Lieu', texte: '', x: 16, y: 60, largeur: 388, hauteur: 26, taillePolice: 15, couleurTexte: '#0c4a6e', gras: true }
+            { type: 'etiquette', nom: 'Lieu', texte: '', x: 16, y: 60, largeur: 388, hauteur: 26, taillePolice: 15, couleurTexte: '#0c4a6e', gras: true },
+            {
+              type: 'lien', nom: 'Source', texte: 'Météo : Open-Meteo.com', adresse: 'https://open-meteo.com', alignement: 'droite',
+              x: 204, y: 286, largeur: 200, hauteur: 20, taillePolice: 12, couleurTexte: '#0369a1'
+            }
           ],
           [],
           () => [
-            presentation('Le bloc « météo à … » demande la météo sur Internet (service Open-Meteo) pour la ville écrite dans la case.'),
+            presentation('Le bloc « météo à … » demande la météo sur Internet (service Open-Meteo) pour la ville écrite dans la case. ' +
+              'Ces données sont libres à condition de citer leur source : c\'est le rôle du lien « Météo : Open-Meteo.com » en bas de la fenêtre.'),
             evt('bs_quand_demarre', null, [note('Au lancement, on montre déjà la météo de la ville écrite dans la case.'), appeler('afficher la météo')]),
             evt('bs_quand_clic', 'c2', [appeler('afficher la météo')]),
             evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [appeler('afficher la météo')]),
