@@ -104,7 +104,16 @@ Le script ouvre l'éditeur dans Chrome ou Edge, sans fenêtre, puis vérifie :
 
 Il répond « Tout est bon » (code de sortie 0) ou liste les échecs (code 1).
 
-## Bibliothèques utilisées
+## Licence
 
-- [Blockly](https://github.com/google/blockly) (Google, licence Apache 2.0).
-- Le kit [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) de Microsoft (`lanceur/sdk`, voir `lanceur/sdk/LICENSE.txt`).
+BlocStudio est sous [licence MIT](LICENSE) : chacun peut l'utiliser, le modifier et le redistribuer librement, à condition de garder la mention de licence.
+
+Les programmes que vous créez avec BlocStudio sont à vous. Une fois exportés, ils contiennent le moteur de BlocStudio (MIT) et, pour un .exe, les DLL WebView2 de Microsoft.
+
+## Logiciels et services utilisés
+
+- [Blockly](https://github.com/google/blockly) 11.2.1 : Google, licence Apache 2.0 (`lib/blockly/LICENSE`).
+- Le kit [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) 1.0.2903.40 : Microsoft, licence de type BSD (`lanceur/sdk/LICENSE.txt`).
+- [Open-Meteo](https://open-meteo.com) pour les blocs Météo : données sous licence CC BY 4.0.
+
+Le détail, avec ce que chacun apporte, est dans [LOGICIELS-TIERS.md](LOGICIELS-TIERS.md).
