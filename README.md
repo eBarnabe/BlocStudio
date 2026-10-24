@@ -43,9 +43,9 @@ Un programme peut avoir **plusieurs fenêtres**, des **menus**, des fenêtres **
 - **Mouvement et jeux** : avancer, rebondir, collisions au pixel près, **gravité et saut** avec sols et murs « solides », clones, costumes et animations, **fond qui défile**, score et vies.
 - **Manette de jeu** : boutons et joysticks. La croix fait aussi les flèches du clavier, si bien que les jeux prévus pour le clavier se jouent à la manette.
 - **Sons** : sons et musiques 8 bits (avec un studio pour les composer), synthèse vocale, **micro**.
-- **Données** : listes, **dictionnaires**, mémoire qui reste d'un lancement à l'autre, fichiers CSV lisibles par Excel.
+- **Données** : listes, **dictionnaires**, mémoire qui reste d'un lancement à l'autre, fichiers **CSV et Excel (.xlsx)** à ouvrir et à enregistrer.
 - **Maths et texte** : hasard, nombres écrits à la française (« 1 234,50 »), conversions d'unités, **dates**.
-- **Internet et Windows** : météo, données d'un service web, notifications, presse-papiers, impression.
+- **Internet et Windows** : météo, données d'un service web (JSON), transformées en listes ou en lignes de tableau d'un seul bloc ; notifications, presse-papiers, impression.
 
 Chaque bloc a une infobulle qui explique à quoi il sert. Le bouton **</> Voir le code** montre le JavaScript produit par les blocs.
 
@@ -53,10 +53,16 @@ Chaque bloc a une infobulle qui explique à quoi il sert. Le bouton **</> Voir l
 
 Les modes **Lent** et **Pas à pas** éclairent chaque bloc au moment où il s'exécute, et **Variables** montre leurs valeurs. Une erreur est expliquée en français, et **🧩 Voir le bloc** désigne le bloc fautif.
 
-### 20 exemples
+### Importer et exporter des données
+
+Un Tableau, une Base de données, une liste ou les suggestions d'une Zone de texte se remplissent avec un **fichier CSV ou Excel**, depuis leurs propriétés (**📥 Importer…**). Une fenêtre d'aperçu permet de choisir la feuille, les lignes et les colonnes à garder. Les données sont rangées dans le projet et partent avec les programmes exportés. Elles s'enregistrent aussi en Excel ou en CSV (**📤**).
+
+Le Tableau reste fluide avec des dizaines de milliers de lignes, par exemple les 35 000 communes de France.
+
+### 21 exemples
 
 - **🌱 Pour débuter** : Bonjour, Fiche d'inscription, Quiz de calcul, Compte à rebours, Plusieurs fenêtres.
-- **🗂️ Applications** : Liste de tâches, Carnet secret, Bloc-notes, Messagerie, Météo, Carnet d'adresses, Ma bibliothèque.
+- **🗂️ Applications** : Liste de tâches, Carnet secret, Bloc-notes, Messagerie, Météo, Communes de France, Carnet d'adresses, Ma bibliothèque.
 - **🎮 Jeux** : Balle qui rebondit, Attrape la pièce, Pluie de météorites, Chasse aux fantômes, Casse-briques, Plateformes.
 - **🎨 Images, sons et caméra** : Mini-Paint, Photomaton.
 
@@ -115,5 +121,6 @@ Les programmes que vous créez avec BlocStudio sont à vous. Une fois exportés,
 - [Blockly](https://github.com/google/blockly) 11.2.1 : Google, licence Apache 2.0 (`lib/blockly/LICENSE`).
 - Le kit [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) 1.0.2903.40 : Microsoft, licence de type BSD (`lanceur/sdk/LICENSE.txt`).
 - [Open-Meteo](https://open-meteo.com) pour les blocs Météo : données sous licence CC BY 4.0.
+- [geo.api.gouv.fr](https://geo.api.gouv.fr/decoupage-administratif) pour l'exemple Communes de France : données sous Licence Ouverte 2.0.
 
 Le détail, avec ce que chacun apporte, est dans [LOGICIELS-TIERS.md](LOGICIELS-TIERS.md).
