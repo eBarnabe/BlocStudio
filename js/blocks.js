@@ -41,6 +41,7 @@
     defilementY: 'défilement vertical (en pixels depuis le haut)', defilementX: 'défilement horizontal (en pixels depuis la gauche)',
     hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
     defilement: 'sens du défilement (vertical, horizontal ou deux)',
+    secondes: 'avec les secondes', decalageHeures: 'décalage (heures, pour un autre pays)',
     solide: 'solide (sol, plateforme ou mur, pour la gravité)', vitesseY: 'vitesse de chute (négative : il monte)'
   };
 
@@ -69,6 +70,8 @@
     tableau: ['numero', 'texte', 'nombreLignes', 'colonnes', ...TEXTE, ...POSITION],
     date: ['texte', ...TEXTE, 'active', ...POSITION],
     heure: ['texte', 'heures', 'minutes', ...TEXTE, 'active', ...POSITION],
+    calendrier: ['texte', 'couleurBarre', ...TEXTE, ...POSITION],
+    horloge: ['texte', 'genre', 'secondes', 'decalageHeures', 'couleurBarre', ...TEXTE, ...POSITION],
     forme: ['genre', 'couleurFond', 'couleurBordure', 'epaisseur', 'sens', ...POSITION, 'direction', 'vitesseY'],
     selecteurcouleur: ['texte', 'active', ...POSITION],
     navigateur: ['adresse', ...POSITION],
@@ -85,7 +88,7 @@
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', 'collision', ...POSITION, 'direction', 'vitesseY']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { horloge: ['texte'], arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: 'élément choisi' },
     zoneliste: { texte: 'élément choisi' },
@@ -98,6 +101,8 @@
     tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
     date: { texte: 'date (jj/mm/aaaa)' },
     heure: { texte: 'heure (hh:mm)' },
+    calendrier: { texte: 'date choisie (jj/mm/aaaa)', couleurBarre: 'couleur du mois et de la date choisie' },
+    horloge: { texte: 'heure affichée (hh:mm:ss)', genre: 'affichage (aiguilles ou chiffres)', couleurBarre: 'couleur de la trotteuse' },
     forme: { genre: 'forme (rectangle, arrondi, ovale, triangle ou ligne)', couleurFond: 'couleur de remplissage' },
     selecteurcouleur: { texte: 'couleur choisie' },
     minuteur: { active: 'en marche' },
@@ -205,7 +210,7 @@
   };
 
   const TYPES_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau', 'barreprogression'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau', 'barreprogression', 'calendrier'];
 
   Blockly.Blocks['bs_quand_change'] = {
     init() {
@@ -1456,6 +1461,28 @@
   Blockly.Blocks['bs_date_jour_semaine'] = valeur(() => [{ nom: 'DATE', libelle: 'jour de la semaine du' }], 'String', COULEUR_SONS,
     'Le jour de la semaine de cette date, en toutes lettres : « lundi », « mardi »… Quel jour tombe ton anniversaire ? ' + DATES);
 
+  // ---------- Calendrier ----------
+
+  const CALENDRIER = { ctrl: ['calendrier'] };
+  Blockly.Blocks['bs_calendrier_marquer'] = instruction(() => [
+    { nom: 'DATE', libelle: 'marquer le' }, 'dans', CALENDRIER, { nom: 'COUL', libelle: 'en' }
+  ], COULEUR_CONTROLES, 'Met un point de couleur sous ce jour : un rendez-vous, un anniversaire, un jour de vacances… ' +
+    'Le point reste quand on change de mois. ' + DATES);
+  Blockly.Blocks['bs_calendrier_effacer'] = instruction(() => [{ nom: 'DATE', libelle: 'effacer la marque du' }, 'dans', CALENDRIER],
+    COULEUR_CONTROLES, 'Retire le point de couleur de ce jour. ' + DATES);
+  Blockly.Blocks['bs_calendrier_vider'] = instruction(() => ['effacer toutes les marques de', CALENDRIER],
+    COULEUR_CONTROLES, 'Retire tous les points de couleur du calendrier.');
+
+  // ---------- Plein écran ----------
+
+  Blockly.Blocks['bs_plein_ecran'] = instruction(() => [
+    { champ: new Blockly.FieldDropdown([['passer en plein écran', 'passer'], ['quitter le plein écran', 'quitter']]), nom: 'QUOI' }
+  ], COULEUR_FENETRES, 'Le programme occupe tout l\'écran, comme un jeu. Une fenêtre redimensionnable s\'agrandit (ses contrôles suivent leur ancrage) ; ' +
+    'sinon, elle reste à sa taille, au milieu de l\'écran. Pour en sortir : Échap (F11 dans l\'application Windows). ' +
+    'Dans l\'éditeur ou une page web, il faut un clic ou une touche juste avant : au démarrage, un bouton « Cliquez ici » apparaît.');
+  Blockly.Blocks['bs_est_plein_ecran'] = valeur(() => ['en plein écran ?'], 'Boolean', COULEUR_FENETRES,
+    'Vrai si le programme occupe tout l\'écran en ce moment.');
+
   // ---------- Micro ----------
 
   Blockly.Blocks['bs_volume_micro'] = valeur(() => ['volume du micro'], 'Number', COULEUR_SONS,
@@ -2414,8 +2441,7 @@
   gen.forBlock['bs_gravite'] = b => mv(b, 'gravite', val(b, 'FORCE', '1'), q(b.getFieldValue('FOND') || 'bas'));
   gen.forBlock['bs_sauter'] = b => mv(b, 'sauter', val(b, 'FORCE', '12'));
   gen.forBlock['bs_au_sol'] = b => [`app.lire(${id(b)}, 'auSol')`, Order.FUNCTION_CALL];
-  gen.forBlock['bs_image_defiler'] = b => `app.defilerImage(${id(b)}, ${val(b, 'DX', '0')}, ${val(b, 'DY', '0')});
-`;
+  gen.forBlock['bs_image_defiler'] = b => `app.defilerImage(${id(b)}, ${val(b, 'DX', '0')}, ${val(b, 'DY', '0')});\n`;
   gen.forBlock['bs_compteur_ajouter'] = b => `app.ajouterAuNombre(${id(b)}, ${val(b, 'VAL', '1')});\n`;
   gen.forBlock['bs_compteur_valeur'] = b => [`app.nombreAffiche(${id(b)})`, Order.FUNCTION_CALL];
 
@@ -2526,6 +2552,12 @@
   gen.forBlock['bs_volume_micro'] = () => ['app.volumeMicro()', Order.FUNCTION_CALL];
   gen.forBlock['bs_quand_micro'] = b =>
     `app.quandMicro(${Number(b.getFieldValue('SEUIL')) || 30}, async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_calendrier_marquer'] = b =>
+    `app.calendrier(${id(b)}, 'marquer', ${val(b, 'DATE', "''")}, ${val(b, 'COUL', "'rouge'")});\n`;
+  gen.forBlock['bs_calendrier_effacer'] = b => `app.calendrier(${id(b)}, 'effacer', ${val(b, 'DATE', "''")});\n`;
+  gen.forBlock['bs_calendrier_vider'] = b => `app.calendrier(${id(b)}, 'vider');\n`;
+  gen.forBlock['bs_plein_ecran'] = b => `app.pleinEcran(${b.getFieldValue('QUOI') !== 'quitter'});\n`;
+  gen.forBlock['bs_est_plein_ecran'] = () => ['app.estPleinEcran()', Order.FUNCTION_CALL];
   gen.forBlock['bs_dico_vide'] = () => ['app.dicoVide()', Order.FUNCTION_CALL];
   gen.forBlock['bs_dico_mettre'] = b => `app.dicoMettre(${val(b, 'DICO', 'null')}, ${val(b, 'CLE', "''")}, ${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_dico_valeur'] = b => [`app.dicoValeur(${val(b, 'DICO', 'null')}, ${val(b, 'CLE', "''")})`, Order.FUNCTION_CALL];
@@ -2842,11 +2874,11 @@
   // Valeur proposée dans « mettre … à » : celle du contrôle dans le concepteur, quand c'est possible.
   const PROPS_NOMBRE = ['x', 'y', 'largeur', 'hauteur', 'taillePolice', 'valeur', 'min', 'max', 'pas', 'numero', 'volume',
     'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax', 'epaisseur', 'heures', 'minutes',
-    'defilementX', 'defilementY', 'largeurContenu', 'hauteurContenu', 'vitesseY'];
+    'defilementX', 'defilementY', 'largeurContenu', 'hauteurContenu', 'vitesseY', 'decalageHeures'];
   const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre', 'couleurBordure'];
   const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee', 'cliquable',
-    'gras', 'italique', 'lectureSeule', 'trie', 'solide'];
+    'gras', 'italique', 'lectureSeule', 'trie', 'solide', 'secondes'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
   const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical', orientation: 'verticale', collision: 'rectangle' };
 
@@ -2989,6 +3021,12 @@
           etiquette('Fichiers (CSV, lisible par Excel)'),
           b('bs_tableau_csv'), b('bs_tableau_remplir_csv'));
         break;
+      case 'calendrier':
+        actions.push(
+          b('bs_calendrier_marquer', { DATE: AUJOURDHUI(), COUL: couleurOmbre() }),
+          b('bs_calendrier_effacer', { DATE: AUJOURDHUI() }),
+          b('bs_calendrier_vider'));
+        break;
       case 'graphique':
         actions.push(b('bs_graphique_ajouter', { VAL: nombre(10), ETIQ: texte('Sam') }), b('bs_graphique_vider'));
         break;
@@ -3086,7 +3124,11 @@
         { kind: 'button', text: '🪟 Créer une autre fenêtre…', callbackKey: 'nouvelleFenetre', 'web-class': 'bouton-fenetre' },
         { kind: 'block', type: 'bs_quand_demarre' },
         { kind: 'block', type: 'bs_fond_fenetre', inputs: { VAL: couleurOmbre() } },
-        { kind: 'block', type: 'bs_fenetre_titre', fields: { FENETRE: '' }, inputs: { VAL: texte(f.titre || 'Mon programme') } });
+        { kind: 'block', type: 'bs_fenetre_titre', fields: { FENETRE: '' }, inputs: { VAL: texte(f.titre || 'Mon programme') } },
+        etiquette('Plein écran'),
+        { kind: 'block', type: 'bs_plein_ecran' },
+        { kind: 'block', type: 'bs_plein_ecran', fields: { QUOI: 'quitter' } },
+        { kind: 'block', type: 'bs_est_plein_ecran' });
       if (BlocRuntime.cheminsMenus(f.menus).length) {
         contenu.push(etiquette('Menus'), { kind: 'block', type: 'bs_quand_menu' }, { kind: 'block', type: 'bs_menu_actif' });
       }

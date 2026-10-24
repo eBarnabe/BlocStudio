@@ -214,6 +214,7 @@ namespace BlocStudio
             if (message != null && message.StartsWith("notification:")) { Notifier(message.Substring(13)); return; }
             if (message != null && message.StartsWith("imprimer:")) { Imprimer(message.Substring(9)); return; }
             if (message != null && message.StartsWith("web:")) { LireWeb(message.Substring(4)); return; }
+            if (message == "pleinecran:1" || message == "pleinecran:0") { PleinEcran(message == "pleinecran:1"); return; }
             if (message == null || !message.StartsWith("taille:")) return;
             string[] t = message.Substring(7).Split('x');
             int l, h;
@@ -222,6 +223,31 @@ namespace BlocStudio
             Size taille = TailleEcran(Math.Max(l, 100), Math.Max(h, 60));
             Rectangle ecran = Screen.FromControl(this).WorkingArea;
             ClientSize = new Size(Math.Min(taille.Width, ecran.Width), Math.Min(taille.Height, ecran.Height));
+        }
+
+        // Le bloc « passer en plein écran » envoie « pleinecran:1 » (« pleinecran:0 » pour en sortir, ou F11) :
+        // la fenêtre perd son bord et couvre tout l'écran, barre des tâches comprise ; la page la remplit comme d'habitude.
+        bool pleinEcran;
+        FormBorderStyle bordAvant;
+        FormWindowState etatAvant;
+        void PleinEcran(bool oui)
+        {
+            if (oui == pleinEcran) return;
+            pleinEcran = oui;
+            if (oui)
+            {
+                bordAvant = FormBorderStyle;
+                etatAvant = WindowState;
+                WindowState = FormWindowState.Normal; // sinon l'agrandissement garderait la place de la barre des tâches
+                FormBorderStyle = FormBorderStyle.None;
+                WindowState = FormWindowState.Maximized;
+            }
+            else
+            {
+                WindowState = FormWindowState.Normal;
+                FormBorderStyle = bordAvant;
+                WindowState = etatAvant;
+            }
         }
 
         // Le bloc « notification » envoie « notification:ICONE\nTITRE\nMESSAGE » : une notification de Windows.

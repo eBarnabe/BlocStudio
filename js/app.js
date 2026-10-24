@@ -33,6 +33,9 @@
       defauts: { colonnes: ['Nom', 'Prénom'], lignes: [['Dupont', 'Marie'], ['Martin', 'Lucas']], memoriser: false } },
     date: { prefixe: 'Date', texte: '', largeur: 150, hauteur: 28, defauts: { date: '' } },
     heure: { prefixe: 'Heure', texte: '', largeur: 110, hauteur: 28, defauts: { heure: '' } },
+    calendrier: { prefixe: 'Calendrier', texte: '', largeur: 230, hauteur: 210, defauts: { date: '', couleurBarre: '#4f46e5' } },
+    horloge: { prefixe: 'Horloge', texte: '', largeur: 120, hauteur: 120,
+      defauts: { genre: 'aiguilles', secondes: true, decalageHeures: 0, couleurBarre: '#dc2626', taillePolice: 24 } },
     forme: { prefixe: 'Forme', texte: '', largeur: 100, hauteur: 100,
       defauts: { genre: 'ovale', couleurFond: '#60a5fa', couleurBordure: '#1e3a8a', epaisseur: 2, sens: 'horizontale' } },
     selecteurcouleur: { prefixe: 'Couleur', texte: '#4f46e5', largeur: 60, hauteur: 30 },
@@ -77,14 +80,14 @@
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
   const AVEC_TEXTE = ['bouton', 'etiquette', 'zonetexte', 'casecocher', 'interrupteur', 'lien', 'graphique', 'onglets', 'listederoulante',
-    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'heure', 'arborescence', 'barreetat', 'barreoutils'];
+    'boutonradio', 'cadre', 'zoneliste', 'selecteurnombre', 'tableau', 'date', 'heure', 'arborescence', 'barreetat', 'barreoutils', 'calendrier', 'horloge'];
 
   // Contrôles dont on peut aligner le texte (à gauche, au centre, à droite).
   const ALIGNABLES = ['bouton', 'etiquette', 'zonetexte', 'lien'];
 
   // Contrôles dont l'événement principal est « change » (pour le double-clic).
   const AVEC_CHANGE = ['zonetexte', 'casecocher', 'boutonradio', 'listederoulante', 'zoneliste',
-    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau', 'barreprogression'];
+    'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau', 'barreprogression', 'calendrier'];
 
   const NOMS_TYPES = {
     bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
@@ -92,7 +95,7 @@
     curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
     boutonradio: 'Bouton radio', cadre: 'Cadre', panneau: 'Panneau défilant', zoneliste: 'Zone de liste',
     selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', barreoutils: 'Barre d\'outils', menucontextuel: 'Menu contextuel', heure: 'Sélecteur d\'heure', forme: 'Forme', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
+    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', barreoutils: 'Barre d\'outils', menucontextuel: 'Menu contextuel', heure: 'Sélecteur d\'heure', calendrier: 'Calendrier', horloge: 'Horloge', forme: 'Forme', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -1376,6 +1379,25 @@
       i.value = c.date || '';
       i.addEventListener('input', () => { c.date = i.value; maj(); });
       d.appendChild(i);
+    }
+    if (c.type === 'calendrier') {
+      const d = prop(liste, 'Date choisie au départ (vide = aujourd\'hui)');
+      const i = document.createElement('input');
+      i.type = 'date';
+      i.value = c.date || '';
+      i.addEventListener('input', () => { c.date = i.value; maj(); });
+      d.appendChild(i);
+      champCouleur(liste, 'Couleur du mois et de la date choisie', c.couleurBarre || '#4f46e5', v => { c.couleurBarre = v; maj(); });
+      liste.appendChild(el('p', 'aide', 'Un clic sur un jour le choisit (double-cliquez sur le calendrier pour écrire « quand … change »). ' +
+        'Ses blocs peuvent aussi marquer des dates d\'un point de couleur : un agenda, des anniversaires…'));
+    }
+    if (c.type === 'horloge') {
+      champChoix(liste, 'Affichage', [['aiguilles', '🕰️ À aiguilles'], ['chiffres', '🔢 En chiffres']], c.genre || 'aiguilles',
+        v => { c.genre = v; maj(); });
+      champCase(liste, 'Avec les secondes', c.secondes !== false, v => { c.secondes = v; maj(); });
+      champNombre(liste, 'Décalage en heures (l\'heure d\'un autre pays : Tokyo +7, New York -6…)', c.decalageHeures || 0,
+        v => { c.decalageHeures = v; maj(); });
+      champCouleur(liste, 'Couleur de la trotteuse (aiguille des secondes)', c.couleurBarre || '#dc2626', v => { c.couleurBarre = v; maj(); });
     }
     if (c.type === 'heure') {
       const d = prop(liste, 'Heure au départ (vide = l\'heure qu\'il est)');
@@ -2826,7 +2848,7 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲', panneau: '📜',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', heure: '🕒', forme: '🔷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', heure: '🕒', calendrier: '🗓️', horloge: '🕰️', forme: '🔷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',
@@ -3636,8 +3658,8 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
   const THEMES_PALETTE = [
     ['✏️ Texte', ['etiquette', 'lien', 'motdepasse', 'zonetexte']],
     ['🔘 Boutons et choix', ['bouton', 'boutonradio', 'casecocher', 'curseur', 'interrupteur', 'listederoulante', 'selecteurcouleur',
-      'date', 'heure', 'selecteurnombre', 'zoneliste']],
-    ['📊 Données', ['arborescence', 'barreprogression', 'basedonnees', 'graphique', 'tableau']],
+      'date', 'heure', 'calendrier', 'selecteurnombre', 'zoneliste']],
+    ['📊 Données', ['arborescence', 'barreprogression', 'basedonnees', 'graphique', 'horloge', 'tableau']],
     ['🖼️ Images et dessin', ['forme', 'image', 'sprite', 'zonedessin']],
     ['🎬 Sons, vidéos et web', ['camera', 'navigateur', 'son', 'video']],
     ['🧱 Mise en page', ['barreetat', 'barreoutils', 'cadre', 'menucontextuel', 'onglets', 'panneau']],
@@ -3652,6 +3674,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     panneau: 'Panel défilement scroll', onglets: 'TabControl pages', curseur: 'TrackBar slider volume',
     barreprogression: 'ProgressBar', zonedessin: 'dessin canvas peinture', tableau: 'DataGridView grille Excel',
     graphique: 'Chart courbe histogramme', date: 'DateTimePicker calendrier', heure: 'DateTimePicker horloge',
+    calendrier: 'MonthCalendar agenda mois date', horloge: 'heure montre pendule aiguilles réveil',
     selecteurcouleur: 'ColorDialog', navigateur: 'WebBrowser internet page', interrupteur: 'switch',
     lien: 'LinkLabel internet', video: 'MediaPlayer film', camera: 'webcam photo', barreetat: 'StatusStrip',
     barreoutils: 'ToolStrip', son: 'musique mp3 bruit', minuteur: 'Timer chronomètre', menucontextuel: 'ContextMenuStrip clic droit',

@@ -98,6 +98,30 @@ function BlocRuntimeFactory() {
     .bs-tableau tbody tr.bs-choisie { background: #4f46e5; color: #fff; }
     .bs-date, .bs-heure { border: 1px solid #7a7a7a; padding: 2px 6px; background: #fff; }
     .bs-forme svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    .bs-calendrier { display: flex; flex-direction: column; border: 1px solid #94a3b8; border-radius: 6px; background: #fff;
+      overflow: hidden; user-select: none; }
+    .bs-cal-tete { display: flex; align-items: center; padding: 2px; background: var(--accent); color: #fff; font-weight: 600; }
+    .bs-cal-tete span { flex: 1; text-align: center; }
+    .bs-cal-tete button { border: 0; background: none; color: inherit; font: inherit; font-size: 1.3em; line-height: 1;
+      padding: 0 .5em; cursor: pointer; border-radius: 4px; }
+    .bs-cal-tete button:hover { background: rgba(255,255,255,.2); }
+    .bs-cal-grille { flex: 1; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: auto repeat(6, 1fr);
+      gap: 1px; padding: 2px; }
+    .bs-cal-grille b { font-size: .75em; font-weight: 600; opacity: .55; text-align: center; padding: 2px 0; }
+    .bs-cal-grille button { position: relative; border: 0; border-radius: 4px; background: none; color: inherit; font: inherit;
+      cursor: pointer; padding: 0; min-height: 0; }
+    .bs-cal-grille button:hover { background: rgba(0,0,0,.07); }
+    .bs-cal-grille .bs-auj { box-shadow: inset 0 0 0 1.5px var(--accent); font-weight: 700; }
+    .bs-cal-grille .bs-choisi, .bs-cal-grille .bs-choisi:hover { background: var(--accent); color: #fff; }
+    .bs-cal-grille .bs-marque::after { content: ''; position: absolute; left: 50%; bottom: 2px; width: 5px; height: 5px;
+      margin-left: -2.5px; border-radius: 50%; background: var(--marque); }
+    .bs-horloge { display: flex; align-items: center; justify-content: center; font-variant-numeric: tabular-nums;
+      font-weight: 600; white-space: nowrap; }
+    .bs-horloge svg { width: 100%; height: 100%; display: block; }
+    .bs-plein-ecran { display: flex !important; flex-direction: column; align-items: center; justify-content: center; }
+    .bs-plein-ecran-attente { position: absolute; z-index: 100002; left: 50%; top: 10px; transform: translateX(-50%);
+      padding: 6px 14px; border-radius: 999px; background: #1e293b; color: #fff; font: 13px "Segoe UI", sans-serif;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3); cursor: pointer; }
     .bs-notifications { position: absolute; right: 10px; bottom: 10px; z-index: 100001; display: flex; flex-direction: column; gap: 8px;
       align-items: flex-end; pointer-events: none; }
     .bs-notification { display: flex; gap: 10px; width: 260px; max-width: calc(100vw - 40px); padding: 10px 12px; border-radius: 8px;
@@ -387,6 +411,96 @@ function BlocRuntimeFactory() {
   // ---- Formes : rectangle, arrondi, ovale (en CSS), triangle et ligne (en SVG) ----
   const GENRES_FORME = ['rectangle', 'arrondi', 'ovale', 'triangle', 'ligne'];
   const SENS_LIGNE = { horizontale: [0, 50, 100, 50], verticale: [50, 0, 50, 100], descendante: [0, 0, 100, 100], montante: [0, 100, 100, 0] };
+  // ---- Calendrier : un mois en grille ; c.choisie (date choisie, aaaa-mm-jj), c.vu (mois affiché, aaaa-mm),
+  // c.marques ({ aaaa-mm-jj: couleur }, posées par le bloc « marquer… ») ----
+  const NOMS_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  function rendreCalendrier(el, c) {
+    const choisie = c.choisie || dateIso(c.date) || aujourdhuiIso();
+    const [a, m] = (c.vu || choisie.slice(0, 7)).split('-').map(Number);
+    const tete = document.createElement('div');
+    tete.className = 'bs-cal-tete';
+    const fleche = (texte, sens) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = texte;
+      b.dataset.nav = sens;
+      return b;
+    };
+    const titre = document.createElement('span');
+    titre.textContent = `${NOMS_MOIS[m - 1]} ${a}`;
+    tete.append(fleche('‹', -1), titre, fleche('›', 1));
+    const grille = document.createElement('div');
+    grille.className = 'bs-cal-grille';
+    for (const j of ['lu', 'ma', 'me', 'je', 've', 'sa', 'di']) grille.appendChild(document.createElement('b')).textContent = j;
+    const decalage = (new Date(a, m - 1, 1).getDay() + 6) % 7; // lundi en premier
+    const nbJours = new Date(a, m, 0).getDate();
+    const auj = aujourdhuiIso();
+    for (let i = 0; i < 42; i++) {
+      const jour = i - decalage + 1;
+      if (jour < 1 || jour > nbJours) { grille.appendChild(document.createElement('span')); continue; }
+      const iso = `${a}-${String(m).padStart(2, '0')}-${String(jour).padStart(2, '0')}`;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = jour;
+      b.dataset.date = iso;
+      if (iso === auj) b.classList.add('bs-auj');
+      if (iso === choisie) b.classList.add('bs-choisi');
+      if (c.marques && c.marques[iso]) {
+        b.classList.add('bs-marque');
+        b.style.setProperty('--marque', couleur(c.marques[iso]));
+      }
+      grille.appendChild(b);
+    }
+    el.style.setProperty('--accent', couleur(c.couleurBarre || '#4f46e5'));
+    el.replaceChildren(tete, grille);
+  }
+
+  // ---- Horloge : l'heure de l'ordinateur (avec un décalage en heures, pour un autre pays),
+  // à aiguilles (c.genre === 'aiguilles') ou en chiffres ----
+  function heureHorloge(c) {
+    return new Date(Date.now() + (Number(c.decalageHeures) || 0) * 3600000);
+  }
+  function texteHorloge(c, avecSecondes) {
+    const t = heureHorloge(c), deux = n => String(n).padStart(2, '0');
+    return `${deux(t.getHours())}:${deux(t.getMinutes())}` + (avecSecondes ? ':' + deux(t.getSeconds()) : '');
+  }
+  function rendreHorloge(el, c) {
+    const secondes = c.secondes !== false;
+    if (c.genre === 'chiffres') {
+      el.classList.remove('bs-aiguilles');
+      el.style.background = c.couleurFond ? couleur(c.couleurFond) : '';
+      el.textContent = texteHorloge(c, secondes);
+      return;
+    }
+    el.classList.add('bs-aiguilles');
+    el.style.background = 'transparent'; // la couleur de fond remplit le cadran rond
+    const t = heureHorloge(c);
+    const s = t.getSeconds(), mn = t.getMinutes() + s / 60, h = t.getHours() % 12 + mn / 60;
+    const encre = couleur(c.couleurTexte || '#1e293b');
+    const aiguille = (angle, longueur, epaisseur, teinte) => {
+      const r = angle * Math.PI / 180;
+      return `<line x1="50" y1="50" x2="${50 + longueur * Math.sin(r)}" y2="${50 - longueur * Math.cos(r)}" ` +
+        `stroke="${teinte}" stroke-width="${epaisseur}" stroke-linecap="round"/>`;
+    };
+    let graduations = '';
+    for (let i = 0; i < 60; i++) {
+      const r = i * 6 * Math.PI / 180, longue = i % 5 === 0;
+      const r1 = longue ? 39 : 42;
+      graduations += `<line x1="${50 + r1 * Math.sin(r)}" y1="${50 - r1 * Math.cos(r)}" x2="${50 + 45 * Math.sin(r)}" y2="${50 - 45 * Math.cos(r)}" ` +
+        `stroke="${encre}" stroke-width="${longue ? 2 : 0.7}"/>`;
+    }
+    for (let i = 1; i <= 12; i++) {
+      const r = i * 30 * Math.PI / 180;
+      graduations += `<text x="${50 + 31 * Math.sin(r)}" y="${50 - 31 * Math.cos(r)}" fill="${encre}" font-size="9" ` +
+        `text-anchor="middle" dominant-baseline="central" font-family="Segoe UI, sans-serif">${i}</text>`;
+    }
+    el.innerHTML = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="${couleur(c.couleurFond || '#ffffff')}" ` +
+      `stroke="${encre}" stroke-width="2"/>${graduations}` +
+      aiguille(h * 30, 22, 4, encre) + aiguille(mn * 6, 34, 2.5, encre) +
+      (secondes ? aiguille(s * 6, 38, 1, couleur(c.couleurBarre || '#dc2626')) : '') +
+      `<circle cx="50" cy="50" r="2.5" fill="${encre}"/></svg>`;
+  }
+
   function rendreForme(el, c) {
     const genre = GENRES_FORME.includes(c.genre) ? c.genre : 'rectangle';
     const trait = couleur(c.couleurBordure || '#1e3a8a');
@@ -968,6 +1082,8 @@ function BlocRuntimeFactory() {
     el.className = 'bs-ctrl bs-' + c.type + (el.className ? ' ' + el.className : '');
     appliquerStyle(el, c);
     if (c.type === 'forme') rendreForme(el, c);
+    if (c.type === 'calendrier') rendreCalendrier(el, c);
+    if (c.type === 'horloge') rendreHorloge(el, c);
     if (c.type === 'curseur') majCurseur(el, c);
     if (c.type === 'panneau') sensDefilement(el, c.defilement);
     return el;
@@ -1506,6 +1622,7 @@ function BlocRuntimeFactory() {
       if (c.type === 'sprite') d.costume = Math.max(0, Math.round(Number(c.costume) || 0));
       if (c.type === 'zonedessin') suivreSouris(el, d);
       if (c.type === 'tableau') preparerTableau(el, d);
+      if (c.type === 'calendrier') preparerCalendrier(el, d);
       if (c.type === 'camera') d.surEvenement = [];
       if (c.type === 'barreetat') d.cases = String(c.texte ?? '').split('|');
       if (c.type === 'barreoutils') {
@@ -2659,6 +2776,87 @@ function BlocRuntimeFactory() {
       let somme = 0;
       for (const x of micro.donnees) somme += x * x;
       return Math.min(100, Math.round(Math.sqrt(somme / micro.donnees.length) * 400));
+    }
+
+    // ---- Plein écran ----
+    // Dans l'application Windows, c'est la fenêtre qui passe en plein écran, sans bord (F11 aussi) ; le programme
+    // la remplit comme d'habitude. Ailleurs (éditeur, page web), le programme occupe tout l'écran : agrandi s'il
+    // est redimensionnable (ses contrôles suivent leur ancrage), sinon centré sur sa couleur de fond.
+    let pleinEcranExe = false, tailleAvantPleinEcran = null, attentePleinEcran = null;
+    const estPleinEcran = () => dansExe ? pleinEcranExe : document.fullscreenElement === hote;
+    function pleinEcran(oui) {
+      if (dansExe) {
+        const webview = window.chrome && window.chrome.webview;
+        if (webview) webview.postMessage(oui ? 'pleinecran:1' : 'pleinecran:0');
+        pleinEcranExe = oui;
+        return;
+      }
+      if (!oui) {
+        if (document.fullscreenElement === hote) document.exitFullscreen().catch(() => {});
+        return;
+      }
+      if (document.fullscreenElement === hote || attentePleinEcran) return;
+      if (!hote.requestFullscreen) throw new Error('Le plein écran n\'est pas possible ici.');
+      hote.requestFullscreen().catch(() => {
+        // Sans clic ni touche juste avant (au démarrage, par exemple), le navigateur refuse : on propose un clic.
+        if (attentePleinEcran || arrete) return;
+        attentePleinEcran = document.createElement('div');
+        attentePleinEcran.className = 'bs-plein-ecran-attente';
+        attentePleinEcran.textContent = '⛶ Cliquez ici pour passer en plein écran';
+        attentePleinEcran.addEventListener('click', () => {
+          attentePleinEcran.remove();
+          attentePleinEcran = null;
+          hote.requestFullscreen().catch(() => {});
+        });
+        hote.appendChild(attentePleinEcran);
+      });
+    }
+    if (dansExe) {
+      ecouter(window, 'keydown', e => {
+        if (e.key !== 'F11') return;
+        e.preventDefault();
+        pleinEcran(!pleinEcranExe);
+      }, true);
+    } else {
+      ecouter(document, 'fullscreenchange', () => {
+        const actif = document.fullscreenElement === hote;
+        hote.classList.toggle('bs-plein-ecran', actif);
+        hote.style.background = actif ? couleur(fenetre.couleurFond || '#f0f0f0') : '';
+        if (actif && fenetre.redimensionnable) {
+          tailleAvantPleinEcran = { largeur: tailles[''].largeur, hauteur: tailles[''].hauteur };
+          redimensionner(principale, hote.clientWidth, hote.clientHeight - (barreMenus ? HAUTEUR_MENUS : 0));
+        } else if (!actif && tailleAvantPleinEcran) {
+          redimensionner(principale, tailleAvantPleinEcran.largeur, tailleAvantPleinEcran.hauteur);
+          tailleAvantPleinEcran = null;
+        }
+      });
+      nettoyages.push(() => { if (document.fullscreenElement === hote) document.exitFullscreen().catch(() => {}); });
+    }
+
+    // ---- Calendrier : un clic sur un jour le choisit (« quand … change »), les flèches changent de mois ----
+    function preparerCalendrier(el, d) {
+      d.choisie = dateIso(d.date) || aujourdhuiIso();
+      d.vu = d.choisie.slice(0, 7);
+      d.marques = {};
+      el.addEventListener('click', e => {
+        const b = e.target.closest('button');
+        if (!b) return;
+        if (b.dataset.nav) {
+          const [a, m] = d.vu.split('-').map(Number);
+          const t = new Date(a, m - 1 + Number(b.dataset.nav), 1);
+          d.vu = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}`;
+          rendreCalendrier(el, d);
+        } else if (b.dataset.date) {
+          d.choisie = b.dataset.date;
+          rendreCalendrier(el, d);
+          el.dispatchEvent(new Event('input'));
+        }
+      });
+    }
+    function dateDuCalendrier(valeur) {
+      const iso = dateIso(valeur);
+      if (!iso) throw new Error(`« ${enTexte(valeur)} » n'est pas une date : écrivez-la comme 25/12/2026.`);
+      return iso;
     }
 
     function verifierDico(dico) {
@@ -4178,6 +4376,13 @@ function BlocRuntimeFactory() {
           return '';
         }
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return lireSprite(d, prop);
+        if (d.type === 'calendrier' && prop === 'texte') return dateFrancaise(d.choisie);
+        if (d.type === 'horloge') {
+          if (prop === 'texte') return texteHorloge(d, true);
+          if (prop === 'genre') return d.genre === 'chiffres' ? 'chiffres' : 'aiguilles';
+          if (prop === 'secondes') return d.secondes !== false;
+          if (prop === 'decalageHeures') return Number(d.decalageHeures) || 0;
+        }
         if (d.type === 'graphique' && PROPS_GRAPHIQUE.includes(prop)) {
           const v = d[prop];
           return Array.isArray(v) ? v.slice() : v ?? '';
@@ -4328,6 +4533,21 @@ function BlocRuntimeFactory() {
           return;
         }
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return ecrireSprite(d, prop, valeur);
+        if (d.type === 'calendrier' && (prop === 'texte' || prop === 'couleurBarre')) {
+          if (prop === 'texte') {
+            d.choisie = dateDuCalendrier(valeur);
+            d.vu = d.choisie.slice(0, 7);
+          } else d.couleurBarre = valeur;
+          return rendreCalendrier(el, d);
+        }
+        if (d.type === 'horloge' && ['genre', 'secondes', 'decalageHeures', 'couleurBarre', 'couleurTexte', 'couleurFond'].includes(prop)) {
+          if (prop === 'genre') d.genre = /chiffre|num/i.test(enTexte(valeur)) ? 'chiffres' : 'aiguilles';
+          else if (prop === 'secondes') d.secondes = !!valeur;
+          else if (prop === 'decalageHeures') d.decalageHeures = Number(valeur) || 0;
+          else d[prop] = valeur;
+          if (prop === 'couleurTexte') el.style.color = couleur(valeur);
+          return rendreHorloge(el, d);
+        }
         if (d.type === 'onglets' && (prop === 'numero' || prop === 'elements')) {
           if (prop === 'elements') {
             d.pages = (Array.isArray(valeur) ? valeur : enTexte(valeur).split('\n')).map(enTexte);
@@ -5083,6 +5303,21 @@ function BlocRuntimeFactory() {
       // Le 1er janvier 1970 était un jeudi.
       jourSemaine(date) { return JOURS_SEMAINE[((joursDepuis1970(date) + 4) % 7 + 7) % 7]; },
 
+      // ---- Calendrier ----
+      // action : 'marquer' (avec une couleur), 'effacer' (une date) ou 'vider' (toutes les marques).
+      calendrier(id, action, date, teinte) {
+        const el = ctrlDeType(id, 'calendrier', 'un calendrier');
+        const d = donnees[id];
+        if (action === 'vider') d.marques = {};
+        else if (action === 'marquer') d.marques[dateDuCalendrier(date)] = enTexte(teinte) || 'rouge';
+        else delete d.marques[dateDuCalendrier(date)];
+        rendreCalendrier(el, d);
+      },
+
+      // ---- Plein écran ----
+      pleinEcran(oui) { pleinEcran(!!oui); },
+      estPleinEcran,
+
       // ---- Dictionnaires ----
       dicoVide() { return {}; },
       dicoMettre(dico, cle, valeur) { verifierDico(dico)[enTexte(cle)] = valeur; },
@@ -5121,6 +5356,16 @@ function BlocRuntimeFactory() {
         if (d.type === 'minuteur' && d.active !== false) demarrerMinuteur(d);
         if (d.type === 'camera' && d.allumerAuDemarrage !== false) allumerCamera(id).catch(signaler);
         if (d.type === 'sprite' && d.anime) animerSprite(d, 'boucle');
+      }
+      // Les horloges sont redessinées à chaque nouvelle seconde.
+      const horloges = Object.keys(donnees).filter(id => donnees[id].type === 'horloge');
+      if (horloges.length) {
+        minuteurs.push(setInterval(() => {
+          for (const id of horloges) {
+            const d = donnees[id], t = texteHorloge(d, true);
+            if (t !== d.dejaAffichee) { d.dejaAffichee = t; rendreHorloge(elements[id], d); }
+          }
+        }, 200));
       }
       for (const id in donnees) brancherMenuContextuel(id);
       brancherMenuFenetre(fenetre, surface, 'fenêtre');

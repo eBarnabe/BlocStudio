@@ -135,6 +135,30 @@ namespace BlocStudio
             Activated += (s, e) => RendreClavier();
         }
 
+        // Plein écran : sans bord, sur tout l'écran (barre des tâches comprise), puis retour à l'état d'avant.
+        bool pleinEcran;
+        FormBorderStyle bordAvant;
+        FormWindowState etatAvant;
+        void PleinEcran(bool oui)
+        {
+            if (oui == pleinEcran) return;
+            pleinEcran = oui;
+            if (oui)
+            {
+                bordAvant = FormBorderStyle;
+                etatAvant = WindowState;
+                WindowState = FormWindowState.Normal; // sinon l'agrandissement garderait la place de la barre des tâches
+                FormBorderStyle = FormBorderStyle.None;
+                WindowState = FormWindowState.Maximized;
+            }
+            else
+            {
+                WindowState = FormWindowState.Normal;
+                FormBorderStyle = bordAvant;
+                WindowState = etatAvant;
+            }
+        }
+
         // Après une boîte de dialogue Windows (ou un passage par une autre application), WinForms
         // redonne le focus au contrôle WebView2 mais pas à la page : on pouvait alors cliquer dans
         // un champ sans pouvoir y écrire. On le lui redonne explicitement.
@@ -186,6 +210,8 @@ namespace BlocStudio
             {
                 if (!string.IsNullOrEmpty(web.DocumentTitle)) Text = web.DocumentTitle;
             };
+            // Un programme testé passe en plein écran (bloc « passer en plein écran ») : la fenêtre aussi.
+            web.ContainsFullScreenElementChanged += (s, e) => PleinEcran(web.ContainsFullScreenElement);
             web.NewWindowRequested += (s, e) =>
             {
                 e.Handled = true;
