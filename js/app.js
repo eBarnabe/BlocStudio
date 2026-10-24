@@ -1267,6 +1267,15 @@
       }
       champTexte(liste, 'Texte d\'invite (grisé tant que la zone est vide)', c.texteInvite || '',
         v => { c.texteInvite = v; maj(); }, false, 'Tapez votre nom…');
+      if (!c.multiligne && !c.motDePasse) {
+        if ((c.suggestions || []).length > TROP_POUR_LES_PROPRIETES) {
+          resumeGrossesDonnees(liste, 'Suggestions pendant la frappe', c.suggestions.length, () => { c.suggestions = []; });
+        } else {
+          champTexte(liste, 'Suggestions pendant la frappe (une par ligne ; elles se resserrent sur ce qu\'on tape)',
+            (c.suggestions || []).join('\n'), v => { c.suggestions = v.split('\n').filter(e => e.trim() !== ''); maj(); }, true, 'Paris\nLyon\nMarseille');
+        }
+        boutonsDonnees(liste, c);
+      }
       champCase(liste, 'Lecture seule (on peut lire et copier, pas écrire)', c.lectureSeule, v => { c.lectureSeule = v; maj(); });
       champNombre(liste, 'Longueur maximale, en lettres (0 = sans limite)', c.longueurMax || 0,
         v => { c.longueurMax = Math.max(0, Math.round(v)); maj(); });
@@ -1344,8 +1353,13 @@
       ]);
     }
     if (c.type === 'listederoulante' || c.type === 'zoneliste') {
-      champTexte(liste, 'Éléments (un par ligne)', (c.elements || []).join('\n'),
-        v => { c.elements = v.split('\n').filter(e => e.trim() !== ''); maj(); }, true);
+      boutonsDonnees(liste, c);
+      if ((c.elements || []).length > TROP_POUR_LES_PROPRIETES) {
+        resumeGrossesDonnees(liste, 'Éléments', c.elements.length, () => { c.elements = []; rafraichirControle(c); });
+      } else {
+        champTexte(liste, 'Éléments (un par ligne)', (c.elements || []).join('\n'),
+          v => { c.elements = v.split('\n').filter(e => e.trim() !== ''); maj(); }, true);
+      }
       champCase(liste, 'Triée par ordre alphabétique (même ce qu\'on ajoute ensuite)', c.trie, v => { c.trie = v; maj(); });
     }
     if (c.type === 'curseur') {
@@ -1365,11 +1379,16 @@
       champCouleur(liste, 'Couleur du curseur', c.couleurBarre || '#4f46e5', v => { c.couleurBarre = v; maj(); });
     }
     if (c.type === 'tableau') {
+      boutonsDonnees(liste, c);
       champTexte(liste, 'Colonnes (une par ligne)', c.colonnes.join('\n'),
         v => { c.colonnes = v.split('\n').map(e => e.trim()).filter(e => e); maj(); }, true);
-      champTexte(liste, 'Lignes de départ (une par ligne, valeurs séparées par ;)',
-        c.lignes.map(l => l.join(' ; ')).join('\n'),
-        v => { c.lignes = v.split('\n').filter(l => l.trim()).map(l => l.split(';').map(e => e.trim())); maj(); }, true);
+      if (c.lignes.length > TROP_POUR_LES_PROPRIETES) {
+        resumeGrossesDonnees(liste, 'Lignes de départ', c.lignes.length, () => { c.lignes = []; rafraichirControle(c); });
+      } else {
+        champTexte(liste, 'Lignes de départ (une par ligne, valeurs séparées par ;)',
+          c.lignes.map(l => l.join(' ; ')).join('\n'),
+          v => { c.lignes = v.split('\n').filter(l => l.trim()).map(l => l.split(';').map(e => e.trim())); maj(); }, true);
+      }
       champCase(liste, 'Mémoriser le contenu (le retrouver au prochain lancement)', c.memoriser, v => { c.memoriser = v; maj(); });
     }
     if (c.type === 'date') {
@@ -1754,7 +1773,7 @@
   }
 
   const TYPES_FICHIER_EDITEUR = {
-    texte: 'Texte (.txt)', csv: 'Tableur (.csv, lisible par Excel)', image: 'Image (PNG, JPG, GIF…)', son: 'Son (MP3, WAV, OGG…)', tous: 'Tous les fichiers'
+    texte: 'Texte (.txt)', csv: 'Tableur (.csv, lisible par Excel)', excel: 'Classeur Excel (.xlsx)', image: 'Image (PNG, JPG, GIF…)', son: 'Son (MP3, WAV, OGG…)', tous: 'Tous les fichiers'
   };
 
   // Menu qui s'ouvre au clic droit sur ce contrôle (ou sur le fond de cette fenêtre).
@@ -1795,7 +1814,7 @@
     choix.addEventListener('change', () => {
       c.typeFichier = choix.value;
       // Le nom proposé prend l'extension qui va avec.
-      const ext = { texte: '.txt', csv: '.csv', image: '.png', son: '.mp3' }[c.typeFichier];
+      const ext = { texte: '.txt', csv: '.csv', excel: '.xlsx', image: '.png', son: '.mp3' }[c.typeFichier];
       if (ext && c.nomPropose) c.nomPropose = c.nomPropose.replace(/\.[a-z0-9]{1,5}$/i, '') + ext;
       maj();
       afficherProprietes();
@@ -1823,16 +1842,271 @@
       BlocStudioBases.rafraichir(workspace);
       afficherInvisibles();
     }, true);
-    champTexte(liste, 'Fiches de départ (une par ligne, valeurs séparées par ;)',
-      (c.fiches || []).map(f => f.join(' ; ')).join('\n'), v => {
-        c.fiches = v.split('\n').filter(l => l.trim()).map(l => l.split(';').map(e => e.trim()));
-        maj();
-        afficherInvisibles();
-      }, true);
+    if ((c.fiches || []).length > TROP_POUR_LES_PROPRIETES) {
+      resumeGrossesDonnees(liste, 'Fiches de départ', c.fiches.length, () => { c.fiches = []; afficherInvisibles(); });
+    } else {
+      champTexte(liste, 'Fiches de départ (une par ligne, valeurs séparées par ;)',
+        (c.fiches || []).map(f => f.join(' ; ')).join('\n'), v => {
+          c.fiches = v.split('\n').filter(l => l.trim()).map(l => l.split(';').map(e => e.trim()));
+          maj();
+          afficherInvisibles();
+        }, true);
+    }
+    boutonsDonnees(liste, c);
     champCase(liste, 'Garder les fiches d\'une fois à l\'autre', c.memoriser !== false, v => { c.memoriser = v; maj(); });
     liste.appendChild(el('p', 'aide',
       'Une base de données range des fiches : une valeur pour chaque champ. Ses blocs (bouton 🧰 ci-dessus) servent à ajouter, chercher, modifier ou supprimer des fiches, et « afficher … dans le tableau » pour les voir. ' +
       'Les fiches ajoutées pendant le programme sont gardées ; elles repartent des fiches de départ si vous changez celles-ci.'));
+  }
+
+  // ---------------------------------------------------------------- Importer / exporter des données
+  // Un fichier CSV ou Excel remplit un tableau, une base de données, une liste ou les suggestions d'une zone
+  // de texte : on choisit la feuille, les lignes et les colonnes gardées. Les données sont rangées dans le
+  // projet (et partent avec les exports .html et .exe). Elles s'exportent aussi en CSV ou en Excel.
+  const PLUSIEURS_COLONNES = ['tableau', 'basedonnees'];
+  const MIME_EXCEL = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  // Au-delà, les données ne s'affichent plus dans une zone de texte des propriétés (trop lourd à modifier là).
+  const TROP_POUR_LES_PROPRIETES = 300;
+
+  const lettreColonne = i => { let s = ''; for (i++; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + (i - 1) % 26) + s; return s; };
+  const nombreLisible = n => n.toLocaleString('fr-FR');
+
+  // Les données du contrôle, en lignes (la première : les titres).
+  function donneesDuControle(c) {
+    if (c.type === 'tableau') return [c.colonnes || [], ...(c.lignes || [])];
+    if (c.type === 'basedonnees') return [c.champs || [], ...(c.fiches || [])];
+    const liste = c.type === 'zonetexte' ? c.suggestions || [] : c.elements || [];
+    return [[c.nom], ...liste.map(e => [e])];
+  }
+  const nombreDeDonnees = c => donneesDuControle(c).length - 1;
+
+  // Boutons « Importer » et « Exporter » d'un contrôle qui a des données.
+  function boutonsDonnees(liste, c) {
+    const zone = el('div', 'prop-boutons');
+    const bouton = (texte, titre, action, actif = true) => {
+      const b = el('button', null, texte);
+      b.title = titre;
+      b.disabled = !actif;
+      b.addEventListener('click', action);
+      zone.appendChild(b);
+    };
+    const n = nombreDeDonnees(c);
+    bouton('📥 Importer…', 'Remplir avec un fichier CSV ou Excel (.xlsx) : vous choisissez les lignes et les colonnes', () => importerDonnees(c));
+    bouton('📤 Excel', 'Enregistrer ces données dans un classeur Excel (.xlsx)', () => exporterDonnees(c, 'excel'), n > 0);
+    bouton('📤 CSV', 'Enregistrer ces données dans un fichier CSV (lisible par Excel)', () => exporterDonnees(c, 'csv'), n > 0);
+    prop(liste, 'Données (fichier CSV ou Excel)').appendChild(zone);
+  }
+
+  // Beaucoup de données : un résumé et un bouton pour tout effacer, à la place de la zone de texte.
+  function resumeGrossesDonnees(liste, libelle, nombre, vider) {
+    const d = prop(liste, libelle);
+    d.appendChild(el('p', 'aide', `${nombreLisible(nombre)} lignes : trop pour les modifier ici. ` +
+      'Réimportez un fichier pour les changer, ou utilisez les blocs pendant le programme.'));
+    const zone = el('div', 'prop-boutons');
+    const b = el('button', null, '🗑️ Tout effacer');
+    b.addEventListener('click', () => {
+      if (!confirm(`Effacer ces ${nombreLisible(nombre)} lignes ?`)) return;
+      vider();
+      planifierSauvegarde();
+      afficherProprietes();
+    });
+    zone.appendChild(b);
+    d.appendChild(zone);
+  }
+
+  async function exporterDonnees(c, format) {
+    const lignes = donneesDuControle(c);
+    try {
+      if (format === 'excel') await telecharger(c.nom + '.xlsx', await BlocRuntime.ecrireClasseur(lignes, c.nom), MIME_EXCEL);
+      else await telecharger(c.nom + '.csv', '﻿' + BlocRuntime.versCsv(lignes), 'text/csv');
+    } catch (e) {
+      alert('Impossible d\'enregistrer le fichier : ' + e.message);
+    }
+  }
+
+  function choisirFichierDonnees() {
+    return new Promise(resoudre => {
+      const choix = document.createElement('input');
+      choix.type = 'file';
+      choix.accept = '.csv,.tsv,.txt,.xlsx,.xlsm';
+      choix.addEventListener('change', () => resoudre(choix.files[0] || null));
+      choix.addEventListener('cancel', () => resoudre(null));
+      choix.click();
+    });
+  }
+
+  async function importerDonnees(c) {
+    const fichier = await choisirFichierDonnees();
+    if (!fichier) return;
+    let feuilles;
+    try {
+      feuilles = (await BlocRuntime.lireTableur(fichier)).filter(f => f.lignes.length);
+    } catch (e) {
+      alert(`Impossible de lire « ${fichier.name} » : ${e.message}`);
+      return;
+    }
+    if (!feuilles.length) { alert(`« ${fichier.name} » ne contient aucune donnée.`); return; }
+    fenetreImport(c, fichier.name, feuilles);
+  }
+
+  // La fenêtre d'import : aperçu, feuille, titres, lignes et colonnes gardées.
+  function fenetreImport(c, nomFichier, feuilles) {
+    const plusieurs = PLUSIEURS_COLONNES.includes(c.type);
+    const cible = { tableau: 'les colonnes et les lignes du tableau', basedonnees: 'les champs et les fiches de la base',
+      listederoulante: 'les éléments de la liste', zoneliste: 'les éléments de la liste', zonetexte: 'les suggestions de la zone de texte' }[c.type];
+    const etat = { feuille: 0, titres: true, de: 1, a: 0, colonnes: new Set() };
+
+    const voile = el('div', 'voile modale');
+    const boite = el('div', 'info-boite import-boite');
+    voile.appendChild(boite);
+    boite.appendChild(el('h2', null, `📥 Importer des données dans « ${c.nom} »`));
+    const infos = el('p', 'info-petit');
+    const reglages = el('div', 'import-reglages');
+    const colonnes = el('div', 'import-colonnes');
+    const apercu = el('div', 'import-apercu');
+    const note = el('p', 'info-petit');
+    const actions = el('div', 'info-actions');
+    const annuler = el('button', 'secondaire', 'Annuler');
+    const importer = el('button', null, 'Importer');
+    actions.append(annuler, importer);
+    boite.append(infos, reglages, el('p', 'import-titre', plusieurs ? 'Colonnes gardées' : 'Colonne gardée'), colonnes,
+      el('p', 'import-titre', 'Aperçu'), apercu, note, actions);
+
+    const lignesDe = () => feuilles[etat.feuille].lignes;
+    const largeur = () => Math.max(0, ...lignesDe().slice(0, 500).map(l => l.length));
+    const titreColonne = i => {
+      const t = etat.titres ? String(lignesDe()[0][i] ?? '').trim() : '';
+      return t || 'Colonne ' + lettreColonne(i);
+    };
+    const donnees = () => lignesDe().slice(etat.titres ? 1 : 0); // sans la ligne des titres
+    const gardees = () => [...etat.colonnes].sort((x, y) => x - y);
+    const retenues = () => donnees().slice(etat.de - 1, etat.a);
+
+    // Une première ligne faite de textes (pas de nombres) ressemble à des titres.
+    const semblentTitres = () => {
+      const l = lignesDe()[0] || [];
+      return l.some(v => String(v).trim()) && l.every(v => !/^-?\d+([.,]\d+)?$/.test(String(v).trim()));
+    };
+    const nouvelleFeuille = () => {
+      etat.titres = lignesDe().length > 1 && semblentTitres();
+      etat.de = 1;
+      etat.a = donnees().length;
+      etat.colonnes = new Set(plusieurs ? Array.from({ length: largeur() }, (_, i) => i) : [0]);
+    };
+
+    const nombre = (libelle, valeur, surChange) => {
+      const l = el('label', null, libelle + ' ');
+      const i = el('input');
+      i.type = 'number';
+      i.min = 1;
+      i.value = valeur;
+      i.addEventListener('change', () => surChange(Math.round(Number(i.value)) || 1));
+      l.appendChild(i);
+      return l;
+    };
+
+    function dessinerReglages() {
+      infos.textContent = `${nomFichier} — ${nombreLisible(lignesDe().length)} lignes, ${largeur()} colonnes`;
+      reglages.replaceChildren();
+      if (feuilles.length > 1) {
+        const l = el('label', null, 'Feuille ');
+        const s = el('select');
+        feuilles.forEach((f, i) => s.add(new Option(`${f.nom} (${nombreLisible(f.lignes.length)} lignes)`, i)));
+        s.value = etat.feuille;
+        s.addEventListener('change', () => { etat.feuille = Number(s.value); nouvelleFeuille(); tout(); });
+        l.appendChild(s);
+        reglages.appendChild(l);
+      }
+      const titres = el('label');
+      const caseTitres = el('input');
+      caseTitres.type = 'checkbox';
+      caseTitres.checked = etat.titres;
+      caseTitres.addEventListener('change', () => {
+        etat.titres = caseTitres.checked;
+        etat.de = 1;
+        etat.a = donnees().length;
+        tout();
+      });
+      titres.append(caseTitres, ' La première ligne contient les titres des colonnes');
+      reglages.appendChild(titres);
+      const total = donnees().length;
+      reglages.append(
+        nombre('Lignes de', etat.de, v => { etat.de = Math.min(Math.max(1, v), total); etat.a = Math.max(etat.a, etat.de); tout(); }),
+        nombre('à', etat.a, v => { etat.a = Math.min(Math.max(etat.de, v), total); tout(); }),
+        el('span', 'info-petit', `(sur ${nombreLisible(total)})`));
+    }
+
+    function dessinerColonnes() {
+      colonnes.replaceChildren();
+      for (let i = 0; i < largeur(); i++) {
+        const l = el('label', 'import-colonne');
+        const choix = el('input');
+        choix.type = plusieurs ? 'checkbox' : 'radio';
+        choix.name = 'import-colonne';
+        choix.checked = etat.colonnes.has(i);
+        choix.addEventListener('change', () => {
+          if (!plusieurs) etat.colonnes.clear();
+          if (choix.checked) etat.colonnes.add(i); else etat.colonnes.delete(i);
+          dessinerColonnes();
+          dessinerApercu();
+        });
+        l.classList.toggle('choisie', choix.checked);
+        l.append(choix, ` ${lettreColonne(i)} · ${titreColonne(i)}`);
+        colonnes.appendChild(l);
+      }
+    }
+
+    function dessinerApercu() {
+      const cols = gardees(), lignes = retenues();
+      const table = el('table');
+      const tr = table.appendChild(el('thead')).appendChild(el('tr'));
+      cols.forEach(i => tr.appendChild(el('th', null, titreColonne(i))));
+      const corps = table.appendChild(el('tbody'));
+      for (const l of lignes.slice(0, 8)) {
+        const r = corps.appendChild(el('tr'));
+        cols.forEach(i => r.appendChild(el('td', null, String(l[i] ?? ''))));
+      }
+      if (lignes.length > 8) {
+        corps.appendChild(el('tr')).appendChild(el('td', 'info-petit', `… et ${nombreLisible(lignes.length - 8)} autres lignes`)).colSpan = cols.length || 1;
+      }
+      apercu.replaceChildren(table);
+      importer.disabled = !cols.length || !lignes.length;
+      importer.textContent = `Importer ${nombreLisible(lignes.length)} ligne${lignes.length > 1 ? 's' : ''}`;
+      note.textContent = `Elles remplaceront ${cible}.` +
+        (lignes.length > 20000 ? ' C\'est beaucoup : le projet grossit d\'autant (et les programmes exportés aussi).' : '');
+    }
+
+    function tout() { dessinerReglages(); dessinerColonnes(); dessinerApercu(); }
+
+    const fermer = () => voile.remove();
+    annuler.addEventListener('click', fermer);
+    voile.addEventListener('keydown', e => { if (e.key === 'Escape') fermer(); });
+    importer.addEventListener('click', () => {
+      const cols = gardees(), lignes = retenues().map(l => cols.map(i => String(l[i] ?? '')));
+      // Des titres en double sont numérotés : chaque champ d'une base doit avoir son propre nom.
+      const vus = new Map();
+      const titres = cols.map(i => {
+        const t = titreColonne(i), n = (vus.get(t.toLowerCase()) || 0) + 1;
+        vus.set(t.toLowerCase(), n);
+        return n > 1 ? `${t} ${n}` : t;
+      });
+      if (c.type === 'tableau') { c.colonnes = titres; c.lignes = lignes; }
+      else if (c.type === 'basedonnees') { c.champs = titres; c.fiches = lignes; }
+      else {
+        const valeurs = lignes.map(l => l[0]).filter(v => v.trim());
+        if (c.type === 'zonetexte') c.suggestions = valeurs; else c.elements = valeurs;
+      }
+      fermer();
+      rafraichirControle(c);
+      if (c.type === 'basedonnees') BlocStudioBases.rafraichir(workspace);
+      planifierSauvegarde();
+      afficherProprietes();
+    });
+
+    nouvelleFeuille();
+    tout();
+    document.body.appendChild(voile);
+    importer.focus();
   }
 
   function prop(parent, libelle) {

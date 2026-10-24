@@ -627,30 +627,104 @@ function BlocRuntimeFactory() {
     el.replaceChildren(liste(noeuds));
   }
 
+  // Au-delà de LIGNES_TOUTES_DESSINEES lignes, le tableau ne dessine que celles qui se voient (et quelques-unes
+  // autour), entre deux lignes vides qui ont la hauteur du reste : il reste fluide avec des dizaines de milliers de lignes.
+  // Chaque ligne dessinée garde son numéro (dataset.n, à partir de 0).
+  const LIGNES_TOUTES_DESSINEES = 200;
   function rendreTableau(el, d) {
-    const nbColonnes = Math.max(d.colonnes.length, ...d.lignes.map(l => l.length), 1);
+    let nbColonnes = Math.max(d.colonnes.length, 1);
+    for (const l of d.lignes) if (l.length > nbColonnes) nbColonnes = l.length;
     const table = document.createElement('table');
     const tr = table.appendChild(document.createElement('thead')).appendChild(document.createElement('tr'));
     for (let i = 0; i < nbColonnes; i++) {
       tr.appendChild(document.createElement('th')).textContent = d.colonnes[i] ?? '';
     }
     const corps = table.appendChild(document.createElement('tbody'));
-    d.lignes.forEach((ligne, n) => {
-      const r = corps.appendChild(document.createElement('tr'));
-      if (n === d.choisie) r.className = 'bs-choisie';
-      for (let i = 0; i < nbColonnes; i++) {
-        const td = r.appendChild(document.createElement('td'));
-        td.textContent = enTexte(ligne[i]);
-        td.title = td.textContent;
+    const defilement = el.scrollTop; // remplacer le contenu remettrait le tableau en haut
+    if (d.lignes.length <= LIGNES_TOUTES_DESSINEES) {
+      el.virtuel = null;
+      d.lignes.forEach((_, n) => corps.appendChild(ligneTableau(d, n, nbColonnes)));
+      el.replaceChildren(table);
+    } else {
+      el.virtuel = { d, nbColonnes, corps, hauteur: el.virtuel ? el.virtuel.hauteur : 0 };
+      el.replaceChildren(table);
+      dessinerLignesVisibles(el, defilement);
+      if (!el.suitDefilement) {
+        el.suitDefilement = true;
+        let prevu = false;
+        el.addEventListener('scroll', () => {
+          if (prevu || !el.virtuel) return;
+          prevu = true;
+          requestAnimationFrame(() => { prevu = false; if (el.virtuel) dessinerLignesVisibles(el, el.scrollTop); });
+        });
       }
-    });
-    el.replaceChildren(table);
+    }
+    el.scrollTop = defilement;
   }
 
-  // Une cellule qui ressemble à un nombre est rendue comme un nombre (pour pouvoir calculer).
+  // Fait défiler le tableau jusqu'à la ligne choisie (choisie par un bloc, elle peut être loin).
+  function montrerLigneChoisie(el, d) {
+    if (d.choisie < 0) return;
+    const entete = el.querySelector('thead') ? el.querySelector('thead').offsetHeight : 0;
+    if (el.virtuel) {
+      const h = el.virtuel.hauteur || Math.round((Number(d.taillePolice) || 14) * 1.2 + 8);
+      const haut = d.choisie * h, bas = haut + h + entete, visible = el.clientHeight || Number(d.hauteur) || 300;
+      if (haut < el.scrollTop) el.scrollTop = haut;
+      else if (bas > el.scrollTop + visible) el.scrollTop = bas - visible;
+      dessinerLignesVisibles(el, el.scrollTop);
+      return;
+    }
+    const tr = el.querySelector(`tr[data-n="${d.choisie}"]`);
+    if (!tr) return;
+    const r = tr.getBoundingClientRect(), cadre = el.getBoundingClientRect();
+    if (r.top < cadre.top + entete) el.scrollTop -= cadre.top + entete - r.top;
+    else if (r.bottom > cadre.bottom) el.scrollTop += r.bottom - cadre.bottom;
+  }
+
+  function ligneTableau(d, n, nbColonnes) {
+    const r = document.createElement('tr');
+    r.dataset.n = n;
+    if (n === d.choisie) r.className = 'bs-choisie';
+    const ligne = d.lignes[n];
+    for (let i = 0; i < nbColonnes; i++) {
+      const td = r.appendChild(document.createElement('td'));
+      td.textContent = enTexte(ligne[i]);
+      td.title = td.textContent;
+    }
+    return r;
+  }
+
+  function dessinerLignesVisibles(el, defilement, remesure) {
+    const v = el.virtuel, d = v.d, total = d.lignes.length;
+    // Hauteur d'une ligne : mesurée sur les lignes déjà dessinées, sinon estimée d'après la taille du texte.
+    const h = v.hauteur || Math.round((Number(d.taillePolice) || 14) * 1.2 + 8);
+    const visibles = Math.ceil((el.clientHeight || Number(d.hauteur) || 300) / h);
+    const debut = Math.max(0, Math.min(total, Math.floor(defilement / h) - 10));
+    const fin = Math.min(total, debut + visibles + 30);
+    const vide = lignes => {
+      const r = document.createElement('tr');
+      const td = r.appendChild(document.createElement('td'));
+      td.colSpan = v.nbColonnes;
+      td.style.cssText = `height:${lignes * h}px;padding:0;border:0`;
+      return r;
+    };
+    const rangees = [];
+    if (debut) rangees.push(vide(debut));
+    for (let n = debut; n < fin; n++) rangees.push(ligneTableau(d, n, v.nbColonnes));
+    if (fin < total) rangees.push(vide(total - fin));
+    v.corps.replaceChildren(...rangees);
+    const mesure = fin > debut && rangees[debut ? 1 : 0].getBoundingClientRect().height;
+    if (mesure && Math.abs(mesure - h) > 0.5 && !remesure) {
+      v.hauteur = mesure; // la vraie hauteur : on redessine avec elle
+      dessinerLignesVisibles(el, defilement, true);
+    }
+  }
+
+  // Une cellule qui ressemble à un nombre est rendue comme un nombre (pour pouvoir calculer),
+  // sauf s'il commence par 0 : un code postal (« 01000 ») ou un numéro de téléphone reste un texte.
   function valeurCellule(v) {
     const s = enTexte(v).trim();
-    return /^-?\d+([.,]\d+)?$/.test(s) ? Number(s.replace(',', '.')) : enTexte(v);
+    return /^-?(0|[1-9]\d*)([.,]\d+)?$/.test(s) ? Number(s.replace(',', '.')) : enTexte(v);
   }
 
   // Format CSV « à la française » (séparateur ;), lisible par Excel et LibreOffice.
@@ -664,8 +738,9 @@ function BlocRuntimeFactory() {
 
   function depuisCsv(texte) {
     texte = String(texte ?? '').replace(/^﻿/, '');
-    const separateur = (texte.split('\n')[0].match(/;/g) || []).length ||
-      !(texte.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+    // Séparateur d'après la première ligne : ; (Excel en français) s'il y en a, sinon tabulation, sinon virgule.
+    const premiere = texte.split('\n')[0];
+    const separateur = premiere.includes(';') ? ';' : premiere.includes('\t') ? '\t' : premiere.includes(',') ? ',' : ';';
     const lignes = [];
     let ligne = [], champ = '', guillemets = false;
     for (let i = 0; i < texte.length; i++) {
@@ -683,6 +758,223 @@ function BlocRuntimeFactory() {
     }
     if (champ !== '' || ligne.length) { ligne.push(champ); lignes.push(ligne); }
     return lignes.filter(l => l.some(c => c.trim() !== ''));
+  }
+
+  // ---- Fichiers de tableur : CSV et classeurs Excel (.xlsx) ----
+  // Un .xlsx est un zip de fichiers XML : on le lit et on l'écrit sans bibliothèque, avec la (dé)compression
+  // du navigateur. Les anciens .xls (binaires) ne sont pas pris en charge : il faut les réenregistrer en .xlsx.
+  const estClasseur = nom => /\.(xlsx|xlsm)$/i.test(enTexte(nom));
+
+  // Un texte venu d'un fichier : en UTF-8, ou sinon en Windows-1252 (CSV enregistrés par Excel en français).
+  function texteDepuisOctets(octets) {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(octets).replace(/^﻿/, ''); }
+    catch (e) { return new TextDecoder('windows-1252').decode(octets); }
+  }
+
+  // Le contenu d'un zip : une fonction nom → texte du fichier (ou null s'il n'y est pas).
+  function dezipper(octets) {
+    const v = new DataView(octets.buffer, octets.byteOffset, octets.byteLength);
+    let fin = octets.length - 22; // fin du répertoire central, cherchée depuis la fin du fichier
+    while (fin >= 0 && v.getUint32(fin, true) !== 0x06054b50) fin--;
+    if (fin < 0) throw new Error('Ce fichier n\'est pas un classeur Excel (.xlsx) : s\'il vient d\'un ancien Excel (.xls), réenregistrez-le en .xlsx.');
+    const fichiers = {};
+    let p = v.getUint32(fin + 16, true);
+    for (let i = v.getUint16(fin + 10, true); i > 0 && v.getUint32(p, true) === 0x02014b50; i--) {
+      const lNom = v.getUint16(p + 28, true), local = v.getUint32(p + 42, true);
+      const nom = new TextDecoder().decode(octets.subarray(p + 46, p + 46 + lNom));
+      const debut = local + 30 + v.getUint16(local + 26, true) + v.getUint16(local + 28, true);
+      fichiers[nom] = { methode: v.getUint16(p + 10, true), donnees: octets.subarray(debut, debut + v.getUint32(p + 20, true)) };
+      p += 46 + lNom + v.getUint16(p + 30, true) + v.getUint16(p + 32, true);
+    }
+    return async nom => {
+      const f = fichiers[nom];
+      if (!f) return null;
+      if (f.methode === 0) return new TextDecoder().decode(f.donnees);
+      if (f.methode !== 8) throw new Error('Ce classeur est compressé d\'une façon que BlocStudio ne sait pas lire.');
+      const flux = new Blob([f.donnees]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return new Response(flux).text();
+    };
+  }
+
+  // Les feuilles d'un classeur .xlsx : [{ nom, lignes: [[texte…]…] }]. Les nombres sont écrits à la française
+  // (3,5), les dates en jj/mm/aaaa.
+  async function lireClasseur(octets) {
+    octets = octets instanceof Uint8Array ? octets : new Uint8Array(octets);
+    const lire = dezipper(octets);
+    const xml = async nom => {
+      const t = await lire(nom);
+      return t === null ? null : new DOMParser().parseFromString(t, 'application/xml');
+    };
+    const tous = (noeud, nom) => noeud ? [...noeud.getElementsByTagNameNS('*', nom)] : [];
+    const classeur = await xml('xl/workbook.xml');
+    if (!classeur) throw new Error('Ce fichier n\'est pas un classeur Excel (.xlsx).');
+    const cibles = {};
+    for (const r of tous(await xml('xl/_rels/workbook.xml.rels'), 'Relationship')) cibles[r.getAttribute('Id')] = r.getAttribute('Target');
+    const texteDe = n => tous(n, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join('');
+    const partages = tous(await xml('xl/sharedStrings.xml'), 'si').map(texteDe);
+    // Les cellules au format date (formats 14 à 22, 45 à 47, ou un format qui contient j, m, a…).
+    const styles = await xml('xl/styles.xml');
+    const formats = {};
+    for (const f of tous(styles, 'numFmt')) formats[f.getAttribute('numFmtId')] = f.getAttribute('formatCode') || '';
+    const xfs = tous(tous(styles, 'cellXfs')[0], 'xf');
+    const estDate = s => {
+      const id = Number(xfs[s] && xfs[s].getAttribute('numFmtId'));
+      if ((id >= 14 && id <= 22) || (id >= 45 && id <= 47)) return true;
+      const code = (formats[id] || '').replace(/"[^"]*"|\[[^\]]*\]|\\./g, '');
+      return /[dmyj]/i.test(code) && !/^general$/i.test(code);
+    };
+    const deux = n => String(n).padStart(2, '0');
+    const valeur = c => {
+      const type = c.getAttribute('t');
+      const v = tous(c, 'v')[0];
+      const brut = v ? v.textContent : '';
+      if (type === 's') return partages[Number(brut)] ?? '';
+      if (type === 'inlineStr') return texteDe(tous(c, 'is')[0]);
+      if (type === 'b') return brut === '1' ? 'vrai' : 'faux';
+      if (type === 'str' || type === 'e' || brut === '') return brut;
+      const n = Number(brut);
+      if (!isFinite(n)) return brut;
+      if (estDate(Number(c.getAttribute('s')) || 0)) {
+        const d = new Date(Math.round((n - 25569) * 86400000)); // jours depuis le 30/12/1899
+        if (n >= 0 && n < 1) return `${deux(d.getUTCHours())}:${deux(d.getUTCMinutes())}`; // une heure seule
+        return `${deux(d.getUTCDate())}/${deux(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
+      }
+      return String(Number(n.toPrecision(15))).replace('.', ','); // comme Excel l'affiche (sans 0,30000000000000004)
+    };
+    const colonne = ref => [...ref.replace(/\d+/g, '').toUpperCase()].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+    const feuilles = [];
+    for (const f of tous(classeur, 'sheet')) {
+      const id = f.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id') || f.getAttribute('r:id');
+      const cible = cibles[id];
+      if (!cible) continue;
+      const feuille = await xml(cible.startsWith('/') ? cible.slice(1) : 'xl/' + cible.replace(/^\.\//, ''));
+      const lignes = [];
+      let numLigne = -1;
+      for (const r of tous(feuille, 'row')) {
+        numLigne = Number(r.getAttribute('r')) - 1 || numLigne + 1;
+        const ligne = lignes[numLigne] = [];
+        let numCol = -1;
+        for (const c of tous(r, 'c')) {
+          numCol = c.getAttribute('r') ? colonne(c.getAttribute('r')) : numCol + 1;
+          ligne[numCol] = valeur(c);
+        }
+      }
+      // Lignes et cases vides comblées ; les lignes entièrement vides retirées.
+      const largeur = Math.max(0, ...lignes.map(l => l ? l.length : 0));
+      feuilles.push({
+        nom: f.getAttribute('name') || 'Feuille' + (feuilles.length + 1),
+        lignes: lignes.map(l => Array.from({ length: largeur }, (_, i) => (l && l[i]) ?? '')).filter(l => l.some(x => String(x).trim() !== ''))
+      });
+    }
+    return feuilles;
+  }
+
+  // Les feuilles d'un fichier choisi (File) : un classeur .xlsx, ou un CSV (une seule feuille).
+  async function lireTableur(fichier) {
+    const octets = new Uint8Array(await fichier.arrayBuffer());
+    if (estClasseur(fichier.name)) return lireClasseur(octets);
+    return [{ nom: fichier.name.replace(/\.[a-z0-9]+$/i, ''), lignes: depuisCsv(texteDepuisOctets(octets)) }];
+  }
+
+  let tableCrc = null;
+  function crc32(octets) {
+    if (!tableCrc) {
+      tableCrc = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+        tableCrc[n] = c >>> 0;
+      }
+    }
+    let c = 0xffffffff;
+    for (let i = 0; i < octets.length; i++) c = tableCrc[(c ^ octets[i]) & 0xff] ^ (c >>> 8);
+    return (c ^ 0xffffffff) >>> 0;
+  }
+
+  // Un zip (fichiers compressés si le navigateur sait le faire) : [{ nom, texte }] → octets.
+  async function zipper(fichiers) {
+    const morceaux = [], central = [];
+    let position = 0;
+    for (const f of fichiers) {
+      const brut = new TextEncoder().encode(f.texte), nom = new TextEncoder().encode(f.nom);
+      let donnees = brut, methode = 0;
+      if (window.CompressionStream) {
+        donnees = new Uint8Array(await new Response(new Blob([brut]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer());
+        methode = 8;
+      }
+      const entete = (taille, extra) => {
+        const e = new DataView(new ArrayBuffer(taille));
+        e.setUint16(extra + 4, 20, true);            // version nécessaire
+        e.setUint16(extra + 8, methode, true);
+        e.setUint16(extra + 12, 0x21, true);         // date : 1er janvier 1980
+        e.setUint32(extra + 14, crc32(brut), true);
+        e.setUint32(extra + 18, donnees.length, true);
+        e.setUint32(extra + 22, brut.length, true);
+        e.setUint16(extra + 26, nom.length, true);
+        return e;
+      };
+      const local = entete(30, 0);
+      local.setUint32(0, 0x04034b50, true);
+      const c = entete(46, 2);
+      c.setUint32(0, 0x02014b50, true);
+      c.setUint16(4, 20, true);                      // version qui a créé le zip
+      c.setUint32(42, position, true);
+      morceaux.push(new Uint8Array(local.buffer), nom, donnees);
+      central.push(new Uint8Array(c.buffer), nom);
+      position += 30 + nom.length + donnees.length;
+    }
+    const tailleCentral = central.reduce((n, m) => n + m.length, 0);
+    const fin = new DataView(new ArrayBuffer(22));
+    fin.setUint32(0, 0x06054b50, true);
+    fin.setUint16(8, fichiers.length, true);
+    fin.setUint16(10, fichiers.length, true);
+    fin.setUint32(12, tailleCentral, true);
+    fin.setUint32(16, position, true);
+    return new Uint8Array(await new Blob([...morceaux, ...central, new Uint8Array(fin.buffer)]).arrayBuffer());
+  }
+
+  // Un classeur .xlsx d'une feuille ; la première ligne (les titres) en gras. Un nombre devient un nombre
+  // pour Excel, sauf s'il commence par 0 (codes postaux…) : il reste alors un texte.
+  async function ecrireClasseur(lignes, nomFeuille) {
+    const xmlTexte = s => enTexte(s).replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const lettres = n => { let s = ''; for (n++; n > 0; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + (n - 1) % 26) + s; return s; };
+    const cellule = (v, ref, gras) => {
+      const s = gras ? ' s="1"' : '';
+      const texte = typeof v === 'number' ? String(v) : enTexte(v).trim();
+      if (typeof v === 'number' || (/^-?(0|[1-9]\d{0,14})([.,]\d+)?$/.test(texte) && !gras)) {
+        return `<c r="${ref}"${s}><v>${texte.replace(',', '.')}</v></c>`;
+      }
+      return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xmlTexte(v)}</t></is></c>`;
+    };
+    const rangees = lignes.map((l, i) => `<row r="${i + 1}">` + l.map((v, j) => cellule(v, lettres(j) + (i + 1), i === 0)).join('') + '</row>');
+    const nom = xmlTexte(enTexte(nomFeuille || 'Feuille1').replace(/[[\]:*?/\\]/g, ' ').slice(0, 31).trim() || 'Feuille1');
+    const entete = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+    const ns = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+    return zipper([
+      { nom: '[Content_Types].xml', texte: entete + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+        '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+        '<Default Extension="xml" ContentType="application/xml"/>' +
+        '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+        '<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>' +
+        '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>' },
+      { nom: '_rels/.rels', texte: entete + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>' },
+      { nom: 'xl/workbook.xml', texte: entete + `<workbook ${ns} xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">` +
+        `<sheets><sheet name="${nom}" sheetId="1" r:id="rId1"/></sheets></workbook>` },
+      { nom: 'xl/_rels/workbook.xml.rels', texte: entete + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+        '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>' +
+        '<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>' },
+      { nom: 'xl/styles.xml', texte: entete + `<styleSheet ${ns}>` +
+        '<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>' +
+        '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>' +
+        '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>' +
+        '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>' +
+        '<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>' +
+        '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>' +
+        '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>' },
+      { nom: 'xl/worksheets/sheet1.xml', texte: entete + `<worksheet ${ns}><sheetData>${rangees.join('')}</sheetData></worksheet>` }
+    ]);
   }
 
   // ---- Dates ----
@@ -851,7 +1143,8 @@ function BlocRuntimeFactory() {
   // Contrôle Fichier : ce que montrent les boîtes « Ouvrir » et « Enregistrer sous ».
   const TYPES_FICHIER = {
     texte: { accept: '.txt,text/plain', extension: '.txt', mime: 'text/plain', description: 'Texte' },
-    csv: { accept: '.csv,text/csv', extension: '.csv', mime: 'text/csv', description: 'Tableur (CSV)' },
+    csv: { accept: '.csv,.tsv,.xlsx,text/csv', extension: '.csv', mime: 'text/csv', description: 'Tableur (CSV)' },
+    excel: { accept: '.xlsx,.csv', extension: '.xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', description: 'Classeur Excel' },
     image: { accept: 'image/*', extension: '.png', mime: 'image/png', description: 'Image' },
     son: { accept: 'audio/*,.mp3,.wav,.ogg,.m4a', extension: '.mp3', mime: 'audio/mpeg', description: 'Son' },
     tous: { accept: '', extension: '.txt', mime: 'application/octet-stream', description: 'Fichier' }
@@ -1623,6 +1916,7 @@ function BlocRuntimeFactory() {
       if (c.type === 'zonedessin') suivreSouris(el, d);
       if (c.type === 'tableau') preparerTableau(el, d);
       if (c.type === 'calendrier') preparerCalendrier(el, d);
+      if (c.type === 'zonetexte' && (c.suggestions || []).length) majSuggestions(c.id);
       if (c.type === 'camera') d.surEvenement = [];
       if (c.type === 'barreetat') d.cases = String(c.texte ?? '').split('|');
       if (c.type === 'barreoutils') {
@@ -1825,8 +2119,8 @@ function BlocRuntimeFactory() {
       rendreTableau(el, d);
       el.addEventListener('click', e => {
         const tr = e.target.closest('tbody tr');
-        if (!tr || el.dataset.inactif) return;
-        d.choisie = [...tr.parentNode.children].indexOf(tr);
+        if (!tr || tr.dataset.n === undefined || el.dataset.inactif) return;
+        d.choisie = Number(tr.dataset.n);
         rendreTableau(el, d);
         el.dispatchEvent(new Event('input'));
       });
@@ -2853,6 +3147,27 @@ function BlocRuntimeFactory() {
         }
       });
     }
+    // ---- Zone de texte : ses suggestions s'affichent pendant la frappe, resserrées sur ce qu'on tape ----
+    function majSuggestions(id) {
+      const d = donnees[id], el = elements[id];
+      const liste = (d.suggestions || []).map(enTexte).filter(s => s.trim());
+      if (!liste.length) {
+        el.removeAttribute('list');
+        if (d.listeSuggestions) d.listeSuggestions.remove();
+        d.listeSuggestions = null;
+        return;
+      }
+      if (!d.listeSuggestions) {
+        d.listeSuggestions = document.createElement('datalist');
+        d.listeSuggestions.id = prefixe + '-suggestions-' + id;
+        el.after(d.listeSuggestions);
+        el.setAttribute('list', d.listeSuggestions.id);
+      }
+      const options = document.createDocumentFragment();
+      for (const s of liste) options.appendChild(document.createElement('option')).value = s;
+      d.listeSuggestions.replaceChildren(options);
+    }
+
     function dateDuCalendrier(valeur) {
       const iso = dateIso(valeur);
       if (!iso) throw new Error(`« ${enTexte(valeur)} » n'est pas une date : écrivez-la comme 25/12/2026.`);
@@ -3435,7 +3750,9 @@ function BlocRuntimeFactory() {
           r.readAsDataURL(fichier);
         });
       }
-      return fichier.text().then(t => t.replace(/^\ufeff/, ''));
+      // Un classeur Excel se lit comme le texte CSV de sa premi\u00e8re feuille.
+      if (estClasseur(fichier.name)) return fichier.arrayBuffer().then(lireClasseur).then(f => versCsv(f.length ? f[0].lignes : []));
+      return fichier.arrayBuffer().then(o => texteDepuisOctets(new Uint8Array(o)));
     }
 
     function chargerImage(url) {
@@ -3658,26 +3975,73 @@ function BlocRuntimeFactory() {
     }
 
     // « current.temperature_2m », « results.1.name » : les numéros de liste commencent à 1, comme dans les blocs.
-    function valeurJson(donnees, chemin) {
-      let v = donnees;
-      if (typeof v === 'string') {
-        try { v = JSON.parse(v); } catch (e) { throw new Error('Ces données ne sont pas au format JSON : impossible d\'y chercher une valeur.'); }
+    // Le dernier texte JSON lu est gardé : les blocs qui y cherchent l'un après l'autre (une boucle sur
+    // 35 000 communes…) ne le relisent pas à chaque fois.
+    let dernierJson = { texte: null, valeur: null };
+    function donneesJson(donnees) {
+      if (typeof donnees !== 'string') return donnees;
+      if (donnees !== dernierJson.texte) {
+        let v;
+        try { v = JSON.parse(donnees); } catch (e) { throw new Error('Ces données ne sont pas au format JSON : impossible d\'y chercher une valeur.'); }
+        dernierJson = { texte: donnees, valeur: v };
       }
-      for (const morceau of enTexte(chemin).split(/[.\/]|\[|\]/).map(m => m.trim()).filter(Boolean)) {
+      return dernierJson.valeur;
+    }
+    const morceauxChemin = chemin => enTexte(chemin).split(/[.\/]|\[|\]/).map(m => m.trim()).filter(Boolean);
+    const cleJson = (objet, morceau) => Object.keys(objet).find(k => k === morceau) ?? Object.keys(objet).find(k => k.toLowerCase() === morceau.toLowerCase());
+    const valeurLisible = v => Array.isArray(v) ? v.map(x => x !== null && typeof x === 'object' ? JSON.stringify(x) : x)
+      : v !== null && typeof v === 'object' ? JSON.stringify(v) : v;
+
+    // Toutes les valeurs d'un chemin : dans une liste, le chemin s'applique à chacun de ses éléments
+    // (« nom » dans une liste de communes → la liste des noms), sauf si l'on donne un numéro (« 1.nom »).
+    function valeursJson(donnees, chemin) {
+      const morceaux = morceauxChemin(chemin), resultat = [];
+      const suivre = (v, i) => {
+        if (v === undefined || v === null) return;
+        if (i === morceaux.length) {
+          if (Array.isArray(v) && !morceaux.length) v.forEach(x => resultat.push(valeurLisible(x)));
+          else resultat.push(valeurLisible(v));
+          return;
+        }
+        if (Array.isArray(v)) {
+          if (/^\d+$/.test(morceaux[i])) suivre(v[Number(morceaux[i]) - 1], i + 1);
+          else v.forEach(x => suivre(x, i));
+        } else if (typeof v === 'object') {
+          const cle = cleJson(v, morceaux[i]);
+          if (cle !== undefined) suivre(v[cle], i + 1);
+        }
+      };
+      suivre(donneesJson(donnees), 0);
+      return resultat;
+    }
+
+    // Les éléments d'une réponse JSON, pour en faire les lignes d'un tableau : la liste elle-même,
+    // ou la première liste trouvée dedans ({ "resultats": [ … ] }).
+    function elementsJson(donnees) {
+      const v = donneesJson(donnees);
+      if (Array.isArray(v)) return v;
+      if (v && typeof v === 'object') {
+        const liste = Object.values(v).find(Array.isArray);
+        if (liste) return liste;
+      }
+      throw new Error('Ces données ne contiennent pas de liste : impossible d\'en faire les lignes d\'un tableau.');
+    }
+
+    function valeurJson(donnees, chemin) {
+      let v = donneesJson(donnees);
+      for (const morceau of morceauxChemin(chemin)) {
         if (v === null || typeof v !== 'object') return '';
         if (Array.isArray(v)) {
           const n = Math.round(Number(morceau));
           if (!(n >= 1)) return '';
           v = v[n - 1];
         } else {
-          const cle = Object.keys(v).find(k => k === morceau) ?? Object.keys(v).find(k => k.toLowerCase() === morceau.toLowerCase());
+          const cle = cleJson(v, morceau);
           v = cle === undefined ? undefined : v[cle];
         }
         if (v === undefined) return '';
       }
-      if (v === null) return '';
-      if (Array.isArray(v)) return v.map(x => x !== null && typeof x === 'object' ? JSON.stringify(x) : x);
-      return typeof v === 'object' ? JSON.stringify(v) : v;
+      return v === null ? '' : valeurLisible(v);
     }
 
     // ---- Météo (Open-Meteo : gratuit, sans inscription) ----
@@ -3794,7 +4158,9 @@ function BlocRuntimeFactory() {
           return;
         }
         case 'enregistrer': {
-          const nom = await enregistrerSous(enTexte(a), nomPropose(), d.typeFichier);
+          // Réglé sur Excel : le texte (CSV, par exemple « texte CSV de Tableau1 ») devient un classeur.
+          const contenu = d.typeFichier === 'excel' ? await ecrireClasseur(depuisCsv(enTexte(a)), 'Feuille1') : enTexte(a);
+          const nom = await enregistrerSous(contenu, nomPropose(), d.typeFichier);
           d.annule = !nom;
           if (nom) d.nomFichier = nom;
           return;
@@ -3807,7 +4173,7 @@ function BlocRuntimeFactory() {
           if (!enImage && !enSon && !AVEC_FICHIER_CSV.includes(cible.type)) {
             throw new Error(`On ne peut pas ouvrir un fichier dans « ${cible.nom} » : choisissez un tableau, une base de données, une image, une zone de dessin ou un son.`);
           }
-          const f = await choisirFichierAOuvrir(enImage ? 'image' : enSon ? 'son' : 'csv');
+          const f = await choisirFichierAOuvrir(enImage ? 'image' : enSon ? 'son' : d.typeFichier === 'excel' ? 'excel' : 'csv');
           d.annule = !f;
           if (!f) return;
           d.nomFichier = f.name;
@@ -3826,7 +4192,15 @@ function BlocRuntimeFactory() {
           const cible = donnees[a];
           const base = (nomPropose() || cible.nom).replace(/\.[a-z0-9]{1,5}$/i, '');
           let nom;
+          // Un tableau ou une base : en classeur Excel si le contrôle Fichier est réglé sur Excel
+          // (ou si le nom proposé finit par .xlsx), sinon en CSV.
+          const enExcel = d.typeFichier === 'excel' || estClasseur(nomPropose());
+          const lignesDe = () => cible.type === 'tableau'
+            ? (cible.colonnes.length ? [cible.colonnes, ...cible.lignes] : cible.lignes) : [cible.champs, ...cible.fiches];
           if (cible.type === 'zonedessin') nom = await enregistrerSous(pngDeDessin(a), base + '.png', 'image');
+          else if ((cible.type === 'tableau' || cible.type === 'basedonnees') && enExcel) {
+            nom = await enregistrerSous(await ecrireClasseur(lignesDe(), cible.nom), base + '.xlsx', 'excel');
+          }
           else if (cible.type === 'tableau') nom = await enregistrerSous(app.lireTableau(a, 'csv'), base + '.csv', 'csv');
           else if (cible.type === 'basedonnees') nom = await enregistrerSous(app.lireBase(a, 'csv'), base + '.csv', 'csv');
           else if (cible.type === 'camera') {
@@ -4377,6 +4751,7 @@ function BlocRuntimeFactory() {
         }
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return lireSprite(d, prop);
         if (d.type === 'calendrier' && prop === 'texte') return dateFrancaise(d.choisie);
+        if (d.type === 'zonetexte' && prop === 'suggestions') return (d.suggestions || []).map(enTexte);
         if (d.type === 'horloge') {
           if (prop === 'texte') return texteHorloge(d, true);
           if (prop === 'genre') return d.genre === 'chiffres' ? 'chiffres' : 'aiguilles';
@@ -4533,6 +4908,10 @@ function BlocRuntimeFactory() {
           return;
         }
         if (d.type === 'sprite' && PROPS_SPRITE.includes(prop)) return ecrireSprite(d, prop, valeur);
+        if (d.type === 'zonetexte' && prop === 'suggestions') {
+          d.suggestions = (Array.isArray(valeur) ? valeur : enTexte(valeur).split('\n')).map(enTexte);
+          return majSuggestions(id);
+        }
         if (d.type === 'calendrier' && (prop === 'texte' || prop === 'couleurBarre')) {
           if (prop === 'texte') {
             d.choisie = dateDuCalendrier(valeur);
@@ -4593,6 +4972,7 @@ function BlocRuntimeFactory() {
               const n = Math.round(Number(valeur)) - 1;
               d.choisie = n >= 0 && n < d.lignes.length ? n : -1;
               rendreTableau(el, d);
+              montrerLigneChoisie(el, d);
             }
             break;
           case 'colonnes':
@@ -4933,6 +5313,15 @@ function BlocRuntimeFactory() {
             d.choisie = choisie ? d.lignes.indexOf(choisie) : -1;
             break;
           }
+          // a : des données JSON (une liste d'éléments) ; b : un chemin par colonne (une liste, ou un texte « nom ; code »).
+          case 'json': {
+            const chemins = (Array.isArray(b) ? b : enTexte(b).split(/[;\n]/)).map(enTexte).map(c => c.trim()).filter(Boolean);
+            d.lignes = elementsJson(a).map(e => chemins.length
+              ? chemins.map(c => enTexte(valeurJson(e, c)))
+              : [enTexte(valeurLisible(e))]);
+            d.choisie = -1;
+            break;
+          }
           case 'csv': {
             let lignes = depuisCsv(a);
             const entete = lignes[0];
@@ -5204,6 +5593,7 @@ function BlocRuntimeFactory() {
       },
       lireWeb,
       valeurJson,
+      valeursJson,
       // Une adresse dans le navigateur de l'ordinateur (Edge, Chrome…), hors du programme.
       ouvrirNavigateur(adresse) {
         if (arrete) return;
@@ -5421,7 +5811,9 @@ function BlocRuntimeFactory() {
 
   return { lancer, creerElement, appliquerStyle, couleur, lireMenus, cheminsMenus, creerBarreMenus, HAUTEUR_MENUS,
     elementsMenuContextuel, elementsBarreOutils, decoderSon, extraitSon, contexteAudio, INVISIBLES,
-    tailleContenuPanneau, sensDefilement };
+    tailleContenuPanneau, sensDefilement,
+    // Fichiers de tableur, aussi utilisés par l'éditeur (importer / exporter des données).
+    lireTableur, lireClasseur, ecrireClasseur, depuisCsv, versCsv, estClasseur };
 }
 
 const BlocRuntime = BlocRuntimeFactory();

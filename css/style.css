@@ -448,6 +448,23 @@ body.dans-hote .si-navigateur, body:not(.dans-hote) .si-hote { display: none; }
 
 /* Enregistrement au micro */
 .micro-boite { width: 440px; }
+
+/* Importer des données (CSV ou Excel) dans un tableau, une base, une liste… */
+.import-boite { width: 680px; max-width: 94vw; max-height: 92vh; overflow: auto; }
+.import-reglages { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-bottom: 4px; font-size: 14px; }
+.import-reglages label { display: inline-flex; align-items: center; gap: 6px; }
+.import-reglages input[type="number"] { width: 90px; padding: 3px 6px; }
+.import-reglages select { padding: 3px 6px; max-width: 260px; }
+.import-titre { margin: 12px 0 4px !important; font-weight: 600; font-size: 14px; }
+.import-colonnes { display: flex; flex-wrap: wrap; gap: 6px; }
+.import-colonne { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border: 1px solid #cbd5e1;
+  border-radius: 999px; font-size: 13px; cursor: pointer; background: #f8fafc; }
+.import-colonne.choisie { border-color: #7c3aed; background: #ede9fe; }
+.import-apercu { max-height: 230px; overflow: auto; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 8px; }
+.import-apercu table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.import-apercu th { position: sticky; top: 0; background: #e8ebf0; text-align: left; padding: 4px 8px; white-space: nowrap; }
+.import-apercu td { padding: 3px 8px; border-top: 1px solid #eef0f3; white-space: nowrap; max-width: 220px;
+  overflow: hidden; text-overflow: ellipsis; }
 .micro-zone { display: flex; align-items: center; gap: 16px; margin: 6px 0 14px; }
 .micro-rond {
   flex: none; width: 64px; height: 64px; border: 4px solid #fecaca; border-radius: 50%;

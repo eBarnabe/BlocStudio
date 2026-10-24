@@ -29,7 +29,7 @@
     allumee: 'allumée', photo: 'dernière photo (image)', mouvement: 'mouvement vu (%)',
     seuilMouvement: 'seuil de mouvement (%)',
     contenu: 'contenu du fichier', nomFichier: 'nom du fichier', annule: 'annulé par l\'utilisateur',
-    nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, image, son ou tous)',
+    nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, excel, image, son ou tous)',
     nombreFiches: 'nombre de fiches', champs: 'champs (liste)', memoriser: 'garder les fiches d\'une fois à l\'autre',
     adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)',
     infobulle: 'infobulle (texte au survol)', gras: 'en gras', italique: 'en italique',
@@ -42,6 +42,7 @@
     hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
     defilement: 'sens du défilement (vertical, horizontal ou deux)',
     secondes: 'avec les secondes', decalageHeures: 'décalage (heures, pour un autre pays)',
+    suggestions: 'suggestions pendant la frappe (liste)',
     solide: 'solide (sol, plateforme ou mur, pour la gravité)', vitesseY: 'vitesse de chute (négative : il monte)'
   };
 
@@ -51,7 +52,7 @@
   const PROPS_PAR_TYPE = {
     bouton: ['texte', ...TEXTE, 'alignement', 'active', ...POSITION],
     etiquette: ['texte', ...TEXTE, 'alignement', 'bordure', ...POSITION, 'direction', 'vitesseY'],
-    zonetexte: ['texte', 'motDePasse', 'texteInvite', 'lectureSeule', 'longueurMax', ...TEXTE, 'alignement', 'active', ...POSITION],
+    zonetexte: ['texte', 'suggestions', 'motDePasse', 'texteInvite', 'lectureSeule', 'longueurMax', ...TEXTE, 'alignement', 'active', ...POSITION],
     arborescence: ['texte', 'chemin', 'elements', ...TEXTE, ...POSITION],
     barreetat: ['texte', ...TEXTE, 'visible'],
     barreoutils: ['couleurTexte', 'couleurFond', 'taillePolice', 'visible'],
@@ -823,11 +824,11 @@
 
   Blockly.Blocks['bs_fichier_ouvrir_dans'] = instruction(() => [
     'ouvrir avec', FICHIER, 'un fichier dans', { ctrl: ['tableau', 'basedonnees', 'image', 'zonedessin', 'son'], nom: 'CIBLE' }
-  ], COULEUR_FICHIERS, 'Raccourci : un fichier CSV (Excel) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin ; un son (MP3, WAV…) va dans un contrôle Son, prêt à jouer.');
+  ], COULEUR_FICHIERS, 'Raccourci : un fichier CSV ou un classeur Excel (.xlsx, sa première feuille) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin ; un son (MP3, WAV…) va dans un contrôle Son, prêt à jouer.');
 
   Blockly.Blocks['bs_fichier_enregistrer_de'] = instruction(() => [
     'enregistrer', { ctrl: ['tableau', 'basedonnees', 'zonedessin', 'camera'], nom: 'CIBLE' }, 'dans un fichier avec', FICHIER
-  ], COULEUR_FICHIERS, 'Raccourci : un tableau ou une base de données devient un fichier CSV (lisible par Excel), une zone de dessin ou la dernière photo d\'une caméra une image PNG.');
+  ], COULEUR_FICHIERS, 'Raccourci : un tableau ou une base de données devient un fichier CSV, ou un classeur Excel (.xlsx) si le contrôle Fichier est réglé sur « Classeur Excel » ; une zone de dessin ou la dernière photo d\'une caméra une image PNG.');
 
   // ---------- Caméra ----------
 
@@ -1252,6 +1253,11 @@
   Blockly.Blocks['bs_tableau_remplir_csv'] = instruction(() => [
     'remplir', TABLEAU, { nom: 'VAL', libelle: 'avec le texte CSV' }
   ], COULEUR_CONTROLES, 'Remplace les lignes du tableau par celles d\'un texte CSV (par exemple lu dans un fichier).');
+  Blockly.Blocks['bs_tableau_remplir_json'] = instruction(() => [
+    'remplir', TABLEAU, { nom: 'VAL', libelle: 'avec les données' }, { nom: 'CHEMINS', libelle: 'colonnes' }
+  ], COULEUR_CONTROLES, 'Une ligne par élément de données JSON (lues sur Internet avec « lire les données de »), ' +
+    'et une colonne par chemin, dans l\'ordre des colonnes du tableau : par exemple la liste « nom », « codesPostaux.1 », « departement.nom ». ' +
+    'Rapide même avec des dizaines de milliers de lignes.');
 
   // ---------- Mémoire et fichiers ----------
 
@@ -1410,6 +1416,11 @@
   Blockly.Blocks['bs_json_valeur'] = valeur(() => [
     { nom: 'CHEMIN', libelle: '🌐 valeur' }, { nom: 'VAL', libelle: 'dans les données' }
   ], null, COULEUR_INTERNET, 'Une information dans des données JSON, désignée par son chemin : « current.temperature_2m », ou « results.1.name » (les numéros de liste commencent à 1). Vide si elle n\'existe pas.');
+  Blockly.Blocks['bs_json_liste'] = valeur(() => [
+    { nom: 'CHEMIN', libelle: '🌐 liste des' }, { nom: 'VAL', libelle: 'dans les données' }
+  ], 'Array', COULEUR_INTERNET, 'Quand les données sont une liste (de communes, de films…), le chemin est pris dans chaque élément : ' +
+    '« nom » donne la liste de tous les noms, « departement.nom » celle des départements, « codesPostaux.1 » le premier code postal de chacun. ' +
+    'Le résultat va tout droit dans une liste déroulante (« mettre éléments de … à ») ou dans les suggestions d\'une zone de texte.');
 
   // ---------- Conversions ----------
 
@@ -2346,6 +2357,9 @@
   gen.forBlock['bs_web_ouvrir'] = b => `app.ouvrirNavigateur(${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_web_lire'] = b => [`(await app.lireWeb(${val(b, 'VAL', "''")}))`, Order.ATOMIC];
   gen.forBlock['bs_json_valeur'] = b => [`app.valeurJson(${val(b, 'VAL', "''")}, ${val(b, 'CHEMIN', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_json_liste'] = b => [`app.valeursJson(${val(b, 'VAL', "''")}, ${val(b, 'CHEMIN', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_tableau_remplir_json'] = b =>
+    `app.tableau(${id(b)}, 'json', ${val(b, 'VAL', "''")}, ${val(b, 'CHEMINS', "''")});\n`;
   const genConvertir = grandeur => b =>
     [`app.convertir(${q(grandeur)}, ${val(b, 'VAL', '0')}, ${q(b.getFieldValue('DE'))}, ${q(b.getFieldValue('VERS'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_convertir_temps'] = genConvertir('temps');
@@ -2771,6 +2785,9 @@
         etiquette('Données d\'un service Internet'),
         { kind: 'block', type: 'bs_web_lire', inputs: { VAL: texte('https://api.open-meteo.com/v1/forecast?latitude=48.85&longitude=2.35&current=temperature_2m') } },
         { kind: 'block', type: 'bs_json_valeur', inputs: { CHEMIN: texte('current.temperature_2m') } },
+        etiquette('Une liste d\'éléments (ici : les communes de France dont le nom commence par « saint-ma »)'),
+        { kind: 'block', type: 'bs_web_lire', inputs: { VAL: texte('https://geo.api.gouv.fr/communes?nom=saint-ma&fields=nom,codesPostaux,departement&boost=population&limit=10') } },
+        { kind: 'block', type: 'bs_json_liste', inputs: { CHEMIN: texte('nom') } },
         etiquette('Pages web'),
         { kind: 'block', type: 'bs_web_ouvrir', inputs: { VAL: texte('www.google.fr') } }
       ]
@@ -2876,7 +2893,7 @@
     'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax', 'epaisseur', 'heures', 'minutes',
     'defilementX', 'defilementY', 'largeurContenu', 'hauteurContenu', 'vitesseY', 'decalageHeures'];
   const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre', 'couleurBordure'];
-  const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
+  const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs', 'suggestions'];
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee', 'cliquable',
     'gras', 'italique', 'lectureSeule', 'trie', 'solide', 'secondes'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
@@ -3019,7 +3036,9 @@
           b('bs_tableau_chercher', { COL: texte('Nom'), VAL: texte('Dupont') }),
           b('bs_base_choisie'),
           etiquette('Fichiers (CSV, lisible par Excel)'),
-          b('bs_tableau_csv'), b('bs_tableau_remplir_csv'));
+          b('bs_tableau_csv'), b('bs_tableau_remplir_csv'),
+          etiquette('Données d\'Internet (JSON)'),
+          b('bs_tableau_remplir_json', { CHEMINS: listeTextes('nom', 'code') }));
         break;
       case 'calendrier':
         actions.push(

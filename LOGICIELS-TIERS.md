@@ -37,6 +37,14 @@ Seuls le nom de la ville demandée, puis ses coordonnées, lui sont envoyés.
 - Données : Open-Meteo.com, sous licence [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Un programme qui affiche ces données doit citer la source, par exemple « Météo : Open-Meteo.com » (comme le lien en bas de l'exemple Météo).
 - Conditions d'utilisation : https://open-meteo.com/en/terms (usage non commercial gratuit)
 
+### API Découpage administratif (geo.api.gouv.fr)
+
+L'exemple **Communes de France** y lit la liste des communes : nom, codes postaux, département, population.
+
+- Service : l'État français (`geo.api.gouv.fr`), gratuit, sans inscription
+- Données : sous [Licence Ouverte 2.0 (Etalab)](https://www.etalab.gouv.fr/licence-ouverte-open-licence/), qui demande de citer la source. L'exemple l'indique sous la recherche.
+- Documentation : https://geo.api.gouv.fr/decoupage-administratif
+
 ### Sites affichés par les programmes
 
 Les contrôles **Navigateur web**, **Vidéo** et **Lien** affichent ou ouvrent les sites choisis par l'auteur du programme : Wikipédia, YouTube, Google Maps… Ces sites ont leurs propres conditions d'utilisation. BlocStudio n'en livre aucun contenu.

@@ -244,6 +244,45 @@
     t.fin();
   });
 
+  await essayer('moteur : fichiers de tableur', async () => {
+    const lignes = [['Nom', 'Code postal', 'Population', 'Note'], ['Bourg-en-Bresse', '01000', '41365', '3,5'], ['Zoé & <Cie>', '75001', 12, '-0,25']];
+    const relu = await BlocRuntime.lireClasseur(await BlocRuntime.ecrireClasseur(lignes, 'Essai'));
+    egal('Excel : écrit puis relu (« 01000 » reste un texte)', [relu[0].nom, relu[0].lignes],
+      ['Essai', [['Nom', 'Code postal', 'Population', 'Note'], ['Bourg-en-Bresse', '01000', '41365', '3,5'], ['Zoé & <Cie>', '75001', '12', '-0,25']]]);
+    const windows1252 = new Uint8Array([0x4e, 0x6f, 0x6d, 0x3b, 0x56, 0x69, 0x6c, 0x6c, 0x65, 0x0d, 0x0a, 0x5a, 0x6f, 0xe9, 0x3b, 0x41, 0xff]);
+    egal('CSV enregistré par Excel (Windows-1252)', (await BlocRuntime.lireTableur(new File([windows1252], 'a.csv')))[0].lignes, [['Nom', 'Ville'], ['Zoé', 'Aÿ']]);
+    egal('CSV : tabulations, et virgules dans un texte séparé par ;',
+      [BlocRuntime.depuisCsv('a\tb\nc\td'), BlocRuntime.depuisCsv('Nom;Adresse\nDupont;12, rue de la Paix')],
+      [[['a', 'b'], ['c', 'd']], [['Nom', 'Adresse'], ['Dupont', '12, rue de la Paix']]]);
+  });
+
+  await essayer('moteur : données JSON et gros tableau', async () => {
+    const communes = Array.from({ length: 35000 }, (_, i) => ({ nom: 'Commune ' + (i + 1), codesPostaux: [String(10000 + i)], departement: { nom: 'Dép ' + (i % 100) } }));
+    const json = JSON.stringify(communes);
+    const t = lancer([
+      { id: 't', type: 'tableau', x: 0, y: 0, largeur: 400, hauteur: 200, colonnes: ['Nom', 'Code postal', 'Département'], lignes: [] },
+      { id: 'z', type: 'zonetexte', x: 0, y: 210, largeur: 200, hauteur: 30 }
+    ]);
+    const { app, hote } = t;
+    const noms = app.valeursJson(json, 'nom');
+    egal('liste des « nom » dans les données', [noms.length, noms[0], noms[34999]], [35000, 'Commune 1', 'Commune 35000']);
+    egal('liste des « codesPostaux.1 » et « departement.nom »',
+      [app.valeursJson(json, 'codesPostaux.1')[2], app.valeursJson(json, 'departement.nom')[101], app.valeurJson(json, '2.nom')], ['10002', 'Dép 1', 'Commune 2']);
+    app.tableau('t', 'json', json, ['nom', 'codesPostaux.1', 'departement.nom']);
+    const el = hote.querySelector('.bs-tableau');
+    egal('tableau rempli avec des données JSON', [app.lire('t', 'nombreLignes'), app.lireTableau('t', 'ligne', 3)], [35000, ['Commune 3', 10002, 'Dép 2']]);
+    app.tableau('t', 'cellule', 1, 2, '01000');
+    egal('un code postal qui commence par 0 reste un texte', app.lireTableau('t', 'cellule', 1, 2), '01000');
+    vrai('35 000 lignes : seules les lignes visibles sont dessinées', el.querySelectorAll('tr[data-n]').length < 100, el.querySelectorAll('tr[data-n]').length + ' lignes dessinées');
+    app.ecrire('t', 'numero', 20000);
+    await dort(50);
+    vrai('choisir une ligne lointaine la fait voir', !!el.querySelector('tr[data-n="19999"].bs-choisie'), 'défilement : ' + el.scrollTop);
+    app.ecrire('z', 'suggestions', noms);
+    const liste = document.getElementById(hote.querySelector('.bs-zonetexte').getAttribute('list'));
+    egal('zone de texte : 35 000 suggestions', [liste && liste.options.length, app.lire('z', 'suggestions').length], [35000, 35000]);
+    t.fin();
+  });
+
   await essayer('moteur : manette', async () => {
     const t = lancer([]);
     const { app } = t;

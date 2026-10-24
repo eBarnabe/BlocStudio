@@ -839,6 +839,88 @@
       }
     },
     {
+      titre: '🏘️ Communes de France',
+      theme: 'applications',
+      description: 'Les 34 969 communes, lues sur un service de l\'État : une recherche pendant la frappe, ou toutes dans un tableau, avec des suggestions, et un enregistrement en Excel.',
+      creer: () => {
+        // c1 Pages (onglets) · page 1 : c2 Recherche, c3 Resultats, c4 Fiche, c5 Explication
+        // page 2 : c6 Charger, c7 Commune, c8 Trouver, c9 Exporter, c10 Communes (tableau), c11 Etat · c12 Fichier (Excel)
+        const API = 'https://geo.api.gouv.fr/communes?fields=nom,codesPostaux,departement,population';
+        const page = (n, c) => Object.assign({ onglets: 'c1', page: n }, c);
+        const json = (chemin, donnees) => bloc('bs_json_valeur', null, { CHEMIN: chemin, VAL: donnees });
+        const dansChoisie = champ => json(joindre(v('v_numero'), t('.' + champ)), v('v_resultats'));
+        const longueur = x => ({ type: 'text_length', inputs: { VALUE: I(x) } });
+        return projet(
+          { titre: 'Communes de France', largeur: 640, hauteur: 470, couleurFond: '#f1f5f9' },
+          [
+            { type: 'onglets', nom: 'Pages', x: 8, y: 8, largeur: 624, hauteur: 454, pages: ['🔍 Rechercher (Internet)', '📋 Toutes les communes'], page: 0 },
+            page(0, { type: 'zonetexte', nom: 'Recherche', texteInvite: 'Le début d\'un nom : saint-ma, aix…', x: 24, y: 56, largeur: 300, hauteur: 32, taillePolice: 15 }),
+            page(0, { type: 'zoneliste', nom: 'Resultats', elements: [], x: 24, y: 96, largeur: 300, hauteur: 350, taillePolice: 14 }),
+            page(0, { type: 'etiquette', nom: 'Fiche', texte: 'Tapez le début d\'un nom, puis choisissez une commune dans la liste.', x: 340, y: 96,
+              largeur: 276, hauteur: 160, taillePolice: 15, couleurTexte: '#0f172a', couleurFond: '#ffffff', bordure: 'simple' }),
+            page(0, { type: 'etiquette', nom: 'Explication', x: 340, y: 270, largeur: 276, hauteur: 176, taillePolice: 12, couleurTexte: '#475569',
+              texte: 'À chaque lettre tapée, le programme demande à un service de l\'État les 15 communes les plus peuplées dont le nom commence ainsi.\n\n' +
+                'Données : geo.api.gouv.fr (Licence Ouverte), il faut une connexion à Internet.' }),
+            page(1, { type: 'bouton', nom: 'Charger', texte: '📥 Charger les communes', x: 24, y: 56, largeur: 230, hauteur: 32, couleurFond: '#0369a1', couleurTexte: '#ffffff', gras: true }),
+            page(1, { type: 'zonetexte', nom: 'Commune', texteInvite: 'Une commune…', x: 24, y: 98, largeur: 230, hauteur: 30, taillePolice: 14 }),
+            page(1, { type: 'bouton', nom: 'Trouver', texte: '➜ La trouver', x: 262, y: 98, largeur: 120, hauteur: 30 }),
+            page(1, { type: 'bouton', nom: 'Exporter', texte: '📤 Enregistrer en Excel', x: 440, y: 56, largeur: 176, hauteur: 32 }),
+            page(1, { type: 'tableau', nom: 'Communes', colonnes: ['Nom', 'Code postal', 'Département'], lignes: [], x: 24, y: 138, largeur: 592, hauteur: 270, taillePolice: 13 }),
+            page(1, { type: 'etiquette', nom: 'Etat', texte: 'Cliquez sur « Charger » : les 34 969 communes vont remplir le tableau (≈ 2 Mo à télécharger).',
+              x: 24, y: 414, largeur: 592, hauteur: 40, taillePolice: 13, couleurTexte: '#334155' }),
+            { type: 'fichier', nom: 'Fichier', typeFichier: 'excel', nomPropose: 'communes de France.xlsx', largeur: 0, hauteur: 0 }
+          ],
+          ['resultats', 'numero', 'toutes', 'ligne'],
+          () => [
+            presentation('Deux façons de lire des données d\'Internet (au format JSON). Page 1 : une petite demande à chaque lettre tapée. ' +
+              'Page 2 : toutes les communes d\'un coup, dans un tableau qui reste fluide malgré ses 34 969 lignes.'),
+            evt('bs_quand_change', 'c2', [
+              note('Dès 2 lettres : on demande les communes dont le nom commence ainsi. « liste des nom » fait une liste de tous les noms reçus.'),
+              si(compare('GTE', longueur(lire('texte', 'c2')), n(2)), [
+                fixer('v_resultats', bloc('bs_web_lire', null, { VAL: joindre(t(API + '&boost=population&limit=15&nom='), lire('texte', 'c2')) })),
+                ecrire('c3', 'elements', bloc('bs_json_liste', null, { CHEMIN: t('nom'), VAL: v('v_resultats') }))
+              ], [listeVider('c3')])
+            ]),
+            evt('bs_quand_change', 'c3', [
+              note('La commune choisie : son numéro dans la liste sert à lire ses informations (« 3.departement.nom » pour la 3e).'),
+              fixer('v_numero', lire('numero', 'c3')),
+              si(compare('GT', v('v_numero'), n(0)), [
+                ecrire('c4', 'texte', joindre(
+                  t('📍 '), dansChoisie('nom'), retourLigne(),
+                  t('✉️ Code postal : '), dansChoisie('codesPostaux'), retourLigne(),
+                  t('🗺️ '), dansChoisie('departement.nom'), t(' ('), dansChoisie('departement.code'), t(')'), retourLigne(),
+                  t('👥 '), bloc('bs_format_nombre', null, { VAL: dansChoisie('population'), DEC: n(0) }), t(' habitants')))
+              ])
+            ]),
+            evt('bs_quand_clic', 'c6', [
+              note('Toutes les communes : une ligne par commune, et une colonne par chemin (le 1er code postal, le nom du département). ' +
+                'Leurs noms deviennent aussi les suggestions de la zone de texte.'),
+              ecrire('c11', 'texte', t('⏳ Je télécharge les communes…')),
+              fixer('v_toutes', bloc('bs_web_lire', null, { VAL: t(API) })),
+              bloc('bs_tableau_remplir_json', 'c10', { VAL: v('v_toutes'), CHEMINS: liste(t('nom'), t('codesPostaux.1'), t('departement.nom')) }),
+              bloc('bs_tableau_trier', 'c10', { COL: t('Nom') }, { SENS: 'croissant' }),
+              ecrire('c7', 'suggestions', bloc('bs_json_liste', null, { CHEMIN: t('nom'), VAL: v('v_toutes') })),
+              ecrire('c11', 'texte', joindre(bloc('bs_format_nombre', null, { VAL: lire('nombreLignes', 'c10'), DEC: n(0) }),
+                t(' communes. Tapez-en une (les suggestions s\'affichent), ou enregistrez-les dans un classeur Excel.')))
+            ]),
+            evt('bs_quand_clic', 'c8', [
+              note('« n° de la ligne où la colonne Nom vaut… » trouve la commune ; la choisir fait défiler le tableau jusqu\'à elle.'),
+              fixer('v_ligne', bloc('bs_tableau_chercher', 'c10', { COL: t('Nom'), VAL: lire('texte', 'c7') })),
+              si(compare('GT', v('v_ligne'), n(0)), [
+                ecrire('c10', 'numero', v('v_ligne')),
+                ecrire('c11', 'texte', joindre(lire('texte', 'c7'), t(' : ligne '), v('v_ligne'), t('.')))
+              ], [ecrire('c11', 'texte', joindre(t('Je ne trouve pas « '), lire('texte', 'c7'), t(' » (avez-vous chargé les communes ?).')))])
+            ]),
+            evt('bs_quand_clic', 'c9', [
+              note('Le contrôle Fichier est réglé sur « Classeur Excel » : le tableau devient un fichier .xlsx.'),
+              si(compare('EQ', lire('nombreLignes', 'c10'), n(0)), [message(t('Chargez d\'abord les communes (bouton « Charger »).'))], [
+                bloc('bs_fichier_enregistrer_de', 'c12', null, { CIBLE: 'c10' })
+              ])
+            ])
+          ]);
+      }
+    },
+    {
       titre: '🧮 Quiz de calcul',
       theme: 'debut',
       description: '5 multiplications au hasard, un score et une barre de progression.',
