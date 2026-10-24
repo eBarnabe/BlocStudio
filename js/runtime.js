@@ -190,6 +190,7 @@ function BlocRuntimeFactory() {
   // Affiche proprement une valeur (les listes deviennent « a, b, c »).
   function enTexte(v) {
     if (Array.isArray(v)) return v.map(enTexte).join(', ');
+    if (estDico(v)) return Object.entries(v).map(([cle, x]) => cle + ' : ' + enTexte(x)).join(', ');
     if (v === true) return 'vrai';
     if (v === false) return 'faux';
     return v === undefined || v === null ? '' : String(v);
@@ -583,6 +584,25 @@ function BlocRuntimeFactory() {
     const m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/.exec(s);
     return m ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : '';
   }
+
+  // Un dictionnaire (bloc « dictionnaire vide ») : un simple objet { clé: valeur }.
+  const estDico = v => !!v && typeof v === 'object' && !Array.isArray(v) && Object.getPrototypeOf(v) === Object.prototype;
+
+  // Une date (« 25/12/2026 » ou « 2026-12-25 ») en nombre de jours, pour calculer sans souci d'heure d'été.
+  function joursDepuis1970(texte) {
+    const iso = dateIso(texte);
+    const [a, m, j] = iso.split('-').map(Number);
+    const t = Date.UTC(a, m - 1, j);
+    if (!iso || isNaN(t) || new Date(t).getUTCDate() !== j) {
+      throw new Error(`« ${enTexte(texte)} » n'est pas une date : écrivez-la comme 25/12/2026.`);
+    }
+    return t / 86400000;
+  }
+  function dateDepuisJours(n) {
+    const d = new Date(n * 86400000);
+    return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
+  }
+  const JOURS_SEMAINE = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 
   function aujourdhuiIso() {
     const d = new Date();
@@ -2604,6 +2624,49 @@ function BlocRuntimeFactory() {
     ecouter(window, 'gamepadconnected', suivreManette);
     nettoyages.push(() => cancelAnimationFrame(lectureManette));
     suivreManette(); // déjà branchée (et déjà utilisée) avant le lancement
+
+    // ---- Micro ----
+    // Allumé au premier « volume du micro » (ou « quand le micro entend… ») ; 0 tant qu'il démarre.
+    const micro = { allumage: false, analyseur: null, donnees: null, flux: null };
+    function allumerMicro() {
+      if (micro.allumage) return;
+      micro.allumage = true;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        signaler(new Error('Le micro n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).'));
+        return;
+      }
+      navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }).then(flux => {
+        if (arrete) { flux.getTracks().forEach(p => p.stop()); return; }
+        micro.flux = flux;
+        const ctx = contexteAudio();
+        if (ctx.state === 'suspended') ctx.resume().catch(() => {});
+        micro.analyseur = ctx.createAnalyser();
+        micro.analyseur.fftSize = 1024;
+        micro.donnees = new Float32Array(micro.analyseur.fftSize);
+        ctx.createMediaStreamSource(flux).connect(micro.analyseur);
+      }, e => {
+        signaler(new Error(e && e.name === 'NotAllowedError'
+          ? 'Le micro a été refusé : autorisez-le pour que le programme entende les sons.'
+          : 'Aucun micro trouvé : branchez-en un (ou vérifiez qu\'il est activé dans Windows).'));
+      });
+    }
+    nettoyages.push(() => { if (micro.flux) micro.flux.getTracks().forEach(p => p.stop()); });
+    // Le volume du son entendu, de 0 (silence) à 100 (très fort).
+    function volumeMicro() {
+      allumerMicro();
+      if (!micro.analyseur) return 0;
+      micro.analyseur.getFloatTimeDomainData(micro.donnees);
+      let somme = 0;
+      for (const x of micro.donnees) somme += x * x;
+      return Math.min(100, Math.round(Math.sqrt(somme / micro.donnees.length) * 400));
+    }
+
+    function verifierDico(dico) {
+      if (!estDico(dico)) {
+        throw new Error(`« ${enTexte(dico) || 'rien'} » n'est pas un dictionnaire : mettez d'abord « dictionnaire vide » dans la variable.`);
+      }
+      return dico;
+    }
 
     // ---- Souris dans la fenêtre ----
     const souris = { x: 0, y: 0, enfonce: false };
@@ -5009,9 +5072,39 @@ function BlocRuntimeFactory() {
           case 'heures': return d.getHours();
           case 'minutes': return d.getMinutes();
           case 'secondes': return d.getSeconds();
-          case 'jourSemaine': return ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'][d.getDay()];
+          case 'jourSemaine': return JOURS_SEMAINE[d.getDay()];
         }
         return '';
+      },
+
+      // ---- Dates ----
+      joursEntre(date1, date2) { return Math.round(joursDepuis1970(date2) - joursDepuis1970(date1)); },
+      datePlusJours(date, jours) { return dateDepuisJours(joursDepuis1970(date) + Math.round(Number(jours) || 0)); },
+      // Le 1er janvier 1970 était un jeudi.
+      jourSemaine(date) { return JOURS_SEMAINE[((joursDepuis1970(date) + 4) % 7 + 7) % 7]; },
+
+      // ---- Dictionnaires ----
+      dicoVide() { return {}; },
+      dicoMettre(dico, cle, valeur) { verifierDico(dico)[enTexte(cle)] = valeur; },
+      dicoValeur(dico, cle) {
+        verifierDico(dico);
+        return Object.prototype.hasOwnProperty.call(dico, enTexte(cle)) ? dico[enTexte(cle)] : '';
+      },
+      dicoContient(dico, cle) { return Object.prototype.hasOwnProperty.call(verifierDico(dico), enTexte(cle)); },
+      dicoCles(dico) { return Object.keys(verifierDico(dico)); },
+      dicoRetirer(dico, cle) { delete verifierDico(dico)[enTexte(cle)]; },
+
+      // ---- Micro ----
+      volumeMicro,
+      quandMicro(seuil, fn) {
+        allumerMicro();
+        const h = sansEmpiler(proteger(fn));
+        let auDessus = false;
+        minuteurs.push(setInterval(() => {
+          const fort = volumeMicro() > (Number(seuil) || 0);
+          if (fort && !auDessus) h();
+          auDessus = fort;
+        }, 50));
       },
       boucles: 0
     };

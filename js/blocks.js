@@ -1443,6 +1443,62 @@
       ['heures (nombre)', 'heures'], ['minutes (nombre)', 'minutes'], ['secondes (nombre)', 'secondes']]), nom: 'QUOI' }
   ], null, COULEUR_SONS, 'La date ou l\'heure de l\'ordinateur, au moment où le bloc est utilisé.');
 
+  // ---------- Dates ----------
+
+  const DATES = 'Une date s\'écrit comme 25/12/2026 (c\'est ce que donnent « date du jour » et un sélecteur de date).';
+  Blockly.Blocks['bs_date_ecart'] = valeur(() => [
+    { nom: 'D1', libelle: 'nombre de jours entre' }, { nom: 'D2', libelle: 'et' }
+  ], 'Number', COULEUR_SONS, 'Combien de jours séparent les deux dates (négatif si la seconde est avant la première). ' +
+    'Exemple : entre la date du jour et 25/12/2026, le nombre de jours avant Noël. ' + DATES);
+  Blockly.Blocks['bs_date_plus'] = valeur(() => [
+    { nom: 'DATE', libelle: 'la date' }, { nom: 'JOURS', libelle: 'plus', check: 'Number' }, 'jours'
+  ], 'String', COULEUR_SONS, 'La date, tant de jours plus tard (ou plus tôt avec un nombre négatif) : la date du jour plus 7 jours = dans une semaine. ' + DATES);
+  Blockly.Blocks['bs_date_jour_semaine'] = valeur(() => [{ nom: 'DATE', libelle: 'jour de la semaine du' }], 'String', COULEUR_SONS,
+    'Le jour de la semaine de cette date, en toutes lettres : « lundi », « mardi »… Quel jour tombe ton anniversaire ? ' + DATES);
+
+  // ---------- Micro ----------
+
+  Blockly.Blocks['bs_volume_micro'] = valeur(() => ['volume du micro'], 'Number', COULEUR_SONS,
+    'Le bruit que le micro entend en ce moment, de 0 (silence) à 100 (très fort). Le micro s\'allume la première fois ' +
+    '(l\'ordinateur peut demander l\'autorisation) ; pendant ce temps, le volume vaut 0. Pour un jeu où l\'on crie pour sauter !');
+  Blockly.Blocks['bs_quand_micro'] = {
+    init() {
+      this.appendDummyInput().appendField('quand le micro entend un bruit plus fort que')
+        .appendField(new Blockly.FieldNumber(30, 1, 100), 'SEUIL');
+      this.appendStatementInput('DO');
+      this.setColour(COULEUR_EVENEMENTS);
+      this.hat = 'cap';
+      this.setTooltip('Exécuté chaque fois que le bruit dépasse ce volume (de 1 à 100) : un clap, un cri… ' +
+        'Il faut que le bruit redescende avant de pouvoir recommencer. Parler normalement : environ 10 à 30.');
+    }
+  };
+
+  // ---------- Dictionnaires ----------
+  // Des valeurs rangées par nom (clé) : « Marie » → 12, « Lucas » → 15.
+
+  const DICO = 'Un dictionnaire range des valeurs par nom : « Marie » → 12, « Lucas » → 15. Mettez « dictionnaire vide » dans une variable, puis remplissez-le.';
+  // Couleur des blocs de listes (comme ceux de Blockly), plutôt qu'une couleur fixe.
+  function styleListes(def) {
+    const init = def.init;
+    def.init = function () { init.call(this); this.setStyle('list_blocks'); };
+    return def;
+  }
+  Blockly.Blocks['bs_dico_vide'] = styleListes(valeur(() => ['dictionnaire vide'], null, 0, DICO));
+  Blockly.Blocks['bs_dico_mettre'] = styleListes(instruction(() => [
+    { nom: 'DICO', libelle: 'dans le dictionnaire' }, { nom: 'CLE', libelle: 'mettre' }, { nom: 'VAL', libelle: 'à' }
+  ], 0, 'Range la valeur sous ce nom (la clé). S\'il y avait déjà une valeur sous ce nom, elle est remplacée. ' + DICO));
+  Blockly.Blocks['bs_dico_valeur'] = styleListes(valeur(() => [
+    { nom: 'CLE', libelle: 'valeur de' }, { nom: 'DICO', libelle: 'dans' }
+  ], null, 0, 'La valeur rangée sous ce nom (rien s\'il n\'y en a pas). ' + DICO));
+  Blockly.Blocks['bs_dico_contient'] = styleListes(valeur(() => [
+    { nom: 'DICO' }, { nom: 'CLE', libelle: 'contient la clé' }, '?'
+  ], 'Boolean', 0, 'Vrai si une valeur est rangée sous ce nom. ' + DICO));
+  Blockly.Blocks['bs_dico_cles'] = styleListes(valeur(() => [{ nom: 'DICO', libelle: 'clés de' }], 'Array', 0,
+    'La liste des noms (clés) du dictionnaire, dans l\'ordre où on les a ajoutés. Avec « pour chaque élément », on le parcourt tout entier. ' + DICO));
+  Blockly.Blocks['bs_dico_retirer'] = styleListes(instruction(() => [
+    { nom: 'CLE', libelle: 'retirer' }, { nom: 'DICO', libelle: 'du dictionnaire' }
+  ], 0, 'Enlève ce nom (et sa valeur) du dictionnaire. ' + DICO));
+
   // ---------- Texte ----------
 
   Blockly.Blocks['bs_retour_ligne'] = {
@@ -2464,6 +2520,18 @@
 
   gen.forBlock['bs_couleur'] = b => b.getFieldValue('COUL') === 'hasard'
     ? ['app.couleurHasard()', Order.FUNCTION_CALL] : [q(b.getFieldValue('COUL')), Order.ATOMIC];
+  gen.forBlock['bs_date_ecart'] = b => [`app.joursEntre(${val(b, 'D1', "''")}, ${val(b, 'D2', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_date_plus'] = b => [`app.datePlusJours(${val(b, 'DATE', "''")}, ${val(b, 'JOURS', '0')})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_date_jour_semaine'] = b => [`app.jourSemaine(${val(b, 'DATE', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_volume_micro'] = () => ['app.volumeMicro()', Order.FUNCTION_CALL];
+  gen.forBlock['bs_quand_micro'] = b =>
+    `app.quandMicro(${Number(b.getFieldValue('SEUIL')) || 30}, async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_dico_vide'] = () => ['app.dicoVide()', Order.FUNCTION_CALL];
+  gen.forBlock['bs_dico_mettre'] = b => `app.dicoMettre(${val(b, 'DICO', 'null')}, ${val(b, 'CLE', "''")}, ${val(b, 'VAL', "''")});\n`;
+  gen.forBlock['bs_dico_valeur'] = b => [`app.dicoValeur(${val(b, 'DICO', 'null')}, ${val(b, 'CLE', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_dico_contient'] = b => [`app.dicoContient(${val(b, 'DICO', 'null')}, ${val(b, 'CLE', "''")})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_dico_cles'] = b => [`app.dicoCles(${val(b, 'DICO', 'null')})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_dico_retirer'] = b => `app.dicoRetirer(${val(b, 'DICO', 'null')}, ${val(b, 'CLE', "''")});\n`;
   gen.forBlock['bs_format_nombre'] = b => [`app.formatNombre(${val(b, 'VAL', '0')}, ${val(b, 'DEC', '2')})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_liste_melanger'] = b => [`app.melanger(${val(b, 'VAL', '[]')})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_chance'] = b => [`app.chance(${val(b, 'VAL', '50')})`, Order.FUNCTION_CALL];
@@ -2515,6 +2583,8 @@
     }
   });
   const etiquette = text => ({ kind: 'label', text });
+  const AUJOURDHUI = () => ({ block: { type: 'bs_maintenant', fields: { QUOI: 'date' } } });
+  const DICO_VAR = () => ({ block: { type: 'variables_get', fields: { VAR: { name: 'dictionnaire' } } } });
 
   const GENERAUX = [
     {
@@ -2598,7 +2668,14 @@
         { kind: 'block', type: 'bs_note', inputs: { SEC: nombre(0.5) } },
         { kind: 'block', type: 'bs_attendre', inputs: { SEC: nombre(1) } },
         { kind: 'block', type: 'bs_maintenant' },
-        { kind: 'block', type: 'bs_temps_texte', inputs: { VAL: nombre(213) } }
+        { kind: 'block', type: 'bs_temps_texte', inputs: { VAL: nombre(213) } },
+        etiquette('Dates'),
+        { kind: 'block', type: 'bs_date_ecart', inputs: { D1: AUJOURDHUI(), D2: texte('25/12/2026') } },
+        { kind: 'block', type: 'bs_date_plus', inputs: { DATE: AUJOURDHUI(), JOURS: nombre(7) } },
+        { kind: 'block', type: 'bs_date_jour_semaine', inputs: { DATE: texte('14/07/2027') } },
+        etiquette('Micro'),
+        { kind: 'block', type: 'bs_volume_micro' },
+        { kind: 'block', type: 'bs_quand_micro' }
       ]
     },
     {
@@ -2722,7 +2799,14 @@
         { kind: 'block', type: 'lists_sort' },
         { kind: 'block', type: 'bs_liste_melanger' },
         { kind: 'block', type: 'lists_reverse' },
-        { kind: 'block', type: 'lists_split', inputs: { DELIM: texte(',') } }
+        { kind: 'block', type: 'lists_split', inputs: { DELIM: texte(',') } },
+        etiquette('Dictionnaires : des valeurs rangées par nom (« Marie » → 12)'),
+        { kind: 'block', type: 'bs_dico_vide' },
+        { kind: 'block', type: 'bs_dico_mettre', inputs: { DICO: DICO_VAR(), CLE: texte('Marie'), VAL: nombre(12) } },
+        { kind: 'block', type: 'bs_dico_valeur', inputs: { DICO: DICO_VAR(), CLE: texte('Marie') } },
+        { kind: 'block', type: 'bs_dico_contient', inputs: { DICO: DICO_VAR(), CLE: texte('Marie') } },
+        { kind: 'block', type: 'bs_dico_cles', inputs: { DICO: DICO_VAR() } },
+        { kind: 'block', type: 'bs_dico_retirer', inputs: { DICO: DICO_VAR(), CLE: texte('Marie') } }
       ]
     },
     { kind: 'category', name: 'Variables', categorystyle: 'variable_category', custom: 'VARIABLE' },
