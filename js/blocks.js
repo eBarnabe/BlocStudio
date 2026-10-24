@@ -325,10 +325,10 @@
     init() {
       this.appendDummyInput()
         .appendField('couleur')
-        .appendField(new Blockly.FieldDropdown(COULEURS.map(c => [c, c])), 'COUL');
+        .appendField(new Blockly.FieldDropdown([...COULEURS.map(c => [c, c]), ['🎲 au hasard', 'hasard']]), 'COUL');
       this.setOutput(true, 'String');
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip('Une couleur. On peut aussi écrire un code comme #ff8800.');
+      this.setTooltip('Une couleur. On peut aussi écrire un code comme #ff8800. « 🎲 au hasard » : une couleur vive différente à chaque fois.');
     }
   };
 
@@ -1454,6 +1454,20 @@
     }
   };
 
+  Blockly.Blocks['bs_format_nombre'] = {
+    init() {
+      this.appendValueInput('VAL').setCheck(['Number', 'String']);
+      this.appendValueInput('DEC').setCheck('Number').appendField('écrit avec');
+      this.appendDummyInput().appendField('chiffres après la virgule');
+      this.setInputsInline(true);
+      this.setOutput(true, 'String');
+      this.setStyle('text_blocks');
+      this.setTooltip('Le nombre écrit à la française, arrondi : 3.14159 avec 2 chiffres donne « 3,14 », 12.5 donne « 12,50 », ' +
+        '1234567 avec 0 chiffre donne « 1 234 567 ». Pour un prix : « créer un texte avec » ce nombre et « € ». ' +
+        '« nombre depuis » sait le relire pour calculer.');
+    }
+  };
+
   Blockly.Blocks['bs_texte_repete'] = {
     init() {
       this.appendValueInput('VAL');
@@ -1673,6 +1687,28 @@
       this.setOutput(true, 'String');
       this.setColour(COULEUR_INTERFACE);
       this.setTooltip("Affiche un bouton par élément de la liste et donne celui qu'on a choisi (vide s'il annule).");
+    }
+  };
+
+  Blockly.Blocks['bs_liste_melanger'] = {
+    init() {
+      this.appendValueInput('VAL').appendField('mélanger');
+      this.setOutput(true, 'Array');
+      this.setStyle('list_blocks');
+      this.setTooltip('Une copie de la liste, dans un ordre au hasard (la liste elle-même ne change pas) : ' +
+        'pour battre des cartes, poser les questions d\'un quiz dans le désordre… Avec un texte, ce sont ses lettres qui sont mélangées.');
+    }
+  };
+
+  Blockly.Blocks['bs_chance'] = {
+    init() {
+      this.appendValueInput('VAL').setCheck('Number').appendField('au hasard, avec');
+      this.appendDummyInput().appendField('% de chances ?');
+      this.setInputsInline(true);
+      this.setOutput(true, 'Boolean');
+      this.setStyle('math_blocks');
+      this.setTooltip('Vrai ou faux, au hasard : 50 % = pile ou face, 10 % = une fois sur dix environ, 100 % = toujours. ' +
+        'Dans un « si » : « si au hasard, avec 5 % de chances, faire apparaître un bonus ».');
     }
   };
 
@@ -2426,7 +2462,11 @@
   gen.forBlock['bs_fond_fenetre'] = b =>
     `app.fondFenetre(${gen.valueToCode(b, 'VAL', Order.NONE) || "''"});\n`;
 
-  gen.forBlock['bs_couleur'] = b => [q(b.getFieldValue('COUL')), Order.ATOMIC];
+  gen.forBlock['bs_couleur'] = b => b.getFieldValue('COUL') === 'hasard'
+    ? ['app.couleurHasard()', Order.FUNCTION_CALL] : [q(b.getFieldValue('COUL')), Order.ATOMIC];
+  gen.forBlock['bs_format_nombre'] = b => [`app.formatNombre(${val(b, 'VAL', '0')}, ${val(b, 'DEC', '2')})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_liste_melanger'] = b => [`app.melanger(${val(b, 'VAL', '[]')})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_chance'] = b => [`app.chance(${val(b, 'VAL', '50')})`, Order.FUNCTION_CALL];
 
   gen.forBlock['bs_message'] = b =>
     `await app.message(${gen.valueToCode(b, 'VAL', Order.NONE) || "''"}, ${q(b.getFieldValue('ICONE') || 'info')});\n`;
@@ -2601,10 +2641,13 @@
         { kind: 'block', type: 'math_arithmetic', inputs: { A: nombre(1), B: nombre(1) } },
         { kind: 'block', type: 'math_single' },
         { kind: 'block', type: 'math_round' },
+        { kind: 'block', type: 'bs_format_nombre', inputs: { VAL: nombre(3.14159), DEC: nombre(2) } },
         { kind: 'block', type: 'math_modulo' },
         { kind: 'block', type: 'math_number_property' },
         { kind: 'block', type: 'math_random_int', inputs: { FROM: nombre(1), TO: nombre(100) } },
         { kind: 'block', type: 'math_random_float' },
+        { kind: 'block', type: 'bs_chance', inputs: { VAL: nombre(50) } },
+        { kind: 'block', type: 'bs_couleur', fields: { COUL: 'hasard' } },
         { kind: 'block', type: 'math_constrain', inputs: { VALUE: nombre(50), LOW: nombre(0), HIGH: nombre(100) } },
         { kind: 'block', type: 'math_on_list' },
         { kind: 'block', type: 'math_trig', inputs: { NUM: nombre(45) } },
@@ -2646,6 +2689,7 @@
         { kind: 'block', type: 'text_join' },
         { kind: 'block', type: 'bs_retour_ligne' },
         { kind: 'block', type: 'bs_texte_repete', inputs: { VAL: texte('❤️'), FOIS: nombre(3) } },
+        { kind: 'block', type: 'bs_format_nombre', inputs: { VAL: nombre(3.14159), DEC: nombre(2) } },
         { kind: 'block', type: 'text_append', inputs: { TEXT: texte('') } },
         { kind: 'block', type: 'text_length' },
         { kind: 'block', type: 'text_isEmpty' },
@@ -2671,10 +2715,12 @@
         { kind: 'block', type: 'lists_repeat', inputs: { NUM: nombre(5) } },
         { kind: 'block', type: 'bs_liste_contient' },
         { kind: 'block', type: 'lists_getIndex' },
+        { kind: 'block', type: 'lists_getIndex', fields: { WHERE: 'RANDOM' } },
         { kind: 'block', type: 'lists_setIndex' },
         { kind: 'block', type: 'lists_indexOf' },
         { kind: 'block', type: 'lists_getSublist', inputs: { AT1: nombre(1), AT2: nombre(3) } },
         { kind: 'block', type: 'lists_sort' },
+        { kind: 'block', type: 'bs_liste_melanger' },
         { kind: 'block', type: 'lists_reverse' },
         { kind: 'block', type: 'lists_split', inputs: { DELIM: texte(',') } }
       ]

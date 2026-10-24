@@ -4443,9 +4443,36 @@ function BlocRuntimeFactory() {
           boutons: [{ libelle: 'Annuler', valeur: '' }]
         });
       },
+      // Les espaces sont retirés : « 1 234,5 » (écrit par « … avec 1 chiffre après la virgule ») redonne 1234.5.
       nombre(v) {
-        const n = parseFloat(String(v).replace(',', '.'));
+        const n = parseFloat(String(v).replace(/[\s  ]/g, '').replace(',', '.'));
         return isNaN(n) ? 0 : n;
+      },
+      // À la française : virgule, et les milliers séparés (12,50 · 1 234 567).
+      formatNombre(v, decimales) {
+        const d = Math.min(10, Math.max(0, Math.round(Number(decimales) || 0)));
+        return (typeof v === 'number' ? v : app.nombre(v)).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+      },
+
+      // ---- Hasard ----
+      melanger(liste) {
+        const l = Array.isArray(liste) ? liste.slice() : enTexte(liste).split('');
+        for (let i = l.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [l[i], l[j]] = [l[j], l[i]];
+        }
+        return Array.isArray(liste) ? l : l.join('');
+      },
+      chance(pourcent) { return Math.random() * 100 < (Number(pourcent) || 0); },
+      // Une couleur vive (ni trop pâle ni trop sombre), en code #rrggbb.
+      couleurHasard() {
+        const h = Math.random() * 360, s = 0.65 + Math.random() * 0.3, l = 0.45 + Math.random() * 0.15;
+        const f = k => {
+          const a = (k + h / 30) % 12;
+          const c = l - s * Math.min(l, 1 - l) * Math.max(-1, Math.min(a - 3, 9 - a, 1));
+          return Math.round(c * 255).toString(16).padStart(2, '0');
+        };
+        return '#' + f(0) + f(8) + f(4);
       },
       // Une liste contient 3 même si l'élément est le texte "3" (saisi dans une zone de texte).
       contient(dans, valeur) {
