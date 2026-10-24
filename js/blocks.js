@@ -40,22 +40,23 @@
     heures: 'heures', minutes: 'minutes', collision: 'collisions (precise : au pixel près, ou rectangle)', orientation: 'orientation (horizontale ou verticale)', cliquable: 'cliquable (un clic choisit la valeur)',
     defilementY: 'défilement vertical (en pixels depuis le haut)', defilementX: 'défilement horizontal (en pixels depuis la gauche)',
     hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
-    defilement: 'sens du défilement (vertical, horizontal ou deux)'
+    defilement: 'sens du défilement (vertical, horizontal ou deux)',
+    solide: 'solide (sol, plateforme ou mur, pour la gravité)', vitesseY: 'vitesse de chute (négative : il monte)'
   };
 
   // Les propriétés proposées dépendent du type de contrôle choisi dans le bloc.
-  const POSITION = ['visible', 'deplacable', 'x', 'y', 'largeur', 'hauteur', 'infobulle'];
+  const POSITION = ['visible', 'deplacable', 'x', 'y', 'largeur', 'hauteur', 'infobulle', 'solide'];
   const TEXTE = ['couleurTexte', 'couleurFond', 'taillePolice', 'gras', 'italique'];
   const PROPS_PAR_TYPE = {
     bouton: ['texte', ...TEXTE, 'alignement', 'active', ...POSITION],
-    etiquette: ['texte', ...TEXTE, 'alignement', 'bordure', ...POSITION, 'direction'],
+    etiquette: ['texte', ...TEXTE, 'alignement', 'bordure', ...POSITION, 'direction', 'vitesseY'],
     zonetexte: ['texte', 'motDePasse', 'texteInvite', 'lectureSeule', 'longueurMax', ...TEXTE, 'alignement', 'active', ...POSITION],
     arborescence: ['texte', 'chemin', 'elements', ...TEXTE, ...POSITION],
     barreetat: ['texte', ...TEXTE, 'visible'],
     barreoutils: ['couleurTexte', 'couleurFond', 'taillePolice', 'visible'],
     menucontextuel: [],
     casecocher: ['texte', 'coche', ...TEXTE, 'active', ...POSITION],
-    image: ['image', 'ajustement', 'bordure', 'couleurFond', ...POSITION, 'direction'],
+    image: ['image', 'ajustement', 'bordure', 'couleurFond', ...POSITION, 'direction', 'vitesseY'],
     listederoulante: ['texte', 'numero', 'elements', 'trie', ...TEXTE, 'active', ...POSITION],
     curseur: ['valeur', 'min', 'max', 'pas', 'orientation', 'couleurBarre', 'couleurFond', 'active', ...POSITION],
     barreprogression: ['valeur', 'max', 'cliquable', 'couleurBarre', 'couleurFond', ...POSITION],
@@ -68,7 +69,7 @@
     tableau: ['numero', 'texte', 'nombreLignes', 'colonnes', ...TEXTE, ...POSITION],
     date: ['texte', ...TEXTE, 'active', ...POSITION],
     heure: ['texte', 'heures', 'minutes', ...TEXTE, 'active', ...POSITION],
-    forme: ['genre', 'couleurFond', 'couleurBordure', 'epaisseur', 'sens', ...POSITION, 'direction'],
+    forme: ['genre', 'couleurFond', 'couleurBordure', 'epaisseur', 'sens', ...POSITION, 'direction', 'vitesseY'],
     selecteurcouleur: ['texte', 'active', ...POSITION],
     navigateur: ['adresse', ...POSITION],
     onglets: ['numero', 'texte', 'elements', ...TEXTE, ...POSITION],
@@ -81,7 +82,7 @@
     basedonnees: ['nombreFiches', 'champs', 'memoriser'],
     fichier: ['contenu', 'nomFichier', 'annule', 'nomPropose', 'typeFichier'],
     camera: ['allumee', 'mouvement', 'photo', 'miroir', 'seuilMouvement', ...POSITION],
-    sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', 'collision', ...POSITION, 'direction']
+    sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', 'collision', ...POSITION, 'direction', 'vitesseY']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
   const LECTURE_SEULE = { arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
@@ -394,6 +395,38 @@
   Blockly.Blocks['bs_souris_enfoncee'] = valeur(() => ['bouton de la souris enfoncé ?'], 'Boolean', COULEUR_ENTREES,
     'Vrai tant que le bouton de la souris est appuyé dans la fenêtre.');
 
+  // ---------- Manette de jeu ----------
+
+  const BOUTONS_MANETTE = [['A', 'a'], ['B', 'b'], ['X', 'x'], ['Y', 'y'],
+    ['↑ croix (ou joystick gauche)', 'haut'], ['↓ croix (ou joystick gauche)', 'bas'],
+    ['← croix (ou joystick gauche)', 'gauche'], ['→ croix (ou joystick gauche)', 'droite'],
+    ['LB (gâchette haute gauche)', 'lb'], ['RB (gâchette haute droite)', 'rb'], ['LT (gâchette gauche)', 'lt'], ['RT (gâchette droite)', 'rt'],
+    ['Start (menu)', 'start'], ['Select (vue)', 'select']];
+  const champBoutonManette = () => new Blockly.FieldDropdown([['n\'importe quel bouton', 'toutes'], ...BOUTONS_MANETTE]);
+  const COMME_CLAVIER = 'La croix et le joystick gauche font aussi les flèches du clavier, et le bouton A la touche Espace : ' +
+    'un jeu prévu pour le clavier se joue déjà à la manette.';
+
+  Blockly.Blocks['bs_quand_manette'] = {
+    init() {
+      this.appendDummyInput().appendField('quand le bouton').appendField(champBoutonManette(), 'BOUTON').appendField('de la manette est appuyé');
+      this.appendStatementInput('DO');
+      this.setColour(COULEUR_EVENEMENTS);
+      this.hat = 'cap';
+      this.setTooltip('Exécuté quand on appuie sur ce bouton d\'une manette de jeu (Xbox, PlayStation… branchée en USB ou en Bluetooth). ' +
+        'Si la manette ne répond pas, appuyez une fois sur un de ses boutons : Windows ne la montre aux programmes qu\'ensuite. ' + COMME_CLAVIER);
+    }
+  };
+  Blockly.Blocks['bs_manette_bouton'] = valeur(() => [
+    'bouton', { champ: champBoutonManette(), nom: 'BOUTON' }, 'de la manette enfoncé ?'
+  ], 'Boolean', COULEUR_ENTREES, 'Vrai tant que ce bouton de la manette est maintenu. ' + COMME_CLAVIER);
+  Blockly.Blocks['bs_manette_joystick'] = valeur(() => [
+    'joystick', { champ: new Blockly.FieldDropdown([['gauche ↔ (horizontal)', 'gx'], ['gauche ↕ (vertical)', 'gy'],
+      ['droit ↔ (horizontal)', 'dx'], ['droit ↕ (vertical)', 'dy']]), nom: 'QUOI' }, 'de la manette'
+  ], 'Number', COULEUR_ENTREES, 'Jusqu\'où le joystick est poussé, de -100 à 100 : ↔ -100 tout à gauche, 100 tout à droite ; ' +
+    '↕ -100 tout en haut, 100 tout en bas ; 0 au repos. Pour avancer plus ou moins vite : « déplacer de x : joystick ÷ 10 ».');
+  Blockly.Blocks['bs_manette_branchee'] = valeur(() => ['une manette est branchée ?'], 'Boolean', COULEUR_ENTREES,
+    'Vrai si une manette de jeu est branchée (et qu\'on a déjà appuyé sur l\'un de ses boutons).');
+
   Blockly.Blocks['bs_se_touchent'] = valeur(() => [
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, 'touche',
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, '?'
@@ -598,6 +631,35 @@
   Blockly.Blocks['bs_distance'] = valeur(() => ['distance entre', BOUGE, 'et', { champ: champCible(false), nom: 'CIBLE' }], 'Number',
     COULEUR_MOUVEMENT, 'Distance en pixels entre le milieu du contrôle et la souris ou le milieu d\'un autre contrôle.');
   Blockly.Blocks['bs_direction'] = valeur(() => ['direction de', BOUGE], 'Number', COULEUR_MOUVEMENT, DIRECTIONS);
+
+  // Gravité et saut (jeux de plateforme) : les contrôles « solides » font le sol, les plateformes et les murs.
+  const SOLIDE = 'Cochez « Solide » dans les propriétés du sol, des plateformes et des murs (ou « mettre solide de … à vrai »).';
+  Blockly.Blocks['bs_gravite'] = instruction(() => ['faire tomber', BOUGE, NB('FORCE', 'avec une gravité de'),
+    { champ: new Blockly.FieldDropdown([['jusqu\'au bas de la fenêtre', 'bas'], ['et le laisser sortir par le bas', 'vide']]), nom: 'FOND' }],
+    COULEUR_MOUVEMENT, 'À mettre dans une boucle (« répéter indéfiniment » avec « attendre 0.02 secondes ») : le contrôle tombe de plus en plus vite, ' +
+    'se pose sur ce qui est solide, s\'y cogne la tête en sautant et ne traverse pas les murs. ' + SOLIDE + ' Gravité : 1 = normale, 0.5 = sur la Lune.');
+  Blockly.Blocks['bs_sauter'] = instruction(() => ['faire sauter', BOUGE, NB('FORCE', 'avec une force de')],
+    COULEUR_MOUVEMENT, 'Le contrôle s\'élance vers le haut, puis « faire tomber » le fait redescendre. Seulement s\'il est posé sur le sol (pas de saut en plein vol). ' +
+    'Force 12 : un saut moyen ; plus grand = plus haut.');
+  Blockly.Blocks['bs_au_sol'] = valeur(() => [BOUGE, 'est posé sur le sol ?'], 'Boolean',
+    COULEUR_MOUVEMENT, 'Vrai si, au dernier « faire tomber », le contrôle s\'est posé sur quelque chose de solide (ou sur le bas de la fenêtre). ' +
+    'Pratique pour changer de costume : en l\'air, il saute ; au sol, il marche.');
+
+  Blockly.Blocks['bs_image_defiler'] = instruction(() => ['faire défiler l\'image de', { ctrl: ['image'] }, NB('DX', 'de x :'), NB('DY', 'y :')],
+    COULEUR_MOUVEMENT, 'Un fond qui défile sans fin, pour un jeu de course ou de vaisseau : l\'image glisse dans son cadre et se répète. ' +
+    'À mettre dans une boucle (avec « attendre 0.02 secondes ») : x négatif = vers la gauche, y positif = vers le bas. ' +
+    'Le contrôle, lui, ne bouge pas. Astuce : une image « Étirée » qui remplit toute la fenêtre.');
+
+  // ---------- Score et vies ----------
+
+  Blockly.Blocks['bs_compteur_ajouter'] = instruction(() => [
+    { nom: 'VAL', libelle: 'ajouter', check: 'Number' }, 'au nombre de', { ctrl: null, moi: true }
+  ], COULEUR_CONTROLES, 'Pour un score, des vies, un niveau… Ajoute ce nombre (négatif pour enlever) au nombre écrit dans le contrôle : ' +
+    'une étiquette « Score : 10 » devient « Score : 11 », le reste du texte ne change pas. ' +
+    'Pour une barre de progression, un curseur ou un sélecteur de nombre : à sa valeur (une barre de vie !).');
+  Blockly.Blocks['bs_compteur_valeur'] = valeur(() => ['nombre affiché par', { ctrl: null, moi: true }], 'Number',
+    COULEUR_CONTROLES, 'Le nombre écrit dans le contrôle (12 pour « Score : 12 ») ; s\'il y en a plusieurs, le dernier. ' +
+    'Pour une barre de progression, un curseur ou un sélecteur de nombre : sa valeur.');
 
   // ---------- Clones ----------
 
@@ -1389,6 +1451,18 @@
       this.setOutput(true, 'String');
       this.setStyle('text_blocks');
       this.setTooltip('Un passage à la ligne, à utiliser dans « créer un texte avec » (pratique pour les zones de texte multilignes).');
+    }
+  };
+
+  Blockly.Blocks['bs_texte_repete'] = {
+    init() {
+      this.appendValueInput('VAL');
+      this.appendValueInput('FOIS').setCheck('Number').appendField('répété');
+      this.appendDummyInput().appendField('fois');
+      this.setInputsInline(true);
+      this.setOutput(true, 'String');
+      this.setStyle('text_blocks');
+      this.setTooltip('Le texte écrit plusieurs fois de suite : « ❤️ » répété 3 fois donne « ❤️❤️❤️ ». Idéal pour montrer les vies qui restent.');
     }
   };
 
@@ -2245,6 +2319,19 @@
   gen.forBlock['bs_touche_bord'] = b => [`app.toucheBord(${id(b)})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_distance'] = b => [`app.distance(${id(b)}, ${q(b.getFieldValue('CIBLE'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_direction'] = b => [`app.lire(${id(b)}, 'direction')`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_gravite'] = b => mv(b, 'gravite', val(b, 'FORCE', '1'), q(b.getFieldValue('FOND') || 'bas'));
+  gen.forBlock['bs_sauter'] = b => mv(b, 'sauter', val(b, 'FORCE', '12'));
+  gen.forBlock['bs_au_sol'] = b => [`app.lire(${id(b)}, 'auSol')`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_image_defiler'] = b => `app.defilerImage(${id(b)}, ${val(b, 'DX', '0')}, ${val(b, 'DY', '0')});
+`;
+  gen.forBlock['bs_compteur_ajouter'] = b => `app.ajouterAuNombre(${id(b)}, ${val(b, 'VAL', '1')});\n`;
+  gen.forBlock['bs_compteur_valeur'] = b => [`app.nombreAffiche(${id(b)})`, Order.FUNCTION_CALL];
+
+  gen.forBlock['bs_quand_manette'] = b =>
+    `app.quandManette(${q(b.getFieldValue('BOUTON'))}, async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_manette_bouton'] = b => [`app.boutonManette(${q(b.getFieldValue('BOUTON'))})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_manette_joystick'] = b => [`app.joystickManette(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_manette_branchee'] = () => ['app.manetteBranchee()', Order.FUNCTION_CALL];
 
   const fen = b => q(b.getFieldValue('FENETRE'));
   gen.forBlock['bs_quand_fenetre'] = b =>
@@ -2275,6 +2362,7 @@
   gen.forBlock['bs_radio_groupe'] = b => [`app.radioCoche(${q(b.getFieldValue('GROUPE'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_emoji'] = b => [q(b.getFieldValue('EMOJI')), Order.ATOMIC];
   gen.forBlock['bs_retour_ligne'] = () => ["'\\n'", Order.ATOMIC];
+  gen.forBlock['bs_texte_repete'] = b => [`app.repeterTexte(${val(b, 'VAL', "''")}, ${val(b, 'FOIS', '1')})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_commentaire'] = b => b.texte_.split('\n').map(l => '// ' + l).join('\n') + '\n';
 
   gen.forBlock['bs_dessin_couleur'] = b => `app.dessin(${id(b)}, 'couleur', ${val(b, 'VAL', "'noir'")});\n`;
@@ -2408,7 +2496,7 @@
       ]
     },
     {
-      kind: 'category', name: 'Clavier et souris', colour: COULEUR_ENTREES, contents: [
+      kind: 'category', name: 'Clavier, souris et manette', colour: COULEUR_ENTREES, contents: [
         etiquette('Clavier'),
         { kind: 'block', type: 'bs_quand_touche' },
         { kind: 'block', type: 'bs_touche_enfoncee', fields: { TOUCHE: 'droite' } },
@@ -2417,7 +2505,12 @@
         { kind: 'block', type: 'bs_quand_souris_fenetre' },
         { kind: 'block', type: 'bs_souris_fenetre' },
         { kind: 'block', type: 'bs_souris_fenetre', fields: { QUOI: 'y' } },
-        { kind: 'block', type: 'bs_souris_enfoncee' }
+        { kind: 'block', type: 'bs_souris_enfoncee' },
+        etiquette('Manette de jeu (la croix fait aussi les flèches, A la touche Espace)'),
+        { kind: 'block', type: 'bs_quand_manette', fields: { BOUTON: 'a' } },
+        { kind: 'block', type: 'bs_manette_bouton', fields: { BOUTON: 'a' } },
+        { kind: 'block', type: 'bs_manette_joystick' },
+        { kind: 'block', type: 'bs_manette_branchee' }
       ]
     },
     {
@@ -2552,6 +2645,7 @@
         { kind: 'block', type: 'bs_emoji' },
         { kind: 'block', type: 'text_join' },
         { kind: 'block', type: 'bs_retour_ligne' },
+        { kind: 'block', type: 'bs_texte_repete', inputs: { VAL: texte('❤️'), FOIS: nombre(3) } },
         { kind: 'block', type: 'text_append', inputs: { TEXT: texte('') } },
         { kind: 'block', type: 'text_length' },
         { kind: 'block', type: 'text_isEmpty' },
@@ -2603,6 +2697,11 @@
       { kind: 'block', type: 'bs_cote_contact' },
       { kind: 'block', type: 'bs_touche_couleur', inputs: { COUL: couleurOmbre() } },
       { kind: 'block', type: 'bs_rebondir_sur' },
+      { kind: 'block', type: 'bs_gravite', inputs: { FORCE: nombre(1) } },
+      { kind: 'block', type: 'bs_sauter', inputs: { FORCE: nombre(12) } },
+      { kind: 'block', type: 'bs_au_sol' },
+      { kind: 'block', type: 'bs_compteur_ajouter', inputs: { VAL: nombre(1) } },
+      { kind: 'block', type: 'bs_compteur_valeur' },
       { kind: 'block', type: 'bs_placer', inputs: { X: nombre(0), Y: nombre(0) } },
       { kind: 'block', type: 'bs_glisser', inputs: { X: nombre(200), Y: nombre(100), SEC: nombre(1) } },
       { kind: 'block', type: 'bs_radio_groupe' },
@@ -2613,11 +2712,11 @@
   // Valeur proposée dans « mettre … à » : celle du contrôle dans le concepteur, quand c'est possible.
   const PROPS_NOMBRE = ['x', 'y', 'largeur', 'hauteur', 'taillePolice', 'valeur', 'min', 'max', 'pas', 'numero', 'volume',
     'position', 'intervalle', 'costume', 'vitesse', 'rotation', 'direction', 'taille', 'transparence', 'seuilMouvement', 'maxValeurs', 'longueurMax', 'epaisseur', 'heures', 'minutes',
-    'defilementX', 'defilementY', 'largeurContenu', 'hauteurContenu'];
+    'defilementX', 'defilementY', 'largeurContenu', 'hauteurContenu', 'vitesseY'];
   const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre', 'couleurBordure'];
   const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs'];
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee', 'cliquable',
-    'gras', 'italique', 'lectureSeule', 'trie'];
+    'gras', 'italique', 'lectureSeule', 'trie', 'solide'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
   const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical', orientation: 'verticale', collision: 'rectangle' };
 
@@ -2686,7 +2785,11 @@
       b('bs_distance'),
       b('bs_se_touchent'),
       b('bs_cote_contact'),
-      b('bs_touche_couleur', { COUL: couleurOmbre() })
+      b('bs_touche_couleur', { COUL: couleurOmbre() }),
+      etiquette('Gravité et saut (jeux de plateforme)'),
+      b('bs_gravite', { FORCE: nombre(1) }),
+      b('bs_sauter', { FORCE: nombre(12) }),
+      b('bs_au_sol')
     ];
     const clones = () => [
       etiquette('Clones'),
@@ -2711,8 +2814,18 @@
           b('bs_sprite_transparence', { VAL: nombre(50) }), b('bs_sprite_fondu', { SEC: nombre(1) }),
           ...mouvement(), ...clones());
         break;
-      case 'image': case 'etiquette': case 'forme':
+      case 'image':
+        actions.push(etiquette('Fond qui défile'), b('bs_image_defiler', { DX: nombre(-2), DY: nombre(0) }), ...mouvement(), ...clones());
+        break;
+      case 'forme':
         actions.push(...mouvement(), ...clones());
+        break;
+      case 'etiquette':
+        actions.push(etiquette('Score, vies…'), b('bs_compteur_ajouter', { VAL: nombre(1) }), b('bs_compteur_valeur'),
+          ...mouvement(), ...clones());
+        break;
+      case 'barreprogression':
+        actions.push(b('bs_compteur_ajouter', { VAL: nombre(-10) }), b('bs_compteur_valeur'));
         break;
       case 'zonedessin':
         actions.push(etiquette('Dessin'),

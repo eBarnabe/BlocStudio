@@ -1470,6 +1470,7 @@
       v => { c.infobulle = v; maj(); }, false, 'Cliquez ici pour…');
     champCase(liste, 'Visible au démarrage', c.visible !== false, v => { c.visible = v; maj(); });
     champCase(liste, 'Déplaçable à la souris (pendant le programme)', c.deplacable, v => { c.deplacable = v; maj(); });
+    champCase(liste, 'Solide : sol, plateforme ou mur (bloc « faire tomber… avec une gravité »)', c.solide, v => { c.solide = v; maj(); });
     if (!AMARRES.includes(c.type)) champAncrage(liste, c.ancrage, v => { c.ancrage = v; });
     champMenuContextuel(liste, c);
   }
@@ -1515,6 +1516,7 @@
     if (visibles.length) {
       champCouleur(liste, 'Couleur de fond', visibles[0].couleurFond, v => pourTous(visibles, c => { c.couleurFond = v; }));
       champCase(liste, 'Visibles au démarrage', visibles.every(c => c.visible !== false), v => pourTous(visibles, c => { c.visible = v; }));
+      champCase(liste, 'Solides : sol, plateformes ou murs (gravité)', visibles.every(c => c.solide), v => pourTous(visibles, c => { c.solide = v; }));
       const ancres = visibles.filter(c => !AMARRES.includes(c.type));
       if (ancres.length) champAncrage(liste, ancres[0].ancrage, v => ancres.forEach(c => { c.ancrage = v; }));
     }

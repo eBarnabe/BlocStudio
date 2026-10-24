@@ -308,6 +308,8 @@ function BlocRuntimeFactory() {
   const DEPUIS_CELSIUS = { celsius: c => c, fahrenheit: c => c * 9 / 5 + 32, kelvin: c => c + 273.15 };
   // Sans les petites erreurs de calcul des ordinateurs (0,1 + 0,2 = 0,30000000000000004).
   const arrondiPropre = x => Math.round(x * 1e9) / 1e9;
+  // Les nombres écrits dans un texte (« Score : 12 », « Temps : 3,5 s »).
+  const NOMBRES_DANS_TEXTE = /-?\d+(?:[.,]\d+)?/g;
   function convertir(grandeur, valeur, de, vers) {
     const n = Number(String(valeur).replace(',', '.')) || 0;
     if (grandeur === 'temperature') {
@@ -2552,6 +2554,57 @@ function BlocRuntimeFactory() {
     ecouter(window, 'keyup', e => touchesEnfoncees.delete(nomTouche(e.key)), true);
     ecouter(window, 'blur', () => touchesEnfoncees.clear()); // fenêtre quittée : plus rien n'est enfoncé
 
+    // ---- Manette de jeu ----
+    // Lue à chaque image tant qu'une manette est branchée. La croix (ou le joystick gauche) fait aussi
+    // les flèches du clavier et le bouton A la touche Espace : les jeux prévus pour le clavier marchent tels quels.
+    const BOUTONS_MANETTE = { a: 0, b: 1, x: 2, y: 3, lb: 4, rb: 5, lt: 6, rt: 7, select: 8, start: 9, haut: 12, bas: 13, gauche: 14, droite: 15 };
+    const COMME_TOUCHES = { haut: 'haut', bas: 'bas', gauche: 'gauche', droite: 'droite', a: 'espace' };
+    const manette = { branchee: false, boutons: new Set(), axes: [0, 0, 0, 0] };
+    const actionsManette = {};       // nom de bouton (ou 'toutes') → fonctions
+    const touchesManette = new Map(); // touche imitée → moment de la prochaine répétition
+    let lectureManette = 0;
+    function lireManette() {
+      lectureManette = 0;
+      if (arrete) return;
+      const pads = [...(navigator.getGamepads ? navigator.getGamepads() : [])].filter(p => p && p.connected);
+      manette.branchee = pads.length > 0;
+      const avant = manette.boutons, boutons = new Set(), axes = [0, 0, 0, 0];
+      for (const p of pads) {
+        for (const [nom, i] of Object.entries(BOUTONS_MANETTE)) if (p.buttons[i] && p.buttons[i].pressed) boutons.add(nom);
+        // Joysticks de -100 à 100, avec une petite zone morte au repos.
+        for (let i = 0; i < 4; i++) {
+          const v = Number(p.axes[i]) || 0;
+          if (Math.abs(v) > 0.15 && !axes[i]) axes[i] = Math.round(Math.max(-1, Math.min(1, v)) * 100);
+        }
+      }
+      if (axes[0] < -50) boutons.add('gauche');
+      if (axes[0] > 50) boutons.add('droite');
+      if (axes[1] < -50) boutons.add('haut');
+      if (axes[1] > 50) boutons.add('bas');
+      manette.boutons = boutons;
+      manette.axes = axes;
+      const libre = !document.querySelector('.bs-dlg-voile');
+      for (const nom of boutons) {
+        if (avant.has(nom) || !libre) continue;
+        [...(actionsManette[nom] || []), ...(actionsManette.toutes || [])].forEach(f => f());
+      }
+      // Les touches imitées : appui, puis répétition si on garde le bouton enfoncé (comme une vraie touche).
+      const maintenant = performance.now();
+      for (const [nom, touche] of Object.entries(COMME_TOUCHES)) {
+        if (!boutons.has(nom)) { touchesManette.delete(touche); continue; }
+        const prochaine = touchesManette.get(touche);
+        if (prochaine !== undefined && maintenant < prochaine) continue;
+        touchesManette.set(touche, maintenant + (prochaine === undefined ? 400 : 35));
+        derniereTouche = touche;
+        if (libre) [...(actionsTouches[touche] || []), ...(actionsTouches.toutes || [])].forEach(f => f());
+      }
+      if (manette.branchee) lectureManette = requestAnimationFrame(lireManette);
+    }
+    const suivreManette = () => { if (!lectureManette && !arrete) lectureManette = requestAnimationFrame(lireManette); };
+    ecouter(window, 'gamepadconnected', suivreManette);
+    nettoyages.push(() => cancelAnimationFrame(lectureManette));
+    suivreManette(); // déjà branchée (et déjà utilisée) avant le lancement
+
     // ---- Souris dans la fenêtre ----
     const souris = { x: 0, y: 0, enfonce: false };
     const actionsSouris = { bouge: [], clic: [] };
@@ -2865,6 +2918,10 @@ function BlocRuntimeFactory() {
       }
       rendreDeplacable(cid);
       brancherMenuContextuel(cid);
+      if (d.decalage) {
+        d.decalage = Object.assign({}, d.decalage); // chaque clone défile de son côté
+        majDefilement(cid);
+      }
       for (const { evenement, h } of evenementsCtrl[original] || []) brancher(cid, evenement, h);
       for (const h of actionsClones[original] || []) h(cid);
       return cid;
@@ -2969,6 +3026,89 @@ function BlocRuntimeFactory() {
           }
           d.direction = normaliser(dir);
           break;
+        }
+        case 'gravite': gravite(id, n(a), b); break;
+        // On ne saute que posé sur quelque chose (pas de saut en plein vol).
+        case 'sauter':
+          if (d.auSol) { d.vitesseY = -Math.abs(n(a)); d.auSol = false; }
+          break;
+      }
+    }
+
+    // ---- Fond qui défile ----
+    // L'image d'un contrôle Image glisse et se répète sans fin (d.decalage, en pixels). Elle est alors
+    // dessinée en fond de l'élément, répétée, et le vrai contenu de <img> est poussé hors de sa vue.
+    const TAILLES_FOND = { entiere: 'contain', etiree: '100% 100%', recadree: 'cover' };
+    function majDefilement(id) {
+      const d = donnees[id], el = elements[id];
+      if (!d.decalage) return;
+      Object.assign(el.style, {
+        objectPosition: '-100000px 0',
+        backgroundImage: `url("${el.getAttribute('src')}")`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: TAILLES_FOND[d.ajustement] || 'contain',
+        backgroundPosition: `calc(50% + ${d.decalage.x}px) calc(50% + ${d.decalage.y}px)`
+      });
+    }
+
+    // ---- Gravité ----
+    // À chaque appel (dans une boucle), le contrôle tombe un peu plus vite (d.vitesseY, en pixels par appel).
+    // Il se pose sur les contrôles « solides » (sol, plateformes) et s'y cogne la tête ; il ne traverse pas
+    // non plus leurs côtés (murs), même quand on le déplace avec « déplacer ».
+    // fond === 'bas' : le bas de la fenêtre est un sol ; sinon il peut tomber hors de la fenêtre.
+    const CHUTE_MAX = 24;  // vitesse de chute maximale (pixels par appel)
+    const PAS_CHUTE = 6;   // découpe la chute en petits pas pour ne pas traverser une plateforme fine
+    function solidesAutourDe(id) {
+      const d = donnees[id];
+      return Object.keys(donnees).filter(o => {
+        const s = donnees[o];
+        return s.solide && o !== id &&!INVISIBLES.includes(s.type) && elements[o].style.display !== 'none' &&
+          (s.fenetre || '') === (d.fenetre || '') && (s.panneau || '') === (d.panneau || '');
+      });
+    }
+    // Ce qui chevauche vraiment (au-delà d'une poussière de pixel due aux arrondis).
+    function recouvrement(za, zb) {
+      const ox = Math.min(za.x + za.l, zb.x + zb.l) - Math.max(za.x, zb.x);
+      const oy = Math.min(za.y + za.h, zb.y + zb.h) - Math.max(za.y, zb.y);
+      return ox > 0.05 && oy > 0.05 ? { ox, oy } : null;
+    }
+    function gravite(id, force, fond) {
+      const d = donnees[id];
+      if (!zoneDe(id)) return;
+      const solides = solidesAutourDe(id);
+      // 1. Contre un mur (touché par le côté) : il en est ressorti horizontalement.
+      for (const s of solides) {
+        const za = zoneDe(id), zb = zoneDe(s);
+        const r = zb && recouvrement(za, zb);
+        if (r && r.ox < r.oy) poser(id, d.x + (za.x + za.l / 2 < zb.x + zb.l / 2 ? -r.ox : r.ox), d.y);
+      }
+      // 2. La chute (ou la montée d'un saut), par petits pas.
+      d.vitesseY = Math.min(CHUTE_MAX, (Number(d.vitesseY) || 0) + force);
+      d.auSol = false;
+      const v = d.vitesseY, pas = Math.max(1, Math.ceil(Math.abs(v) / PAS_CHUTE));
+      for (let i = 0; i < pas && v; i++) {
+        poser(id, d.x, d.y + v / pas);
+        const za = zoneDe(id);
+        let butee = null; // le haut du sol le plus haut (en tombant), le bas du plafond le plus bas (en montant)
+        for (const s of solides) {
+          const zb = zoneDe(s);
+          if (!zb || !recouvrement(za, zb)) continue;
+          butee = v > 0 ? Math.min(butee ?? Infinity, zb.y) : Math.max(butee ?? -Infinity, zb.y + zb.h);
+        }
+        if (butee !== null) {
+          poser(id, d.x, d.y + (v > 0 ? butee - za.y - za.h : butee - za.y));
+          d.vitesseY = 0;
+          d.auSol = v > 0;
+          break;
+        }
+      }
+      // 3. Le bas de la fenêtre.
+      if (fond === 'bas') {
+        const za = zoneDe(id), f = fenetreDe(d);
+        if (za.y + za.h >= f.hauteur && d.vitesseY >= 0) {
+          poser(id, d.x, d.y + f.hauteur - za.y - za.h);
+          d.vitesseY = 0;
+          d.auSol = true;
         }
       }
     }
@@ -3860,8 +4000,49 @@ function BlocRuntimeFactory() {
 
       // ---- Clavier et souris ----
       quandTouche(touche, fn) { (actionsTouches[touche] = actionsTouches[touche] || []).push(proteger(fn)); },
-      toucheEnfoncee(touche) { return touche === 'toutes' ? touchesEnfoncees.size > 0 : touchesEnfoncees.has(touche); },
+      toucheEnfoncee(touche) {
+        if (touche === 'toutes') return touchesEnfoncees.size > 0 || touchesManette.size > 0;
+        return touchesEnfoncees.has(touche) || touchesManette.has(touche);
+      },
       derniereTouche() { return derniereTouche; },
+      quandManette(bouton, fn) { (actionsManette[bouton] = actionsManette[bouton] || []).push(proteger(fn)); },
+      boutonManette(bouton) { return bouton === 'toutes' ? manette.boutons.size > 0 : manette.boutons.has(bouton); },
+      // quoi : 'gx', 'gy' (joystick gauche), 'dx', 'dy' (droit) ; de -100 à 100 (y : vers le bas).
+      joystickManette(quoi) { return manette.axes[{ gx: 0, gy: 1, dx: 2, dy: 3 }[quoi]] || 0; },
+      manetteBranchee() { return manette.branchee; },
+
+      // ---- Score, vies… : le nombre écrit dans un contrôle (« Score : 12 »), ou sa valeur ----
+      nombreAffiche(id) {
+        ctrl(id);
+        if (aValeur(donnees[id].type) || donnees[id].type === 'barreprogression') return app.lire(id, 'valeur');
+        const m = enTexte(app.lire(id, 'texte')).match(NOMBRES_DANS_TEXTE);
+        return m ? Number(m[m.length - 1].replace(',', '.')) : 0;
+      },
+      ajouterAuNombre(id, ajout) {
+        ctrl(id);
+        ajout = Number(ajout) || 0;
+        if (aValeur(donnees[id].type) || donnees[id].type === 'barreprogression') {
+          return app.ecrire(id, 'valeur', arrondiPropre(app.lire(id, 'valeur') + ajout));
+        }
+        // Le dernier nombre du texte change ; le reste (« Score : ») ne bouge pas.
+        const texte = enTexte(app.lire(id, 'texte'));
+        const m = [...texte.matchAll(NOMBRES_DANS_TEXTE)].pop();
+        if (!m) return app.ecrire(id, 'texte', texte + (texte && !/\s$/.test(texte) ? ' ' : '') + arrondiPropre(ajout));
+        let nouveau = String(arrondiPropre(Number(m[0].replace(',', '.')) + ajout));
+        if (m[0].includes(',')) nouveau = nouveau.replace('.', ',');
+        app.ecrire(id, 'texte', texte.slice(0, m.index) + nouveau + texte.slice(m.index + m[0].length));
+      },
+      defilerImage(id, dx, dy) {
+        ctrlDeType(id, 'image', 'une image');
+        const d = donnees[id];
+        d.decalage = d.decalage || { x: 0, y: 0 };
+        d.decalage.x += Number(dx) || 0;
+        d.decalage.y += Number(dy) || 0;
+        majDefilement(id);
+      },
+      repeterTexte(texte, fois) {
+        return enTexte(texte).repeat(Math.max(0, Math.min(1000, Math.round(Number(fois) || 0))));
+      },
       quandSouris(quoi, fn) { actionsSouris[quoi].push(quoi === 'bouge' ? sansEmpiler(proteger(fn)) : proteger(fn)); },
       sourisFenetre(quoi) { return quoi === 'enfonce' ? souris.enfonce : souris[quoi] ?? 0; },
       seTouchent,
@@ -3972,6 +4153,9 @@ function BlocRuntimeFactory() {
           case 'visible': return el.style.display !== 'none';
           case 'deplacable': return !!d.deplacable;
           case 'direction': return directionDe(d);
+          case 'solide': return !!d.solide;
+          case 'vitesseY': return Number(d.vitesseY) || 0;
+          case 'auSol': return !!d.auSol;
           case 'adresse': return adresseWeb(d.adresse);
           case 'enLecture': return d.type === 'video' ? !el.paused && !el.ended : false;
           case 'position': return d.type === 'video' ? Math.round(el.currentTime * 10) / 10 : 0;
@@ -3999,7 +4183,8 @@ function BlocRuntimeFactory() {
         }
         if (PROPS_APPARENCE.includes(prop)) {
           d[prop] = valeurApparence(prop, valeur);
-          return appliquerApparence(el, d);
+          appliquerApparence(el, d);
+          return majDefilement(id); // l'ajustement change aussi le fond qui défile
         }
         if (d.type === 'zonetexte') {
           if (prop === 'texteInvite') { el.placeholder = enTexte(valeur); return; }
@@ -4161,6 +4346,8 @@ function BlocRuntimeFactory() {
           case 'visible': el.style.display = valeur ? '' : 'none'; break;
           case 'deplacable': d.deplacable = !!valeur; el.style.cursor = valeur ? 'grab' : ''; break;
           case 'direction': d.direction = normaliser(valeur); break;
+          case 'solide': d.solide = !!valeur; break;
+          case 'vitesseY': d.vitesseY = Number(valeur) || 0; break;
           case 'active':
             if (estCase(d.type)) el.querySelector('input').disabled = !valeur;
             else el.disabled = !valeur;
@@ -4193,6 +4380,7 @@ function BlocRuntimeFactory() {
           case 'boucle': if (d.type === 'video') el.loop = !!valeur; break;
         }
         if (d.type === 'graphique') dessinerGraphique(el, d); // taille, couleurs du texte ou du fond
+        majDefilement(id); // une autre image, une couleur de fond… : le fond qui défile est redessiné
         if (prop === 'largeur' || prop === 'hauteur') agrandirPanneau(d);
         if (d.type === 'curseur') partCurseur(el); // valeur, minimum ou maximum
         if (d.type === 'forme' && prop === 'couleurFond') rendreForme(el, d);

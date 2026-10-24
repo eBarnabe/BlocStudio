@@ -91,11 +91,12 @@
   function projet(fenetre, controles, variables, evenements) {
     y = 0;
     const blocs = evenements();
+    let numero = 0; // c1, c2… dans l'ordre, sans compter les contrôles qui ont déjà leur identifiant
     const p = {
       format: 'BlocStudio', version: 1,
       fenetre: Object.assign({ couleurFond: '#f0f0f0' }, fenetre),
-      controles: controles.map((c, i) => Object.assign({
-        id: 'c' + (i + 1), texte: '', x: 20, y: 20, largeur: 120, hauteur: 28,
+      controles: controles.map(c => Object.assign({
+        id: c.id || 'c' + (++numero), texte: '', x: 20, y: 20, largeur: 120, hauteur: 28,
         couleurTexte: '#000000', couleurFond: '', taillePolice: 14,
         visible: true, coche: false, image: ''
       }, c)),
@@ -261,6 +262,41 @@
       })
     }));
     return { id: 'spr_brique', nom: 'Brique', taille: 16, lisse: false, vitesse: 8, costumes };
+  }
+
+  // Ciel étoilé (240 × 180, fond transparent) : des étoiles placées « au hasard », toujours les mêmes.
+  function imageEtoiles() {
+    const c = document.createElement('canvas');
+    c.width = 240;
+    c.height = 180;
+    const g = c.getContext('2d');
+    let graine = 7;
+    const hasard = () => (graine = (graine * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < 90; i++) {
+      const grosse = hasard() < 0.15;
+      g.fillStyle = ['#ffffff', '#c7d2fe', '#fde68a', '#94a3b8'][Math.floor(hasard() * 4)];
+      g.fillRect(Math.floor(hasard() * 240), Math.floor(hasard() * 180), grosse ? 2 : 1, grosse ? 2 : 1);
+    }
+    return c.toDataURL('image/png');
+  }
+
+  // Petit héros à casquette, tourné vers la droite : deux costumes de marche, puis un de saut.
+  function spriteHeros() {
+    const haut = [
+      '................', '.....rrrrrr.....', '....rrrrrrrrrr..', '....sssssss.....',
+      '....ssksssks....', '....sssssssss...', '.....sssssss....', '......ssss......',
+      '....bbrbbrbb....', '...sbbbbbbbbs...', '...sbbbbbbbbs...', '.....bbbbbb.....'
+    ];
+    const jambes = [
+      ['marche 1', ['.....bb..bb.....', '.....bb..bb.....', '....nnn..nnn....', '................']],
+      ['marche 2', ['....bb....bb....', '...bb......bb...', '..nnn......nnn..', '................']],
+      ['saut', ['.....bb..bb.....', '....bb....bb....', '...nn......nn...', '................']]
+    ];
+    const couleurs = { r: '#e11d48', s: '#fcd5b5', k: '#1e293b', b: '#2563eb', n: '#7c2d12' };
+    return {
+      id: 'spr_heros', nom: 'Héros', taille: 16, lisse: false, vitesse: 8,
+      costumes: jambes.map(([nom, j]) => ({ nom, donnees: dessinTexte(haut.concat(j), couleurs) }))
+    };
   }
 
   // Musique un peu inquiétante (la mineur), écrite comme dans le studio 8 bits :
@@ -1183,6 +1219,7 @@
       description: 'Un jeu avec des clones : des météorites de plus en plus nombreuses, à éviter avec la souris ou les flèches.',
       creer: () => {
         // c1 Score · c2 Vaisseau · c3 Meteorite (cachée : ce sont ses clones qui tombent) · c4 Consigne · c5 Apparition (Minuteur)
+        // c0 Etoiles : le ciel qui défile, posé en premier pour être derrière tout le reste
         const score = () => ecrire('c1', 'texte', joindre(t('Score : '), v('v_score')));
         const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record météorites') }) });
         const intervalle = () => lire('intervalle', 'c5');
@@ -1195,6 +1232,7 @@
         const p = projet(
           { titre: 'Pluie de météorites', largeur: 480, hauteur: 360, couleurFond: '#0b1026' },
           [
+            { id: 'c0', type: 'image', nom: 'Etoiles', image: imageEtoiles(), ajustement: 'etiree', x: 0, y: 0, largeur: 480, hauteur: 360 },
             { type: 'etiquette', nom: 'Score', texte: 'Score : 0', x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#fde68a' },
             { type: 'sprite', nom: 'Vaisseau', sprite: 'spr_vaisseau', costume: 0, anime: true, x: 216, y: 296, largeur: 48, hauteur: 48 },
             { type: 'sprite', nom: 'Meteorite', sprite: 'spr_meteorite', costume: 0, anime: true, visible: false, x: 216, y: 60, largeur: 48, hauteur: 48 },
@@ -1207,7 +1245,14 @@
           ['score', 'enJeu'],
           () => [
             presentation('Un jeu avec des clones : Meteorite reste cachée, ce sont ses copies qui tombent. Le minuteur Apparition en crée une à chaque tic, de plus en plus souvent.'),
-            evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
+            evt('bs_quand_demarre', null, [
+              fixer('v_enJeu', vrai(false)),
+              note('Le ciel étoilé défile vers le bas, sans fin : le vaisseau a l\'air d\'avancer. Plus vite pendant la partie.'),
+              toujours([
+                bloc('bs_image_defiler', 'c0', { DX: n(0), DY: { type: 'logic_ternary', inputs: { IF: I(v('v_enJeu')), THEN: I(n(3)), ELSE: I(n(1)) } } }),
+                attendre(0.02)
+              ])
+            ]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
@@ -1490,6 +1535,137 @@
             ])
           ]);
         p.sprites = [spriteRaquette(), spriteBalle(), spriteBrique()];
+        return p;
+      }
+    },
+    {
+      titre: '🍄 Plateformes',
+      theme: 'jeux',
+      description: 'Cours, saute de plateforme en plateforme et ramasse les pièces, sans tomber dans le trou ni toucher le fantôme. Gravité, saut, score, vies… et ça se joue aussi à la manette !',
+      creer: () => {
+        // c1 Score · c2 Vies · c3 Héros · c4-c5 le sol (avec un trou au milieu) · c6-c9 plateformes
+        // c10 Pièce · c11 Fantôme · c12 Consigne
+        const touche = k => ({ type: 'bs_touche_enfoncee', fields: { TOUCHE: k } });
+        const auSol = () => bloc('bs_au_sol', 'c3');
+        const pieces = () => bloc('bs_compteur_valeur', 'c1');
+        const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record plateformes') }) });
+        const vies = () => ecrire('c2', 'texte', bloc('bs_texte_repete', null, { VAL: t('❤️'), FOIS: v('v_vies') }));
+        const choix = (...nombres) => ({
+          type: 'lists_getIndex', fields: { MODE: 'GET', WHERE: 'FROM_START' },
+          inputs: { VALUE: I(liste(...nombres.map(n))), AT: I(v('v_place')) }
+        });
+        const solide = (nom, x, y, l, h, genre, fond, trait) =>
+          ({ type: 'forme', nom, genre, x, y, largeur: l, hauteur: h, couleurFond: fond, couleurBordure: trait, epaisseur: 2, solide: true });
+        const p = projet(
+          { titre: 'Plateformes', largeur: 480, hauteur: 360, couleurFond: '#7dd3fc' },
+          [
+            { type: 'etiquette', nom: 'Score', texte: 'Pièces : 0', x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, gras: true, couleurTexte: '#713f12' },
+            { type: 'etiquette', nom: 'Vies', texte: '❤️❤️❤️', x: 360, y: 6, largeur: 110, hauteur: 28, taillePolice: 18, alignement: 'droite' },
+            { type: 'sprite', nom: 'Héros', sprite: 'spr_heros', costume: 0, x: 48, y: 60, largeur: 40, hauteur: 40 },
+            solide('SolGauche', 0, 320, 200, 40, 'rectangle', '#22c55e', '#14532d'),
+            solide('SolDroit', 280, 320, 200, 40, 'rectangle', '#22c55e', '#14532d'),
+            solide('Plateforme1', 60, 245, 110, 16, 'arrondi', '#d97706', '#78350f'),
+            solide('Plateforme2', 200, 180, 100, 16, 'arrondi', '#d97706', '#78350f'),
+            solide('Plateforme3', 330, 115, 110, 16, 'arrondi', '#d97706', '#78350f'),
+            solide('Plateforme4', 30, 110, 90, 16, 'arrondi', '#d97706', '#78350f'),
+            { type: 'sprite', nom: 'Pièce', sprite: 'spr_piece', costume: 0, x: 101, y: 211, largeur: 28, hauteur: 28 },
+            { type: 'sprite', nom: 'Fantôme', sprite: 'spr_fantome', costume: 0, x: 300, y: 284, largeur: 36, hauteur: 36, transparence: 20 },
+            {
+              type: 'etiquette', nom: 'Consigne', x: 50, y: 120, largeur: 380, hauteur: 160, taillePolice: 16, couleurTexte: '#ffffff',
+              couleurFond: '#1e3a8a', alignement: 'centre',
+              texte: 'Ramasse un maximum de pièces !\n\n← → pour courir, Espace ou ↑ pour sauter.\nAttention au fantôme et au trou !\n' +
+                'À la manette : la croix et le bouton A.\n\nEspace, Entrée ou clic pour commencer.'
+            }
+          ],
+          ['vies', 'enJeu', 'place'],
+          () => [
+            presentation('Le sol et les plateformes sont des formes « solides » (case cochée dans leurs propriétés). Le héros tombe avec « faire tomber … avec une gravité » : il se pose sur ce qui est solide. « faire sauter » ne marche que s\'il est posé.'),
+            evt('bs_quand_demarre', null, [
+              fixer('v_enJeu', vrai(false)),
+              bloc('bs_sprite_animer', 'c10', null, { MODE: 'boucle' }),
+              bloc('bs_sprite_animer', 'c11', null, { MODE: 'boucle' }),
+              note('Le fantôme fait des allers-retours d\'un bord à l\'autre de la fenêtre (il vole au-dessus du trou).'),
+              bloc('bs_orienter', 'c11', { DIR: n(90) }),
+              toujours([
+                si(v('v_enJeu'), [bloc('bs_avancer', 'c11', { PAS: n(2) }), bloc('bs_rebondir', 'c11')]),
+                attendre(0.02)
+              ])
+            ]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            evtChamps('bs_quand_manette', { BOUTON: 'start' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
+            fonction('nouvelle partie', [
+              note('« ajouter … au nombre de Score » change le nombre écrit dans l\'étiquette : « Pièces : 0 » devient « Pièces : 1 ».'),
+              ecrire('c1', 'texte', t('Pièces : 0')),
+              fixer('v_vies', n(3)), vies(),
+              ecrire('c12', 'visible', vrai(false)),
+              bloc('bs_placer', 'c11', { X: n(300), Y: n(284) }),
+              appeler('remettre le héros'),
+              appeler('placer la pièce'),
+              fixer('v_enJeu', vrai(true)),
+              note('La boucle du jeu : courir, sauter, tomber (gravité), puis regarder ce que le héros touche.'),
+              tantQue(v('v_enJeu'), [
+                si(touche('gauche'), [
+                  bloc('bs_deplacer', 'c3', { DX: n(-4), DY: n(0) }),
+                  bloc('bs_sprite_regarder', 'c3', null, { SENS: 'gauche' })
+                ]),
+                si(touche('droite'), [
+                  bloc('bs_deplacer', 'c3', { DX: n(4), DY: n(0) }),
+                  bloc('bs_sprite_regarder', 'c3', null, { SENS: 'droite' })
+                ]),
+                si(et(ou(touche('espace'), touche('haut')), auSol()), [
+                  bloc('bs_son', null, null, { SON: 'saut' }),
+                  bloc('bs_sauter', 'c3', { FORCE: n(13) })
+                ]),
+                bloc('bs_gravite', 'c3', { FORCE: n(1) }, { FOND: 'vide' }),
+                ecrire('c3', 'x', { type: 'math_constrain', inputs: { VALUE: I(lire('x', 'c3')), LOW: I(n(0)), HIGH: I(n(440)) } }),
+                note('Le costume : « saut » en l\'air ; au sol, les deux costumes de marche alternent selon sa position.'),
+                si(non(auSol()), [bloc('bs_sprite_costume', 'c3', { VAL: n(3) })], [
+                  bloc('bs_sprite_costume', 'c3', {
+                    VAL: calc('ADD', { type: 'math_modulo', inputs: {
+                      DIVIDEND: I({ type: 'math_round', fields: { OP: 'ROUND' }, inputs: { NUM: I(calc('DIVIDE', lire('x', 'c3'), n(12))) } }),
+                      DIVISOR: I(n(2)) } }, n(1))
+                  })
+                ]),
+                si(compare('GT', lire('y', 'c3'), n(360)), [appeler('perdre une vie')]),
+                si({ type: 'bs_se_touchent', fields: { CTRL: 'c3', CTRL2: 'c11' } }, [appeler('perdre une vie')]),
+                si({ type: 'bs_se_touchent', fields: { CTRL: 'c3', CTRL2: 'c10' } }, [
+                  bloc('bs_son', null, null, { SON: 'piece' }),
+                  bloc('bs_compteur_ajouter', 'c1', { VAL: n(1) }),
+                  appeler('placer la pièce')
+                ]),
+                attendre(0.02)
+              ])
+            ]),
+            fonction('remettre le héros', [
+              note('Il repart en haut à gauche, sur la plateforme la plus haute, loin du fantôme.'),
+              bloc('bs_placer', 'c3', { X: n(48), Y: n(60) }),
+              ecrire('c3', 'vitesseY', n(0))
+            ]),
+            fonction('placer la pièce', [
+              note('Une des 6 places, au hasard : au-dessus d\'une plateforme ou du sol.'),
+              fixer('v_place', hasard(1, 6)),
+              bloc('bs_placer', 'c10', { X: choix(101, 236, 371, 61, 86, 366), Y: choix(211, 146, 81, 76, 286, 286) })
+            ]),
+            fonction('perdre une vie', [
+              ajouter('v_vies', n(-1)), vies(),
+              bloc('bs_son', null, null, { SON: 'erreur' }),
+              si(compare('LTE', v('v_vies'), n(0)), [
+                fixer('v_enJeu', vrai(false)),
+                si(compare('GT', pieces(), record()), [
+                  bloc('bs_memoriser', null, { VAL: pieces(), NOM: t('record plateformes') })
+                ]),
+                ecrire('c12', 'texte', joindre(t('Perdu ! Pièces ramassées : '), pieces(), retourLigne(),
+                  t('Record : '), record(), retourLigne(), retourLigne(), t('Espace, Entrée ou clic pour rejouer.'))),
+                ecrire('c12', 'visible', vrai(true))
+              ], [
+                appeler('remettre le héros'),
+                attendre(0.5)
+              ])
+            ])
+          ]);
+        p.sprites = [spriteHeros(), spritePiece(), spriteFantome()];
         return p;
       }
     },
