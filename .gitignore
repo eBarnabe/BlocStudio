@@ -1,0 +1,13 @@
+# Visual Studio (quel que soit le dossier)
+.vs/
+
+# Claude Code et son extension Visual Studio : réglages propres à cet ordinateur
+.claude/
+.mcp.json
+
+# Projets d'essai personnels : tests\verifier.ps1 les teste s'ils sont là, mais ils restent hors du dépôt
+tests/*.bstudio
+
+# Windows
+Thumbs.db
+desktop.ini
