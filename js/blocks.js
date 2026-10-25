@@ -10,40 +10,40 @@
   const COULEUR_DESSIN = 75;
 
   const LIBELLES = {
-    texte: 'texte', coche: 'coché', numero: 'numéro choisi', elements: 'éléments',
-    valeur: 'valeur', min: 'minimum', max: 'maximum', pas: 'pas',
-    visible: 'visible', active: 'activé',
-    x: 'position X', y: 'position Y', largeur: 'largeur', hauteur: 'hauteur',
-    couleurTexte: 'couleur du texte', couleurFond: 'couleur de fond',
-    couleurBarre: 'couleur de la barre', taillePolice: 'taille du texte',
-    image: 'image (adresse)', nombreLignes: 'nombre de lignes', colonnes: 'colonnes (liste)',
-    son: 'son joué (nom, ou adresse web d\'un son ou d\'une radio)', volume: 'volume (%)', boucle: 'en boucle', enLecture: 'en train de jouer',
-    intervalle: 'intervalle (secondes)', deplacable: 'déplaçable à la souris',
-    sprite: 'sprite affiché (nom)', costume: 'n° du costume', nomCostume: 'nom du costume',
-    vitesse: 'vitesse d\'animation (images/s)', miroir: 'retourné (miroir)', rotation: 'angle (degrés)',
-    enAnimation: 'en train d\'être animé', direction: 'direction (degrés)',
-    taille: 'taille (%)', transparence: 'transparence (%)',
-    valeurs: 'valeurs (liste)', etiquettes: 'étiquettes (liste)', genre: 'genre (barres, courbe ou secteurs)',
-    maxValeurs: 'nombre maximum de valeurs',
-    motDePasse: 'caché (mot de passe)', chemin: 'chemin de l\'élément choisi',
-    allumee: 'allumée', photo: 'dernière photo (image)', mouvement: 'mouvement vu (%)',
-    seuilMouvement: 'seuil de mouvement (%)',
-    contenu: 'contenu du fichier', nomFichier: 'nom du fichier', annule: 'annulé par l\'utilisateur',
-    nomPropose: 'nom proposé pour enregistrer', typeFichier: 'type de fichier (texte, csv, excel, image, son ou tous)',
-    nombreFiches: 'nombre de fiches', champs: 'champs (liste)', memoriser: 'garder les fiches d\'une fois à l\'autre',
-    adresse: 'adresse web', video: 'vidéo (adresse)', position: 'position (secondes)', duree: 'durée (secondes)',
-    infobulle: 'infobulle (texte au survol)', gras: 'en gras', italique: 'en italique',
-    alignement: 'alignement (gauche, centre ou droite)', bordure: 'bordure (aucune, simple ou creuse)',
-    ajustement: 'ajustement (entiere, etiree ou recadree)', texteInvite: 'texte d\'invite (grisé)',
-    lectureSeule: 'en lecture seule', longueurMax: 'longueur maximale (0 = sans limite)', trie: 'triée (ordre alphabétique)',
-    couleurBordure: 'couleur du trait', epaisseur: 'épaisseur du trait', sens: 'sens de la ligne (horizontale, verticale, descendante ou montante)',
-    heures: 'heures', minutes: 'minutes', collision: 'collisions (precise : au pixel près, ou rectangle)', orientation: 'orientation (horizontale ou verticale)', cliquable: 'cliquable (un clic choisit la valeur)',
-    defilementY: 'défilement vertical (en pixels depuis le haut)', defilementX: 'défilement horizontal (en pixels depuis la gauche)',
-    hauteurContenu: 'hauteur du contenu (tout ce qu\'on peut faire défiler)', largeurContenu: 'largeur du contenu',
-    defilement: 'sens du défilement (vertical, horizontal ou deux)',
-    secondes: 'avec les secondes', decalageHeures: 'décalage (heures, pour un autre pays)',
-    suggestions: 'suggestions pendant la frappe (liste)',
-    solide: 'solide (sol, plateforme ou mur, pour la gravité)', vitesseY: 'vitesse de chute (négative : il monte)'
+    texte: T('texte'), coche: T('coché'), numero: T('numéro choisi'), elements: T('éléments'),
+    valeur: T('valeur'), min: T('minimum'), max: T('maximum'), pas: T('pas'),
+    visible: T('visible'), active: T('activé'),
+    x: T('position X'), y: T('position Y'), largeur: T('largeur'), hauteur: T('hauteur'),
+    couleurTexte: T('couleur du texte'), couleurFond: T('couleur de fond'),
+    couleurBarre: T('couleur de la barre'), taillePolice: T('taille du texte'),
+    image: T('image (adresse)'), nombreLignes: T('nombre de lignes'), colonnes: T('colonnes (liste)'),
+    son: T('son joué (nom, ou adresse web d\'un son ou d\'une radio)'), volume: T('volume (%)'), boucle: T('en boucle'), enLecture: T('en train de jouer'),
+    intervalle: T('intervalle (secondes)'), deplacable: T('déplaçable à la souris'),
+    sprite: T('sprite affiché (nom)'), costume: T('n° du costume'), nomCostume: T('nom du costume'),
+    vitesse: T('vitesse d\'animation (images/s)'), miroir: T('retourné (miroir)'), rotation: T('angle (degrés)'),
+    enAnimation: T('en train d\'être animé'), direction: T('direction (degrés)'),
+    taille: T('taille (%)'), transparence: T('transparence (%)'),
+    valeurs: T('valeurs (liste)'), etiquettes: T('étiquettes (liste)'), genre: T('genre (barres, courbe ou secteurs)'),
+    maxValeurs: T('nombre maximum de valeurs'),
+    motDePasse: T('caché (mot de passe)'), chemin: T('chemin de l\'élément choisi'),
+    allumee: T('allumée'), photo: T('dernière photo (image)'), mouvement: T('mouvement vu (%)'),
+    seuilMouvement: T('seuil de mouvement (%)'),
+    contenu: T('contenu du fichier'), nomFichier: T('nom du fichier'), annule: T('annulé par l\'utilisateur'),
+    nomPropose: T('nom proposé pour enregistrer'), typeFichier: T('type de fichier (texte, csv, excel, image, son ou tous)'),
+    nombreFiches: T('nombre de fiches'), champs: T('champs (liste)'), memoriser: T('garder les fiches d\'une fois à l\'autre'),
+    adresse: T('adresse web'), video: T('vidéo (adresse)'), position: T('position (secondes)'), duree: T('durée (secondes)'),
+    infobulle: T('infobulle (texte au survol)'), gras: T('en gras'), italique: T('en italique'),
+    alignement: T('alignement (gauche, centre ou droite)'), bordure: T('bordure (aucune, simple ou creuse)'),
+    ajustement: T('ajustement (entiere, etiree ou recadree)'), texteInvite: T('texte d\'invite (grisé)'),
+    lectureSeule: T('en lecture seule'), longueurMax: T('longueur maximale (0 = sans limite)'), trie: T('triée (ordre alphabétique)'),
+    couleurBordure: T('couleur du trait'), epaisseur: T('épaisseur du trait'), sens: T('sens de la ligne (horizontale, verticale, descendante ou montante)'),
+    heures: T('heures'), minutes: T('minutes'), collision: T('collisions (precise : au pixel près, ou rectangle)'), orientation: T('orientation (horizontale ou verticale)'), cliquable: T('cliquable (un clic choisit la valeur)'),
+    defilementY: T('défilement vertical (en pixels depuis le haut)'), defilementX: T('défilement horizontal (en pixels depuis la gauche)'),
+    hauteurContenu: T('hauteur du contenu (tout ce qu\'on peut faire défiler)'), largeurContenu: T('largeur du contenu'),
+    defilement: T('sens du défilement (vertical, horizontal ou deux)'),
+    secondes: T('avec les secondes'), decalageHeures: T('décalage (heures, pour un autre pays)'),
+    suggestions: T('suggestions pendant la frappe (liste)'),
+    solide: T('solide (sol, plateforme ou mur, pour la gravité)'), vitesseY: T('vitesse de chute (négative : il monte)')
   };
 
   // Les propriétés proposées dépendent du type de contrôle choisi dans le bloc.
@@ -91,25 +91,25 @@
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
   const LECTURE_SEULE = { horloge: ['texte'], arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
-    listederoulante: { texte: 'élément choisi' },
-    zoneliste: { texte: 'élément choisi' },
-    boutonradio: { coche: 'sélectionné' },
-    interrupteur: { coche: 'allumé' },
-    onglets: { numero: 'n° de la page affichée', texte: 'titre de la page affichée', elements: 'titres des pages (liste)' },
-    graphique: { texte: 'titre', couleurBarre: 'couleur des barres / de la courbe' },
-    curseur: { couleurBarre: 'couleur du curseur' },
-    cadre: { texte: 'titre' },
-    tableau: { numero: 'n° de la ligne choisie', texte: 'ligne choisie (texte)' },
-    date: { texte: 'date (jj/mm/aaaa)' },
-    heure: { texte: 'heure (hh:mm)' },
-    calendrier: { texte: 'date choisie (jj/mm/aaaa)', couleurBarre: 'couleur du mois et de la date choisie' },
-    horloge: { texte: 'heure affichée (hh:mm:ss)', genre: 'affichage (aiguilles ou chiffres)', couleurBarre: 'couleur de la trotteuse' },
-    forme: { genre: 'forme (rectangle, arrondi, ovale, triangle ou ligne)', couleurFond: 'couleur de remplissage' },
-    selecteurcouleur: { texte: 'couleur choisie' },
-    minuteur: { active: 'en marche' },
-    camera: { miroir: 'en miroir (comme dans une glace)' },
-    arborescence: { texte: 'élément choisi', elements: 'tous les éléments (liste de chemins)' },
-    barreetat: { texte: 'texte (cases séparées par |)' }
+    listederoulante: { texte: T('élément choisi') },
+    zoneliste: { texte: T('élément choisi') },
+    boutonradio: { coche: T('sélectionné') },
+    interrupteur: { coche: T('allumé') },
+    onglets: { numero: T('n° de la page affichée'), texte: T('titre de la page affichée'), elements: T('titres des pages (liste)') },
+    graphique: { texte: T('titre'), couleurBarre: T('couleur des barres / de la courbe') },
+    curseur: { couleurBarre: T('couleur du curseur') },
+    cadre: { texte: T('titre') },
+    tableau: { numero: T('n° de la ligne choisie'), texte: T('ligne choisie (texte)') },
+    date: { texte: T('date (jj/mm/aaaa)') },
+    heure: { texte: T('heure (hh:mm)') },
+    calendrier: { texte: T('date choisie (jj/mm/aaaa)'), couleurBarre: T('couleur du mois et de la date choisie') },
+    horloge: { texte: T('heure affichée (hh:mm:ss)'), genre: T('affichage (aiguilles ou chiffres)'), couleurBarre: T('couleur de la trotteuse') },
+    forme: { genre: T('forme (rectangle, arrondi, ovale, triangle ou ligne)'), couleurFond: T('couleur de remplissage') },
+    selecteurcouleur: { texte: T('couleur choisie') },
+    minuteur: { active: T('en marche') },
+    camera: { miroir: T('en miroir (comme dans une glace)') },
+    arborescence: { texte: T('élément choisi'), elements: T('tous les éléments (liste de chemins)') },
+    barreetat: { texte: T('texte (cases séparées par |)') }
   };
 
   function typeDe(id) {
@@ -180,8 +180,8 @@
       const liste = BlocStudio.controles()
         .filter(c => types ? types.includes(c.type) : avecInvisibles || !BlocRuntime.INVISIBLES.includes(c.type))
         .map(c => [c.nom, c.id]);
-      if (avecMoi) liste.push(['👉 moi', '__moi']);
-      return liste.length ? liste : [['(aucun contrôle)', '']];
+      if (avecMoi) liste.push([T('👉 moi'), '__moi']);
+      return liste.length ? liste : [[T('(aucun contrôle)'), '']];
     };
   }
 
@@ -198,15 +198,15 @@
 
   Blockly.Blocks['bs_quand_demarre'] = {
     init() {
-      evenement(this, 'quand la fenêtre démarre');
-      this.setTooltip("Exécuté une seule fois, à l'ouverture du programme.");
+      evenement(this, T('quand la fenêtre démarre'));
+      this.setTooltip(T("Exécuté une seule fois, à l'ouverture du programme."));
     }
   };
 
   Blockly.Blocks['bs_quand_clic'] = {
     init() {
-      evenement(this, 'quand', null, 'est cliqué');
-      this.setTooltip("Exécuté chaque fois qu'on clique sur ce contrôle.");
+      evenement(this, T('quand'), null, T('est cliqué'));
+      this.setTooltip(T("Exécuté chaque fois qu'on clique sur ce contrôle."));
     }
   };
 
@@ -215,70 +215,70 @@
 
   Blockly.Blocks['bs_quand_change'] = {
     init() {
-      evenement(this, 'quand', TYPES_CHANGE, 'change');
-      this.setTooltip("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page, ou quand un panneau défilant défile, ou quand on clique sur une barre de progression « cliquable ».");
+      evenement(this, T('quand'), TYPES_CHANGE, T('change', 'bloc'));
+      this.setTooltip(T("Exécuté quand on tape dans une zone de texte, coche une case, sélectionne un bouton radio, choisit dans une liste, change un nombre, une date ou une couleur, clique sur une ligne d'un tableau, sur une page d'onglets ou sur un élément d'une arborescence, ou quand un navigateur web a fini de charger une page, ou quand un panneau défilant défile, ou quand on clique sur une barre de progression « cliquable »."));
     }
   };
 
   Blockly.Blocks['bs_quand_glisse'] = {
     init() {
-      evenement(this, 'quand on fait glisser la souris dans', ['zonedessin']);
-      this.setTooltip('Exécuté pendant que la souris bouge avec le bouton enfoncé. Parfait pour un programme de dessin.');
+      evenement(this, T('quand on fait glisser la souris dans'), ['zonedessin']);
+      this.setTooltip(T('Exécuté pendant que la souris bouge avec le bouton enfoncé. Parfait pour un programme de dessin.'));
     }
   };
 
   Blockly.Blocks['bs_quand_minuteur'] = {
     init() {
-      evenement(this, 'quand', ['minuteur'], 'sonne');
-      this.setTooltip('Exécuté régulièrement, selon l\'intervalle du minuteur (réglé dans ses propriétés), tant qu\'il est en marche.');
+      evenement(this, T('quand'), ['minuteur'], T('sonne'));
+      this.setTooltip(T('Exécuté régulièrement, selon l\'intervalle du minuteur (réglé dans ses propriétés), tant qu\'il est en marche.'));
     }
   };
 
   Blockly.Blocks['bs_quand_fichier_depose'] = {
     init() {
-      evenement(this, 'quand on dépose un fichier sur la fenêtre, avec', ['fichier']);
-      this.setTooltip('Exécuté quand on fait glisser un fichier (depuis l\'Explorateur de Windows) sur la fenêtre du programme. Ensuite, « contenu du fichier » et « nom du fichier » le décrivent.');
+      evenement(this, T('quand on dépose un fichier sur la fenêtre, avec'), ['fichier']);
+      this.setTooltip(T('Exécuté quand on fait glisser un fichier (depuis l\'Explorateur de Windows) sur la fenêtre du programme. Ensuite, « contenu du fichier » et « nom du fichier » le décrivent.'));
     }
   };
 
   Blockly.Blocks['bs_quand_camera_mouvement'] = {
     init() {
-      evenement(this, 'quand', ['camera'], 'voit bouger');
-      this.setTooltip('Exécuté quand quelque chose bouge devant la caméra (au plus deux fois par seconde). Le « seuil de mouvement » (propriétés) règle la sensibilité : plus il est petit, plus la caméra réagit.');
+      evenement(this, T('quand'), ['camera'], T('voit bouger'));
+      this.setTooltip(T('Exécuté quand quelque chose bouge devant la caméra (au plus deux fois par seconde). Le « seuil de mouvement » (propriétés) règle la sensibilité : plus il est petit, plus la caméra réagit.'));
     }
   };
 
   Blockly.Blocks['bs_quand_son_fin'] = {
     init() {
-      evenement(this, 'quand', ['son', 'video'], 'se termine');
-      this.setTooltip('Exécuté quand le son ou la vidéo arrive à sa fin (pas quand on l\'arrête ou le met en pause). Pratique pour enchaîner des musiques.');
+      evenement(this, T('quand'), ['son', 'video'], T('se termine'));
+      this.setTooltip(T('Exécuté quand le son ou la vidéo arrive à sa fin (pas quand on l\'arrête ou le met en pause). Pratique pour enchaîner des musiques.'));
     }
   };
 
   Blockly.Blocks['bs_toutes_les'] = {
     init() {
-      this.appendValueInput('SEC').setCheck('Number').appendField('toutes les');
-      this.appendDummyInput().appendField('secondes');
+      this.appendValueInput('SEC').setCheck('Number').appendField(T('toutes les'));
+      this.appendDummyInput().appendField(T('secondes'));
       this.appendStatementInput('DO');
       this.setInputsInline(true);
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté régulièrement, sans jamais s\'arrêter. Pour pouvoir l\'arrêter ou changer son rythme, utilisez plutôt un contrôle Minuteur.');
+      this.setTooltip(T('Exécuté régulièrement, sans jamais s\'arrêter. Pour pouvoir l\'arrêter ou changer son rythme, utilisez plutôt un contrôle Minuteur.'));
     }
   };
 
   Blockly.Blocks['bs_ecrire'] = {
     init() {
       this.appendValueInput('VAL')
-        .appendField('mettre')
+        .appendField(T('mettre'))
         .appendField(new ChampPropriete(), 'PROP')
-        .appendField('de')
+        .appendField(T('de'))
         .appendField(champControleAvecPropriete(), 'CTRL')
-        .appendField('à');
+        .appendField(T('à'));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip("Change une propriété d'un contrôle de la fenêtre.");
+      this.setTooltip(T("Change une propriété d'un contrôle de la fenêtre."));
     },
     onchange() { verifierImageDeFichier(this); }
   };
@@ -297,8 +297,8 @@
     if (['image', 'texte'].includes(bloc.getFieldValue('PROP')) && typeDe(bloc.getFieldValue('CTRL')) === 'image') {
       const f = fichierLuEnTexte(bloc.getInputTargetBlock('VAL'));
       if (f) {
-        texte = `« ${f.nom} » lit les fichiers comme du texte : l'image restera vide. Dans les propriétés de ${f.nom} ` +
-          `(onglet Fenêtre, sous la fenêtre), choisissez « Type de fichier proposé : Image ». Ou plus simple : le bloc « ouvrir avec ${f.nom} un fichier dans … ».`;
+        texte = T('« {nom} » lit les fichiers comme du texte : l\'image restera vide. Dans les propriétés de {nom} ' +
+          '(onglet Fenêtre, sous la fenêtre), choisissez « Type de fichier proposé : Image ». Ou plus simple : le bloc « ouvrir avec {nom} un fichier dans … ».', { nom: f.nom });
       }
     }
     bloc.setWarningText(texte, 'fichier-image');
@@ -310,17 +310,17 @@
     init() {
       this.appendDummyInput()
         .appendField(new ChampPropriete(), 'PROP')
-        .appendField('de')
+        .appendField(T('de'))
         .appendField(champControleAvecPropriete(), 'CTRL');
       this.setOutput(true);
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip("Donne la valeur d'une propriété d'un contrôle.");
+      this.setTooltip(T("Donne la valeur d'une propriété d'un contrôle."));
     }
   };
 
   Blockly.Blocks['bs_fond_fenetre'] = {
     init() {
-      this.appendValueInput('VAL').appendField('mettre la couleur de la fenêtre à');
+      this.appendValueInput('VAL').appendField(T('mettre la couleur de la fenêtre à'));
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_CONTROLES);
@@ -330,11 +330,11 @@
   Blockly.Blocks['bs_couleur'] = {
     init() {
       this.appendDummyInput()
-        .appendField('couleur')
-        .appendField(new Blockly.FieldDropdown([...COULEURS.map(c => [c, c]), ['🎲 au hasard', 'hasard']]), 'COUL');
+        .appendField(T('couleur'))
+        .appendField(new Blockly.FieldDropdown([...COULEURS.map(c => [T(c), c]),[T('🎲 au hasard'), 'hasard']]), 'COUL');
       this.setOutput(true, 'String');
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip('Une couleur. On peut aussi écrire un code comme #ff8800. « 🎲 au hasard » : une couleur vive différente à chaque fois.');
+      this.setTooltip(T('Une couleur. On peut aussi écrire un code comme #ff8800. « 🎲 au hasard » : une couleur vive différente à chaque fois.'));
     }
   };
 
@@ -344,108 +344,108 @@
   const LETTRES = 'abcdefghijklmnopqrstuvwxyz'.split('').map(l => [l.toUpperCase(), l]);
   const CHIFFRES = '0123456789'.split('').map(c => [c, c]);
   const TOUCHES = [
-    ['← flèche gauche', 'gauche'], ['→ flèche droite', 'droite'], ['↑ flèche haut', 'haut'], ['↓ flèche bas', 'bas'],
-    ['espace', 'espace'], ['Entrée', 'entree'], ['Échap', 'echap'], ['⌫ effacement', 'effacement'],
+    [T('← flèche gauche'), 'gauche'], [T('→ flèche droite'), 'droite'], [T('↑ flèche haut'), 'haut'], [T('↓ flèche bas'), 'bas'],
+    [T('espace'), 'espace'], [T('Entrée'), 'entree'], [T('Échap'), 'echap'], [T('⌫ effacement'), 'effacement'],
     ...LETTRES, ...CHIFFRES
   ];
-  const champTouche = () => new Blockly.FieldDropdown([['n\'importe quelle touche', 'toutes'], ...TOUCHES]);
+  const champTouche = () => new Blockly.FieldDropdown([[T('n\'importe quelle touche'), 'toutes'], ...TOUCHES]);
 
   Blockly.Blocks['bs_quand_touche'] = {
     init() {
-      this.appendDummyInput().appendField('quand la touche').appendField(champTouche(), 'TOUCHE').appendField('est appuyée');
+      this.appendDummyInput().appendField(T('quand la touche')).appendField(champTouche(), 'TOUCHE').appendField(T('est appuyée'));
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté quand on appuie sur cette touche (et répété si on la garde enfoncée). Les lettres sont ignorées pendant qu\'on écrit dans une zone de texte.');
+      this.setTooltip(T('Exécuté quand on appuie sur cette touche (et répété si on la garde enfoncée). Les lettres sont ignorées pendant qu\'on écrit dans une zone de texte.'));
     }
   };
 
   Blockly.Blocks['bs_quand_souris_ctrl'] = {
     init() {
       this.appendDummyInput()
-        .appendField('quand on')
-        .appendField(new Blockly.FieldDropdown([['double-clique sur', 'dblclic'], ['appuie sur', 'appui'],
-          ['relâche le bouton sur', 'relache'], ['passe la souris sur', 'entre'], ['retire la souris de', 'sort']]), 'QUOI')
+        .appendField(T('quand on'))
+        .appendField(new Blockly.FieldDropdown([[T('double-clique sur'), 'dblclic'], [T('appuie sur'), 'appui'],
+          [T('relâche le bouton sur'), 'relache'], [T('passe la souris sur'), 'entre'], [T('retire la souris de'), 'sort']]), 'QUOI')
         .appendField(new Blockly.FieldDropdown(optionsControles(null)), 'CTRL');
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Réagit à la souris sur un contrôle : double-clic, bouton appuyé ou relâché, souris qui arrive dessus ou qui s\'en va.');
+      this.setTooltip(T('Réagit à la souris sur un contrôle : double-clic, bouton appuyé ou relâché, souris qui arrive dessus ou qui s\'en va.'));
     }
   };
 
   Blockly.Blocks['bs_quand_souris_fenetre'] = {
     init() {
       this.appendDummyInput()
-        .appendField('quand la souris')
-        .appendField(new Blockly.FieldDropdown([['bouge', 'bouge'], ['clique', 'clic']]), 'QUOI')
-        .appendField('dans la fenêtre');
+        .appendField(T('quand la souris'))
+        .appendField(new Blockly.FieldDropdown([[T('bouge'), 'bouge'], [T('clique'), 'clic']]), 'QUOI')
+        .appendField(T('dans la fenêtre'));
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Réagit à la souris n\'importe où dans la fenêtre. Sa position est donnée par « souris position X / Y ».');
+      this.setTooltip(T('Réagit à la souris n\'importe où dans la fenêtre. Sa position est donnée par « souris position X / Y ».'));
     }
   };
 
   Blockly.Blocks['bs_touche_enfoncee'] = valeur(() => [
-    'touche', { champ: champTouche(), nom: 'TOUCHE' }, 'enfoncée ?'
-  ], 'Boolean', COULEUR_ENTREES, 'Vrai tant que la touche est maintenue. Idéal dans un minuteur pour déplacer un personnage en douceur.');
+    T('touche', 'clavier'), { champ: champTouche(), nom: 'TOUCHE' }, T('enfoncée ?')
+  ], 'Boolean', COULEUR_ENTREES, T('Vrai tant que la touche est maintenue. Idéal dans un minuteur pour déplacer un personnage en douceur.'));
 
-  Blockly.Blocks['bs_derniere_touche'] = valeur(() => ['dernière touche appuyée'], 'String', COULEUR_ENTREES,
-    'Le nom de la dernière touche : une lettre (« a »), un chiffre, ou gauche, droite, haut, bas, espace, entree, echap…');
+  Blockly.Blocks['bs_derniere_touche'] = valeur(() => [T('dernière touche appuyée')], 'String', COULEUR_ENTREES,
+    T('Le nom de la dernière touche : une lettre (« a »), un chiffre, ou gauche, droite, haut, bas, espace, entree, echap…'));
 
   Blockly.Blocks['bs_souris_fenetre'] = valeur(() => [
-    'souris', { champ: new Blockly.FieldDropdown([['position X', 'x'], ['position Y', 'y']]), nom: 'QUOI' }, 'dans la fenêtre'
-  ], 'Number', COULEUR_ENTREES, 'Position de la souris dans la fenêtre, en pixels (0, 0 = coin en haut à gauche).');
+    T('souris'), { champ: new Blockly.FieldDropdown([[T('position X'), 'x'], [T('position Y'), 'y']]), nom: 'QUOI' }, T('dans la fenêtre')
+  ], 'Number', COULEUR_ENTREES, T('Position de la souris dans la fenêtre, en pixels (0, 0 = coin en haut à gauche).'));
 
-  Blockly.Blocks['bs_souris_enfoncee'] = valeur(() => ['bouton de la souris enfoncé ?'], 'Boolean', COULEUR_ENTREES,
-    'Vrai tant que le bouton de la souris est appuyé dans la fenêtre.');
+  Blockly.Blocks['bs_souris_enfoncee'] = valeur(() => [T('bouton de la souris enfoncé ?')], 'Boolean', COULEUR_ENTREES,
+    T('Vrai tant que le bouton de la souris est appuyé dans la fenêtre.'));
 
   // ---------- Manette de jeu ----------
 
   const BOUTONS_MANETTE = [['A', 'a'], ['B', 'b'], ['X', 'x'], ['Y', 'y'],
-    ['↑ croix (ou joystick gauche)', 'haut'], ['↓ croix (ou joystick gauche)', 'bas'],
-    ['← croix (ou joystick gauche)', 'gauche'], ['→ croix (ou joystick gauche)', 'droite'],
-    ['LB (gâchette haute gauche)', 'lb'], ['RB (gâchette haute droite)', 'rb'], ['LT (gâchette gauche)', 'lt'], ['RT (gâchette droite)', 'rt'],
-    ['Start (menu)', 'start'], ['Select (vue)', 'select']];
-  const champBoutonManette = () => new Blockly.FieldDropdown([['n\'importe quel bouton', 'toutes'], ...BOUTONS_MANETTE]);
-  const COMME_CLAVIER = 'La croix et le joystick gauche font aussi les flèches du clavier, et le bouton A la touche Espace : ' +
-    'un jeu prévu pour le clavier se joue déjà à la manette.';
+    [T('↑ croix (ou joystick gauche)'), 'haut'], [T('↓ croix (ou joystick gauche)'), 'bas'],
+    [T('← croix (ou joystick gauche)'), 'gauche'], [T('→ croix (ou joystick gauche)'), 'droite'],
+    [T('LB (gâchette haute gauche)'), 'lb'], [T('RB (gâchette haute droite)'), 'rb'], [T('LT (gâchette gauche)'), 'lt'], [T('RT (gâchette droite)'), 'rt'],
+    [T('Start (menu)'), 'start'], [T('Select (vue)'), 'select']];
+  const champBoutonManette = () => new Blockly.FieldDropdown([[T('n\'importe quel bouton'), 'toutes'], ...BOUTONS_MANETTE]);
+  const COMME_CLAVIER = T('La croix et le joystick gauche font aussi les flèches du clavier, et le bouton A la touche Espace : ') +
+    T('un jeu prévu pour le clavier se joue déjà à la manette.');
 
   Blockly.Blocks['bs_quand_manette'] = {
     init() {
-      this.appendDummyInput().appendField('quand le bouton').appendField(champBoutonManette(), 'BOUTON').appendField('de la manette est appuyé');
+      this.appendDummyInput().appendField(T('quand le bouton')).appendField(champBoutonManette(), 'BOUTON').appendField(T('de la manette est appuyé'));
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté quand on appuie sur ce bouton d\'une manette de jeu (Xbox, PlayStation… branchée en USB ou en Bluetooth). ' +
-        'Si la manette ne répond pas, appuyez une fois sur un de ses boutons : Windows ne la montre aux programmes qu\'ensuite. ' + COMME_CLAVIER);
+      this.setTooltip(T('Exécuté quand on appuie sur ce bouton d\'une manette de jeu (Xbox, PlayStation… branchée en USB ou en Bluetooth). ') +
+        T('Si la manette ne répond pas, appuyez une fois sur un de ses boutons : Windows ne la montre aux programmes qu\'ensuite. ') + COMME_CLAVIER);
     }
   };
   Blockly.Blocks['bs_manette_bouton'] = valeur(() => [
-    'bouton', { champ: champBoutonManette(), nom: 'BOUTON' }, 'de la manette enfoncé ?'
-  ], 'Boolean', COULEUR_ENTREES, 'Vrai tant que ce bouton de la manette est maintenu. ' + COMME_CLAVIER);
+    T('bouton'), { champ: champBoutonManette(), nom: 'BOUTON' }, T('de la manette enfoncé ?')
+  ], 'Boolean', COULEUR_ENTREES, T('Vrai tant que ce bouton de la manette est maintenu. ') + COMME_CLAVIER);
   Blockly.Blocks['bs_manette_joystick'] = valeur(() => [
-    'joystick', { champ: new Blockly.FieldDropdown([['gauche ↔ (horizontal)', 'gx'], ['gauche ↕ (vertical)', 'gy'],
-      ['droit ↔ (horizontal)', 'dx'], ['droit ↕ (vertical)', 'dy']]), nom: 'QUOI' }, 'de la manette'
-  ], 'Number', COULEUR_ENTREES, 'Jusqu\'où le joystick est poussé, de -100 à 100 : ↔ -100 tout à gauche, 100 tout à droite ; ' +
-    '↕ -100 tout en haut, 100 tout en bas ; 0 au repos. Pour avancer plus ou moins vite : « déplacer de x : joystick ÷ 10 ».');
-  Blockly.Blocks['bs_manette_branchee'] = valeur(() => ['une manette est branchée ?'], 'Boolean', COULEUR_ENTREES,
-    'Vrai si une manette de jeu est branchée (et qu\'on a déjà appuyé sur l\'un de ses boutons).');
+    T('joystick'), { champ: new Blockly.FieldDropdown([[T('gauche ↔ (horizontal)'), 'gx'], [T('gauche ↕ (vertical)'), 'gy'],
+      [T('droit ↔ (horizontal)'), 'dx'], [T('droit ↕ (vertical)'), 'dy']]), nom: 'QUOI' }, T('de la manette')
+  ], 'Number', COULEUR_ENTREES, T('Jusqu\'où le joystick est poussé, de -100 à 100 : ↔ -100 tout à gauche, 100 tout à droite ; ') +
+    T('↕ -100 tout en haut, 100 tout en bas ; 0 au repos. Pour avancer plus ou moins vite : « déplacer de x : joystick ÷ 10 ».'));
+  Blockly.Blocks['bs_manette_branchee'] = valeur(() => [T('une manette est branchée ?')], 'Boolean', COULEUR_ENTREES,
+    T('Vrai si une manette de jeu est branchée (et qu\'on a déjà appuyé sur l\'un de ses boutons).'));
 
   Blockly.Blocks['bs_se_touchent'] = valeur(() => [
-    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, 'touche',
+    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, T('touche'),
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, '?'
-  ], 'Boolean', COULEUR_ENTREES, 'Vrai si les deux contrôles se chevauchent (et sont visibles). Parfait pour les jeux : le panier attrape-t-il la pièce ?');
+  ], 'Boolean', COULEUR_ENTREES, T('Vrai si les deux contrôles se chevauchent (et sont visibles). Parfait pour les jeux : le panier attrape-t-il la pièce ?'));
 
   Blockly.Blocks['bs_cote_contact'] = valeur(() => [
-    'de quel côté', { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, 'touche',
+    T('de quel côté'), { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, T('touche'),
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, '?'
-  ], 'String', COULEUR_ENTREES, 'Pour les jeux de plateforme : « bas » s\'il est posé dessus, « haut » s\'il s\'y cogne la tête, « gauche » ou « droite » s\'il le touche par ce côté. Vide s\'ils ne se touchent pas.');
+  ], 'String', COULEUR_ENTREES, T('Pour les jeux de plateforme : « bas » s\'il est posé dessus, « haut » s\'il s\'y cogne la tête, « gauche » ou « droite » s\'il le touche par ce côté. Vide s\'ils ne se touchent pas.'));
   Blockly.Blocks['bs_touche_couleur'] = valeur(() => [
-    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, 'touche la couleur',
+    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, T('touche la couleur'),
     { nom: 'COUL' }, '?'
-  ], 'Boolean', COULEUR_ENTREES, 'Vrai si une partie visible du contrôle est sur cette couleur : les murs d\'un labyrinthe dessiné, une flaque peinte dans une zone de dessin, une forme, une image…');
+  ], 'Boolean', COULEUR_ENTREES, T('Vrai si une partie visible du contrôle est sur cette couleur : les murs d\'un labyrinthe dessiné, une flaque peinte dans une zone de dessin, une forme, une image…'));
 
   // ---------- Sprites ----------
 
@@ -458,9 +458,9 @@
     constructor() {
       super(function () {
         const options = BlocStudio.sprites().map(s => ['🎭 ' + s.nom, s.id]);
-        if (!options.length) options.push(['(aucun sprite)', '']);
+        if (!options.length) options.push([T('(aucun sprite)'), '']);
         const v = this.getValue();
-        if (v && !options.some(o => o[1] === v)) options.push(['(sprite supprimé)', v]);
+        if (v && !options.some(o => o[1] === v)) options.push([T('(sprite supprimé)'), v]);
         return options;
       });
     }
@@ -474,52 +474,52 @@
   }
 
   Blockly.Blocks['bs_sprite_costume'] = instruction(() => [
-    'mettre le costume de', SPRITE, { nom: 'VAL', libelle: 'à' }
-  ], COULEUR_SPRITES, 'Change l\'image affichée par le sprite : donnez le numéro du costume (1, 2…) ou son nom.');
+    T('mettre le costume de'), SPRITE, { nom: 'VAL', libelle: T('à') }
+  ], COULEUR_SPRITES, T('Change l\'image affichée par le sprite : donnez le numéro du costume (1, 2…) ou son nom.'));
 
-  Blockly.Blocks['bs_sprite_suivant'] = instruction(() => ['costume suivant de', SPRITE],
-    COULEUR_SPRITES, 'Passe au costume suivant (après le dernier, on revient au premier). Pratique pour animer un personnage seulement quand il bouge.');
+  Blockly.Blocks['bs_sprite_suivant'] = instruction(() => [T('costume suivant de'), SPRITE],
+    COULEUR_SPRITES, T('Passe au costume suivant (après le dernier, on revient au premier). Pratique pour animer un personnage seulement quand il bouge.'));
 
   Blockly.Blocks['bs_sprite_animer'] = instruction(() => [
-    'animer', SPRITE,
-    { champ: new Blockly.FieldDropdown([['en boucle', 'boucle'], ['une fois (attendre la fin)', 'unefois']]), nom: 'MODE' }
-  ], COULEUR_SPRITES, 'Fait défiler les costumes, à la vitesse choisie dans l\'éditeur de sprite. « une fois » : du premier au dernier costume, puis le programme continue (idéal pour une explosion).');
+    T('animer'), SPRITE,
+    { champ: new Blockly.FieldDropdown([[T('en boucle'), 'boucle'], [T('une fois (attendre la fin)'), 'unefois']]), nom: 'MODE' }
+  ], COULEUR_SPRITES, T('Fait défiler les costumes, à la vitesse choisie dans l\'éditeur de sprite. « une fois » : du premier au dernier costume, puis le programme continue (idéal pour une explosion).'));
 
-  Blockly.Blocks['bs_sprite_arreter'] = instruction(() => ['arrêter l\'animation de', SPRITE],
-    COULEUR_SPRITES, 'Arrête l\'animation : le sprite garde le costume affiché à ce moment-là.');
+  Blockly.Blocks['bs_sprite_arreter'] = instruction(() => [T('arrêter l\'animation de'), SPRITE],
+    COULEUR_SPRITES, T('Arrête l\'animation : le sprite garde le costume affiché à ce moment-là.'));
 
   Blockly.Blocks['bs_sprite_regarder'] = instruction(() => [
-    'faire regarder', SPRITE,
-    { champ: new Blockly.FieldDropdown([['vers la gauche', 'gauche'], ['vers la droite', 'droite']]), nom: 'SENS' }
-  ], COULEUR_SPRITES, 'Retourne le sprite comme dans un miroir. Dessinez vos personnages tournés vers la droite : « vers la gauche » les retourne.');
+    T('faire regarder'), SPRITE,
+    { champ: new Blockly.FieldDropdown([[T('vers la gauche'), 'gauche'], [T('vers la droite'), 'droite']]), nom: 'SENS' }
+  ], COULEUR_SPRITES, T('Retourne le sprite comme dans un miroir. Dessinez vos personnages tournés vers la droite : « vers la gauche » les retourne.'));
 
   Blockly.Blocks['bs_sprite_tourner'] = instruction(() => [
-    'tourner', SPRITE, { nom: 'DEG', libelle: 'de', check: 'Number' }, 'degrés'
-  ], COULEUR_SPRITES, 'Fait pivoter le sprite (sens des aiguilles d\'une montre). Pour choisir l\'angle exact : « mettre angle de … ».');
+    T('tourner'), SPRITE, { nom: 'DEG', libelle: T('de', 'de combien'), check: 'Number' }, T('degrés')
+  ], COULEUR_SPRITES, T('Fait pivoter le sprite (sens des aiguilles d\'une montre). Pour choisir l\'angle exact : « mettre angle de … ».'));
 
   Blockly.Blocks['bs_sprite_taille'] = instruction(() => [
-    'mettre la taille de', SPRITE, { nom: 'VAL', libelle: 'à', check: 'Number' }, '%'
-  ], COULEUR_SPRITES, 'Agrandit ou rétrécit le sprite autour de son centre : 100 % = taille normale, 200 % = deux fois plus grand, 50 % = moitié.');
+    T('mettre la taille de'), SPRITE, { nom: 'VAL', libelle: T('à'), check: 'Number' }, '%'
+  ], COULEUR_SPRITES, T('Agrandit ou rétrécit le sprite autour de son centre : 100 % = taille normale, 200 % = deux fois plus grand, 50 % = moitié.'));
 
   Blockly.Blocks['bs_sprite_grandir'] = instruction(() => [
-    'changer la taille de', SPRITE, { nom: 'VAL', libelle: 'de', check: 'Number' }, '%'
-  ], COULEUR_SPRITES, 'Ajoute ce nombre à la taille (un nombre négatif rétrécit). Dans une boucle, le sprite grossit petit à petit.');
+    T('changer la taille de'), SPRITE, { nom: 'VAL', libelle: T('de', 'de combien'), check: 'Number' }, '%'
+  ], COULEUR_SPRITES, T('Ajoute ce nombre à la taille (un nombre négatif rétrécit). Dans une boucle, le sprite grossit petit à petit.'));
 
   Blockly.Blocks['bs_sprite_transparence'] = instruction(() => [
-    'mettre la transparence de', SPRITE, { nom: 'VAL', libelle: 'à', check: 'Number' }, '%'
-  ], COULEUR_SPRITES, 'Rend le sprite plus ou moins transparent : 0 % = bien visible, 50 % = à moitié transparent (un fantôme !), 100 % = invisible.');
+    T('mettre la transparence de'), SPRITE, { nom: 'VAL', libelle: T('à'), check: 'Number' }, '%'
+  ], COULEUR_SPRITES, T('Rend le sprite plus ou moins transparent : 0 % = bien visible, 50 % = à moitié transparent (un fantôme !), 100 % = invisible.'));
 
   Blockly.Blocks['bs_sprite_fondu'] = instruction(() => [
-    'faire', { champ: new Blockly.FieldDropdown([['apparaître', 'apparaitre'], ['disparaître', 'disparaitre']]), nom: 'SENS' },
-    SPRITE, { nom: 'SEC', libelle: 'en fondu pendant', check: 'Number' }, 'secondes'
-  ], COULEUR_SPRITES, 'Montre ou cache le sprite en douceur ; le programme attend la fin du fondu. « disparaître » cache le sprite à la fin (comme « visible = faux »).');
+    T('faire'), { champ: new Blockly.FieldDropdown([[T('apparaître'), 'apparaitre'], [T('disparaître'), 'disparaitre']]), nom: 'SENS' },
+    SPRITE, { nom: 'SEC', libelle: T('en fondu pendant'), check: 'Number' }, T('secondes')
+  ], COULEUR_SPRITES, T('Montre ou cache le sprite en douceur ; le programme attend la fin du fondu. « disparaître » cache le sprite à la fin (comme « visible = faux »).'));
 
   Blockly.Blocks['bs_sprite_changer'] = instruction(() => [
-    'remplacer', SPRITE, 'par le sprite', { champ: new ChampSprite(), nom: 'SPRITE' }
-  ], COULEUR_SPRITES, 'Affiche un autre sprite de la bibliothèque dans ce contrôle (en commençant par son premier costume).');
+    T('remplacer'), SPRITE, T('par le sprite'), { champ: new ChampSprite(), nom: 'SPRITE' }
+  ], COULEUR_SPRITES, T('Affiche un autre sprite de la bibliothèque dans ce contrôle (en commençant par son premier costume).'));
 
-  Blockly.Blocks['bs_sprite_numero'] = valeur(() => ['n° du costume de', SPRITE], 'Number', COULEUR_SPRITES,
-    'Le numéro du costume affiché (1 pour le premier).');
+  Blockly.Blocks['bs_sprite_numero'] = valeur(() => [T('n° du costume de'), SPRITE], 'Number', COULEUR_SPRITES,
+    T('Le numéro du costume affiché (1 pour le premier).'));
 
   // ---------- Fenêtres ----------
 
@@ -531,10 +531,10 @@
     constructor(avecPrincipale) {
       super(function () {
         const options = BlocStudio.fenetres().map(f => ['🪟 ' + f.nom, f.id]);
-        if (avecPrincipale) options.unshift(['🪟 principale', '']);
-        else if (!options.length) options.push(['(aucune autre fenêtre)', '']);
+        if (avecPrincipale) options.unshift([T('🪟 principale'), '']);
+        else if (!options.length) options.push([T('(aucune autre fenêtre)'), '']);
         const v = this.getValue();
-        if (v && !options.some(o => o[1] === v)) options.push(['(fenêtre supprimée)', v]);
+        if (v && !options.some(o => o[1] === v)) options.push([T('(fenêtre supprimée)'), v]);
         return options;
       });
     }
@@ -551,46 +551,46 @@
   Blockly.Blocks['bs_quand_fenetre'] = {
     init() {
       this.appendDummyInput()
-        .appendField('quand la fenêtre')
+        .appendField(T('quand la fenêtre'))
         .appendField(new ChampFenetre(), 'FENETRE')
-        .appendField(new Blockly.FieldDropdown([['s\'ouvre', 'ouverture'], ['se ferme', 'fermeture']]), 'QUOI');
+        .appendField(new Blockly.FieldDropdown([[T('s\'ouvre'), 'ouverture'], [T('se ferme'), 'fermeture']]), 'QUOI');
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté chaque fois que cette fenêtre s\'ouvre (pour préparer son contenu) ou se ferme (y compris avec sa croix ✕).');
+      this.setTooltip(T('Exécuté chaque fois que cette fenêtre s\'ouvre (pour préparer son contenu) ou se ferme (y compris avec sa croix ✕).'));
     }
   };
   Blockly.Blocks['bs_fenetre_ouvrir'] = instruction(() => [
-    'ouvrir la fenêtre', FENETRE(),
-    { champ: new Blockly.FieldDropdown([['sans attendre', 'normal'], ['et attendre qu\'elle soit fermée', 'attendre']]), nom: 'MODE' }
-  ], COULEUR_FENETRES, 'Affiche la fenêtre par-dessus la fenêtre principale. « et attendre qu\'elle soit fermée » : le reste du programme est bloqué et les blocs suivants attendent sa fermeture (idéal pour une fenêtre de réglages avec OK / Annuler).');
-  Blockly.Blocks['bs_fenetre_fermer'] = instruction(() => ['fermer la fenêtre', FENETRE()],
-    COULEUR_FENETRES, 'Cache la fenêtre. Ses contrôles gardent ce qu\'on y a écrit : on le retrouve si on la rouvre.');
-  Blockly.Blocks['bs_fenetre_titre'] = instruction(() => ['mettre le titre de la fenêtre', { champ: new ChampFenetre(true), nom: 'FENETRE' }, { nom: 'VAL', libelle: 'à' }],
-    COULEUR_FENETRES, 'Change le texte de la barre de titre de la fenêtre.');
-  Blockly.Blocks['bs_fenetre_ouverte'] = valeur(() => ['la fenêtre', FENETRE(), 'est ouverte ?'], 'Boolean',
-    COULEUR_FENETRES, 'Vrai si la fenêtre est affichée en ce moment.');
+    T('ouvrir la fenêtre'), FENETRE(),
+    { champ: new Blockly.FieldDropdown([[T('sans attendre'), 'normal'], [T('et attendre qu\'elle soit fermée'), 'attendre']]), nom: 'MODE' }
+  ], COULEUR_FENETRES, T('Affiche la fenêtre par-dessus la fenêtre principale. « et attendre qu\'elle soit fermée » : le reste du programme est bloqué et les blocs suivants attendent sa fermeture (idéal pour une fenêtre de réglages avec OK / Annuler).'));
+  Blockly.Blocks['bs_fenetre_fermer'] = instruction(() => [T('fermer la fenêtre'), FENETRE()],
+    COULEUR_FENETRES, T('Cache la fenêtre. Ses contrôles gardent ce qu\'on y a écrit : on le retrouve si on la rouvre.'));
+  Blockly.Blocks['bs_fenetre_titre'] = instruction(() => [T('mettre le titre de la fenêtre'), { champ: new ChampFenetre(true), nom: 'FENETRE' }, { nom: 'VAL', libelle: T('à') }],
+    COULEUR_FENETRES, T('Change le texte de la barre de titre de la fenêtre.'));
+  Blockly.Blocks['bs_fenetre_ouverte'] = valeur(() => [T('la fenêtre'), FENETRE(), T('est ouverte ?')], 'Boolean',
+    COULEUR_FENETRES, T('Vrai si la fenêtre est affichée en ce moment.'));
 
   // Taille des fenêtres (la principale comprise).
   const TOUTE_FENETRE = () => ({ champ: new ChampFenetre(true), nom: 'FENETRE' });
   Blockly.Blocks['bs_quand_fenetre_taille'] = {
     init() {
       this.appendDummyInput()
-        .appendField('quand la fenêtre')
+        .appendField(T('quand la fenêtre'))
         .appendField(new ChampFenetre(true), 'FENETRE')
-        .appendField('change de taille');
+        .appendField(T('change de taille'));
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté chaque fois que la fenêtre change de taille : quand on la tire par son bord (si elle est redimensionnable), quand on l\'agrandit, ou avec « changer la taille de la fenêtre ». Les contrôles suivent déjà leur ancrage ; ici, on peut faire le reste.');
+      this.setTooltip(T('Exécuté chaque fois que la fenêtre change de taille : quand on la tire par son bord (si elle est redimensionnable), quand on l\'agrandit, ou avec « changer la taille de la fenêtre ». Les contrôles suivent déjà leur ancrage ; ici, on peut faire le reste.'));
     }
   };
   Blockly.Blocks['bs_fenetre_changer_taille'] = instruction(() => [
-    'changer la taille de la fenêtre', TOUTE_FENETRE(), { nom: 'L', libelle: 'largeur', check: 'Number' }, { nom: 'H', libelle: 'hauteur', check: 'Number' }
-  ], COULEUR_FENETRES, 'Donne une nouvelle taille (en pixels, sans la barre de titre ni les menus) à la fenêtre. Elle ne descend pas sous sa taille minimale ; les contrôles suivent leur ancrage.');
+    T('changer la taille de la fenêtre'), TOUTE_FENETRE(), { nom: 'L', libelle: T('largeur'), check: 'Number' }, { nom: 'H', libelle: T('hauteur'), check: 'Number' }
+  ], COULEUR_FENETRES, T('Donne une nouvelle taille (en pixels, sans la barre de titre ni les menus) à la fenêtre. Elle ne descend pas sous sa taille minimale ; les contrôles suivent leur ancrage.'));
   Blockly.Blocks['bs_fenetre_dimension'] = valeur(() => [
-    { champ: new Blockly.FieldDropdown([['largeur', 'largeur'], ['hauteur', 'hauteur']]), nom: 'QUOI' }, 'de la fenêtre', TOUTE_FENETRE()
-  ], 'Number', COULEUR_FENETRES, 'La taille actuelle de la fenêtre en pixels (sans la barre de titre ni les menus).');
+    { champ: new Blockly.FieldDropdown([[T('largeur'), 'largeur'], [T('hauteur'), 'hauteur']]), nom: 'QUOI' }, T('de la fenêtre'), TOUTE_FENETRE()
+  ], 'Number', COULEUR_FENETRES, T('La taille actuelle de la fenêtre en pixels (sans la barre de titre ni les menus).'));
 
   // ---------- Mouvement ----------
 
@@ -601,71 +601,71 @@
   // Une cible : la souris, un contrôle, ou (pour « placer ») un endroit au hasard.
   function champCible(avecHasard) {
     return new Blockly.FieldDropdown(function () {
-      const options = [['🖱️ la souris', '__souris']];
-      if (avecHasard) options.unshift(['🎲 un endroit au hasard', '__hasard']);
+      const options = [[T('🖱️ la souris'), '__souris']];
+      if (avecHasard) options.unshift([T('🎲 un endroit au hasard'), '__hasard']);
       return options.concat(BlocStudio.controles().filter(c => !BlocRuntime.INVISIBLES.includes(c.type)).map(c => [c.nom, c.id]));
     });
   }
-  const DIRECTIONS = 'Direction en degrés, comme dans Scratch : 90 = vers la droite, -90 = vers la gauche, 0 = vers le haut, 180 = vers le bas.';
+  const DIRECTIONS = T('Direction en degrés, comme dans Scratch : 90 = vers la droite, -90 = vers la gauche, 0 = vers le haut, 180 = vers le bas.');
 
-  Blockly.Blocks['bs_avancer'] = instruction(() => ['avancer', BOUGE, NB('PAS', 'de'), 'pas'],
-    COULEUR_MOUVEMENT, 'Fait avancer le contrôle dans sa direction (vers la droite au départ). Un pas = un pixel.');
-  Blockly.Blocks['bs_deplacer'] = instruction(() => ['déplacer', BOUGE, NB('DX', 'de x :'), NB('DY', 'y :')],
-    COULEUR_MOUVEMENT, 'Déplace le contrôle : x positif = vers la droite, y positif = vers le bas.');
-  Blockly.Blocks['bs_placer'] = instruction(() => ['placer', BOUGE, NB('X', 'à x :'), NB('Y', 'y :')],
-    COULEUR_MOUVEMENT, 'Place le coin en haut à gauche du contrôle à cette position (0, 0 = coin en haut à gauche de la fenêtre).');
-  Blockly.Blocks['bs_placer_sur'] = instruction(() => ['placer', BOUGE, 'sur', { champ: champCible(true), nom: 'CIBLE' }],
-    COULEUR_MOUVEMENT, 'Place le contrôle au milieu de la souris ou d\'un autre contrôle, ou à un endroit au hasard dans la fenêtre.');
-  Blockly.Blocks['bs_glisser'] = instruction(() => ['glisser', BOUGE, NB('X', 'vers x :'), NB('Y', 'y :'), NB('SEC', 'en'), 'secondes'],
-    COULEUR_MOUVEMENT, 'Déplace le contrôle en douceur jusqu\'à cette position. Le programme attend qu\'il soit arrivé.');
-  Blockly.Blocks['bs_orienter'] = instruction(() => ['orienter', BOUGE, NB('DIR', 'à'), 'degrés'],
-    COULEUR_MOUVEMENT, 'Choisit la direction dans laquelle « avancer » fait aller le contrôle (son image ne tourne pas). ' + DIRECTIONS);
-  Blockly.Blocks['bs_orienter_vers'] = instruction(() => ['orienter', BOUGE, 'vers', { champ: champCible(false), nom: 'CIBLE' }],
-    COULEUR_MOUVEMENT, 'Tourne la direction du contrôle vers la souris ou vers un autre contrôle : avec « avancer », il le poursuit !');
-  Blockly.Blocks['bs_tourner_direction'] = instruction(() => ['tourner la direction de', BOUGE, NB('DEG', 'de'), 'degrés'],
-    COULEUR_MOUVEMENT, 'Change la direction (sens des aiguilles d\'une montre si le nombre est positif). ' + DIRECTIONS);
-  Blockly.Blocks['bs_rebondir'] = instruction(() => ['si', BOUGE, 'touche un bord, rebondir'],
-    COULEUR_MOUVEMENT, 'Si le contrôle sort de la fenêtre, il est remis dedans et repart dans l\'autre sens. À mettre dans une boucle, après « avancer ».');
-  Blockly.Blocks['bs_rebondir_sur'] = instruction(() => ['si', BOUGE, 'touche',
-    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, ', rebondir',
-    { champ: new Blockly.FieldDropdown([['normalement', 'normal'], ['en visant', 'viser']]), nom: 'MODE' }],
-    COULEUR_MOUVEMENT, 'S\'il touche l\'autre contrôle, il repart dans l\'autre sens (comme sur un bord) et en est ressorti. ' +
-    '« En visant » (casse-briques) : sur le dessus ou le dessous, il repart tout droit s\'il touche le milieu, et de plus en plus en biais vers les bouts. ' +
-    'À mettre dans une boucle, après « avancer ».');
-  Blockly.Blocks['bs_touche_bord'] = valeur(() => [BOUGE, 'touche un bord ?'], 'Boolean',
-    COULEUR_MOUVEMENT, 'Vrai si le contrôle touche ou dépasse un bord de la fenêtre.');
-  Blockly.Blocks['bs_distance'] = valeur(() => ['distance entre', BOUGE, 'et', { champ: champCible(false), nom: 'CIBLE' }], 'Number',
-    COULEUR_MOUVEMENT, 'Distance en pixels entre le milieu du contrôle et la souris ou le milieu d\'un autre contrôle.');
-  Blockly.Blocks['bs_direction'] = valeur(() => ['direction de', BOUGE], 'Number', COULEUR_MOUVEMENT, DIRECTIONS);
+  Blockly.Blocks['bs_avancer'] = instruction(() => [T('avancer'), BOUGE, NB('PAS', T('de', 'de combien')), T('pas', 'avancer')],
+    COULEUR_MOUVEMENT, T('Fait avancer le contrôle dans sa direction (vers la droite au départ). Un pas = un pixel.'));
+  Blockly.Blocks['bs_deplacer'] = instruction(() => [T('déplacer'), BOUGE, NB('DX', T('de x :')), NB('DY', T('y :'))],
+    COULEUR_MOUVEMENT, T('Déplace le contrôle : x positif = vers la droite, y positif = vers le bas.'));
+  Blockly.Blocks['bs_placer'] = instruction(() => [T('placer'), BOUGE, NB('X', T('à x :')), NB('Y', T('y :'))],
+    COULEUR_MOUVEMENT, T('Place le coin en haut à gauche du contrôle à cette position (0, 0 = coin en haut à gauche de la fenêtre).'));
+  Blockly.Blocks['bs_placer_sur'] = instruction(() => [T('placer'), BOUGE, T('sur'), { champ: champCible(true), nom: 'CIBLE' }],
+    COULEUR_MOUVEMENT, T('Place le contrôle au milieu de la souris ou d\'un autre contrôle, ou à un endroit au hasard dans la fenêtre.'));
+  Blockly.Blocks['bs_glisser'] = instruction(() => [T('glisser', 'mouvement'), BOUGE, NB('X', T('vers x :')), NB('Y', T('y :')), NB('SEC', T('en')), T('secondes')],
+    COULEUR_MOUVEMENT, T('Déplace le contrôle en douceur jusqu\'à cette position. Le programme attend qu\'il soit arrivé.'));
+  Blockly.Blocks['bs_orienter'] = instruction(() => [T('orienter'), BOUGE, NB('DIR', T('à')), T('degrés')],
+    COULEUR_MOUVEMENT, T('Choisit la direction dans laquelle « avancer » fait aller le contrôle (son image ne tourne pas). ') + DIRECTIONS);
+  Blockly.Blocks['bs_orienter_vers'] = instruction(() => [T('orienter'), BOUGE, T('vers'), { champ: champCible(false), nom: 'CIBLE' }],
+    COULEUR_MOUVEMENT, T('Tourne la direction du contrôle vers la souris ou vers un autre contrôle : avec « avancer », il le poursuit !'));
+  Blockly.Blocks['bs_tourner_direction'] = instruction(() => [T('tourner la direction de'), BOUGE, NB('DEG', T('de', 'de combien')), T('degrés')],
+    COULEUR_MOUVEMENT, T('Change la direction (sens des aiguilles d\'une montre si le nombre est positif). ') + DIRECTIONS);
+  Blockly.Blocks['bs_rebondir'] = instruction(() => [T('si'), BOUGE, T('touche un bord, rebondir')],
+    COULEUR_MOUVEMENT, T('Si le contrôle sort de la fenêtre, il est remis dedans et repart dans l\'autre sens. À mettre dans une boucle, après « avancer ».'));
+  Blockly.Blocks['bs_rebondir_sur'] = instruction(() => [T('si'), BOUGE, T('touche'),
+    { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, T(', rebondir'),
+    { champ: new Blockly.FieldDropdown([[T('normalement'), 'normal'], [T('en visant'), 'viser']]), nom: 'MODE' }],
+    COULEUR_MOUVEMENT, T('S\'il touche l\'autre contrôle, il repart dans l\'autre sens (comme sur un bord) et en est ressorti. ') +
+    T('« En visant » (casse-briques) : sur le dessus ou le dessous, il repart tout droit s\'il touche le milieu, et de plus en plus en biais vers les bouts. ') +
+    T('À mettre dans une boucle, après « avancer ».'));
+  Blockly.Blocks['bs_touche_bord'] = valeur(() => [BOUGE, T('touche un bord ?')], 'Boolean',
+    COULEUR_MOUVEMENT, T('Vrai si le contrôle touche ou dépasse un bord de la fenêtre.'));
+  Blockly.Blocks['bs_distance'] = valeur(() => [T('distance entre'), BOUGE, T('et'), { champ: champCible(false), nom: 'CIBLE' }], 'Number',
+    COULEUR_MOUVEMENT, T('Distance en pixels entre le milieu du contrôle et la souris ou le milieu d\'un autre contrôle.'));
+  Blockly.Blocks['bs_direction'] = valeur(() => [T('direction de'), BOUGE], 'Number', COULEUR_MOUVEMENT, DIRECTIONS);
 
   // Gravité et saut (jeux de plateforme) : les contrôles « solides » font le sol, les plateformes et les murs.
-  const SOLIDE = 'Cochez « Solide » dans les propriétés du sol, des plateformes et des murs (ou « mettre solide de … à vrai »).';
-  Blockly.Blocks['bs_gravite'] = instruction(() => ['faire tomber', BOUGE, NB('FORCE', 'avec une gravité de'),
-    { champ: new Blockly.FieldDropdown([['jusqu\'au bas de la fenêtre', 'bas'], ['et le laisser sortir par le bas', 'vide']]), nom: 'FOND' }],
-    COULEUR_MOUVEMENT, 'À mettre dans une boucle (« répéter indéfiniment » avec « attendre 0.02 secondes ») : le contrôle tombe de plus en plus vite, ' +
-    'se pose sur ce qui est solide, s\'y cogne la tête en sautant et ne traverse pas les murs. ' + SOLIDE + ' Gravité : 1 = normale, 0.5 = sur la Lune.');
-  Blockly.Blocks['bs_sauter'] = instruction(() => ['faire sauter', BOUGE, NB('FORCE', 'avec une force de')],
-    COULEUR_MOUVEMENT, 'Le contrôle s\'élance vers le haut, puis « faire tomber » le fait redescendre. Seulement s\'il est posé sur le sol (pas de saut en plein vol). ' +
-    'Force 12 : un saut moyen ; plus grand = plus haut.');
-  Blockly.Blocks['bs_au_sol'] = valeur(() => [BOUGE, 'est posé sur le sol ?'], 'Boolean',
-    COULEUR_MOUVEMENT, 'Vrai si, au dernier « faire tomber », le contrôle s\'est posé sur quelque chose de solide (ou sur le bas de la fenêtre). ' +
-    'Pratique pour changer de costume : en l\'air, il saute ; au sol, il marche.');
+  const SOLIDE = T('Cochez « Solide » dans les propriétés du sol, des plateformes et des murs (ou « mettre solide de … à vrai »).');
+  Blockly.Blocks['bs_gravite'] = instruction(() => [T('faire tomber'), BOUGE, NB('FORCE', T('avec une gravité de')),
+    { champ: new Blockly.FieldDropdown([[T('jusqu\'au bas de la fenêtre'), 'bas'], [T('et le laisser sortir par le bas'), 'vide']]), nom: 'FOND' }],
+    COULEUR_MOUVEMENT, T('À mettre dans une boucle (« répéter indéfiniment » avec « attendre 0.02 secondes ») : le contrôle tombe de plus en plus vite, ') +
+    T('se pose sur ce qui est solide, s\'y cogne la tête en sautant et ne traverse pas les murs. ') + SOLIDE + T(' Gravité : 1 = normale, 0.5 = sur la Lune.'));
+  Blockly.Blocks['bs_sauter'] = instruction(() => [T('faire sauter'), BOUGE, NB('FORCE', T('avec une force de'))],
+    COULEUR_MOUVEMENT, T('Le contrôle s\'élance vers le haut, puis « faire tomber » le fait redescendre. Seulement s\'il est posé sur le sol (pas de saut en plein vol). ') +
+    T('Force 12 : un saut moyen ; plus grand = plus haut.'));
+  Blockly.Blocks['bs_au_sol'] = valeur(() => [BOUGE, T('est posé sur le sol ?')], 'Boolean',
+    COULEUR_MOUVEMENT, T('Vrai si, au dernier « faire tomber », le contrôle s\'est posé sur quelque chose de solide (ou sur le bas de la fenêtre). ') +
+    T('Pratique pour changer de costume : en l\'air, il saute ; au sol, il marche.'));
 
-  Blockly.Blocks['bs_image_defiler'] = instruction(() => ['faire défiler l\'image de', { ctrl: ['image'] }, NB('DX', 'de x :'), NB('DY', 'y :')],
-    COULEUR_MOUVEMENT, 'Un fond qui défile sans fin, pour un jeu de course ou de vaisseau : l\'image glisse dans son cadre et se répète. ' +
-    'À mettre dans une boucle (avec « attendre 0.02 secondes ») : x négatif = vers la gauche, y positif = vers le bas. ' +
-    'Le contrôle, lui, ne bouge pas. Astuce : une image « Étirée » qui remplit toute la fenêtre.');
+  Blockly.Blocks['bs_image_defiler'] = instruction(() => [T('faire défiler l\'image de'), { ctrl: ['image'] }, NB('DX', T('de x :')), NB('DY', T('y :'))],
+    COULEUR_MOUVEMENT, T('Un fond qui défile sans fin, pour un jeu de course ou de vaisseau : l\'image glisse dans son cadre et se répète. ') +
+    T('À mettre dans une boucle (avec « attendre 0.02 secondes ») : x négatif = vers la gauche, y positif = vers le bas. ') +
+    T('Le contrôle, lui, ne bouge pas. Astuce : une image « Étirée » qui remplit toute la fenêtre.'));
 
   // ---------- Score et vies ----------
 
   Blockly.Blocks['bs_compteur_ajouter'] = instruction(() => [
-    { nom: 'VAL', libelle: 'ajouter', check: 'Number' }, 'au nombre de', { ctrl: null, moi: true }
-  ], COULEUR_CONTROLES, 'Pour un score, des vies, un niveau… Ajoute ce nombre (négatif pour enlever) au nombre écrit dans le contrôle : ' +
-    'une étiquette « Score : 10 » devient « Score : 11 », le reste du texte ne change pas. ' +
-    'Pour une barre de progression, un curseur ou un sélecteur de nombre : à sa valeur (une barre de vie !).');
-  Blockly.Blocks['bs_compteur_valeur'] = valeur(() => ['nombre affiché par', { ctrl: null, moi: true }], 'Number',
-    COULEUR_CONTROLES, 'Le nombre écrit dans le contrôle (12 pour « Score : 12 ») ; s\'il y en a plusieurs, le dernier. ' +
-    'Pour une barre de progression, un curseur ou un sélecteur de nombre : sa valeur.');
+    { nom: 'VAL', libelle: T('ajouter'), check: 'Number' }, T('au nombre de'), { ctrl: null, moi: true }
+  ], COULEUR_CONTROLES, T('Pour un score, des vies, un niveau… Ajoute ce nombre (négatif pour enlever) au nombre écrit dans le contrôle : ') +
+    T('une étiquette « Score : 10 » devient « Score : 11 », le reste du texte ne change pas. ') +
+    T('Pour une barre de progression, un curseur ou un sélecteur de nombre : à sa valeur (une barre de vie !).'));
+  Blockly.Blocks['bs_compteur_valeur'] = valeur(() => [T('nombre affiché par'), { ctrl: null, moi: true }], 'Number',
+    COULEUR_CONTROLES, T('Le nombre écrit dans le contrôle (12 pour « Score : 12 ») ; s\'il y en a plusieurs, le dernier. ') +
+    T('Pour une barre de progression, un curseur ou un sélecteur de nombre : sa valeur.'));
 
   // ---------- Clones ----------
 
@@ -673,40 +673,40 @@
 
   Blockly.Blocks['bs_quand_clone'] = {
     init() {
-      evenement(this, 'quand un clone de', CLONABLES, 'est créé');
-      this.setTooltip('Exécuté pour chaque nouveau clone. Dans ces blocs, choisissez « 👉 moi » pour parler du clone lui-même (le placer, le faire avancer, le supprimer…).');
+      evenement(this, T('quand un clone de'), CLONABLES, T('est créé'));
+      this.setTooltip(T('Exécuté pour chaque nouveau clone. Dans ces blocs, choisissez « 👉 moi » pour parler du clone lui-même (le placer, le faire avancer, le supprimer…).'));
     }
   };
-  Blockly.Blocks['bs_creer_clone'] = instruction(() => ['créer un clone de', { ctrl: CLONABLES, moi: true }],
-    COULEUR_SPRITES, 'Crée une copie du contrôle, à la même place et avec la même apparence. Les clones réagissent aux mêmes événements que l\'original (« quand … est cliqué »…). Astuce : cachez l\'original et montrez chaque clone.');
-  Blockly.Blocks['bs_supprimer_clone'] = instruction(() => ['supprimer ce clone'],
-    COULEUR_SPRITES, 'Fait disparaître le clone (« moi ») et arrête ses blocs. À utiliser dans « quand un clone de … est créé ». Sans effet sur l\'original.');
-  Blockly.Blocks['bs_supprimer_clones'] = instruction(() => ['supprimer tous les clones de', { ctrl: CLONABLES }],
-    COULEUR_SPRITES, 'Fait disparaître tous les clones de ce contrôle (par exemple pour recommencer une partie).');
-  Blockly.Blocks['bs_nombre_clones'] = valeur(() => ['nombre de clones de', { ctrl: CLONABLES }], 'Number',
-    COULEUR_SPRITES, 'Combien de clones de ce contrôle existent en ce moment.');
+  Blockly.Blocks['bs_creer_clone'] = instruction(() => [T('créer un clone de'), { ctrl: CLONABLES, moi: true }],
+    COULEUR_SPRITES, T('Crée une copie du contrôle, à la même place et avec la même apparence. Les clones réagissent aux mêmes événements que l\'original (« quand … est cliqué »…). Astuce : cachez l\'original et montrez chaque clone.'));
+  Blockly.Blocks['bs_supprimer_clone'] = instruction(() => [T('supprimer ce clone')],
+    COULEUR_SPRITES, T('Fait disparaître le clone (« moi ») et arrête ses blocs. À utiliser dans « quand un clone de … est créé ». Sans effet sur l\'original.'));
+  Blockly.Blocks['bs_supprimer_clones'] = instruction(() => [T('supprimer tous les clones de'), { ctrl: CLONABLES }],
+    COULEUR_SPRITES, T('Fait disparaître tous les clones de ce contrôle (par exemple pour recommencer une partie).'));
+  Blockly.Blocks['bs_nombre_clones'] = valeur(() => [T('nombre de clones de'), { ctrl: CLONABLES }], 'Number',
+    COULEUR_SPRITES, T('Combien de clones de ce contrôle existent en ce moment.'));
 
   // ---------- Temps ----------
 
   Blockly.Blocks['bs_attendre'] = {
     init() {
-      this.appendValueInput('SEC').setCheck('Number').appendField('attendre');
-      this.appendDummyInput().appendField('secondes');
+      this.appendValueInput('SEC').setCheck('Number').appendField(T('attendre'));
+      this.appendDummyInput().appendField(T('secondes'));
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setStyle('loop_blocks');
-      this.setTooltip('Met le programme en pause. On peut écrire 0.5 pour une demi-seconde.');
+      this.setTooltip(T('Met le programme en pause. On peut écrire 0.5 pour une demi-seconde.'));
     }
   };
 
   Blockly.Blocks['bs_toujours'] = {
     init() {
-      this.appendDummyInput().appendField('répéter indéfiniment');
+      this.appendDummyInput().appendField(T('répéter indéfiniment'));
       this.appendStatementInput('DO');
       this.setPreviousStatement(true);
       this.setStyle('loop_blocks');
-      this.setTooltip('Répète les blocs sans jamais s\'arrêter (jusqu\'à la fermeture du programme). Idéal pour les animations, avec un bloc « attendre ».');
+      this.setTooltip(T('Répète les blocs sans jamais s\'arrêter (jusqu\'à la fermeture du programme). Idéal pour les animations, avec un bloc « attendre ».'));
     }
   };
 
@@ -717,41 +717,41 @@
 
   Blockly.Blocks['bs_liste_ajouter'] = {
     init() {
-      this.appendValueInput('VAL').appendField('ajouter');
-      this.appendDummyInput().appendField('à la liste').appendField(champCtrl(LISTES), 'CTRL');
+      this.appendValueInput('VAL').appendField(T('ajouter'));
+      this.appendDummyInput().appendField(T('à la liste')).appendField(champCtrl(LISTES), 'CTRL');
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip('Ajoute un élément à la fin d\'une liste (déroulante ou zone de liste).');
+      this.setTooltip(T('Ajoute un élément à la fin d\'une liste (déroulante ou zone de liste).'));
     }
   };
 
   Blockly.Blocks['bs_liste_vider'] = {
     init() {
-      this.appendDummyInput().appendField('vider la liste').appendField(champCtrl(LISTES), 'CTRL');
+      this.appendDummyInput().appendField(T('vider la liste')).appendField(champCtrl(LISTES), 'CTRL');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip('Retire tous les éléments d\'une liste.');
+      this.setTooltip(T('Retire tous les éléments d\'une liste.'));
     }
   };
 
   // Contrôles qui peuvent recevoir le curseur clavier.
   const FOCUSABLES = ['zonetexte', 'bouton', 'listederoulante', 'zoneliste', 'selecteurnombre', 'curseur', 'date', 'heure',
     'casecocher', 'boutonradio', 'interrupteur', 'selecteurcouleur'];
-  Blockly.Blocks['bs_focus'] = instruction(() => ['placer le curseur clavier dans', { ctrl: FOCUSABLES }], COULEUR_CONTROLES,
-    'Le clavier écrit désormais dans ce contrôle, sans avoir à cliquer dedans : pratique pour une zone de texte au démarrage, ou après « Effacer ». Pour un bouton, Entrée ou Espace le clique.');
+  Blockly.Blocks['bs_focus'] = instruction(() => [T('placer le curseur clavier dans'), { ctrl: FOCUSABLES }], COULEUR_CONTROLES,
+    T('Le clavier écrit désormais dans ce contrôle, sans avoir à cliquer dedans : pratique pour une zone de texte au démarrage, ou après « Effacer ». Pour un bouton, Entrée ou Espace le clique.'));
 
   Blockly.Blocks['bs_liste_retirer'] = {
     init() {
-      this.appendValueInput('NUM').setCheck('Number').appendField('retirer l\'élément n°');
-      this.appendDummyInput().appendField('de la liste').appendField(champCtrl(LISTES), 'CTRL');
+      this.appendValueInput('NUM').setCheck('Number').appendField(T('retirer l\'élément n°'));
+      this.appendDummyInput().appendField(T('de la liste')).appendField(champCtrl(LISTES), 'CTRL');
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip('Retire un élément d\'une liste. Astuce : utilisez « numéro choisi » pour retirer l\'élément sélectionné.');
+      this.setTooltip(T('Retire un élément d\'une liste. Astuce : utilisez « numéro choisi » pour retirer l\'élément sélectionné.'));
     }
   };
 
@@ -761,17 +761,17 @@
     const groupes = [...new Set(BlocStudio.controles()
       .filter(c => c.type === 'boutonradio')
       .map(c => c.groupe || 'groupe1'))];
-    return groupes.length ? groupes.map(g => [g, g]) : [['(aucun groupe)', '']];
+    return groupes.length ? groupes.map(g => [g, g]) : [[T('(aucun groupe)'), '']];
   }
 
   Blockly.Blocks['bs_radio_groupe'] = {
     init() {
       this.appendDummyInput()
-        .appendField('choix sélectionné du groupe')
+        .appendField(T('choix sélectionné du groupe'))
         .appendField(new Blockly.FieldDropdown(optionsGroupes), 'GROUPE');
       this.setOutput(true, 'String');
       this.setColour(COULEUR_CONTROLES);
-      this.setTooltip('Donne le texte du bouton radio sélectionné dans ce groupe (vide si aucun).');
+      this.setTooltip(T('Donne le texte du bouton radio sélectionné dans ce groupe (vide si aucun).'));
     }
   };
 
@@ -815,52 +815,52 @@
   const COULEUR_FICHIERS = '#a16207'; // comme la catégorie Mémoire, où ces blocs sont rangés
   const FICHIER = { ctrl: ['fichier'] };
 
-  Blockly.Blocks['bs_fichier_ouvrir_avec'] = instruction(() => ['ouvrir un fichier avec', FICHIER], COULEUR_FICHIERS,
-    'Montre la fenêtre « Ouvrir » de Windows ; le programme attend le choix. Ensuite : « contenu du fichier » (un texte, une image pour un contrôle Image, ou un son pour un contrôle Son), « nom du fichier », ou « annulé ? » si l\'utilisateur a fermé la fenêtre sans choisir.');
+  Blockly.Blocks['bs_fichier_ouvrir_avec'] = instruction(() => [T('ouvrir un fichier avec'), FICHIER], COULEUR_FICHIERS,
+    T('Montre la fenêtre « Ouvrir » de Windows ; le programme attend le choix. Ensuite : « contenu du fichier » (un texte, une image pour un contrôle Image, ou un son pour un contrôle Son), « nom du fichier », ou « annulé ? » si l\'utilisateur a fermé la fenêtre sans choisir.'));
 
   Blockly.Blocks['bs_fichier_enregistrer_avec'] = instruction(() => [
-    { nom: 'VAL', libelle: 'enregistrer le texte' }, 'avec', FICHIER
-  ], COULEUR_FICHIERS, 'Montre la fenêtre « Enregistrer sous » de Windows, avec le nom proposé dans les propriétés du contrôle (ou celui du fichier ouvert).');
+    { nom: 'VAL', libelle: T('enregistrer le texte') }, T('avec'), FICHIER
+  ], COULEUR_FICHIERS, T('Montre la fenêtre « Enregistrer sous » de Windows, avec le nom proposé dans les propriétés du contrôle (ou celui du fichier ouvert).'));
 
   Blockly.Blocks['bs_fichier_ouvrir_dans'] = instruction(() => [
-    'ouvrir avec', FICHIER, 'un fichier dans', { ctrl: ['tableau', 'basedonnees', 'image', 'zonedessin', 'son'], nom: 'CIBLE' }
-  ], COULEUR_FICHIERS, 'Raccourci : un fichier CSV ou un classeur Excel (.xlsx, sa première feuille) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin ; un son (MP3, WAV…) va dans un contrôle Son, prêt à jouer.');
+    T('ouvrir avec'), FICHIER, T('un fichier dans'), { ctrl: ['tableau', 'basedonnees', 'image', 'zonedessin', 'son'], nom: 'CIBLE' }
+  ], COULEUR_FICHIERS, T('Raccourci : un fichier CSV ou un classeur Excel (.xlsx, sa première feuille) remplit un tableau ou une base de données ; une image s\'affiche dans un contrôle Image ou une zone de dessin ; un son (MP3, WAV…) va dans un contrôle Son, prêt à jouer.'));
 
   Blockly.Blocks['bs_fichier_enregistrer_de'] = instruction(() => [
-    'enregistrer', { ctrl: ['tableau', 'basedonnees', 'zonedessin', 'camera'], nom: 'CIBLE' }, 'dans un fichier avec', FICHIER
-  ], COULEUR_FICHIERS, 'Raccourci : un tableau ou une base de données devient un fichier CSV, ou un classeur Excel (.xlsx) si le contrôle Fichier est réglé sur « Classeur Excel » ; une zone de dessin ou la dernière photo d\'une caméra une image PNG.');
+    T('enregistrer'), { ctrl: ['tableau', 'basedonnees', 'zonedessin', 'camera'], nom: 'CIBLE' }, T('dans un fichier avec'), FICHIER
+  ], COULEUR_FICHIERS, T('Raccourci : un tableau ou une base de données devient un fichier CSV, ou un classeur Excel (.xlsx) si le contrôle Fichier est réglé sur « Classeur Excel » ; une zone de dessin ou la dernière photo d\'une caméra une image PNG.'));
 
   // ---------- Caméra ----------
 
   const CAMERA = { ctrl: ['camera'] };
 
   Blockly.Blocks['bs_camera_ctrl'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['allumer', 'allumer'], ['éteindre', 'eteindre']]), nom: 'ACTION' },
-    'la caméra', CAMERA
-  ], COULEUR_CONTROLES, 'Allume ou éteint la webcam. La première fois, Windows (ou le navigateur) demande la permission. Par défaut, la caméra s\'allume toute seule au démarrage (voir ses propriétés).');
+    { champ: new Blockly.FieldDropdown([[T('allumer'), 'allumer'], [T('éteindre'), 'eteindre']]), nom: 'ACTION' },
+    T('la caméra'), CAMERA
+  ], COULEUR_CONTROLES, T('Allume ou éteint la webcam. La première fois, Windows (ou le navigateur) demande la permission. Par défaut, la caméra s\'allume toute seule au démarrage (voir ses propriétés).'));
 
-  Blockly.Blocks['bs_camera_photo'] = instruction(() => ['prendre une photo avec', CAMERA], COULEUR_CONTROLES,
-    'Garde l\'image que la caméra voit en ce moment, cadrée comme à l\'écran. Ensuite : « mettre la photo de… dans… », ou « enregistrer … dans un fichier » avec un contrôle Fichier.');
+  Blockly.Blocks['bs_camera_photo'] = instruction(() => [T('prendre une photo avec'), CAMERA], COULEUR_CONTROLES,
+    T('Garde l\'image que la caméra voit en ce moment, cadrée comme à l\'écran. Ensuite : « mettre la photo de… dans… », ou « enregistrer … dans un fichier » avec un contrôle Fichier.'));
 
   Blockly.Blocks['bs_camera_photo_dans'] = instruction(() => [
-    'mettre la photo de', CAMERA, 'dans', { ctrl: ['image', 'zonedessin'], nom: 'CIBLE' }
-  ], COULEUR_CONTROLES, 'Affiche la dernière photo dans un contrôle Image, ou la dessine dans une zone de dessin (on peut ensuite dessiner par-dessus).');
+    T('mettre la photo de'), CAMERA, T('dans'), { ctrl: ['image', 'zonedessin'], nom: 'CIBLE' }
+  ], COULEUR_CONTROLES, T('Affiche la dernière photo dans un contrôle Image, ou la dessine dans une zone de dessin (on peut ensuite dessiner par-dessus).'));
 
-  Blockly.Blocks['bs_fichier_contenu'] = valeur(() => ['contenu du fichier de', FICHIER], null, COULEUR_FICHIERS,
-    'Le texte du dernier fichier ouvert ou déposé (pour le type « Image » : l\'image, à mettre dans un contrôle Image).');
+  Blockly.Blocks['bs_fichier_contenu'] = valeur(() => [T('contenu du fichier de'), FICHIER], null, COULEUR_FICHIERS,
+    T('Le texte du dernier fichier ouvert ou déposé (pour le type « Image » : l\'image, à mettre dans un contrôle Image).'));
 
-  Blockly.Blocks['bs_fichier_nom'] = valeur(() => ['nom du fichier de', FICHIER], 'String', COULEUR_FICHIERS,
-    'Le nom du dernier fichier ouvert, enregistré ou déposé (par exemple « mes notes.txt »).');
+  Blockly.Blocks['bs_fichier_nom'] = valeur(() => [T('nom du fichier de'), FICHIER], 'String', COULEUR_FICHIERS,
+    T('Le nom du dernier fichier ouvert, enregistré ou déposé (par exemple « mes notes.txt »).'));
 
-  Blockly.Blocks['bs_fichier_annule'] = valeur(() => [FICHIER, ': annulé par l\'utilisateur ?'], 'Boolean', COULEUR_FICHIERS,
-    'Vrai si, la dernière fois, l\'utilisateur a fermé la fenêtre « Ouvrir » ou « Enregistrer sous » sans choisir de fichier.');
+  Blockly.Blocks['bs_fichier_annule'] = valeur(() => [FICHIER, T(': annulé par l\'utilisateur ?')], 'Boolean', COULEUR_FICHIERS,
+    T('Vrai si, la dernière fois, l\'utilisateur a fermé la fenêtre « Ouvrir » ou « Enregistrer sous » sans choisir de fichier.'));
 
   // ---------- Base de données ----------
 
   const COULEUR_BASE = '#b45309';
   const BASE = { ctrl: ['basedonnees'] };
   const champsDeBase = id => (BlocStudio.controles().find(c => c.id === id && c.type === 'basedonnees') || {}).champs || [];
-  const OPERATIONS = [['=', 'egal'], ['≠', 'different'], ['contient', 'contient'], ['commence par', 'commence'],
+  const OPERATIONS = [['=', 'egal'], ['≠', 'different'], [T('contient'), 'contient'], [T('commence par'), 'commence'],
     ['<', 'inferieur'], ['>', 'superieur'], ['≤', 'infegal'], ['≥', 'supegal']];
 
   // Liste des champs de la base choisie dans le même bloc. Accepte tout nom
@@ -872,7 +872,7 @@
         const options = (bloc ? champsDeBase(bloc.getFieldValue('CTRL')) : []).map(c => [c, c]);
         const v = this.getValue();
         if (v && !options.some(o => o[1] === v)) options.push([v, v]);
-        return options.length ? options : [['(aucun champ)', '']];
+        return options.length ? options : [[T('(aucun champ)'), '']];
       });
     }
     doClassValidation_(v) { return typeof v === 'string' ? v : null; }
@@ -911,7 +911,7 @@
   // « ajouter une fiche » : une entrée par champ de la base choisie.
   Blockly.Blocks['bs_base_ajouter'] = {
     init() {
-      this.appendDummyInput('TETE').appendField('ajouter une fiche à')
+      this.appendDummyInput('TETE').appendField(T('ajouter une fiche à'))
         .appendField(new Blockly.FieldDropdown(optionsControles(['basedonnees']), id => {
           this.majChamps(champsDeBase(id));
           return id;
@@ -920,7 +920,7 @@
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_BASE);
-      this.setTooltip('Ajoute une fiche à la fin de la base : une valeur pour chaque champ (un champ laissé vide reste vide).');
+      this.setTooltip(T('Ajoute une fiche à la fin de la base : une valeur pour chaque champ (un champ laissé vide reste vide).'));
       this.majChamps(champsDeBase(this.getFieldValue('CTRL')));
     },
     saveExtraState() { return { champs: this.champs.slice() }; },
@@ -947,53 +947,53 @@
   };
 
   Blockly.Blocks['bs_base_modifier'] = instructionBase(() => [
-    'dans', BASE, 'mettre le champ', CHAMP(), { nom: 'N', libelle: 'de la fiche n°', check: 'Number' }, { nom: 'VAL', libelle: 'à' }
-  ], 'Change une valeur d\'une fiche. Le n° de fiche vient par exemple de « n° de la fiche choisie dans Tableau » ou d\'une recherche.');
+    T('dans'), BASE, T('mettre le champ'), CHAMP(), { nom: 'N', libelle: T('de la fiche n°'), check: 'Number' }, { nom: 'VAL', libelle: T('à') }
+  ], T('Change une valeur d\'une fiche. Le n° de fiche vient par exemple de « n° de la fiche choisie dans Tableau » ou d\'une recherche.'));
 
   Blockly.Blocks['bs_base_supprimer'] = instructionBase(() => [
-    { nom: 'N', libelle: 'supprimer la fiche n°', check: 'Number' }, 'de', BASE
-  ], 'Enlève une fiche de la base. Les fiches suivantes prennent un numéro de moins.');
+    { nom: 'N', libelle: T('supprimer la fiche n°'), check: 'Number' }, T('de'), BASE
+  ], T('Enlève une fiche de la base. Les fiches suivantes prennent un numéro de moins.'));
 
-  Blockly.Blocks['bs_base_vider'] = instructionBase(() => ['effacer toutes les fiches de', BASE],
-    'Enlève toutes les fiches de la base (attention : elles sont perdues).');
+  Blockly.Blocks['bs_base_vider'] = instructionBase(() => [T('effacer toutes les fiches de'), BASE],
+    T('Enlève toutes les fiches de la base (attention : elles sont perdues).'));
 
   Blockly.Blocks['bs_base_trier'] = instructionBase(() => [
-    'trier', BASE, 'par', CHAMP(),
-    { champ: new Blockly.FieldDropdown([['croissant (A → Z, 1 → 9)', 'croissant'], ['décroissant (Z → A, 9 → 1)', 'decroissant']]), nom: 'SENS' }
-  ], 'Range les fiches de la base selon un champ. Les numéros des fiches changent.');
+    T('trier'), BASE, T('par'), CHAMP(),
+    { champ: new Blockly.FieldDropdown([[T('croissant (A → Z, 1 → 9)'), 'croissant'], [T('décroissant (Z → A, 9 → 1)'), 'decroissant']]), nom: 'SENS' }
+  ], T('Range les fiches de la base selon un champ. Les numéros des fiches changent.'));
 
   Blockly.Blocks['bs_base_afficher'] = instructionBase(() => [
-    'afficher les fiches de', BASE, 'dans le tableau', { ctrl: ['tableau'], nom: 'TAB' },
-    { nom: 'NUMS', libelle: 'seulement les n° (liste, facultatif)' }
-  ], 'Montre les fiches dans un Tableau, avec un titre de colonne par champ. Sans liste de n°, le tableau montre toutes les fiches et se met à jour tout seul. Avec une liste (le résultat d\'une recherche), il ne montre que ces fiches.');
+    T('afficher les fiches de'), BASE, T('dans le tableau'), { ctrl: ['tableau'], nom: 'TAB' },
+    { nom: 'NUMS', libelle: T('seulement les n° (liste, facultatif)') }
+  ], T('Montre les fiches dans un Tableau, avec un titre de colonne par champ. Sans liste de n°, le tableau montre toutes les fiches et se met à jour tout seul. Avec une liste (le résultat d\'une recherche), il ne montre que ces fiches.'));
 
   Blockly.Blocks['bs_base_remplir'] = instructionBase(() => [
-    'remplir', BASE, { nom: 'VAL', libelle: 'avec le texte CSV' }
-  ], 'Remplace toutes les fiches par celles d\'un texte CSV (une fiche par ligne, valeurs séparées par ;). Avec « texte d\'un fichier choisi », on peut importer un fichier Excel enregistré en CSV.');
+    T('remplir'), BASE, { nom: 'VAL', libelle: T('avec le texte CSV') }
+  ], T('Remplace toutes les fiches par celles d\'un texte CSV (une fiche par ligne, valeurs séparées par ;). Avec « texte d\'un fichier choisi », on peut importer un fichier Excel enregistré en CSV.'));
 
   Blockly.Blocks['bs_base_champ'] = valeurBase(() => [
-    CHAMP(), { nom: 'N', libelle: 'de la fiche n°', check: 'Number' }, 'de', BASE
-  ], null, 'La valeur d\'un champ d\'une fiche.');
+    CHAMP(), { nom: 'N', libelle: T('de la fiche n°'), check: 'Number' }, T('de'), BASE
+  ], null, T('La valeur d\'un champ d\'une fiche.'));
 
-  Blockly.Blocks['bs_base_nombre'] = valeurBase(() => ['nombre de fiches de', BASE], 'Number',
-    'Combien de fiches contient la base.');
+  Blockly.Blocks['bs_base_nombre'] = valeurBase(() => [T('nombre de fiches de'), BASE], 'Number',
+    T('Combien de fiches contient la base.'));
 
   Blockly.Blocks['bs_base_chercher'] = valeurBase(() => [
-    'n° des fiches de', BASE, 'où', CHAMP(), OPERATION(), { nom: 'VAL', libelle: '' }
-  ], 'Array', 'Cherche les fiches qui correspondent : donne la liste de leurs numéros (vide si aucune). Les majuscules et les accents ne comptent pas. Pour les montrer : « afficher … seulement les n° ».');
+    T('n° des fiches de'), BASE, T('où'), CHAMP(), OPERATION(), { nom: 'VAL', libelle: '' }
+  ], 'Array', T('Cherche les fiches qui correspondent : donne la liste de leurs numéros (vide si aucune). Les majuscules et les accents ne comptent pas. Pour les montrer : « afficher … seulement les n° ».'));
 
   Blockly.Blocks['bs_base_premiere'] = valeurBase(() => [
-    'n° de la première fiche de', BASE, 'où', CHAMP(), OPERATION(), { nom: 'VAL', libelle: '' }
-  ], 'Number', 'Le numéro de la première fiche qui correspond, ou 0 s\'il n\'y en a aucune.');
+    T('n° de la première fiche de'), BASE, T('où'), CHAMP(), OPERATION(), { nom: 'VAL', libelle: '' }
+  ], 'Number', T('Le numéro de la première fiche qui correspond, ou 0 s\'il n\'y en a aucune.'));
 
-  Blockly.Blocks['bs_base_colonne'] = valeurBase(() => ['toutes les valeurs du champ', CHAMP(), 'de', BASE], 'Array',
-    'La liste des valeurs d\'un champ, fiche par fiche. Avec les blocs de Maths (« somme », « moyenne » d\'une liste), on calcule des totaux.');
+  Blockly.Blocks['bs_base_colonne'] = valeurBase(() => [T('toutes les valeurs du champ'), CHAMP(), T('de'), BASE], 'Array',
+    T('La liste des valeurs d\'un champ, fiche par fiche. Avec les blocs de Maths (« somme », « moyenne » d\'une liste), on calcule des totaux.'));
 
-  Blockly.Blocks['bs_base_csv'] = valeurBase(() => ['contenu de', BASE, 'en texte (CSV)'], 'String',
-    'Toutes les fiches en texte CSV (la première ligne donne les champs) : à enregistrer dans un fichier, lisible par Excel.');
+  Blockly.Blocks['bs_base_csv'] = valeurBase(() => [T('contenu de'), BASE, T('en texte (CSV)')], 'String',
+    T('Toutes les fiches en texte CSV (la première ligne donne les champs) : à enregistrer dans un fichier, lisible par Excel.'));
 
-  Blockly.Blocks['bs_base_choisie'] = valeur(() => ['n° de la fiche choisie dans', { ctrl: ['tableau'] }], 'Number',
-    COULEUR_BASE, 'Le numéro (dans la base) de la fiche sur laquelle on a cliqué dans le tableau, ou 0 si aucune ligne n\'est choisie.');
+  Blockly.Blocks['bs_base_choisie'] = valeur(() => [T('n° de la fiche choisie dans'), { ctrl: ['tableau'] }], 'Number',
+    COULEUR_BASE, T('Le numéro (dans la base) de la fiche sur laquelle on a cliqué dans le tableau, ou 0 si aucune ligne n\'est choisie.'));
 
   // Après un changement des champs d'une base dans l'éditeur.
   window.BlocStudioBases = {
@@ -1006,7 +1006,7 @@
 
   function optionsMenus() {
     const chemins = BlocRuntime.cheminsMenus(BlocStudio.fenetre().menus);
-    return chemins.length ? chemins.map(c => [c, c]) : [['(aucun menu)', '']];
+    return chemins.length ? chemins.map(c => [c, c]) : [[T('(aucun menu)'), '']];
   }
 
   // Accepte tout chemin : un menu renommé reste visible (« introuvable ») au lieu d'être perdu.
@@ -1015,7 +1015,7 @@
       super(function () {
         const options = optionsMenus();
         const v = this.getValue();
-        if (v && !options.some(o => o[1] === v)) options.push([v + ' (introuvable)', v]);
+        if (v && !options.some(o => o[1] === v)) options.push([v + T(' (introuvable)'), v]);
         return options;
       });
     }
@@ -1030,18 +1030,18 @@
 
   Blockly.Blocks['bs_quand_menu'] = {
     init() {
-      this.appendDummyInput().appendField('quand on choisit le menu').appendField(new ChampMenu(), 'MENU');
+      this.appendDummyInput().appendField(T('quand on choisit le menu')).appendField(new ChampMenu(), 'MENU');
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté quand on choisit cet élément dans la barre de menus. Les menus se créent dans les propriétés de la fenêtre.');
+      this.setTooltip(T('Exécuté quand on choisit cet élément dans la barre de menus. Les menus se créent dans les propriétés de la fenêtre.'));
     }
   };
 
   Blockly.Blocks['bs_menu_actif'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['activer', 'TRUE'], ['désactiver', 'FALSE']]), nom: 'ACTIF' },
-    'le menu', { champ: new ChampMenu(), nom: 'MENU' }
-  ], COULEUR_CONTROLES, 'Un menu désactivé est grisé : on ne peut plus le choisir.');
+    { champ: new Blockly.FieldDropdown([[T('activer'), 'TRUE'], [T('désactiver'), 'FALSE']]), nom: 'ACTIF' },
+    T('le menu'), { champ: new ChampMenu(), nom: 'MENU' }
+  ], COULEUR_CONTROLES, T('Un menu désactivé est grisé : on ne peut plus le choisir.'));
 
   // ---------- Menus contextuels et barres d'outils ----------
 
@@ -1054,7 +1054,7 @@
         const options = c ? lireElements(c).map(e => [e, e]) : [];
         const v = this.getValue();
         if (v && !options.some(o => o[1] === v)) options.push([v, v]);
-        if (!options.length) options.push(['(aucun élément)', '']);
+        if (!options.length) options.push([T('(aucun élément)'), '']);
         return options;
       });
     }
@@ -1086,23 +1086,23 @@
     };
   }
 
-  Blockly.Blocks['bs_quand_menu_contextuel'] = chapeauElement('quand on choisit', ELEMENT_MENU, 'dans', ['menucontextuel'],
-    'Exécuté quand on choisit cet élément dans le menu qui s\'ouvre au clic droit. « nom du contrôle où … a été ouvert » dit sur quel contrôle on avait cliqué.');
-  Blockly.Blocks['bs_menu_contextuel_source'] = valeur(() => ['nom du contrôle où', MENU_CTX, 'a été ouvert'], 'String', COULEUR_CONTROLES,
-    'Le nom du contrôle sur lequel on a fait le clic droit (ou celui de la fenêtre). Utile quand plusieurs contrôles partagent le même menu.');
+  Blockly.Blocks['bs_quand_menu_contextuel'] = chapeauElement(T('quand on choisit'), ELEMENT_MENU, T('dans'), ['menucontextuel'],
+    T('Exécuté quand on choisit cet élément dans le menu qui s\'ouvre au clic droit. « nom du contrôle où … a été ouvert » dit sur quel contrôle on avait cliqué.'));
+  Blockly.Blocks['bs_menu_contextuel_source'] = valeur(() => [T('nom du contrôle où'), MENU_CTX, T('a été ouvert')], 'String', COULEUR_CONTROLES,
+    T('Le nom du contrôle sur lequel on a fait le clic droit (ou celui de la fenêtre). Utile quand plusieurs contrôles partagent le même menu.'));
   Blockly.Blocks['bs_menu_contextuel_actif'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['activer', 'TRUE'], ['désactiver', 'FALSE']]), nom: 'ACTIF' },
-    'l\'élément', ELEMENT_MENU(), 'de', MENU_CTX
-  ], COULEUR_CONTROLES, 'Un élément désactivé est grisé : on ne peut plus le choisir.');
-  Blockly.Blocks['bs_menu_contextuel_montrer'] = instruction(() => ['montrer le menu', MENU_CTX, 'à la souris'], COULEUR_CONTROLES,
-    'Ouvre le menu là où se trouve la souris, sans clic droit : par exemple quand on clique sur un bouton « ⋯ ».');
+    { champ: new Blockly.FieldDropdown([[T('activer'), 'TRUE'], [T('désactiver'), 'FALSE']]), nom: 'ACTIF' },
+    T('l\'élément'), ELEMENT_MENU(), T('de'), MENU_CTX
+  ], COULEUR_CONTROLES, T('Un élément désactivé est grisé : on ne peut plus le choisir.'));
+  Blockly.Blocks['bs_menu_contextuel_montrer'] = instruction(() => [T('montrer le menu'), MENU_CTX, T('à la souris')], COULEUR_CONTROLES,
+    T('Ouvre le menu là où se trouve la souris, sans clic droit : par exemple quand on clique sur un bouton « ⋯ ».'));
 
-  Blockly.Blocks['bs_quand_outil'] = chapeauElement('quand on clique sur', BOUTON_OUTIL, 'dans', ['barreoutils'],
-    'Exécuté quand on clique sur ce bouton de la barre d\'outils.');
+  Blockly.Blocks['bs_quand_outil'] = chapeauElement(T('quand on clique sur'), BOUTON_OUTIL, T('dans'), ['barreoutils'],
+    T('Exécuté quand on clique sur ce bouton de la barre d\'outils.'));
   Blockly.Blocks['bs_outil_actif'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['activer', 'TRUE'], ['désactiver', 'FALSE']]), nom: 'ACTIF' },
-    'le bouton', BOUTON_OUTIL(), 'de', OUTILS
-  ], COULEUR_CONTROLES, 'Un bouton désactivé est grisé : on ne peut plus cliquer dessus.');
+    { champ: new Blockly.FieldDropdown([[T('activer'), 'TRUE'], [T('désactiver'), 'FALSE']]), nom: 'ACTIF' },
+    T('le bouton'), BOUTON_OUTIL(), T('de'), OUTILS
+  ], COULEUR_CONTROLES, T('Un bouton désactivé est grisé : on ne peut plus cliquer dessus.'));
 
   // ---------- Messages (comme dans Scratch) ----------
 
@@ -1119,11 +1119,11 @@
             .forEach(b => noms.add(b.getFieldValue('MSG')));
         }
         const options = [...noms].filter(Boolean).sort((a, b) => a.localeCompare(b, 'fr')).map(n => [n, n]);
-        options.push(['➕ Nouveau message…', '__nouveau']);
+        options.push([T('➕ Nouveau message…'), '__nouveau']);
         return options;
       }, function (v) {
         if (v !== '__nouveau') return v;
-        const nom = (prompt('Nom du nouveau message :', '') || '').trim();
+        const nom = (prompt(T('Nom du nouveau message :'), '') || '').trim();
         return nom || null;
       });
       if (valeur) this.setValue(valeur);
@@ -1139,23 +1139,23 @@
 
   Blockly.Blocks['bs_quand_message'] = {
     init() {
-      this.appendDummyInput().appendField('📨 quand je reçois').appendField(new ChampMessage('message1'), 'MSG');
+      this.appendDummyInput().appendField(T('📨 quand je reçois')).appendField(new ChampMessage('message1'), 'MSG');
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté chaque fois que ce message est envoyé (avec « envoyer le message »). Plusieurs blocs peuvent recevoir le même message.');
+      this.setTooltip(T('Exécuté chaque fois que ce message est envoyé (avec « envoyer le message »). Plusieurs blocs peuvent recevoir le même message.'));
     }
   };
 
   Blockly.Blocks['bs_envoyer_message'] = {
     init() {
       this.appendDummyInput()
-        .appendField('📨 envoyer le message').appendField(new ChampMessage('message1'), 'MSG')
-        .appendField(new Blockly.FieldDropdown([['sans attendre', 'non'], ['et attendre la fin', 'oui']]), 'ATTENDRE');
+        .appendField(T('📨 envoyer le message')).appendField(new ChampMessage('message1'), 'MSG')
+        .appendField(new Blockly.FieldDropdown([[T('sans attendre'), 'non'], [T('et attendre la fin'), 'oui']]), 'ATTENDRE');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_EVENEMENTS);
-      this.setTooltip('Déclenche tous les blocs « quand je reçois » ce message. Avec « et attendre », la suite attend qu\'ils soient tous terminés.');
+      this.setTooltip(T('Déclenche tous les blocs « quand je reçois » ce message. Avec « et attendre », la suite attend qu\'ils soient tous terminés.'));
     }
   };
 
@@ -1164,100 +1164,100 @@
   // ---------- Arborescence et barre d'état ----------
 
   const ARBRE = { ctrl: ['arborescence'] };
-  const AIDE_CHEMIN = ' Un élément se désigne par son chemin : « Animaux › Chats » (ou « Animaux > Chats »).';
+  const AIDE_CHEMIN = T(' Un élément se désigne par son chemin : « Animaux › Chats » (ou « Animaux > Chats »).');
 
   Blockly.Blocks['bs_arbre_ajouter'] = instruction(() => [
-    { nom: 'VAL', libelle: 'ajouter l\'élément' }, { nom: 'DANS', libelle: 'dans' }, 'de', ARBRE
-  ], COULEUR_CONTROLES, 'Ajoute un élément, rangé dans un autre (laissez « dans » vide pour le premier niveau).' + AIDE_CHEMIN);
+    { nom: 'VAL', libelle: T('ajouter l\'élément') }, { nom: 'DANS', libelle: T('dans') }, T('de'), ARBRE
+  ], COULEUR_CONTROLES, T('Ajoute un élément, rangé dans un autre (laissez « dans » vide pour le premier niveau).') + AIDE_CHEMIN);
 
   Blockly.Blocks['bs_arbre_supprimer'] = instruction(() => [
-    { nom: 'CHEMIN', libelle: 'supprimer l\'élément' }, 'de', ARBRE
-  ], COULEUR_CONTROLES, 'Supprime un élément, avec tout ce qui est rangé dedans.' + AIDE_CHEMIN);
+    { nom: 'CHEMIN', libelle: T('supprimer l\'élément') }, T('de'), ARBRE
+  ], COULEUR_CONTROLES, T('Supprime un élément, avec tout ce qui est rangé dedans.') + AIDE_CHEMIN);
 
   Blockly.Blocks['bs_arbre_ctrl'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['tout déplier', 'deplier'], ['tout replier', 'replier'], ['vider', 'vider']]), nom: 'ACTION' },
+    { champ: new Blockly.FieldDropdown([[T('tout déplier'), 'deplier'], [T('tout replier'), 'replier'], [T('vider'), 'vider']]), nom: 'ACTION' },
     ARBRE
-  ], COULEUR_CONTROLES, 'Ouvre ou ferme tous les dossiers de l\'arborescence, ou la vide.');
+  ], COULEUR_CONTROLES, T('Ouvre ou ferme tous les dossiers de l\'arborescence, ou la vide.'));
 
   Blockly.Blocks['bs_arbre_enfants'] = valeur(() => [
-    { nom: 'CHEMIN', libelle: 'éléments rangés dans' }, 'de', ARBRE
-  ], 'Array', COULEUR_CONTROLES, 'La liste des textes des éléments rangés directement dans celui-ci (vide = ceux du premier niveau).' + AIDE_CHEMIN);
+    { nom: 'CHEMIN', libelle: T('éléments rangés dans') }, T('de'), ARBRE
+  ], 'Array', COULEUR_CONTROLES, T('La liste des textes des éléments rangés directement dans celui-ci (vide = ceux du premier niveau).') + AIDE_CHEMIN);
 
   const BARRE_ETAT = { ctrl: ['barreetat'] };
 
   Blockly.Blocks['bs_barreetat_ecrire'] = instruction(() => [
-    { nom: 'VAL', libelle: 'écrire' }, { nom: 'NUM', libelle: 'dans la case n°', check: 'Number' }, 'de', BARRE_ETAT
-  ], COULEUR_CONTROLES, 'Change le texte d\'une case de la barre d\'état (1 = la plus large, à gauche). Les cases manquantes sont ajoutées.');
+    { nom: 'VAL', libelle: T('écrire') }, { nom: 'NUM', libelle: T('dans la case n°'), check: 'Number' }, T('de'), BARRE_ETAT
+  ], COULEUR_CONTROLES, T('Change le texte d\'une case de la barre d\'état (1 = la plus large, à gauche). Les cases manquantes sont ajoutées.'));
 
   Blockly.Blocks['bs_barreetat_case'] = valeur(() => [
-    { nom: 'NUM', libelle: 'texte de la case n°', check: 'Number' }, 'de', BARRE_ETAT
-  ], 'String', COULEUR_CONTROLES, 'Le texte d\'une case de la barre d\'état.');
+    { nom: 'NUM', libelle: T('texte de la case n°'), check: 'Number' }, T('de'), BARRE_ETAT
+  ], 'String', COULEUR_CONTROLES, T('Le texte d\'une case de la barre d\'état.'));
 
   const TABLEAU = { ctrl: ['tableau'] };
   const COLONNE = libelle => ({ nom: 'COL', libelle });
   const NUMERO = libelle => ({ nom: 'NUM', libelle, check: 'Number' });
 
   Blockly.Blocks['bs_tableau_ajouter'] = instruction(() => [
-    { nom: 'LIGNE', libelle: 'ajouter la ligne' }, 'au tableau', TABLEAU
-  ], COULEUR_CONTROLES, 'Ajoute une ligne à la fin du tableau. Donnez une liste : une valeur par colonne.');
+    { nom: 'LIGNE', libelle: T('ajouter la ligne') }, T('au tableau'), TABLEAU
+  ], COULEUR_CONTROLES, T('Ajoute une ligne à la fin du tableau. Donnez une liste : une valeur par colonne.'));
 
   Blockly.Blocks['bs_tableau_remplacer'] = instruction(() => [
-    NUMERO('remplacer la ligne n°'), 'de', TABLEAU, { nom: 'LIGNE', libelle: 'par' }
-  ], COULEUR_CONTROLES, 'Remplace toute une ligne par une nouvelle liste de valeurs.');
+    NUMERO(T('remplacer la ligne n°')), T('de'), TABLEAU, { nom: 'LIGNE', libelle: T('par', 'remplacer') }
+  ], COULEUR_CONTROLES, T('Remplace toute une ligne par une nouvelle liste de valeurs.'));
 
   Blockly.Blocks['bs_tableau_supprimer'] = instruction(() => [
-    NUMERO('supprimer la ligne n°'), 'de', TABLEAU
-  ], COULEUR_CONTROLES, 'Supprime une ligne. Astuce : « n° de la ligne choisie » donne la ligne sur laquelle on a cliqué.');
+    NUMERO(T('supprimer la ligne n°')), T('de'), TABLEAU
+  ], COULEUR_CONTROLES, T('Supprime une ligne. Astuce : « n° de la ligne choisie » donne la ligne sur laquelle on a cliqué.'));
 
   const GRAPHIQUE = { ctrl: ['graphique'] };
 
   Blockly.Blocks['bs_graphique_ajouter'] = instruction(() => [
-    { nom: 'VAL', libelle: 'ajouter la valeur', check: 'Number' }, { nom: 'ETIQ', libelle: 'avec l\'étiquette' },
-    'au graphique', GRAPHIQUE
-  ], COULEUR_CONTROLES, 'Ajoute une barre (ou un point à la courbe) à la fin du graphique. Avec « garder seulement les N dernières valeurs », les plus anciennes disparaissent : parfait pour suivre un score en direct.');
+    { nom: 'VAL', libelle: T('ajouter la valeur'), check: 'Number' }, { nom: 'ETIQ', libelle: T('avec l\'étiquette') },
+    T('au graphique'), GRAPHIQUE
+  ], COULEUR_CONTROLES, T('Ajoute une barre (ou un point à la courbe) à la fin du graphique. Avec « garder seulement les N dernières valeurs », les plus anciennes disparaissent : parfait pour suivre un score en direct.'));
 
-  Blockly.Blocks['bs_graphique_vider'] = instruction(() => ['vider le graphique', GRAPHIQUE],
-    COULEUR_CONTROLES, 'Enlève toutes les valeurs du graphique.');
+  Blockly.Blocks['bs_graphique_vider'] = instruction(() => [T('vider le graphique'), GRAPHIQUE],
+    COULEUR_CONTROLES, T('Enlève toutes les valeurs du graphique.'));
 
-  Blockly.Blocks['bs_tableau_vider'] = instruction(() => ['vider le tableau', TABLEAU],
-    COULEUR_CONTROLES, 'Supprime toutes les lignes (les titres des colonnes restent).');
+  Blockly.Blocks['bs_tableau_vider'] = instruction(() => [T('vider le tableau'), TABLEAU],
+    COULEUR_CONTROLES, T('Supprime toutes les lignes (les titres des colonnes restent).'));
 
   Blockly.Blocks['bs_tableau_ecrire_cellule'] = instruction(() => [
-    'dans', TABLEAU, COLONNE('mettre la colonne'), NUMERO('de la ligne n°'), { nom: 'VAL', libelle: 'à' }
-  ], COULEUR_CONTROLES, 'Change une seule case du tableau. La colonne se désigne par son titre ou par son numéro.');
+    T('dans'), TABLEAU, COLONNE(T('mettre la colonne')), NUMERO(T('de la ligne n°')), { nom: 'VAL', libelle: T('à') }
+  ], COULEUR_CONTROLES, T('Change une seule case du tableau. La colonne se désigne par son titre ou par son numéro.'));
 
   Blockly.Blocks['bs_tableau_trier'] = instruction(() => [
-    'trier', TABLEAU, COLONNE('selon la colonne'),
-    { champ: new Blockly.FieldDropdown([['croissant (A → Z, 1 → 9)', 'croissant'], ['décroissant (Z → A, 9 → 1)', 'decroissant']]), nom: 'SENS' }
-  ], COULEUR_CONTROLES, 'Range les lignes dans l\'ordre d\'une colonne (alphabétique ou numérique).');
+    T('trier'), TABLEAU, COLONNE(T('selon la colonne')),
+    { champ: new Blockly.FieldDropdown([[T('croissant (A → Z, 1 → 9)'), 'croissant'], [T('décroissant (Z → A, 9 → 1)'), 'decroissant']]), nom: 'SENS' }
+  ], COULEUR_CONTROLES, T('Range les lignes dans l\'ordre d\'une colonne (alphabétique ou numérique).'));
 
   Blockly.Blocks['bs_tableau_cellule'] = valeur(() => [
-    COLONNE('colonne'), NUMERO('de la ligne n°'), 'de', TABLEAU
-  ], null, COULEUR_CONTROLES, 'Le contenu d\'une case du tableau (un nombre si la case contient un nombre).');
+    COLONNE(T('colonne')), NUMERO(T('de la ligne n°')), T('de'), TABLEAU
+  ], null, COULEUR_CONTROLES, T('Le contenu d\'une case du tableau (un nombre si la case contient un nombre).'));
 
   Blockly.Blocks['bs_tableau_ligne'] = valeur(() => [
-    NUMERO('ligne n°'), 'de', TABLEAU, '(liste)'
-  ], 'Array', COULEUR_CONTROLES, 'Toutes les valeurs d\'une ligne, sous forme de liste.');
+    NUMERO(T('ligne n°')), T('de'), TABLEAU, T('(liste)')
+  ], 'Array', COULEUR_CONTROLES, T('Toutes les valeurs d\'une ligne, sous forme de liste.'));
 
   Blockly.Blocks['bs_tableau_colonne'] = valeur(() => [
-    COLONNE('toutes les valeurs de la colonne'), 'de', TABLEAU
-  ], 'Array', COULEUR_CONTROLES, 'La liste des valeurs d\'une colonne, de haut en bas. Pratique pour faire un total.');
+    COLONNE(T('toutes les valeurs de la colonne')), T('de'), TABLEAU
+  ], 'Array', COULEUR_CONTROLES, T('La liste des valeurs d\'une colonne, de haut en bas. Pratique pour faire un total.'));
 
   Blockly.Blocks['bs_tableau_chercher'] = valeur(() => [
-    'n° de la ligne de', TABLEAU, COLONNE('où la colonne'), { nom: 'VAL', libelle: 'vaut' }
-  ], 'Number', COULEUR_CONTROLES, 'Cherche une valeur dans une colonne (sans tenir compte des majuscules) et donne le numéro de la première ligne trouvée, ou 0.');
+    T('n° de la ligne de'), TABLEAU, COLONNE(T('où la colonne')), { nom: 'VAL', libelle: T('vaut') }
+  ], 'Number', COULEUR_CONTROLES, T('Cherche une valeur dans une colonne (sans tenir compte des majuscules) et donne le numéro de la première ligne trouvée, ou 0.'));
 
-  Blockly.Blocks['bs_tableau_csv'] = valeur(() => ['contenu de', TABLEAU, 'en texte (CSV)'],
-    'String', COULEUR_CONTROLES, 'Tout le tableau sous forme de texte CSV (lisible par Excel). À enregistrer dans un fichier .csv.');
+  Blockly.Blocks['bs_tableau_csv'] = valeur(() => [T('contenu de'), TABLEAU, T('en texte (CSV)')],
+    'String', COULEUR_CONTROLES, T('Tout le tableau sous forme de texte CSV (lisible par Excel). À enregistrer dans un fichier .csv.'));
 
   Blockly.Blocks['bs_tableau_remplir_csv'] = instruction(() => [
-    'remplir', TABLEAU, { nom: 'VAL', libelle: 'avec le texte CSV' }
-  ], COULEUR_CONTROLES, 'Remplace les lignes du tableau par celles d\'un texte CSV (par exemple lu dans un fichier).');
+    T('remplir'), TABLEAU, { nom: 'VAL', libelle: T('avec le texte CSV') }
+  ], COULEUR_CONTROLES, T('Remplace les lignes du tableau par celles d\'un texte CSV (par exemple lu dans un fichier).'));
   Blockly.Blocks['bs_tableau_remplir_json'] = instruction(() => [
-    'remplir', TABLEAU, { nom: 'VAL', libelle: 'avec les données' }, { nom: 'CHEMINS', libelle: 'colonnes' }
-  ], COULEUR_CONTROLES, 'Une ligne par élément de données JSON (lues sur Internet avec « lire les données de »), ' +
-    'et une colonne par chemin, dans l\'ordre des colonnes du tableau : par exemple la liste « nom », « codesPostaux.1 », « departement.nom ». ' +
-    'Rapide même avec des dizaines de milliers de lignes.');
+    T('remplir'), TABLEAU, { nom: 'VAL', libelle: T('avec les données') }, { nom: 'CHEMINS', libelle: T('colonnes') }
+  ], COULEUR_CONTROLES, T('Une ligne par élément de données JSON (lues sur Internet avec « lire les données de »), ') +
+    T('et une colonne par chemin, dans l\'ordre des colonnes du tableau : par exemple la liste « nom », « codesPostaux.1 », « departement.nom ». ') +
+    T('Rapide même avec des dizaines de milliers de lignes.'));
 
   // ---------- Mémoire et fichiers ----------
 
@@ -1265,31 +1265,31 @@
   const NOM = libelle => ({ nom: 'NOM', libelle, check: 'String' });
 
   Blockly.Blocks['bs_memoriser'] = instruction(() => [
-    { nom: 'VAL', libelle: 'mémoriser' }, NOM('sous le nom')
-  ], COULEUR_MEMOIRE, 'Garde une valeur (texte, nombre ou liste) même après la fermeture du programme : on la retrouve au lancement suivant.');
+    { nom: 'VAL', libelle: T('mémoriser') }, NOM(T('sous le nom'))
+  ], COULEUR_MEMOIRE, T('Garde une valeur (texte, nombre ou liste) même après la fermeture du programme : on la retrouve au lancement suivant.'));
 
-  Blockly.Blocks['bs_memoire'] = valeur(() => [NOM('valeur mémorisée sous le nom')],
-    null, COULEUR_MEMOIRE, 'Retrouve une valeur mémorisée (vide si rien n\'a été mémorisé sous ce nom).');
+  Blockly.Blocks['bs_memoire'] = valeur(() => [NOM(T('valeur mémorisée sous le nom'))],
+    null, COULEUR_MEMOIRE, T('Retrouve une valeur mémorisée (vide si rien n\'a été mémorisé sous ce nom).'));
 
-  Blockly.Blocks['bs_oublier'] = instruction(() => [NOM('oublier la valeur mémorisée sous le nom')],
-    COULEUR_MEMOIRE, 'Efface une valeur mémorisée.');
+  Blockly.Blocks['bs_oublier'] = instruction(() => [NOM(T('oublier la valeur mémorisée sous le nom'))],
+    COULEUR_MEMOIRE, T('Efface une valeur mémorisée.'));
 
-  Blockly.Blocks['bs_tout_oublier'] = instruction(() => ['tout oublier (effacer toute la mémoire du programme)'],
-    COULEUR_MEMOIRE, 'Efface toutes les valeurs mémorisées et le contenu des tableaux mémorisés.');
+  Blockly.Blocks['bs_tout_oublier'] = instruction(() => [T('tout oublier (effacer toute la mémoire du programme)')],
+    COULEUR_MEMOIRE, T('Efface toutes les valeurs mémorisées et le contenu des tableaux mémorisés.'));
 
   Blockly.Blocks['bs_fichier_enregistrer'] = instruction(() => [
-    { nom: 'VAL', libelle: 'enregistrer le texte' }, NOM('dans un fichier nommé')
-  ], COULEUR_MEMOIRE, 'Propose d\'enregistrer un fichier sur l\'ordinateur. Finissez le nom par .txt, ou .csv pour un tableau.');
+    { nom: 'VAL', libelle: T('enregistrer le texte') }, NOM(T('dans un fichier nommé'))
+  ], COULEUR_MEMOIRE, T('Propose d\'enregistrer un fichier sur l\'ordinateur. Finissez le nom par .txt, ou .csv pour un tableau.'));
 
-  Blockly.Blocks['bs_fichier_ouvrir'] = valeur(() => ['texte d\'un fichier choisi par l\'utilisateur'],
-    'String', COULEUR_MEMOIRE, 'Ouvre la boîte « Ouvrir » et donne le contenu du fichier choisi (vide s\'il annule).');
+  Blockly.Blocks['bs_fichier_ouvrir'] = valeur(() => [T('texte d\'un fichier choisi par l\'utilisateur')],
+    'String', COULEUR_MEMOIRE, T('Ouvre la boîte « Ouvrir » et donne le contenu du fichier choisi (vide s\'il annule).'));
 
   // ---------- Sons et temps ----------
 
   const COULEUR_SONS = '#db2777';
 
-  const SONS_INTEGRES = [['🔔 bip', 'bip'], ['🎉 succès', 'succes'], ['💥 erreur', 'erreur'],
-    ['🪙 pièce', 'piece'], ['👆 clic', 'clic'], ['🦘 saut', 'saut']];
+  const SONS_INTEGRES = [[T('🔔 bip'), 'bip'], [T('🎉 succès'), 'succes'], [T('💥 erreur'), 'erreur'],
+    [T('🪙 pièce'), 'piece'], [T('👆 clic'), 'clic'], [T('🦘 saut'), 'saut']];
 
   // Sons intégrés, puis sons importés dans le projet (désignés par leur identifiant,
   // pour pouvoir les renommer). Un son supprimé reste affiché au lieu d'être perdu.
@@ -1300,9 +1300,9 @@
       super(function () {
         const importes = BlocStudio.sons().map(s => ['🎵 ' + s.nom, s.id]);
         const options = [...debut, ...(integres ? SONS_INTEGRES : []), ...importes];
-        if (!options.length) options.push(['(aucun son importé)', '']);
+        if (!options.length) options.push([T('(aucun son importé)'), '']);
         const v = this.getValue();
-        if (v && !options.some(o => o[1] === v)) options.push(['(son supprimé)', v]);
+        if (v && !options.some(o => o[1] === v)) options.push([T('(son supprimé)'), v]);
         return options;
       });
     }
@@ -1315,262 +1315,262 @@
     }
   }
 
-  Blockly.Blocks['bs_son'] = instruction(() => ['jouer le son', { champ: new ChampSon(), nom: 'SON' }],
-    COULEUR_SONS, 'Joue un son. Le programme continue sans attendre la fin du son. Importez vos propres sons avec le bouton « Importer un son… ».');
+  Blockly.Blocks['bs_son'] = instruction(() => [T('jouer le son'), { champ: new ChampSon(), nom: 'SON' }],
+    COULEUR_SONS, T('Joue un son. Le programme continue sans attendre la fin du son. Importez vos propres sons avec le bouton « Importer un son… ».'));
 
   Blockly.Blocks['bs_son_mode'] = instruction(() => [
-    'jouer le son', { champ: new ChampSon(), nom: 'SON' },
-    { champ: new Blockly.FieldDropdown([['jusqu\'au bout', 'attendre'], ['en boucle (musique de fond)', 'boucle']]), nom: 'MODE' }
-  ], COULEUR_SONS, '« jusqu\'au bout » : le programme attend la fin du son avant de continuer. « en boucle » : le son recommence sans fin, jusqu\'à « arrêter tous les sons ».');
+    T('jouer le son'), { champ: new ChampSon(), nom: 'SON' },
+    { champ: new Blockly.FieldDropdown([[T('jusqu\'au bout'), 'attendre'], [T('en boucle (musique de fond)'), 'boucle']]), nom: 'MODE' }
+  ], COULEUR_SONS, T('« jusqu\'au bout » : le programme attend la fin du son avant de continuer. « en boucle » : le son recommence sans fin, jusqu\'à « arrêter tous les sons ».'));
 
   Blockly.Blocks['bs_sonctrl'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['jouer', 'jouer'], ['jouer jusqu\'au bout', 'attendre'], ['mettre en pause', 'pause'],
-      ['reprendre', 'reprendre'], ['arrêter', 'arreter']]), nom: 'ACTION' },
+    { champ: new Blockly.FieldDropdown([[T('jouer'), 'jouer'], [T('jouer jusqu\'au bout'), 'attendre'], [T('mettre en pause'), 'pause'],
+      [T('reprendre'), 'reprendre'], [T('arrêter'), 'arreter']]), nom: 'ACTION' },
     { ctrl: ['son', 'video'] }
-  ], COULEUR_SONS, 'Commande un contrôle Son ou Vidéo. « reprendre » repart de l\'endroit de la pause. Son volume et « en boucle » se changent avec le bloc « mettre … ».');
+  ], COULEUR_SONS, T('Commande un contrôle Son ou Vidéo. « reprendre » repart de l\'endroit de la pause. Son volume et « en boucle » se changent avec le bloc « mettre … ».'));
 
   Blockly.Blocks['bs_minuteur_ctrl'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['démarrer', 'demarrer'], ['arrêter', 'arreter']]), nom: 'ACTION' },
-    'le minuteur', { ctrl: ['minuteur'] }
-  ], COULEUR_EVENEMENTS, 'Met en marche ou arrête un minuteur. Son intervalle se change avec le bloc « mettre intervalle de … ».');
+    { champ: new Blockly.FieldDropdown([[T('démarrer'), 'demarrer'], [T('arrêter'), 'arreter']]), nom: 'ACTION' },
+    T('le minuteur'), { ctrl: ['minuteur'] }
+  ], COULEUR_EVENEMENTS, T('Met en marche ou arrête un minuteur. Son intervalle se change avec le bloc « mettre intervalle de … ».'));
 
-  Blockly.Blocks['bs_sons_arreter'] = instruction(() => ['arrêter tous les sons'],
-    COULEUR_SONS, 'Coupe les sons importés en train de jouer (par exemple une musique de fond), ainsi que la voix.');
+  Blockly.Blocks['bs_sons_arreter'] = instruction(() => [T('arrêter tous les sons')],
+    COULEUR_SONS, T('Coupe les sons importés en train de jouer (par exemple une musique de fond), ainsi que la voix.'));
 
-  Blockly.Blocks['bs_son_arreter'] = instruction(() => ['arrêter le son', { champ: new ChampSon([], false), nom: 'SON' }],
-    COULEUR_SONS, 'Coupe seulement ce son (par exemple la musique de fond) ; les autres continuent.');
+  Blockly.Blocks['bs_son_arreter'] = instruction(() => [T('arrêter le son'), { champ: new ChampSon([], false), nom: 'SON' }],
+    COULEUR_SONS, T('Coupe seulement ce son (par exemple la musique de fond) ; les autres continuent.'));
 
   Blockly.Blocks['bs_son_volume'] = instruction(() => [
-    'régler le volume de', { champ: new ChampSon([['🔊 tous les sons', '*']]), nom: 'SON' },
-    { nom: 'VOL', libelle: 'à', check: 'Number' }, '%'
-  ], COULEUR_SONS, '0 % = muet, 100 % = volume normal. Pratique pour baisser la musique de fond sous les bruitages. Agit aussi sur un son déjà en train de jouer.');
+    T('régler le volume de'), { champ: new ChampSon([[T('🔊 tous les sons'), '*']]), nom: 'SON' },
+    { nom: 'VOL', libelle: T('à'), check: 'Number' }, '%'
+  ], COULEUR_SONS, T('0 % = muet, 100 % = volume normal. Pratique pour baisser la musique de fond sous les bruitages. Agit aussi sur un son déjà en train de jouer.'));
 
   Blockly.Blocks['bs_note'] = instruction(() => [
-    'jouer la note',
-    { champ: new Blockly.FieldDropdown([['do', 'do'], ['ré', 're'], ['mi', 'mi'], ['fa', 'fa'], ['sol', 'sol'],
-      ['la', 'la'], ['si', 'si'], ['do aigu', 'do2']]), nom: 'NOTE' },
-    { nom: 'SEC', libelle: 'pendant', check: 'Number' }, 'secondes'
-  ], COULEUR_SONS, 'Joue une note de musique, puis attend qu\'elle soit finie. Enchaînez-les pour faire une mélodie !');
+    T('jouer la note'),
+    { champ: new Blockly.FieldDropdown([[T('do', 'note'), 'do'], [T('ré', 'note'), 're'], [T('mi', 'note'), 'mi'], [T('fa', 'note'), 'fa'], [T('sol', 'note'), 'sol'],
+      [T('la', 'note'), 'la'], [T('si', 'note'), 'si'], [T('do aigu', 'note'), 'do2']]), nom: 'NOTE' },
+    { nom: 'SEC', libelle: T('pendant'), check: 'Number' }, T('secondes')
+  ], COULEUR_SONS, T('Joue une note de musique, puis attend qu\'elle soit finie. Enchaînez-les pour faire une mélodie !'));
 
   Blockly.Blocks['bs_dire'] = instruction(() => [
-    { nom: 'VAL', libelle: '🗣️ dire à voix haute' },
-    { champ: new Blockly.FieldDropdown([['sans attendre', 'non'], ['et attendre la fin', 'oui']]), nom: 'ATTENDRE' }
-  ], COULEUR_SONS, 'L\'ordinateur lit le texte avec une voix française. Avec « sans attendre », la suite du programme continue pendant qu\'il parle.');
+    { nom: 'VAL', libelle: T('🗣️ dire à voix haute') },
+    { champ: new Blockly.FieldDropdown([[T('sans attendre'), 'non'], [T('et attendre la fin'), 'oui']]), nom: 'ATTENDRE' }
+  ], COULEUR_SONS, T('L\'ordinateur lit le texte avec une voix française. Avec « sans attendre », la suite du programme continue pendant qu\'il parle.'));
 
   Blockly.Blocks['bs_voix_regler'] = instruction(() => [
-    { nom: 'VITESSE', libelle: '🗣️ régler la voix : vitesse', check: 'Number' },
-    { nom: 'HAUTEUR', libelle: 'hauteur', check: 'Number' }
-  ], COULEUR_SONS, 'Vitesse : 1 = normale, 0.5 = lente, 2 = rapide. Hauteur : 1 = normale, 0 = très grave, 2 = très aiguë (voix de robot ou de souris !).');
+    { nom: 'VITESSE', libelle: T('🗣️ régler la voix : vitesse'), check: 'Number' },
+    { nom: 'HAUTEUR', libelle: T('hauteur', 'voix'), check: 'Number' }
+  ], COULEUR_SONS, T('Vitesse : 1 = normale, 0.5 = lente, 2 = rapide. Hauteur : 1 = normale, 0 = très grave, 2 = très aiguë (voix de robot ou de souris !).'));
 
-  Blockly.Blocks['bs_voix_taire'] = instruction(() => ['🗣️ faire taire la voix'],
-    COULEUR_SONS, 'Arrête immédiatement la phrase en cours (et celles qui attendaient leur tour).');
+  Blockly.Blocks['bs_voix_taire'] = instruction(() => [T('🗣️ faire taire la voix')],
+    COULEUR_SONS, T('Arrête immédiatement la phrase en cours (et celles qui attendaient leur tour).'));
 
   // ---------- Panneau défilant ----------
 
   const PANNEAU = { ctrl: ['panneau'] };
   Blockly.Blocks['bs_panneau_defiler'] = instruction(() => [
-    '📜 faire défiler', PANNEAU,
-    { champ: new Blockly.FieldDropdown([['tout en bas', 'bas'], ['tout en haut', 'haut'], ['tout à gauche', 'gauche'], ['tout à droite', 'droite']]), nom: 'QUOI' }
-  ], COULEUR_CONTROLES, 'Fait défiler le panneau jusqu\'au bout. « tout en bas » : idéal après avoir ajouté un message ou une ligne.');
-  Blockly.Blocks['bs_panneau_montrer'] = instruction(() => ['📜 faire défiler', PANNEAU, 'pour montrer', { ctrl: null, nom: 'CIBLE' }],
-    COULEUR_CONTROLES, 'Fait défiler le panneau juste ce qu\'il faut pour qu\'on voie ce contrôle en entier (il doit être posé dans le panneau).');
+    T('📜 faire défiler'), PANNEAU,
+    { champ: new Blockly.FieldDropdown([[T('tout en bas'), 'bas'], [T('tout en haut'), 'haut'], [T('tout à gauche'), 'gauche'], [T('tout à droite'), 'droite']]), nom: 'QUOI' }
+  ], COULEUR_CONTROLES, T('Fait défiler le panneau jusqu\'au bout. « tout en bas » : idéal après avoir ajouté un message ou une ligne.'));
+  Blockly.Blocks['bs_panneau_montrer'] = instruction(() => [T('📜 faire défiler'), PANNEAU, T('pour montrer'), { ctrl: null, nom: 'CIBLE' }],
+    COULEUR_CONTROLES, T('Fait défiler le panneau juste ce qu\'il faut pour qu\'on voie ce contrôle en entier (il doit être posé dans le panneau).'));
 
   // ---------- Windows : presse-papiers, impression, notifications ----------
 
   const COULEUR_WINDOWS = '#475569';
   const AVEC_IMAGE = ['zonedessin', 'image', 'graphique', 'camera'];
 
-  Blockly.Blocks['bs_copier'] = instruction(() => [{ nom: 'VAL', libelle: '📋 copier' }, 'dans le presse-papiers'],
-    COULEUR_WINDOWS, 'Comme Ctrl+C : le texte peut ensuite être collé (Ctrl+V) dans n\'importe quel logiciel.');
-  Blockly.Blocks['bs_copier_image'] = instruction(() => ['📋 copier l\'image de', { ctrl: AVEC_IMAGE }, 'dans le presse-papiers'],
-    COULEUR_WINDOWS, 'Copie le dessin, l\'image, le graphique ou l\'image de la caméra : on peut ensuite la coller dans Paint, Word, un e-mail…');
-  Blockly.Blocks['bs_presse_papiers'] = valeur(() => ['📋 texte du presse-papiers'], 'String',
-    COULEUR_WINDOWS, 'Le texte copié en dernier (Ctrl+C), dans ce programme ou dans un autre logiciel. Vide s\'il n\'y a pas de texte.');
+  Blockly.Blocks['bs_copier'] = instruction(() => [{ nom: 'VAL', libelle: T('📋 copier') }, T('dans le presse-papiers')],
+    COULEUR_WINDOWS, T('Comme Ctrl+C : le texte peut ensuite être collé (Ctrl+V) dans n\'importe quel logiciel.'));
+  Blockly.Blocks['bs_copier_image'] = instruction(() => [T('📋 copier l\'image de'), { ctrl: AVEC_IMAGE }, T('dans le presse-papiers')],
+    COULEUR_WINDOWS, T('Copie le dessin, l\'image, le graphique ou l\'image de la caméra : on peut ensuite la coller dans Paint, Word, un e-mail…'));
+  Blockly.Blocks['bs_presse_papiers'] = valeur(() => [T('📋 texte du presse-papiers')], 'String',
+    COULEUR_WINDOWS, T('Le texte copié en dernier (Ctrl+C), dans ce programme ou dans un autre logiciel. Vide s\'il n\'y a pas de texte.'));
 
-  Blockly.Blocks['bs_imprimer_texte'] = instruction(() => [{ nom: 'VAL', libelle: '🖨️ imprimer le texte' }],
-    COULEUR_WINDOWS, 'Ouvre la boîte « Imprimer » de Windows avec ce texte. On peut aussi y choisir « Enregistrer au format PDF ».');
-  Blockly.Blocks['bs_imprimer'] = instruction(() => ['🖨️ imprimer', { ctrl: null }],
-    COULEUR_WINDOWS, 'Imprime un contrôle : tout le texte d\'une zone de texte, tout un tableau, un dessin, une image, un graphique… Le programme attend que la boîte « Imprimer » soit fermée.');
-  Blockly.Blocks['bs_imprimer_fenetre'] = instruction(() => ['🖨️ imprimer la fenêtre', { champ: new ChampFenetre(true), nom: 'FENETRE' }],
-    COULEUR_WINDOWS, 'Imprime la fenêtre telle qu\'on la voit (réduite si elle est plus large que la feuille).');
+  Blockly.Blocks['bs_imprimer_texte'] = instruction(() => [{ nom: 'VAL', libelle: T('🖨️ imprimer le texte') }],
+    COULEUR_WINDOWS, T('Ouvre la boîte « Imprimer » de Windows avec ce texte. On peut aussi y choisir « Enregistrer au format PDF ».'));
+  Blockly.Blocks['bs_imprimer'] = instruction(() => [T('🖨️ imprimer'), { ctrl: null }],
+    COULEUR_WINDOWS, T('Imprime un contrôle : tout le texte d\'une zone de texte, tout un tableau, un dessin, une image, un graphique… Le programme attend que la boîte « Imprimer » soit fermée.'));
+  Blockly.Blocks['bs_imprimer_fenetre'] = instruction(() => [T('🖨️ imprimer la fenêtre'), { champ: new ChampFenetre(true), nom: 'FENETRE' }],
+    COULEUR_WINDOWS, T('Imprime la fenêtre telle qu\'on la voit (réduite si elle est plus large que la feuille).'));
 
   Blockly.Blocks['bs_notification'] = instruction(() => [
-    { nom: 'TITRE', libelle: '🔔 notification' },
-    { nom: 'VAL', libelle: 'message' },
-    { champ: new Blockly.FieldDropdown([['ℹ️ information', 'info'], ['⚠️ avertissement', 'avertissement'], ['❌ erreur', 'erreur'], ['sans icône', 'aucune']]), nom: 'ICONE' }
-  ], COULEUR_WINDOWS, 'Affiche une notification de Windows en bas à droite de l\'écran, même si la fenêtre du programme est cachée ou réduite. Un clic dessus ramène le programme devant.');
+    { nom: 'TITRE', libelle: T('🔔 notification') },
+    { nom: 'VAL', libelle: T('message') },
+    { champ: new Blockly.FieldDropdown([[T('ℹ️ information'), 'info'], [T('⚠️ avertissement'), 'avertissement'], [T('❌ erreur'), 'erreur'], [T('sans icône'), 'aucune']]), nom: 'ICONE' }
+  ], COULEUR_WINDOWS, T('Affiche une notification de Windows en bas à droite de l\'écran, même si la fenêtre du programme est cachée ou réduite. Un clic dessus ramène le programme devant.'));
 
   // ---------- Internet ----------
 
   const COULEUR_INTERNET = '#0369a1';
   Blockly.Blocks['bs_meteo'] = valeur(() => [
-    { nom: 'VAL', libelle: '☀️ météo à' }, ':',
-    { champ: new Blockly.FieldDropdown([['température (°C)', 'temperature'], ['température ressentie (°C)', 'ressenti'],
-      ['temps qu\'il fait (texte)', 'description'], ['temps qu\'il fait (emoji)', 'emoji'], ['vent (km/h)', 'vent'],
-      ['humidité (%)', 'humidite'], ['maximum du jour (°C)', 'max'], ['minimum du jour (°C)', 'min'], ['nom de la ville trouvée', 'ville'], ['ville trouvée ? (vrai ou faux)', 'trouvee']]), nom: 'QUOI' }
-  ], null, COULEUR_INTERNET, 'La météo en ce moment dans cette ville (service Open-Meteo, gratuit). Il faut une connexion à Internet ; le programme attend la réponse.');
-  Blockly.Blocks['bs_web_lire'] = valeur(() => [{ nom: 'VAL', libelle: '🌐 lire les données de' }], 'String', COULEUR_INTERNET,
-    'Le contenu d\'une adresse Internet (souvent des données au format JSON). Le programme attend la réponse. Ensuite : « valeur … dans les données ».');
-  Blockly.Blocks['bs_web_ouvrir'] = instruction(() => [{ nom: 'VAL', libelle: '🌐 ouvrir' }, 'dans le navigateur de l\'ordinateur'],
-    COULEUR_INTERNET, 'Ouvre la page dans Edge, Chrome… (le navigateur habituel), en dehors du programme : pour Google, Facebook et les sites qui refusent de s\'afficher dans un Navigateur web.');
+    { nom: 'VAL', libelle: T('☀️ météo à') }, ':',
+    { champ: new Blockly.FieldDropdown([[T('température (°C)'), 'temperature'], [T('température ressentie (°C)'), 'ressenti'],
+      [T('temps qu\'il fait (texte)'), 'description'], [T('temps qu\'il fait (emoji)'), 'emoji'], [T('vent (km/h)'), 'vent'],
+      [T('humidité (%)'), 'humidite'], [T('maximum du jour (°C)'), 'max'], [T('minimum du jour (°C)'), 'min'], [T('nom de la ville trouvée'), 'ville'], [T('ville trouvée ? (vrai ou faux)'), 'trouvee']]), nom: 'QUOI' }
+  ], null, COULEUR_INTERNET, T('La météo en ce moment dans cette ville (service Open-Meteo, gratuit). Il faut une connexion à Internet ; le programme attend la réponse.'));
+  Blockly.Blocks['bs_web_lire'] = valeur(() => [{ nom: 'VAL', libelle: T('🌐 lire les données de') }], 'String', COULEUR_INTERNET,
+    T('Le contenu d\'une adresse Internet (souvent des données au format JSON). Le programme attend la réponse. Ensuite : « valeur … dans les données ».'));
+  Blockly.Blocks['bs_web_ouvrir'] = instruction(() => [{ nom: 'VAL', libelle: T('🌐 ouvrir') }, T('dans le navigateur de l\'ordinateur')],
+    COULEUR_INTERNET, T('Ouvre la page dans Edge, Chrome… (le navigateur habituel), en dehors du programme : pour Google, Facebook et les sites qui refusent de s\'afficher dans un Navigateur web.'));
   Blockly.Blocks['bs_json_valeur'] = valeur(() => [
-    { nom: 'CHEMIN', libelle: '🌐 valeur' }, { nom: 'VAL', libelle: 'dans les données' }
-  ], null, COULEUR_INTERNET, 'Une information dans des données JSON, désignée par son chemin : « current.temperature_2m », ou « results.1.name » (les numéros de liste commencent à 1). Vide si elle n\'existe pas.');
+    { nom: 'CHEMIN', libelle: T('🌐 valeur') }, { nom: 'VAL', libelle: T('dans les données') }
+  ], null, COULEUR_INTERNET, T('Une information dans des données JSON, désignée par son chemin : « current.temperature_2m », ou « results.1.name » (les numéros de liste commencent à 1). Vide si elle n\'existe pas.'));
   Blockly.Blocks['bs_json_liste'] = valeur(() => [
-    { nom: 'CHEMIN', libelle: '🌐 liste des' }, { nom: 'VAL', libelle: 'dans les données' }
-  ], 'Array', COULEUR_INTERNET, 'Quand les données sont une liste (de communes, de films…), le chemin est pris dans chaque élément : ' +
-    '« nom » donne la liste de tous les noms, « departement.nom » celle des départements, « codesPostaux.1 » le premier code postal de chacun. ' +
-    'Le résultat va tout droit dans une liste déroulante (« mettre éléments de … à ») ou dans les suggestions d\'une zone de texte.');
+    { nom: 'CHEMIN', libelle: T('🌐 liste des') }, { nom: 'VAL', libelle: T('dans les données') }
+  ], 'Array', COULEUR_INTERNET, T('Quand les données sont une liste (de communes, de films…), le chemin est pris dans chaque élément : ') +
+    T('« nom » donne la liste de tous les noms, « departement.nom » celle des départements, « codesPostaux.1 » le premier code postal de chacun. ') +
+    T('Le résultat va tout droit dans une liste déroulante (« mettre éléments de … à ») ou dans les suggestions d\'une zone de texte.'));
 
   // ---------- Conversions ----------
 
   const COULEUR_CONVERSIONS = '#0f766e';
-  const UNITES_TEMPS = [['secondes', 'secondes'], ['minutes', 'minutes'], ['heures', 'heures'], ['jours', 'jours'],
-    ['semaines', 'semaines'], ['millisecondes', 'millisecondes']];
-  const UNITES_DISTANCE = [['mètres', 'metres'], ['centimètres', 'centimetres'], ['millimètres', 'millimetres'],
-    ['kilomètres', 'kilometres'], ['pouces', 'pouces'], ['pieds', 'pieds'], ['miles', 'miles']];
-  const UNITES_MASSE = [['grammes', 'grammes'], ['kilogrammes', 'kilogrammes'], ['milligrammes', 'milligrammes'],
-    ['tonnes', 'tonnes'], ['livres (lb)', 'livres'], ['onces (oz)', 'onces']];
-  const UNITES_VOLUME = [['litres', 'litres'], ['millilitres', 'millilitres'], ['centilitres', 'centilitres'], ['décilitres', 'decilitres'],
-    ['mètres cubes', 'metrescubes'], ['cuillères à café', 'cuillerescafe'], ['cuillères à soupe', 'cuillerescsoupe'], ['gallons (US)', 'gallons']];
-  const UNITES_TEMPERATURE = [['°C (Celsius)', 'celsius'], ['°F (Fahrenheit)', 'fahrenheit'], ['K (kelvins)', 'kelvin']];
+  const UNITES_TEMPS = [[T('secondes'), 'secondes'], [T('minutes'), 'minutes'], [T('heures'), 'heures'], [T('jours'), 'jours'],
+    [T('semaines'), 'semaines'], [T('millisecondes'), 'millisecondes']];
+  const UNITES_DISTANCE = [[T('mètres'), 'metres'], [T('centimètres'), 'centimetres'], [T('millimètres'), 'millimetres'],
+    [T('kilomètres'), 'kilometres'], [T('pouces'), 'pouces'], [T('pieds'), 'pieds'], [T('miles'), 'miles']];
+  const UNITES_MASSE = [[T('grammes'), 'grammes'], [T('kilogrammes'), 'kilogrammes'], [T('milligrammes'), 'milligrammes'],
+    [T('tonnes'), 'tonnes'], [T('livres (lb)'), 'livres'], [T('onces (oz)'), 'onces']];
+  const UNITES_VOLUME = [[T('litres'), 'litres'], [T('millilitres'), 'millilitres'], [T('centilitres'), 'centilitres'], [T('décilitres'), 'decilitres'],
+    [T('mètres cubes'), 'metrescubes'], [T('cuillères à café'), 'cuillerescafe'], [T('cuillères à soupe'), 'cuillerescsoupe'], [T('gallons (US)'), 'gallons']];
+  const UNITES_TEMPERATURE = [[T('°C (Celsius)'), 'celsius'], [T('°F (Fahrenheit)'), 'fahrenheit'], [T('K (kelvins)'), 'kelvin']];
   // « convertir [n] [unité] en [unité] » : la seconde liste propose d'abord une autre unité que la première.
   const blocConvertir = (unites, tooltip) => valeur(() => [
-    { nom: 'VAL', libelle: '🔁 convertir', check: 'Number' },
-    { champ: new Blockly.FieldDropdown(unites), nom: 'DE' }, 'en',
+    { nom: 'VAL', libelle: T('🔁 convertir'), check: 'Number' },
+    { champ: new Blockly.FieldDropdown(unites), nom: 'DE' }, T('en', 'convertir'),
     { champ: new Blockly.FieldDropdown([unites[1], unites[0], ...unites.slice(2)]), nom: 'VERS' }
   ], 'Number', COULEUR_CONVERSIONS, tooltip);
-  Blockly.Blocks['bs_convertir_temps'] = blocConvertir(UNITES_TEMPS, 'Par exemple 90 secondes = 1,5 minute ; 2 heures = 120 minutes.');
-  Blockly.Blocks['bs_convertir_distance'] = blocConvertir(UNITES_DISTANCE, 'Par exemple 1,5 kilomètre = 1500 mètres ; 1 pouce = 2,54 centimètres ; 1 mile = 1,609 kilomètre.');
-  Blockly.Blocks['bs_convertir_masse'] = blocConvertir(UNITES_MASSE, 'Par exemple 1,5 kilogramme = 1500 grammes ; 1 livre ≈ 453,6 grammes ; 1 tonne = 1000 kilogrammes.');
-  Blockly.Blocks['bs_convertir_volume'] = blocConvertir(UNITES_VOLUME, 'Par exemple 1 litre = 1000 millilitres = 100 centilitres ; une cuillère à café = 5 mL, à soupe = 15 mL ; 1 gallon US ≈ 3,785 litres.');
-  Blockly.Blocks['bs_convertir_temperature'] = blocConvertir(UNITES_TEMPERATURE, 'Par exemple 20 °C = 68 °F ; 0 °C = 273,15 K ; 100 °F ≈ 37,8 °C.');
+  Blockly.Blocks['bs_convertir_temps'] = blocConvertir(UNITES_TEMPS, T('Par exemple 90 secondes = 1,5 minute ; 2 heures = 120 minutes.'));
+  Blockly.Blocks['bs_convertir_distance'] = blocConvertir(UNITES_DISTANCE, T('Par exemple 1,5 kilomètre = 1500 mètres ; 1 pouce = 2,54 centimètres ; 1 mile = 1,609 kilomètre.'));
+  Blockly.Blocks['bs_convertir_masse'] = blocConvertir(UNITES_MASSE, T('Par exemple 1,5 kilogramme = 1500 grammes ; 1 livre ≈ 453,6 grammes ; 1 tonne = 1000 kilogrammes.'));
+  Blockly.Blocks['bs_convertir_volume'] = blocConvertir(UNITES_VOLUME, T('Par exemple 1 litre = 1000 millilitres = 100 centilitres ; une cuillère à café = 5 mL, à soupe = 15 mL ; 1 gallon US ≈ 3,785 litres.'));
+  Blockly.Blocks['bs_convertir_temperature'] = blocConvertir(UNITES_TEMPERATURE, T('Par exemple 20 °C = 68 °F ; 0 °C = 273,15 K ; 100 °F ≈ 37,8 °C.'));
   Blockly.Blocks['bs_temps_texte'] = valeur(() => [
-    { nom: 'VAL', libelle: '⏱️', check: 'Number' }, 'secondes en',
-    { champ: new Blockly.FieldDropdown([['« m:ss » (3:33)', 'm:ss'], ['« h:mm:ss » (0:03:33)', 'h:mm:ss']]), nom: 'FORMAT' }
-  ], 'String', COULEUR_CONVERSIONS, 'Un temps en secondes écrit comme sur un lecteur de musique ou un chronomètre : 213 → « 3:33 », 65 → « 1:05 ». Au-delà d\'une heure, les heures s\'ajoutent : « 1:02:05 ».');
-  Blockly.Blocks['bs_temps_secondes'] = valeur(() => [{ nom: 'VAL', libelle: '⏱️ le temps' }, 'en secondes'], 'Number',
-    COULEUR_CONVERSIONS, 'L\'inverse : « 3:33 » → 213 ; « 1:02:05 » → 3725 ; un simple nombre reste un nombre de secondes.');
+    { nom: 'VAL', libelle: '⏱️', check: 'Number' }, T('secondes en'),
+    { champ: new Blockly.FieldDropdown([[T('« m:ss » (3:33)'), 'm:ss'], [T('« h:mm:ss » (0:03:33)'), 'h:mm:ss']]), nom: 'FORMAT' }
+  ], 'String', COULEUR_CONVERSIONS, T('Un temps en secondes écrit comme sur un lecteur de musique ou un chronomètre : 213 → « 3:33 », 65 → « 1:05 ». Au-delà d\'une heure, les heures s\'ajoutent : « 1:02:05 ».'));
+  Blockly.Blocks['bs_temps_secondes'] = valeur(() => [{ nom: 'VAL', libelle: T('⏱️ le temps') }, T('en secondes')], 'Number',
+    COULEUR_CONVERSIONS, T('L\'inverse : « 3:33 » → 213 ; « 1:02:05 » → 3725 ; un simple nombre reste un nombre de secondes.'));
 
   Blockly.Blocks['bs_maintenant'] = valeur(() => [
     { champ: new Blockly.FieldDropdown([
-      ['date du jour (jj/mm/aaaa)', 'date'], ['heure actuelle (hh:mm)', 'heure'], ['jour du mois', 'jour'],
-      ['mois actuel', 'mois'], ['année actuelle', 'annee'], ['jour de la semaine', 'jourSemaine'],
-      ['heures (nombre)', 'heures'], ['minutes (nombre)', 'minutes'], ['secondes (nombre)', 'secondes']]), nom: 'QUOI' }
-  ], null, COULEUR_SONS, 'La date ou l\'heure de l\'ordinateur, au moment où le bloc est utilisé.');
+      [T('date du jour (jj/mm/aaaa)'), 'date'], [T('heure actuelle (hh:mm)'), 'heure'], [T('jour du mois'), 'jour'],
+      [T('mois actuel'), 'mois'], [T('année actuelle'), 'annee'], [T('jour de la semaine'), 'jourSemaine'],
+      [T('heures (nombre)'), 'heures'], [T('minutes (nombre)'), 'minutes'], [T('secondes (nombre)'), 'secondes']]), nom: 'QUOI' }
+  ], null, COULEUR_SONS, T('La date ou l\'heure de l\'ordinateur, au moment où le bloc est utilisé.'));
 
   // ---------- Dates ----------
 
-  const DATES = 'Une date s\'écrit comme 25/12/2026 (c\'est ce que donnent « date du jour » et un sélecteur de date).';
+  const DATES = T('Une date s\'écrit comme 25/12/2026 (c\'est ce que donnent « date du jour » et un sélecteur de date).');
   Blockly.Blocks['bs_date_ecart'] = valeur(() => [
-    { nom: 'D1', libelle: 'nombre de jours entre' }, { nom: 'D2', libelle: 'et' }
-  ], 'Number', COULEUR_SONS, 'Combien de jours séparent les deux dates (négatif si la seconde est avant la première). ' +
-    'Exemple : entre la date du jour et 25/12/2026, le nombre de jours avant Noël. ' + DATES);
+    { nom: 'D1', libelle: T('nombre de jours entre') }, { nom: 'D2', libelle: T('et') }
+  ], 'Number', COULEUR_SONS, T('Combien de jours séparent les deux dates (négatif si la seconde est avant la première). ') +
+    T('Exemple : entre la date du jour et 25/12/2026, le nombre de jours avant Noël. ') + DATES);
   Blockly.Blocks['bs_date_plus'] = valeur(() => [
-    { nom: 'DATE', libelle: 'la date' }, { nom: 'JOURS', libelle: 'plus', check: 'Number' }, 'jours'
-  ], 'String', COULEUR_SONS, 'La date, tant de jours plus tard (ou plus tôt avec un nombre négatif) : la date du jour plus 7 jours = dans une semaine. ' + DATES);
-  Blockly.Blocks['bs_date_jour_semaine'] = valeur(() => [{ nom: 'DATE', libelle: 'jour de la semaine du' }], 'String', COULEUR_SONS,
-    'Le jour de la semaine de cette date, en toutes lettres : « lundi », « mardi »… Quel jour tombe ton anniversaire ? ' + DATES);
+    { nom: 'DATE', libelle: T('la date') }, { nom: 'JOURS', libelle: T('plus'), check: 'Number' }, T('jours')
+  ], 'String', COULEUR_SONS, T('La date, tant de jours plus tard (ou plus tôt avec un nombre négatif) : la date du jour plus 7 jours = dans une semaine. ') + DATES);
+  Blockly.Blocks['bs_date_jour_semaine'] = valeur(() => [{ nom: 'DATE', libelle: T('jour de la semaine du') }], 'String', COULEUR_SONS,
+    T('Le jour de la semaine de cette date, en toutes lettres : « lundi », « mardi »… Quel jour tombe ton anniversaire ? ') + DATES);
 
   // ---------- Calendrier ----------
 
   const CALENDRIER = { ctrl: ['calendrier'] };
   Blockly.Blocks['bs_calendrier_marquer'] = instruction(() => [
-    { nom: 'DATE', libelle: 'marquer le' }, 'dans', CALENDRIER, { nom: 'COUL', libelle: 'en' }
-  ], COULEUR_CONTROLES, 'Met un point de couleur sous ce jour : un rendez-vous, un anniversaire, un jour de vacances… ' +
-    'Le point reste quand on change de mois. ' + DATES);
-  Blockly.Blocks['bs_calendrier_effacer'] = instruction(() => [{ nom: 'DATE', libelle: 'effacer la marque du' }, 'dans', CALENDRIER],
-    COULEUR_CONTROLES, 'Retire le point de couleur de ce jour. ' + DATES);
-  Blockly.Blocks['bs_calendrier_vider'] = instruction(() => ['effacer toutes les marques de', CALENDRIER],
-    COULEUR_CONTROLES, 'Retire tous les points de couleur du calendrier.');
+    { nom: 'DATE', libelle: T('marquer le') }, T('dans'), CALENDRIER, { nom: 'COUL', libelle: T('en') }
+  ], COULEUR_CONTROLES, T('Met un point de couleur sous ce jour : un rendez-vous, un anniversaire, un jour de vacances… ') +
+    T('Le point reste quand on change de mois. ') + DATES);
+  Blockly.Blocks['bs_calendrier_effacer'] = instruction(() => [{ nom: 'DATE', libelle: T('effacer la marque du') }, T('dans'), CALENDRIER],
+    COULEUR_CONTROLES, T('Retire le point de couleur de ce jour. ') + DATES);
+  Blockly.Blocks['bs_calendrier_vider'] = instruction(() => [T('effacer toutes les marques de'), CALENDRIER],
+    COULEUR_CONTROLES, T('Retire tous les points de couleur du calendrier.'));
 
   // ---------- Plein écran ----------
 
   Blockly.Blocks['bs_plein_ecran'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([['passer en plein écran', 'passer'], ['quitter le plein écran', 'quitter']]), nom: 'QUOI' }
-  ], COULEUR_FENETRES, 'Le programme occupe tout l\'écran, comme un jeu. Une fenêtre redimensionnable s\'agrandit (ses contrôles suivent leur ancrage) ; ' +
-    'sinon, elle reste à sa taille, au milieu de l\'écran. Pour en sortir : Échap (F11 dans l\'application Windows). ' +
-    'Dans l\'éditeur ou une page web, il faut un clic ou une touche juste avant : au démarrage, un bouton « Cliquez ici » apparaît.');
-  Blockly.Blocks['bs_est_plein_ecran'] = valeur(() => ['en plein écran ?'], 'Boolean', COULEUR_FENETRES,
-    'Vrai si le programme occupe tout l\'écran en ce moment.');
+    { champ: new Blockly.FieldDropdown([[T('passer en plein écran'), 'passer'], [T('quitter le plein écran'), 'quitter']]), nom: 'QUOI' }
+  ], COULEUR_FENETRES, T('Le programme occupe tout l\'écran, comme un jeu. Une fenêtre redimensionnable s\'agrandit (ses contrôles suivent leur ancrage) ; ') +
+    T('sinon, elle reste à sa taille, au milieu de l\'écran. Pour en sortir : Échap (F11 dans l\'application Windows). ') +
+    T('Dans l\'éditeur ou une page web, il faut un clic ou une touche juste avant : au démarrage, un bouton « Cliquez ici » apparaît.'));
+  Blockly.Blocks['bs_est_plein_ecran'] = valeur(() => [T('en plein écran ?')], 'Boolean', COULEUR_FENETRES,
+    T('Vrai si le programme occupe tout l\'écran en ce moment.'));
 
   // ---------- Micro ----------
 
-  Blockly.Blocks['bs_volume_micro'] = valeur(() => ['volume du micro'], 'Number', COULEUR_SONS,
-    'Le bruit que le micro entend en ce moment, de 0 (silence) à 100 (très fort). Le micro s\'allume la première fois ' +
-    '(l\'ordinateur peut demander l\'autorisation) ; pendant ce temps, le volume vaut 0. Pour un jeu où l\'on crie pour sauter !');
+  Blockly.Blocks['bs_volume_micro'] = valeur(() => [T('volume du micro')], 'Number', COULEUR_SONS,
+    T('Le bruit que le micro entend en ce moment, de 0 (silence) à 100 (très fort). Le micro s\'allume la première fois ') +
+    T('(l\'ordinateur peut demander l\'autorisation) ; pendant ce temps, le volume vaut 0. Pour un jeu où l\'on crie pour sauter !'));
   Blockly.Blocks['bs_quand_micro'] = {
     init() {
-      this.appendDummyInput().appendField('quand le micro entend un bruit plus fort que')
+      this.appendDummyInput().appendField(T('quand le micro entend un bruit plus fort que'))
         .appendField(new Blockly.FieldNumber(30, 1, 100), 'SEUIL');
       this.appendStatementInput('DO');
       this.setColour(COULEUR_EVENEMENTS);
       this.hat = 'cap';
-      this.setTooltip('Exécuté chaque fois que le bruit dépasse ce volume (de 1 à 100) : un clap, un cri… ' +
-        'Il faut que le bruit redescende avant de pouvoir recommencer. Parler normalement : environ 10 à 30.');
+      this.setTooltip(T('Exécuté chaque fois que le bruit dépasse ce volume (de 1 à 100) : un clap, un cri… ') +
+        T('Il faut que le bruit redescende avant de pouvoir recommencer. Parler normalement : environ 10 à 30.'));
     }
   };
 
   // ---------- Dictionnaires ----------
   // Des valeurs rangées par nom (clé) : « Marie » → 12, « Lucas » → 15.
 
-  const DICO = 'Un dictionnaire range des valeurs par nom : « Marie » → 12, « Lucas » → 15. Mettez « dictionnaire vide » dans une variable, puis remplissez-le.';
+  const DICO = T('Un dictionnaire range des valeurs par nom : « Marie » → 12, « Lucas » → 15. Mettez « dictionnaire vide » dans une variable, puis remplissez-le.');
   // Couleur des blocs de listes (comme ceux de Blockly), plutôt qu'une couleur fixe.
   function styleListes(def) {
     const init = def.init;
     def.init = function () { init.call(this); this.setStyle('list_blocks'); };
     return def;
   }
-  Blockly.Blocks['bs_dico_vide'] = styleListes(valeur(() => ['dictionnaire vide'], null, 0, DICO));
+  Blockly.Blocks['bs_dico_vide'] = styleListes(valeur(() => [T('dictionnaire vide')], null, 0, DICO));
   Blockly.Blocks['bs_dico_mettre'] = styleListes(instruction(() => [
-    { nom: 'DICO', libelle: 'dans le dictionnaire' }, { nom: 'CLE', libelle: 'mettre' }, { nom: 'VAL', libelle: 'à' }
-  ], 0, 'Range la valeur sous ce nom (la clé). S\'il y avait déjà une valeur sous ce nom, elle est remplacée. ' + DICO));
+    { nom: 'DICO', libelle: T('dans le dictionnaire') }, { nom: 'CLE', libelle: T('mettre') }, { nom: 'VAL', libelle: T('à') }
+  ], 0, T('Range la valeur sous ce nom (la clé). S\'il y avait déjà une valeur sous ce nom, elle est remplacée. ') + DICO));
   Blockly.Blocks['bs_dico_valeur'] = styleListes(valeur(() => [
-    { nom: 'CLE', libelle: 'valeur de' }, { nom: 'DICO', libelle: 'dans' }
-  ], null, 0, 'La valeur rangée sous ce nom (rien s\'il n\'y en a pas). ' + DICO));
+    { nom: 'CLE', libelle: T('valeur de') }, { nom: 'DICO', libelle: T('dans') }
+  ], null, 0, T('La valeur rangée sous ce nom (rien s\'il n\'y en a pas). ') + DICO));
   Blockly.Blocks['bs_dico_contient'] = styleListes(valeur(() => [
-    { nom: 'DICO' }, { nom: 'CLE', libelle: 'contient la clé' }, '?'
-  ], 'Boolean', 0, 'Vrai si une valeur est rangée sous ce nom. ' + DICO));
-  Blockly.Blocks['bs_dico_cles'] = styleListes(valeur(() => [{ nom: 'DICO', libelle: 'clés de' }], 'Array', 0,
-    'La liste des noms (clés) du dictionnaire, dans l\'ordre où on les a ajoutés. Avec « pour chaque élément », on le parcourt tout entier. ' + DICO));
+    { nom: 'DICO' }, { nom: 'CLE', libelle: T('contient la clé') }, '?'
+  ], 'Boolean', 0, T('Vrai si une valeur est rangée sous ce nom. ') + DICO));
+  Blockly.Blocks['bs_dico_cles'] = styleListes(valeur(() => [{ nom: 'DICO', libelle: T('clés de') }], 'Array', 0,
+    T('La liste des noms (clés) du dictionnaire, dans l\'ordre où on les a ajoutés. Avec « pour chaque élément », on le parcourt tout entier. ') + DICO));
   Blockly.Blocks['bs_dico_retirer'] = styleListes(instruction(() => [
-    { nom: 'CLE', libelle: 'retirer' }, { nom: 'DICO', libelle: 'du dictionnaire' }
-  ], 0, 'Enlève ce nom (et sa valeur) du dictionnaire. ' + DICO));
+    { nom: 'CLE', libelle: T('retirer') }, { nom: 'DICO', libelle: T('du dictionnaire') }
+  ], 0, T('Enlève ce nom (et sa valeur) du dictionnaire. ') + DICO));
 
   // ---------- Texte ----------
 
   Blockly.Blocks['bs_retour_ligne'] = {
     init() {
-      this.appendDummyInput().appendField('↵ retour à la ligne');
+      this.appendDummyInput().appendField(T('↵ retour à la ligne'));
       this.setOutput(true, 'String');
       this.setStyle('text_blocks');
-      this.setTooltip('Un passage à la ligne, à utiliser dans « créer un texte avec » (pratique pour les zones de texte multilignes).');
+      this.setTooltip(T('Un passage à la ligne, à utiliser dans « créer un texte avec » (pratique pour les zones de texte multilignes).'));
     }
   };
 
   Blockly.Blocks['bs_format_nombre'] = {
     init() {
       this.appendValueInput('VAL').setCheck(['Number', 'String']);
-      this.appendValueInput('DEC').setCheck('Number').appendField('écrit avec');
-      this.appendDummyInput().appendField('chiffres après la virgule');
+      this.appendValueInput('DEC').setCheck('Number').appendField(T('écrit avec'));
+      this.appendDummyInput().appendField(T('chiffres après la virgule'));
       this.setInputsInline(true);
       this.setOutput(true, 'String');
       this.setStyle('text_blocks');
-      this.setTooltip('Le nombre écrit à la française, arrondi : 3.14159 avec 2 chiffres donne « 3,14 », 12.5 donne « 12,50 », ' +
-        '1234567 avec 0 chiffre donne « 1 234 567 ». Pour un prix : « créer un texte avec » ce nombre et « € ». ' +
-        '« nombre depuis » sait le relire pour calculer.');
+      this.setTooltip(T('Le nombre écrit à la française, arrondi : 3.14159 avec 2 chiffres donne « 3,14 », 12.5 donne « 12,50 », ') +
+        T('1234567 avec 0 chiffre donne « 1 234 567 ». Pour un prix : « créer un texte avec » ce nombre et « € ». ') +
+        T('« nombre depuis » sait le relire pour calculer.'));
     }
   };
 
   Blockly.Blocks['bs_texte_repete'] = {
     init() {
       this.appendValueInput('VAL');
-      this.appendValueInput('FOIS').setCheck('Number').appendField('répété');
-      this.appendDummyInput().appendField('fois');
+      this.appendValueInput('FOIS').setCheck('Number').appendField(T('répété'));
+      this.appendDummyInput().appendField(T('fois'));
       this.setInputsInline(true);
       this.setOutput(true, 'String');
       this.setStyle('text_blocks');
-      this.setTooltip('Le texte écrit plusieurs fois de suite : « ❤️ » répété 3 fois donne « ❤️❤️❤️ ». Idéal pour montrer les vies qui restent.');
+      this.setTooltip(T('Le texte écrit plusieurs fois de suite : « ❤️ » répété 3 fois donne « ❤️❤️❤️ ». Idéal pour montrer les vies qui restent.'));
     }
   };
 
@@ -1590,10 +1590,10 @@
   }
   Blockly.Blocks['bs_emoji'] = {
     init() {
-      this.appendDummyInput().appendField('émoji').appendField(new ChampEmoji(), 'EMOJI');
+      this.appendDummyInput().appendField(T('émoji')).appendField(new ChampEmoji(), 'EMOJI');
       this.setOutput(true, 'String');
       this.setStyle('text_blocks');
-      this.setTooltip('Un émoji, à utiliser comme un texte. Cliquez dessus pour en choisir un autre.');
+      this.setTooltip(T('Un émoji, à utiliser comme un texte. Cliquez dessus pour en choisir un autre.'));
     }
   };
 
@@ -1603,7 +1603,7 @@
   Blockly.ContextMenuRegistry.registry.register({
     id: 'bs_ajouter_emoji',
     scopeType: Blockly.ContextMenuRegistry.ScopeType.BLOCK,
-    displayText: '😀 Ajouter un émoji…',
+    displayText: T('😀 Ajouter un émoji…'),
     preconditionFn: s => champTexteDe(s.block) ? 'enabled' : 'hidden',
     callback: s => {
       const champ = champTexteDe(s.block);
@@ -1619,7 +1619,7 @@
 
   // Construit un bloc « dans [zone] … » avec des entrées numériques nommées.
   function blocDessin(bloc, debut, morceaux, tooltip) {
-    bloc.appendDummyInput().appendField('dans').appendField(champCtrl(['zonedessin']), 'CTRL').appendField(debut);
+    bloc.appendDummyInput().appendField(T('dans')).appendField(champCtrl(['zonedessin']), 'CTRL').appendField(debut);
     for (const m of morceaux) {
       if (typeof m === 'string') bloc.appendDummyInput().appendField(m);
       else if (m.champ) bloc.appendDummyInput().appendField(m.champ, m.nom);
@@ -1632,82 +1632,82 @@
     bloc.setTooltip(tooltip);
   }
 
-  const champPlein = () => ({ champ: new Blockly.FieldDropdown([['plein', 'TRUE'], ['vide', 'FALSE']]), nom: 'PLEIN' });
+  const champPlein = () => ({ champ: new Blockly.FieldDropdown([[T('plein'), 'TRUE'], [T('vide'), 'FALSE']]), nom: 'PLEIN' });
 
   Blockly.Blocks['bs_dessin_couleur'] = {
     init() {
       this.appendValueInput('VAL')
-        .appendField('couleur du crayon de').appendField(champCtrl(['zonedessin']), 'CTRL').appendField(':');
+        .appendField(T('couleur du crayon de')).appendField(champCtrl(['zonedessin']), 'CTRL').appendField(':');
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_DESSIN);
-      this.setTooltip('Choisit la couleur des prochains dessins.');
+      this.setTooltip(T('Choisit la couleur des prochains dessins.'));
     }
   };
 
   Blockly.Blocks['bs_dessin_epaisseur'] = {
     init() {
       this.appendValueInput('VAL').setCheck('Number')
-        .appendField('épaisseur du crayon de').appendField(champCtrl(['zonedessin']), 'CTRL').appendField(':');
+        .appendField(T('épaisseur du crayon de')).appendField(champCtrl(['zonedessin']), 'CTRL').appendField(':');
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_DESSIN);
-      this.setTooltip('Choisit l\'épaisseur des traits, en pixels.');
+      this.setTooltip(T('Choisit l\'épaisseur des traits, en pixels.'));
     }
   };
 
   Blockly.Blocks['bs_dessin_effacer'] = {
     init() {
-      this.appendDummyInput().appendField('effacer le dessin de').appendField(champCtrl(['zonedessin']), 'CTRL');
+      this.appendDummyInput().appendField(T('effacer le dessin de')).appendField(champCtrl(['zonedessin']), 'CTRL');
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_DESSIN);
-      this.setTooltip('Efface tout le contenu de la zone de dessin.');
+      this.setTooltip(T('Efface tout le contenu de la zone de dessin.'));
     }
   };
 
   Blockly.Blocks['bs_dessin_trait'] = {
     init() {
-      blocDessin(this, 'tracer un trait de', [
-        { nom: 'X1', libelle: 'x' }, { nom: 'Y1', libelle: 'y' },
-        'à', { nom: 'X2', libelle: 'x' }, { nom: 'Y2', libelle: 'y' }
-      ], 'Trace une ligne droite entre deux points. (0, 0) est le coin en haut à gauche.');
+      blocDessin(this, T('tracer un trait de'), [
+        { nom: 'X1', libelle: T('x') }, { nom: 'Y1', libelle: T('y') },
+        T('à'), { nom: 'X2', libelle: T('x') }, { nom: 'Y2', libelle: T('y') }
+      ], T('Trace une ligne droite entre deux points. (0, 0) est le coin en haut à gauche.'));
     }
   };
 
   Blockly.Blocks['bs_dessin_rectangle'] = {
     init() {
-      blocDessin(this, 'dessiner un rectangle', [
-        champPlein(), { nom: 'X', libelle: 'x' }, { nom: 'Y', libelle: 'y' },
-        { nom: 'L', libelle: 'largeur' }, { nom: 'H', libelle: 'hauteur' }
-      ], 'Dessine un rectangle dont le coin en haut à gauche est en (x, y).');
+      blocDessin(this, T('dessiner un rectangle'), [
+        champPlein(), { nom: 'X', libelle: T('x') }, { nom: 'Y', libelle: T('y') },
+        { nom: 'L', libelle: T('largeur') }, { nom: 'H', libelle: T('hauteur') }
+      ], T('Dessine un rectangle dont le coin en haut à gauche est en (x, y).'));
     }
   };
 
   Blockly.Blocks['bs_dessin_cercle'] = {
     init() {
-      blocDessin(this, 'dessiner un cercle', [
-        champPlein(), 'centre', { nom: 'X', libelle: 'x' }, { nom: 'Y', libelle: 'y' },
-        { nom: 'R', libelle: 'rayon' }
-      ], 'Dessine un cercle autour du point (x, y).');
+      blocDessin(this, T('dessiner un cercle'), [
+        champPlein(), T('centre'), { nom: 'X', libelle: T('x') }, { nom: 'Y', libelle: T('y') },
+        { nom: 'R', libelle: T('rayon') }
+      ], T('Dessine un cercle autour du point (x, y).'));
     }
   };
 
   Blockly.Blocks['bs_dessin_point'] = {
     init() {
-      blocDessin(this, 'dessiner un point', [{ nom: 'X', libelle: 'x' }, { nom: 'Y', libelle: 'y' }],
-        'Dessine un point rond, de la taille du crayon.');
+      blocDessin(this, T('dessiner un point'), [{ nom: 'X', libelle: T('x') }, { nom: 'Y', libelle: T('y') }],
+        T('Dessine un point rond, de la taille du crayon.'));
     }
   };
 
   Blockly.Blocks['bs_dessin_texte'] = {
     init() {
-      blocDessin(this, 'écrire', [
-        { nom: 'TXT', libelle: '', check: null }, 'à', { nom: 'X', libelle: 'x' }, { nom: 'Y', libelle: 'y' },
-        { nom: 'T', libelle: 'taille' }
-      ], 'Écrit un texte dans le dessin, avec la couleur du crayon.');
+      blocDessin(this, T('écrire'), [
+        { nom: 'TXT', libelle: '', check: null }, T('à'), { nom: 'X', libelle: T('x') }, { nom: 'Y', libelle: T('y') },
+        { nom: 'T', libelle: T('taille') }
+      ], T('Écrit un texte dans le dessin, avec la couleur du crayon.'));
     }
   };
 
@@ -1715,103 +1715,103 @@
     init() {
       this.appendDummyInput()
         .appendField(new Blockly.FieldDropdown([
-          ['x', 'x'], ['y', 'y'], ['x précédent', 'px'], ['y précédent', 'py']
+          [T('x'), 'x'], [T('y'), 'y'], [T('x précédent'), 'px'], [T('y précédent'), 'py']
         ]), 'QUOI')
-        .appendField('de la souris dans')
+        .appendField(T('de la souris dans'))
         .appendField(champCtrl(['zonedessin']), 'CTRL');
       this.setOutput(true, 'Number');
       this.setColour(COULEUR_DESSIN);
-      this.setTooltip('Position de la souris dans la zone de dessin. « précédent » = position juste avant le dernier mouvement.');
+      this.setTooltip(T('Position de la souris dans la zone de dessin. « précédent » = position juste avant le dernier mouvement.'));
     }
   };
 
   const ICONES = [
-    ['ℹ️ information', 'info'],
-    ['✅ succès', 'succes'],
-    ['⚠️ attention', 'attention'],
-    ['❌ erreur', 'erreur']
+    [T('ℹ️ information'), 'info'],
+    [T('✅ succès'), 'succes'],
+    [T('⚠️ attention'), 'attention'],
+    [T('❌ erreur'), 'erreur']
   ];
 
   Blockly.Blocks['bs_message'] = {
     init() {
-      this.appendValueInput('VAL').appendField('afficher le message');
+      this.appendValueInput('VAL').appendField(T('afficher le message'));
       this.appendDummyInput()
-        .appendField('icône')
+        .appendField(T('icône'))
         .appendField(new Blockly.FieldDropdown(ICONES), 'ICONE');
       this.setInputsInline(true);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
       this.setColour(COULEUR_INTERFACE);
-      this.setTooltip('Ouvre une boîte avec un message. Le programme attend que l\'on clique sur OK.');
+      this.setTooltip(T('Ouvre une boîte avec un message. Le programme attend que l\'on clique sur OK.'));
     }
   };
 
   Blockly.Blocks['bs_demander'] = {
     init() {
-      this.appendValueInput('VAL').appendField('demander');
+      this.appendValueInput('VAL').appendField(T('demander'));
       this.setOutput(true, 'String');
       this.setColour(COULEUR_INTERFACE);
-      this.setTooltip("Pose une question et donne le texte tapé par l'utilisateur (vide s'il annule).");
+      this.setTooltip(T("Pose une question et donne le texte tapé par l'utilisateur (vide s'il annule)."));
     }
   };
 
   Blockly.Blocks['bs_demander_nombre'] = {
     init() {
-      this.appendValueInput('VAL').appendField('demander un nombre');
+      this.appendValueInput('VAL').appendField(T('demander un nombre'));
       this.setOutput(true, 'Number');
       this.setColour(COULEUR_INTERFACE);
-      this.setTooltip("Pose une question et n'accepte qu'un nombre comme réponse (0 s'il annule).");
+      this.setTooltip(T("Pose une question et n'accepte qu'un nombre comme réponse (0 s'il annule)."));
     }
   };
 
   Blockly.Blocks['bs_confirmer'] = {
     init() {
-      this.appendValueInput('VAL').appendField('réponse oui / non à');
+      this.appendValueInput('VAL').appendField(T('réponse oui / non à'));
       this.setOutput(true, 'Boolean');
       this.setColour(COULEUR_INTERFACE);
-      this.setTooltip('Pose une question avec les boutons Oui et Non. Donne vrai pour Oui, faux pour Non.');
+      this.setTooltip(T('Pose une question avec les boutons Oui et Non. Donne vrai pour Oui, faux pour Non.'));
     }
   };
 
   Blockly.Blocks['bs_choisir'] = {
     init() {
-      this.appendValueInput('VAL').appendField('faire choisir, question');
-      this.appendValueInput('LISTE').setCheck('Array').appendField('parmi la liste');
+      this.appendValueInput('VAL').appendField(T('faire choisir, question'));
+      this.appendValueInput('LISTE').setCheck('Array').appendField(T('parmi la liste'));
       this.setInputsInline(true);
       this.setOutput(true, 'String');
       this.setColour(COULEUR_INTERFACE);
-      this.setTooltip("Affiche un bouton par élément de la liste et donne celui qu'on a choisi (vide s'il annule).");
+      this.setTooltip(T("Affiche un bouton par élément de la liste et donne celui qu'on a choisi (vide s'il annule)."));
     }
   };
 
   Blockly.Blocks['bs_liste_melanger'] = {
     init() {
-      this.appendValueInput('VAL').appendField('mélanger');
+      this.appendValueInput('VAL').appendField(T('mélanger'));
       this.setOutput(true, 'Array');
       this.setStyle('list_blocks');
-      this.setTooltip('Une copie de la liste, dans un ordre au hasard (la liste elle-même ne change pas) : ' +
-        'pour battre des cartes, poser les questions d\'un quiz dans le désordre… Avec un texte, ce sont ses lettres qui sont mélangées.');
+      this.setTooltip(T('Une copie de la liste, dans un ordre au hasard (la liste elle-même ne change pas) : ') +
+        T('pour battre des cartes, poser les questions d\'un quiz dans le désordre… Avec un texte, ce sont ses lettres qui sont mélangées.'));
     }
   };
 
   Blockly.Blocks['bs_chance'] = {
     init() {
-      this.appendValueInput('VAL').setCheck('Number').appendField('au hasard, avec');
-      this.appendDummyInput().appendField('% de chances ?');
+      this.appendValueInput('VAL').setCheck('Number').appendField(T('au hasard, avec'));
+      this.appendDummyInput().appendField(T('% de chances ?'));
       this.setInputsInline(true);
       this.setOutput(true, 'Boolean');
       this.setStyle('math_blocks');
-      this.setTooltip('Vrai ou faux, au hasard : 50 % = pile ou face, 10 % = une fois sur dix environ, 100 % = toujours. ' +
-        'Dans un « si » : « si au hasard, avec 5 % de chances, faire apparaître un bonus ».');
+      this.setTooltip(T('Vrai ou faux, au hasard : 50 % = pile ou face, 10 % = une fois sur dix environ, 100 % = toujours. ') +
+        T('Dans un « si » : « si au hasard, avec 5 % de chances, faire apparaître un bonus ».'));
     }
   };
 
   Blockly.Blocks['bs_nombre'] = {
     init() {
-      this.appendValueInput('VAL').appendField('nombre depuis');
+      this.appendValueInput('VAL').appendField(T('nombre depuis'));
       this.setOutput(true, 'Number');
       this.setColour(COULEUR_INTERFACE);
-      this.setTooltip('Transforme un texte comme "12" ou "3,5" en nombre pour pouvoir calculer.');
+      this.setTooltip(T('Transforme un texte comme "12" ou "3,5" en nombre pour pouvoir calculer.'));
     }
   };
 
@@ -1819,12 +1819,12 @@
   const blocContient = style => ({
     init() {
       this.appendValueInput('DANS');
-      this.appendValueInput('VAL').appendField('contient');
+      this.appendValueInput('VAL').appendField(T('contient'));
       this.appendDummyInput().appendField('?');
       this.setInputsInline(true);
       this.setOutput(true, 'Boolean');
       this.setStyle(style);
-      this.setTooltip('Vrai si le texte contient ce morceau de texte (« Bonjour » contient « jour »), ou si la liste contient cet élément.');
+      this.setTooltip(T('Vrai si le texte contient ce morceau de texte (« Bonjour » contient « jour »), ou si la liste contient cet élément.'));
     }
   });
   Blockly.Blocks['bs_contient'] = blocContient('text_blocks');
@@ -1838,7 +1838,7 @@
     `<svg xmlns="http://www.w3.org/2000/svg" width="${largeur}" height="${HAUTEUR_BOUTON_SI}">` +
     `<rect x=".75" y=".75" width="${largeur - 1.5}" height="${HAUTEUR_BOUTON_SI - 1.5}" rx="${HAUTEUR_BOUTON_SI / 2 - 1}" fill="#ffffff" fill-opacity=".3" stroke="#ffffff" stroke-width="1.5"/>` +
     `<text x="${largeur / 2}" y="${HAUTEUR_BOUTON_SI / 2 + taille * 0.36}" font-family="Segoe UI, sans-serif" font-size="${taille}" font-weight="700" fill="#ffffff" text-anchor="middle">${texte}</text></svg>`);
-  const IMAGE_PLUS_SINON_SI = boutonSi('＋ sinon si', 88), IMAGE_PLUS_SINON = boutonSi('＋ sinon', 68), IMAGE_MOINS = boutonSi('−', 24, 17);
+  const IMAGE_PLUS_SINON_SI = boutonSi(T('＋ sinon si'), 88), IMAGE_PLUS_SINON = boutonSi(T('＋ sinon'), 68), IMAGE_MOINS = boutonSi('−', 24, 17);
   const etatSi = b => { const s = b.saveExtraState && b.saveExtraState(true); return s ? JSON.stringify(s) : ''; };
 
   // Un changement de forme fait par un bouton : un seul « Ctrl+Z » l'annule, avec ce qu'il a déplacé.
@@ -1868,12 +1868,12 @@
   function boutonsEntrees(bloc, quoi) {
     if (bloc.getInput('BOUTONS_ENTREES')) bloc.removeInput('BOUTONS_ENTREES');
     const ligne = bloc.appendDummyInput('BOUTONS_ENTREES').setAlign(Blockly.inputs.Align.RIGHT);
-    ligne.appendField(boutonBloc(IMAGE_PLUS, 24, `Ajouter ${quoi}`, () => changerForme(bloc, () => {
+    ligne.appendField(boutonBloc(IMAGE_PLUS, 24, T('Ajouter {quoi}', { quoi }),() => changerForme(bloc, () => {
       bloc.itemCount_++;
       bloc.updateShape_();
     })));
     if (bloc.itemCount_ > 0) {
-      ligne.appendField(boutonBloc(IMAGE_MOINS, 24, `Enlever la dernière entrée`, () => changerForme(bloc, () => {
+      ligne.appendField(boutonBloc(IMAGE_MOINS, 24, T('Enlever la dernière entrée'),() => changerForme(bloc, () => {
         const lache = bloc.getInputTargetBlock('ADD' + (bloc.itemCount_ - 1));
         bloc.itemCount_--;
         bloc.updateShape_();
@@ -1881,7 +1881,7 @@
       })));
     }
   }
-  for (const [type, quoi] of [['text_join', 'un morceau de texte'], ['lists_create_with', 'un élément à la liste']]) {
+  for (const [type, quoi] of [['text_join', T('un morceau de texte')], ['lists_create_with', T('un élément à la liste')]]) {
     const initAvant = Blockly.Blocks[type].init;
     Blockly.Blocks[type].init = function () {
       initAvant.call(this);
@@ -1893,7 +1893,7 @@
   }
 
   // Fonctions : « ＋ paramètre » demande son nom, « − » enlève le dernier ; les appels se mettent à jour.
-  const IMAGE_PLUS_PARAMETRE = boutonSi('＋ paramètre', 98);
+  const IMAGE_PLUS_PARAMETRE = boutonSi(T('＋ paramètre'), 98);
   function changerParametres(bloc, changer) {
     changerForme(bloc, () => {
       const etat = bloc.saveExtraState(true) || {};
@@ -1907,15 +1907,15 @@
       initAvant.call(this);
       sansRoue(this);
       const bloc = this;
-      const moins = boutonBloc(IMAGE_MOINS, 24, 'Enlever le dernier paramètre', () =>
+      const moins = boutonBloc(IMAGE_MOINS, 24, T('Enlever le dernier paramètre'), () =>
         changerParametres(bloc, params => params.slice(0, -1)));
-      const plus = boutonBloc(IMAGE_PLUS_PARAMETRE, 98, 'Ajouter un paramètre : une valeur donnée à la fonction quand on l\'appelle', () => {
+      const plus = boutonBloc(IMAGE_PLUS_PARAMETRE, 98, T('Ajouter un paramètre : une valeur donnée à la fonction quand on l\'appelle'), () => {
         if (bloc.isInFlyout || bloc.workspace.options.readOnly) return;
-        Blockly.dialog.prompt('Nom du nouveau paramètre (par exemple : nombre, prénom, vitesse) :', '', nom => {
+        Blockly.dialog.prompt(T('Nom du nouveau paramètre (par exemple : nombre, prénom, vitesse) :'), '', nom => {
           nom = (nom || '').trim();
           if (!nom) return;
           if (bloc.arguments_.some(a => a.toLowerCase() === nom.toLowerCase())) {
-            Blockly.dialog.alert(`La fonction a déjà un paramètre « ${nom} ».`);
+            Blockly.dialog.alert(T('La fonction a déjà un paramètre « {nom} ».', { nom }));
             return;
           }
           changerParametres(bloc, params => [...params, { name: nom }]);
@@ -1965,13 +1965,13 @@
       return f;
     };
     for (let i = 1; bloc.getInput('IF' + i); i++) {
-      bloc.getInput('IF' + i).appendField(bouton(IMAGE_MOINS, 24, 'Enlever ce « sinon si »', 'enleverSinonSi', i));
+      bloc.getInput('IF' + i).appendField(bouton(IMAGE_MOINS, 24, T('Enlever ce « sinon si »'), 'enleverSinonSi', i));
     }
-    if (bloc.getInput('ELSE')) bloc.getInput('ELSE').appendField(bouton(IMAGE_MOINS, 24, 'Enlever le « sinon »', 'enleverSinon'));
+    if (bloc.getInput('ELSE')) bloc.getInput('ELSE').appendField(bouton(IMAGE_MOINS, 24, T('Enlever le « sinon »'), 'enleverSinon'));
     if (bloc.getInput('BOUTONS_SI')) bloc.removeInput('BOUTONS_SI');
     const ligne = bloc.appendDummyInput('BOUTONS_SI');
-    ligne.appendField(bouton(IMAGE_PLUS_SINON_SI, 88, 'Ajouter une autre condition à tester (« sinon si »)', 'ajouterSinonSi'));
-    if (!bloc.getInput('ELSE')) ligne.appendField(bouton(IMAGE_PLUS_SINON, 68, 'Ajouter ce qu\'il faut faire si aucune condition n\'est vraie (« sinon »)', 'ajouterSinon'));
+    ligne.appendField(bouton(IMAGE_PLUS_SINON_SI, 88, T('Ajouter une autre condition à tester (« sinon si »)'), 'ajouterSinonSi'));
+    if (!bloc.getInput('ELSE')) ligne.appendField(bouton(IMAGE_PLUS_SINON, 68, T('Ajouter ce qu\'il faut faire si aucune condition n\'est vraie (« sinon »)'), 'ajouterSinon'));
   }
 
   const initSi = Blockly.Blocks['controls_if'].init;
@@ -2036,15 +2036,15 @@
     const boite = document.createElement('div');
     boite.className = 'bs-commentaire-boite';
     const titre = document.createElement('h3');
-    titre.textContent = '💬 Commentaire';
+    titre.textContent = T('💬 Commentaire');
     const zone = document.createElement('textarea');
     zone.value = texte;
     zone.rows = 6;
-    zone.placeholder = 'Expliquez ce que font les blocs en dessous…';
+    zone.placeholder = T('Expliquez ce que font les blocs en dessous…');
     const boutons = document.createElement('div');
     boutons.className = 'bs-commentaire-boutons';
     const annuler = document.createElement('button');
-    annuler.textContent = 'Annuler';
+    annuler.textContent = T('Annuler');
     annuler.className = 'secondaire';
     const ok = document.createElement('button');
     ok.textContent = 'OK';
@@ -2071,12 +2071,12 @@
 
   Blockly.Blocks['bs_commentaire'] = {
     init() {
-      this.texte_ = 'Expliquez ici ce que font les blocs en dessous.';
+      this.texte_ = T('Expliquez ici ce que font les blocs en dessous.');
       this.setColour(COULEUR_COMMENTAIRE);
       this.setPreviousStatement(true);
       this.setNextStatement(true);
-      this.setTooltip('Un commentaire : il explique le programme et ne fait rien quand le programme tourne. ' +
-        'Cliquez sur ✎ pour l\'écrire. Il peut aussi rester seul, à côté des blocs, comme une note.');
+      this.setTooltip(T('Un commentaire : il explique le programme et ne fait rien quand le programme tourne. ') +
+        T('Cliquez sur ✎ pour l\'écrire. Il peut aussi rester seul, à côté des blocs, comme une note.'));
       this.suppressPrefixSuffix = true; // pas d'arrêt dessus en mode pas à pas
       this.majCommentaire_();
     },
@@ -2086,10 +2086,10 @@
       this.majCommentaire_();
     },
     majCommentaire_() {
-      const lignes = lignesCommentaire(this.texte_ || '(commentaire vide)').join('\n');
+      const lignes = lignesCommentaire(this.texte_ || T('(commentaire vide)')).join('\n');
       if (this.getField('TEXTE')) return this.setFieldValue(lignes, 'TEXTE');
       this.appendDummyInput('NOTE')
-        .appendField(boutonBloc(IMAGE_CRAYON, 24, 'Modifier le commentaire', () => {
+        .appendField(boutonBloc(IMAGE_CRAYON, 24, T('Modifier le commentaire'), () => {
           if (this.isInFlyout || this.workspace.options.readOnly) return;
           saisirCommentaire(this.texte_, texte => changerForme(this, () => {
             this.texte_ = texte;
@@ -2102,144 +2102,144 @@
 
   // Libellés de Blockly plus parlants pour les débutants.
   Object.assign(Blockly.Msg, {
-    LOGIC_TERNARY_CONDITION: 'si',
-    LOGIC_TERNARY_IF_TRUE: 'alors',
-    LOGIC_TERNARY_IF_FALSE: 'sinon',
-    LOGIC_TERNARY_TOOLTIP: 'Donne la valeur « alors » si la condition est vraie, sinon la valeur « sinon ».',
-    MATH_CHANGE_TITLE: 'augmenter %1 de %2',
-    MATH_CONSTRAIN_TITLE: 'limiter %1 entre %2 et %3',
-    MATH_CONSTRAIN_TOOLTIP: 'Garde le nombre entre le minimum et le maximum (pratique pour un score ou une position).',
-    MATH_RANDOM_FLOAT_TITLE_RANDOM: 'nombre à virgule au hasard entre 0 et 1',
-    MATH_ONLIST_OPERATOR_MODE: 'valeurs les plus fréquentes de la liste',
-    TEXT_APPEND_TITLE: 'ajouter le texte %2 à la fin de %1',
-    TEXT_COUNT_MESSAGE0: 'nombre de fois que %1 apparaît dans %2',
-    TEXT_REVERSE_MESSAGE0: 'texte à l\'envers %1',
-    TEXT_GET_SUBSTRING_START_FIRST: 'prendre le morceau depuis la première lettre',
-    TEXT_GET_SUBSTRING_START_FROM_START: 'prendre le morceau depuis la lettre nº',
-    TEXT_GET_SUBSTRING_START_FROM_END: 'prendre le morceau depuis la lettre nº (depuis la fin)',
-    LISTS_REVERSE_MESSAGE0: 'liste à l\'envers %1',
-    LISTS_GET_SUBLIST_START_FIRST: 'prendre la sous-liste depuis le début',
-    LISTS_GET_SUBLIST_START_FROM_START: 'prendre la sous-liste depuis le nº',
-    LISTS_GET_SUBLIST_START_FROM_END: 'prendre la sous-liste depuis le nº (depuis la fin)'
+    LOGIC_TERNARY_CONDITION: T('si'),
+    LOGIC_TERNARY_IF_TRUE: T('alors'),
+    LOGIC_TERNARY_IF_FALSE: T('sinon'),
+    LOGIC_TERNARY_TOOLTIP: T('Donne la valeur « alors » si la condition est vraie, sinon la valeur « sinon ».'),
+    MATH_CHANGE_TITLE: T('augmenter %1 de %2'),
+    MATH_CONSTRAIN_TITLE: T('limiter %1 entre %2 et %3'),
+    MATH_CONSTRAIN_TOOLTIP: T('Garde le nombre entre le minimum et le maximum (pratique pour un score ou une position).'),
+    MATH_RANDOM_FLOAT_TITLE_RANDOM: T('nombre à virgule au hasard entre 0 et 1'),
+    MATH_ONLIST_OPERATOR_MODE: T('valeurs les plus fréquentes de la liste'),
+    TEXT_APPEND_TITLE: T('ajouter le texte %2 à la fin de %1'),
+    TEXT_COUNT_MESSAGE0: T('nombre de fois que %1 apparaît dans %2'),
+    TEXT_REVERSE_MESSAGE0: T('texte à l\'envers %1'),
+    TEXT_GET_SUBSTRING_START_FIRST: T('prendre le morceau depuis la première lettre'),
+    TEXT_GET_SUBSTRING_START_FROM_START: T('prendre le morceau depuis la lettre nº'),
+    TEXT_GET_SUBSTRING_START_FROM_END: T('prendre le morceau depuis la lettre nº (depuis la fin)'),
+    LISTS_REVERSE_MESSAGE0: T('liste à l\'envers %1'),
+    LISTS_GET_SUBLIST_START_FIRST: T('prendre la sous-liste depuis le début'),
+    LISTS_GET_SUBLIST_START_FROM_START: T('prendre la sous-liste depuis le nº'),
+    LISTS_GET_SUBLIST_START_FROM_END: T('prendre la sous-liste depuis le nº (depuis la fin)')
   });
 
   // Infobulles des blocs de Blockly, réécrites simplement (la traduction d'origine est souvent technique).
   Object.assign(Blockly.Msg, {
     // Logique
-    CONTROLS_IF_TOOLTIP_1: 'Si la condition est vraie, les blocs de « faire » s\'exécutent. Boutons ＋ : ajouter « sinon si » ou « sinon ».',
-    CONTROLS_IF_TOOLTIP_2: 'Si la condition est vraie, les blocs de « faire » s\'exécutent ; sinon, ce sont ceux de « sinon ».',
-    CONTROLS_IF_TOOLTIP_3: 'Les conditions sont testées dans l\'ordre : seuls les blocs de la première condition vraie s\'exécutent.',
-    CONTROLS_IF_TOOLTIP_4: 'Les conditions sont testées dans l\'ordre : seuls les blocs de la première condition vraie s\'exécutent ; si aucune n\'est vraie, ce sont ceux de « sinon ».',
-    LOGIC_COMPARE_TOOLTIP_EQ: 'Vrai si les deux valeurs sont égales (5 = 5, « oui » = « oui »).',
-    LOGIC_COMPARE_TOOLTIP_NEQ: 'Vrai si les deux valeurs sont différentes.',
-    LOGIC_COMPARE_TOOLTIP_LT: 'Vrai si la première valeur est plus petite que la seconde (3 < 5).',
-    LOGIC_COMPARE_TOOLTIP_LTE: 'Vrai si la première valeur est plus petite que la seconde, ou égale.',
-    LOGIC_COMPARE_TOOLTIP_GT: 'Vrai si la première valeur est plus grande que la seconde (5 > 3).',
-    LOGIC_COMPARE_TOOLTIP_GTE: 'Vrai si la première valeur est plus grande que la seconde, ou égale.',
-    LOGIC_OPERATION_TOOLTIP_AND: 'Vrai seulement si les deux conditions sont vraies.',
-    LOGIC_OPERATION_TOOLTIP_OR: 'Vrai si au moins une des deux conditions est vraie.',
-    LOGIC_NEGATE_TOOLTIP: 'L\'inverse de la condition : vrai devient faux, et faux devient vrai.',
-    LOGIC_BOOLEAN_TOOLTIP: 'La valeur vrai ou faux, au choix.',
+    CONTROLS_IF_TOOLTIP_1: T('Si la condition est vraie, les blocs de « faire » s\'exécutent. Boutons ＋ : ajouter « sinon si » ou « sinon ».'),
+    CONTROLS_IF_TOOLTIP_2: T('Si la condition est vraie, les blocs de « faire » s\'exécutent ; sinon, ce sont ceux de « sinon ».'),
+    CONTROLS_IF_TOOLTIP_3: T('Les conditions sont testées dans l\'ordre : seuls les blocs de la première condition vraie s\'exécutent.'),
+    CONTROLS_IF_TOOLTIP_4: T('Les conditions sont testées dans l\'ordre : seuls les blocs de la première condition vraie s\'exécutent ; si aucune n\'est vraie, ce sont ceux de « sinon ».'),
+    LOGIC_COMPARE_TOOLTIP_EQ: T('Vrai si les deux valeurs sont égales (5 = 5, « oui » = « oui »).'),
+    LOGIC_COMPARE_TOOLTIP_NEQ: T('Vrai si les deux valeurs sont différentes.'),
+    LOGIC_COMPARE_TOOLTIP_LT: T('Vrai si la première valeur est plus petite que la seconde (3 < 5).'),
+    LOGIC_COMPARE_TOOLTIP_LTE: T('Vrai si la première valeur est plus petite que la seconde, ou égale.'),
+    LOGIC_COMPARE_TOOLTIP_GT: T('Vrai si la première valeur est plus grande que la seconde (5 > 3).'),
+    LOGIC_COMPARE_TOOLTIP_GTE: T('Vrai si la première valeur est plus grande que la seconde, ou égale.'),
+    LOGIC_OPERATION_TOOLTIP_AND: T('Vrai seulement si les deux conditions sont vraies.'),
+    LOGIC_OPERATION_TOOLTIP_OR: T('Vrai si au moins une des deux conditions est vraie.'),
+    LOGIC_NEGATE_TOOLTIP: T('L\'inverse de la condition : vrai devient faux, et faux devient vrai.'),
+    LOGIC_BOOLEAN_TOOLTIP: T('La valeur vrai ou faux, au choix.'),
     // Boucles
-    CONTROLS_REPEAT_TOOLTIP: 'Répète les blocs à l\'intérieur le nombre de fois indiqué.',
-    CONTROLS_WHILEUNTIL_TOOLTIP_WHILE: 'Répète les blocs tant que la condition est vraie (elle est vérifiée avant chaque tour).',
-    CONTROLS_WHILEUNTIL_TOOLTIP_UNTIL: 'Répète les blocs jusqu\'à ce que la condition devienne vraie.',
-    CONTROLS_FOR_TOOLTIP: 'Compte du premier nombre jusqu\'au second (de 1 en 1, ou du pas choisi) : à chaque tour, la variable « %1 » vaut le nombre du moment, puis les blocs s\'exécutent.',
-    CONTROLS_FOREACH_TOOLTIP: 'Pour chaque élément de la liste, l\'un après l\'autre : la variable « %1 » vaut cet élément, puis les blocs s\'exécutent.',
-    CONTROLS_FLOW_STATEMENTS_TOOLTIP_BREAK: 'Arrête la boucle tout de suite : le programme continue après la boucle.',
-    CONTROLS_FLOW_STATEMENTS_TOOLTIP_CONTINUE: 'Passe directement au tour suivant de la boucle, sans faire la fin de celui-ci.',
+    CONTROLS_REPEAT_TOOLTIP: T('Répète les blocs à l\'intérieur le nombre de fois indiqué.'),
+    CONTROLS_WHILEUNTIL_TOOLTIP_WHILE: T('Répète les blocs tant que la condition est vraie (elle est vérifiée avant chaque tour).'),
+    CONTROLS_WHILEUNTIL_TOOLTIP_UNTIL: T('Répète les blocs jusqu\'à ce que la condition devienne vraie.'),
+    CONTROLS_FOR_TOOLTIP: T('Compte du premier nombre jusqu\'au second (de 1 en 1, ou du pas choisi) : à chaque tour, la variable « %1 » vaut le nombre du moment, puis les blocs s\'exécutent.'),
+    CONTROLS_FOREACH_TOOLTIP: T('Pour chaque élément de la liste, l\'un après l\'autre : la variable « %1 » vaut cet élément, puis les blocs s\'exécutent.'),
+    CONTROLS_FLOW_STATEMENTS_TOOLTIP_BREAK: T('Arrête la boucle tout de suite : le programme continue après la boucle.'),
+    CONTROLS_FLOW_STATEMENTS_TOOLTIP_CONTINUE: T('Passe directement au tour suivant de la boucle, sans faire la fin de celui-ci.'),
     // Maths
-    MATH_NUMBER_TOOLTIP: 'Un nombre. Pour un nombre à virgule, écrivez-le avec un point : 2.5',
-    MATH_ARITHMETIC_TOOLTIP_ADD: 'La somme des deux nombres (3 + 2 = 5).',
-    MATH_ARITHMETIC_TOOLTIP_MINUS: 'Le premier nombre moins le second (5 − 2 = 3).',
-    MATH_ARITHMETIC_TOOLTIP_MULTIPLY: 'Le produit des deux nombres (3 × 4 = 12).',
-    MATH_ARITHMETIC_TOOLTIP_DIVIDE: 'Le premier nombre divisé par le second (10 ÷ 4 = 2,5).',
-    MATH_ARITHMETIC_TOOLTIP_POWER: 'Le premier nombre à la puissance du second (2 ^ 3 = 2 × 2 × 2 = 8).',
-    MATH_SINGLE_TOOLTIP_ROOT: 'La racine carrée du nombre (√9 = 3).',
-    MATH_SINGLE_TOOLTIP_ABS: 'Le nombre sans son signe moins (−7 donne 7).',
-    MATH_SINGLE_TOOLTIP_NEG: 'L\'opposé du nombre (7 donne −7, et −7 donne 7).',
-    MATH_SINGLE_TOOLTIP_LN: 'Le logarithme naturel (ln) du nombre.',
-    MATH_SINGLE_TOOLTIP_LOG10: 'Le logarithme décimal du nombre (log de 1000 = 3).',
-    MATH_SINGLE_TOOLTIP_EXP: 'Le nombre e (environ 2,718) à la puissance du nombre.',
-    MATH_SINGLE_TOOLTIP_POW10: '10 à la puissance du nombre (10^3 = 1000).',
-    MATH_ROUND_TOOLTIP: 'Arrondit le nombre : à l\'entier le plus proche (2,6 → 3), au-dessus (2,1 → 3) ou au-dessous (2,9 → 2).',
-    MATH_MODULO_TOOLTIP: 'Le reste de la division (17 ÷ 5 = 3, reste 2). Un reste de 0 : le premier nombre est un multiple du second.',
-    MATH_IS_TOOLTIP: 'Vrai ou faux : le nombre est-il pair, impair, premier, entier, positif, négatif, ou divisible par un autre ?',
-    MATH_RANDOM_INT_TOOLTIP: 'Un nombre entier au hasard entre les deux nombres, eux compris : comme un dé.',
-    MATH_RANDOM_FLOAT_TOOLTIP: 'Un nombre à virgule au hasard, entre 0 et 1 (jamais 1).',
-    MATH_ONLIST_TOOLTIP_SUM: 'La somme de tous les nombres de la liste.',
-    MATH_ONLIST_TOOLTIP_MIN: 'Le plus petit nombre de la liste.',
-    MATH_ONLIST_TOOLTIP_MAX: 'Le plus grand nombre de la liste.',
-    MATH_ONLIST_TOOLTIP_AVERAGE: 'La moyenne des nombres de la liste.',
-    MATH_ONLIST_TOOLTIP_MEDIAN: 'La valeur du milieu, quand on range les nombres de la liste dans l\'ordre.',
-    MATH_ONLIST_TOOLTIP_MODE: 'La valeur qui revient le plus souvent dans la liste (une liste, s\'il y en a plusieurs à égalité).',
-    MATH_ONLIST_TOOLTIP_STD_DEV: 'L\'écart type : il mesure à quel point les nombres de la liste sont dispersés.',
-    MATH_ONLIST_TOOLTIP_RANDOM: 'Un élément de la liste, pris au hasard.',
-    MATH_TRIG_TOOLTIP_SIN: 'Le sinus d\'un angle en degrés.',
-    MATH_TRIG_TOOLTIP_COS: 'Le cosinus d\'un angle en degrés.',
-    MATH_TRIG_TOOLTIP_TAN: 'La tangente d\'un angle en degrés.',
-    MATH_TRIG_TOOLTIP_ASIN: 'L\'angle, en degrés, dont le sinus est ce nombre.',
-    MATH_TRIG_TOOLTIP_ACOS: 'L\'angle, en degrés, dont le cosinus est ce nombre.',
-    MATH_TRIG_TOOLTIP_ATAN: 'L\'angle, en degrés, dont la tangente est ce nombre.',
-    MATH_CONSTANT_TOOLTIP: 'Une constante : π (3,14159…), e (2,71828…), φ le nombre d\'or (1,618…), √2 (1,414…), √½ (0,707…) ou ∞ (l\'infini).',
+    MATH_NUMBER_TOOLTIP: T('Un nombre. Pour un nombre à virgule, écrivez-le avec un point : 2.5'),
+    MATH_ARITHMETIC_TOOLTIP_ADD: T('La somme des deux nombres (3 + 2 = 5).'),
+    MATH_ARITHMETIC_TOOLTIP_MINUS: T('Le premier nombre moins le second (5 − 2 = 3).'),
+    MATH_ARITHMETIC_TOOLTIP_MULTIPLY: T('Le produit des deux nombres (3 × 4 = 12).'),
+    MATH_ARITHMETIC_TOOLTIP_DIVIDE: T('Le premier nombre divisé par le second (10 ÷ 4 = 2,5).'),
+    MATH_ARITHMETIC_TOOLTIP_POWER: T('Le premier nombre à la puissance du second (2 ^ 3 = 2 × 2 × 2 = 8).'),
+    MATH_SINGLE_TOOLTIP_ROOT: T('La racine carrée du nombre (√9 = 3).'),
+    MATH_SINGLE_TOOLTIP_ABS: T('Le nombre sans son signe moins (−7 donne 7).'),
+    MATH_SINGLE_TOOLTIP_NEG: T('L\'opposé du nombre (7 donne −7, et −7 donne 7).'),
+    MATH_SINGLE_TOOLTIP_LN: T('Le logarithme naturel (ln) du nombre.'),
+    MATH_SINGLE_TOOLTIP_LOG10: T('Le logarithme décimal du nombre (log de 1000 = 3).'),
+    MATH_SINGLE_TOOLTIP_EXP: T('Le nombre e (environ 2,718) à la puissance du nombre.'),
+    MATH_SINGLE_TOOLTIP_POW10: T('10 à la puissance du nombre (10^3 = 1000).'),
+    MATH_ROUND_TOOLTIP: T('Arrondit le nombre : à l\'entier le plus proche (2,6 → 3), au-dessus (2,1 → 3) ou au-dessous (2,9 → 2).'),
+    MATH_MODULO_TOOLTIP: T('Le reste de la division (17 ÷ 5 = 3, reste 2). Un reste de 0 : le premier nombre est un multiple du second.'),
+    MATH_IS_TOOLTIP: T('Vrai ou faux : le nombre est-il pair, impair, premier, entier, positif, négatif, ou divisible par un autre ?'),
+    MATH_RANDOM_INT_TOOLTIP: T('Un nombre entier au hasard entre les deux nombres, eux compris : comme un dé.'),
+    MATH_RANDOM_FLOAT_TOOLTIP: T('Un nombre à virgule au hasard, entre 0 et 1 (jamais 1).'),
+    MATH_ONLIST_TOOLTIP_SUM: T('La somme de tous les nombres de la liste.'),
+    MATH_ONLIST_TOOLTIP_MIN: T('Le plus petit nombre de la liste.'),
+    MATH_ONLIST_TOOLTIP_MAX: T('Le plus grand nombre de la liste.'),
+    MATH_ONLIST_TOOLTIP_AVERAGE: T('La moyenne des nombres de la liste.'),
+    MATH_ONLIST_TOOLTIP_MEDIAN: T('La valeur du milieu, quand on range les nombres de la liste dans l\'ordre.'),
+    MATH_ONLIST_TOOLTIP_MODE: T('La valeur qui revient le plus souvent dans la liste (une liste, s\'il y en a plusieurs à égalité).'),
+    MATH_ONLIST_TOOLTIP_STD_DEV: T('L\'écart type : il mesure à quel point les nombres de la liste sont dispersés.'),
+    MATH_ONLIST_TOOLTIP_RANDOM: T('Un élément de la liste, pris au hasard.'),
+    MATH_TRIG_TOOLTIP_SIN: T('Le sinus d\'un angle en degrés.'),
+    MATH_TRIG_TOOLTIP_COS: T('Le cosinus d\'un angle en degrés.'),
+    MATH_TRIG_TOOLTIP_TAN: T('La tangente d\'un angle en degrés.'),
+    MATH_TRIG_TOOLTIP_ASIN: T('L\'angle, en degrés, dont le sinus est ce nombre.'),
+    MATH_TRIG_TOOLTIP_ACOS: T('L\'angle, en degrés, dont le cosinus est ce nombre.'),
+    MATH_TRIG_TOOLTIP_ATAN: T('L\'angle, en degrés, dont la tangente est ce nombre.'),
+    MATH_CONSTANT_TOOLTIP: T('Une constante : π (3,14159…), e (2,71828…), φ le nombre d\'or (1,618…), √2 (1,414…), √½ (0,707…) ou ∞ (l\'infini).'),
     // Texte
-    TEXT_TEXT_TOOLTIP: 'Un texte : une lettre, un mot ou une phrase.',
-    TEXT_JOIN_TOOLTIP: 'Colle des morceaux bout à bout pour faire un seul texte (pensez aux espaces : « Bonjour » + « Léa » donne « BonjourLéa »). Boutons ＋ et − : ajouter ou enlever un morceau.',
-    TEXT_APPEND_TOOLTIP: 'Ajoute ce texte à la fin de la variable « %1 ».',
-    TEXT_LENGTH_TOOLTIP: 'Le nombre de caractères du texte : lettres, chiffres, espaces et ponctuation compris.',
-    TEXT_ISEMPTY_TOOLTIP: 'Vrai si le texte est vide (aucun caractère).',
-    TEXT_INDEXOF_TOOLTIP: 'La position du morceau dans le texte (1 = au tout début), à sa première ou à sa dernière apparition ; %1 s\'il n\'y est pas.',
-    TEXT_CHARAT_TOOLTIP: 'La lettre qui se trouve à cette position du texte.',
-    LISTS_INDEX_FROM_START_TOOLTIP: 'Le nº 1 est le premier.',
-    LISTS_INDEX_FROM_END_TOOLTIP: 'Le nº 1 est le dernier.',
-    TEXT_GET_SUBSTRING_TOOLTIP: 'Un morceau du texte, entre les deux positions choisies.',
-    TEXT_REPLACE_TOOLTIP: 'Remplace partout dans le texte un morceau par un autre.',
-    TEXT_COUNT_TOOLTIP: 'Combien de fois un morceau de texte apparaît dans un autre.',
-    TEXT_CHANGECASE_TOOLTIP: 'Le texte en MAJUSCULES, en minuscules, ou avec Une Majuscule À Chaque Mot.',
-    TEXT_TRIM_TOOLTIP: 'Le texte sans ses espaces au début, à la fin, ou des deux côtés.',
-    TEXT_REVERSE_TOOLTIP: 'Le texte à l\'envers (« abc » donne « cba »).',
+    TEXT_TEXT_TOOLTIP: T('Un texte : une lettre, un mot ou une phrase.'),
+    TEXT_JOIN_TOOLTIP: T('Colle des morceaux bout à bout pour faire un seul texte (pensez aux espaces : « Bonjour » + « Léa » donne « BonjourLéa »). Boutons ＋ et − : ajouter ou enlever un morceau.'),
+    TEXT_APPEND_TOOLTIP: T('Ajoute ce texte à la fin de la variable « %1 ».'),
+    TEXT_LENGTH_TOOLTIP: T('Le nombre de caractères du texte : lettres, chiffres, espaces et ponctuation compris.'),
+    TEXT_ISEMPTY_TOOLTIP: T('Vrai si le texte est vide (aucun caractère).'),
+    TEXT_INDEXOF_TOOLTIP: T('La position du morceau dans le texte (1 = au tout début), à sa première ou à sa dernière apparition ; %1 s\'il n\'y est pas.'),
+    TEXT_CHARAT_TOOLTIP: T('La lettre qui se trouve à cette position du texte.'),
+    LISTS_INDEX_FROM_START_TOOLTIP: T('Le nº 1 est le premier.'),
+    LISTS_INDEX_FROM_END_TOOLTIP: T('Le nº 1 est le dernier.'),
+    TEXT_GET_SUBSTRING_TOOLTIP: T('Un morceau du texte, entre les deux positions choisies.'),
+    TEXT_REPLACE_TOOLTIP: T('Remplace partout dans le texte un morceau par un autre.'),
+    TEXT_COUNT_TOOLTIP: T('Combien de fois un morceau de texte apparaît dans un autre.'),
+    TEXT_CHANGECASE_TOOLTIP: T('Le texte en MAJUSCULES, en minuscules, ou avec Une Majuscule À Chaque Mot.'),
+    TEXT_TRIM_TOOLTIP: T('Le texte sans ses espaces au début, à la fin, ou des deux côtés.'),
+    TEXT_REVERSE_TOOLTIP: T('Le texte à l\'envers (« abc » donne « cba »).'),
     // Listes
-    LISTS_CREATE_EMPTY_TOOLTIP: 'Une liste vide, à remplir ensuite.',
-    LISTS_CREATE_WITH_TOOLTIP: 'Une liste faite de ces éléments, dans cet ordre. Boutons ＋ et − : ajouter ou enlever un élément.',
-    LISTS_LENGTH_TOOLTIP: 'Le nombre d\'éléments de la liste.',
-    LISTS_ISEMPTY_TOOLTIP: 'Vrai si la liste ne contient aucun élément.',
-    LISTS_REPEAT_TOOLTIP: 'Une liste qui contient la même valeur, répétée le nombre de fois indiqué.',
-    LISTS_GET_INDEX_TOOLTIP_GET_FROM: 'L\'élément qui se trouve à cette position dans la liste.',
-    LISTS_GET_INDEX_TOOLTIP_GET_FIRST: 'Le premier élément de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_GET_LAST: 'Le dernier élément de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_GET_RANDOM: 'Un élément de la liste, pris au hasard.',
-    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FROM: 'L\'élément qui se trouve à cette position, retiré en même temps de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FIRST: 'Le premier élément, retiré en même temps de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_LAST: 'Le dernier élément, retiré en même temps de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_RANDOM: 'Un élément au hasard, retiré en même temps de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_REMOVE_FROM: 'Retire de la liste l\'élément qui se trouve à cette position.',
-    LISTS_GET_INDEX_TOOLTIP_REMOVE_FIRST: 'Retire le premier élément de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_REMOVE_LAST: 'Retire le dernier élément de la liste.',
-    LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM: 'Retire un élément de la liste, pris au hasard.',
-    LISTS_SET_INDEX_TOOLTIP_SET_FROM: 'Remplace l\'élément qui se trouve à cette position.',
-    LISTS_SET_INDEX_TOOLTIP_SET_FIRST: 'Remplace le premier élément de la liste.',
-    LISTS_SET_INDEX_TOOLTIP_SET_LAST: 'Remplace le dernier élément de la liste.',
-    LISTS_SET_INDEX_TOOLTIP_SET_RANDOM: 'Remplace un élément de la liste, pris au hasard.',
-    LISTS_SET_INDEX_TOOLTIP_INSERT_FROM: 'Insère l\'élément à cette position (les suivants se décalent d\'une place).',
-    LISTS_SET_INDEX_TOOLTIP_INSERT_FIRST: 'Insère l\'élément au début de la liste.',
-    LISTS_SET_INDEX_TOOLTIP_INSERT_LAST: 'Ajoute l\'élément à la fin de la liste.',
-    LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM: 'Insère l\'élément à une place au hasard.',
-    LISTS_INDEX_OF_TOOLTIP: 'La position de l\'élément dans la liste (1 = le premier), à sa première ou à sa dernière apparition ; %1 s\'il n\'y est pas.',
-    LISTS_GET_SUBLIST_TOOLTIP: 'Une nouvelle liste faite d\'une partie de celle-ci, entre les deux positions choisies.',
-    LISTS_SORT_TOOLTIP: 'Une copie de la liste rangée dans l\'ordre (nombres ou ordre alphabétique, croissant ou décroissant).',
-    LISTS_REVERSE_TOOLTIP: 'Une copie de la liste à l\'envers : le dernier élément devient le premier.',
-    LISTS_SPLIT_TOOLTIP_SPLIT: 'Découpe un texte en liste à chaque séparateur (« a,b,c » avec « , » donne a, b et c).',
-    LISTS_SPLIT_TOOLTIP_JOIN: 'Colle les éléments d\'une liste en un seul texte, avec le séparateur entre chacun.',
+    LISTS_CREATE_EMPTY_TOOLTIP: T('Une liste vide, à remplir ensuite.'),
+    LISTS_CREATE_WITH_TOOLTIP: T('Une liste faite de ces éléments, dans cet ordre. Boutons ＋ et − : ajouter ou enlever un élément.'),
+    LISTS_LENGTH_TOOLTIP: T('Le nombre d\'éléments de la liste.'),
+    LISTS_ISEMPTY_TOOLTIP: T('Vrai si la liste ne contient aucun élément.'),
+    LISTS_REPEAT_TOOLTIP: T('Une liste qui contient la même valeur, répétée le nombre de fois indiqué.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_FROM: T('L\'élément qui se trouve à cette position dans la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_FIRST: T('Le premier élément de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_LAST: T('Le dernier élément de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_RANDOM: T('Un élément de la liste, pris au hasard.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FROM: T('L\'élément qui se trouve à cette position, retiré en même temps de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_FIRST: T('Le premier élément, retiré en même temps de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_LAST: T('Le dernier élément, retiré en même temps de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_GET_REMOVE_RANDOM: T('Un élément au hasard, retiré en même temps de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_REMOVE_FROM: T('Retire de la liste l\'élément qui se trouve à cette position.'),
+    LISTS_GET_INDEX_TOOLTIP_REMOVE_FIRST: T('Retire le premier élément de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_REMOVE_LAST: T('Retire le dernier élément de la liste.'),
+    LISTS_GET_INDEX_TOOLTIP_REMOVE_RANDOM: T('Retire un élément de la liste, pris au hasard.'),
+    LISTS_SET_INDEX_TOOLTIP_SET_FROM: T('Remplace l\'élément qui se trouve à cette position.'),
+    LISTS_SET_INDEX_TOOLTIP_SET_FIRST: T('Remplace le premier élément de la liste.'),
+    LISTS_SET_INDEX_TOOLTIP_SET_LAST: T('Remplace le dernier élément de la liste.'),
+    LISTS_SET_INDEX_TOOLTIP_SET_RANDOM: T('Remplace un élément de la liste, pris au hasard.'),
+    LISTS_SET_INDEX_TOOLTIP_INSERT_FROM: T('Insère l\'élément à cette position (les suivants se décalent d\'une place).'),
+    LISTS_SET_INDEX_TOOLTIP_INSERT_FIRST: T('Insère l\'élément au début de la liste.'),
+    LISTS_SET_INDEX_TOOLTIP_INSERT_LAST: T('Ajoute l\'élément à la fin de la liste.'),
+    LISTS_SET_INDEX_TOOLTIP_INSERT_RANDOM: T('Insère l\'élément à une place au hasard.'),
+    LISTS_INDEX_OF_TOOLTIP: T('La position de l\'élément dans la liste (1 = le premier), à sa première ou à sa dernière apparition ; %1 s\'il n\'y est pas.'),
+    LISTS_GET_SUBLIST_TOOLTIP: T('Une nouvelle liste faite d\'une partie de celle-ci, entre les deux positions choisies.'),
+    LISTS_SORT_TOOLTIP: T('Une copie de la liste rangée dans l\'ordre (nombres ou ordre alphabétique, croissant ou décroissant).'),
+    LISTS_REVERSE_TOOLTIP: T('Une copie de la liste à l\'envers : le dernier élément devient le premier.'),
+    LISTS_SPLIT_TOOLTIP_SPLIT: T('Découpe un texte en liste à chaque séparateur (« a,b,c » avec « , » donne a, b et c).'),
+    LISTS_SPLIT_TOOLTIP_JOIN: T('Colle les éléments d\'une liste en un seul texte, avec le séparateur entre chacun.'),
     // Variables
-    VARIABLES_SET_TOOLTIP: 'Range une valeur dans la variable (elle remplace l\'ancienne).',
-    MATH_CHANGE_TOOLTIP: 'Ajoute ce nombre à la variable « %1 » (un nombre négatif l\'enlève).',
-    VARIABLES_GET_TOOLTIP: 'La valeur rangée dans cette variable.',
+    VARIABLES_SET_TOOLTIP: T('Range une valeur dans la variable (elle remplace l\'ancienne).'),
+    MATH_CHANGE_TOOLTIP: T('Ajoute ce nombre à la variable « %1 » (un nombre négatif l\'enlève).'),
+    VARIABLES_GET_TOOLTIP: T('La valeur rangée dans cette variable.'),
     // Fonctions
-    PROCEDURES_DEFNORETURN_TOOLTIP: 'Crée une fonction : des blocs regroupés sous un nom, à lancer avec son bloc de la catégorie Fonctions. « ＋ paramètre » : lui donner des valeurs.',
-    PROCEDURES_DEFRETURN_TOOLTIP: 'Crée une fonction qui calcule une valeur et la renvoie : son bloc s\'utilise comme une valeur. « ＋ paramètre » : lui donner des valeurs.',
-    PROCEDURES_IFRETURN_TOOLTIP: 'Si la condition est vraie, la fonction s\'arrête là et renvoie cette valeur.',
-    PROCEDURES_CALLNORETURN_TOOLTIP: 'Lance la fonction « %1 » : ses blocs s\'exécutent, puis le programme continue.',
-    PROCEDURES_CALLRETURN_TOOLTIP: 'Lance la fonction « %1 » et utilise la valeur qu\'elle renvoie.'
+    PROCEDURES_DEFNORETURN_TOOLTIP: T('Crée une fonction : des blocs regroupés sous un nom, à lancer avec son bloc de la catégorie Fonctions. « ＋ paramètre » : lui donner des valeurs.'),
+    PROCEDURES_DEFRETURN_TOOLTIP: T('Crée une fonction qui calcule une valeur et la renvoie : son bloc s\'utilise comme une valeur. « ＋ paramètre » : lui donner des valeurs.'),
+    PROCEDURES_IFRETURN_TOOLTIP: T('Si la condition est vraie, la fonction s\'arrête là et renvoie cette valeur.'),
+    PROCEDURES_CALLNORETURN_TOOLTIP: T('Lance la fonction « %1 » : ses blocs s\'exécutent, puis le programme continue.'),
+    PROCEDURES_CALLRETURN_TOOLTIP: T('Lance la fonction « %1 » et utilise la valeur qu\'elle renvoie.')
   });
 
   // ---------- Génération du code ----------
@@ -2630,39 +2630,39 @@
   });
   const etiquette = text => ({ kind: 'label', text });
   const AUJOURDHUI = () => ({ block: { type: 'bs_maintenant', fields: { QUOI: 'date' } } });
-  const DICO_VAR = () => ({ block: { type: 'variables_get', fields: { VAR: { name: 'dictionnaire' } } } });
+  const DICO_VAR = () => ({ block: { type: 'variables_get', fields: { VAR: { name: T('dictionnaire') } } } });
 
   const GENERAUX = [
     {
-      kind: 'category', name: 'Événements', colour: COULEUR_EVENEMENTS, contents: [
+      kind: 'category', name: T('Événements'), colour: COULEUR_EVENEMENTS, contents: [
         { kind: 'block', type: 'bs_quand_demarre' },
         { kind: 'block', type: 'bs_quand_touche' },
         { kind: 'block', type: 'bs_toutes_les', inputs: { SEC: nombre(1) } },
-        etiquette('Messages entre les scripts'),
+        etiquette(T('Messages entre les scripts')),
         { kind: 'block', type: 'bs_envoyer_message' },
         { kind: 'block', type: 'bs_quand_message' },
-        etiquette('Les événements d\'un contrôle (« quand Bouton1 est cliqué »…) sont dans sa catégorie, en bas.')
+        etiquette(T('Les événements d\'un contrôle (« quand Bouton1 est cliqué »…) sont dans sa catégorie, en bas.'))
       ]
     },
     {
-      kind: 'category', name: 'Commentaires', colour: COULEUR_COMMENTAIRE, contents: [
-        etiquette('Expliquez votre programme : un commentaire ne fait rien quand le programme tourne.'),
+      kind: 'category', name: T('Commentaires'), colour: COULEUR_COMMENTAIRE, contents: [
+        etiquette(T('Expliquez votre programme : un commentaire ne fait rien quand le programme tourne.')),
         { kind: 'block', type: 'bs_commentaire' },
-        etiquette('Glissez-le au-dessus des blocs qu\'il explique (ou en premier dans un « quand… »).')
+        etiquette(T('Glissez-le au-dessus des blocs qu\'il explique (ou en premier dans un « quand… »).'))
       ]
     },
     {
-      kind: 'category', name: 'Clavier, souris et manette', colour: COULEUR_ENTREES, contents: [
-        etiquette('Clavier'),
+      kind: 'category', name: T('Clavier, souris et manette'), colour: COULEUR_ENTREES, contents: [
+        etiquette(T('Clavier')),
         { kind: 'block', type: 'bs_quand_touche' },
         { kind: 'block', type: 'bs_touche_enfoncee', fields: { TOUCHE: 'droite' } },
         { kind: 'block', type: 'bs_derniere_touche' },
-        etiquette('Souris'),
+        etiquette(T('Souris')),
         { kind: 'block', type: 'bs_quand_souris_fenetre' },
         { kind: 'block', type: 'bs_souris_fenetre' },
         { kind: 'block', type: 'bs_souris_fenetre', fields: { QUOI: 'y' } },
         { kind: 'block', type: 'bs_souris_enfoncee' },
-        etiquette('Manette de jeu (la croix fait aussi les flèches, A la touche Espace)'),
+        etiquette(T('Manette de jeu (la croix fait aussi les flèches, A la touche Espace)')),
         { kind: 'block', type: 'bs_quand_manette', fields: { BOUTON: 'a' } },
         { kind: 'block', type: 'bs_manette_bouton', fields: { BOUTON: 'a' } },
         { kind: 'block', type: 'bs_manette_joystick' },
@@ -2670,74 +2670,74 @@
       ]
     },
     {
-      kind: 'category', name: 'Dialogue', colour: COULEUR_INTERFACE, contents: [
-        { kind: 'block', type: 'bs_message', inputs: { VAL: texte('Bonjour !') } },
-        { kind: 'block', type: 'bs_demander', inputs: { VAL: texte('Comment tu t\'appelles ?') } },
-        { kind: 'block', type: 'bs_demander_nombre', inputs: { VAL: texte('Quel âge as-tu ?') } },
-        { kind: 'block', type: 'bs_confirmer', inputs: { VAL: texte('Veux-tu continuer ?') } },
+      kind: 'category', name: T('Dialogue'), colour: COULEUR_INTERFACE, contents: [
+        { kind: 'block', type: 'bs_message', inputs: { VAL: texte(T('Bonjour !')) } },
+        { kind: 'block', type: 'bs_demander', inputs: { VAL: texte(T('Comment tu t\'appelles ?')) } },
+        { kind: 'block', type: 'bs_demander_nombre', inputs: { VAL: texte(T('Quel âge as-tu ?')) } },
+        { kind: 'block', type: 'bs_confirmer', inputs: { VAL: texte(T('Veux-tu continuer ?')) } },
         {
           kind: 'block', type: 'bs_choisir',
-          inputs: { VAL: texte('Quelle couleur préfères-tu ?'), LISTE: listeTextes('Rouge', 'Vert', 'Bleu') }
+          inputs: { VAL: texte(T('Quelle couleur préfères-tu ?')), LISTE: listeTextes(T('Rouge'), T('Vert'), T('Bleu')) }
         },
         { kind: 'block', type: 'bs_nombre' }
       ]
     },
     {
-      kind: 'category', name: 'Windows', colour: COULEUR_WINDOWS, contents: [
-        etiquette('Notifications'),
-        { kind: 'block', type: 'bs_notification', inputs: { TITRE: texte('Rappel'), VAL: texte('C\'est l\'heure de la pause !') }, fields: { ICONE: 'info' } },
-        etiquette('Presse-papiers'),
-        { kind: 'block', type: 'bs_copier', inputs: { VAL: texte('Bonjour !') } },
+      kind: 'category', name: T('Windows'), colour: COULEUR_WINDOWS, contents: [
+        etiquette(T('Notifications')),
+        { kind: 'block', type: 'bs_notification', inputs: { TITRE: texte(T('Rappel')), VAL: texte(T('C\'est l\'heure de la pause !')) }, fields: { ICONE: 'info' } },
+        etiquette(T('Presse-papiers')),
+        { kind: 'block', type: 'bs_copier', inputs: { VAL: texte(T('Bonjour !')) } },
         { kind: 'block', type: 'bs_presse_papiers' },
         { kind: 'block', type: 'bs_copier_image' },
-        etiquette('Impression'),
-        { kind: 'block', type: 'bs_imprimer_texte', inputs: { VAL: texte('Ma liste de courses') } },
+        etiquette(T('Impression')),
+        { kind: 'block', type: 'bs_imprimer_texte', inputs: { VAL: texte(T('Ma liste de courses')) } },
         { kind: 'block', type: 'bs_imprimer' },
         { kind: 'block', type: 'bs_imprimer_fenetre', fields: { FENETRE: '' } }
       ]
     },
     {
-      kind: 'category', name: 'Sons et temps', colour: COULEUR_SONS, contents: [
-        { kind: 'button', text: '🎵 Importer un son…', callbackKey: 'importerSon' },
-        { kind: 'button', text: '🎤 Enregistrer avec le micro…', callbackKey: 'enregistrerSon' },
-        { kind: 'button', text: '🎹 Composer une musique 8 bits…', callbackKey: 'composerMusique' },
+      kind: 'category', name: T('Sons et temps'), colour: COULEUR_SONS, contents: [
+        { kind: 'button', text: T('🎵 Importer un son…'), callbackKey: 'importerSon' },
+        { kind: 'button', text: T('🎤 Enregistrer avec le micro…'), callbackKey: 'enregistrerSon' },
+        { kind: 'button', text: T('🎹 Composer une musique 8 bits…'), callbackKey: 'composerMusique' },
         { kind: 'block', type: 'bs_son' },
         { kind: 'block', type: 'bs_son_mode' },
         { kind: 'block', type: 'bs_son_arreter' },
         { kind: 'block', type: 'bs_sons_arreter' },
         { kind: 'block', type: 'bs_son_volume', fields: { SON: '*' }, inputs: { VOL: nombre(30) } },
-        etiquette('Voix'),
-        { kind: 'block', type: 'bs_dire', inputs: { VAL: texte('Bonjour, je suis ton ordinateur !') }, fields: { ATTENDRE: 'oui' } },
+        etiquette(T('Voix')),
+        { kind: 'block', type: 'bs_dire', inputs: { VAL: texte(T('Bonjour, je suis ton ordinateur !')) }, fields: { ATTENDRE: 'oui' } },
         { kind: 'block', type: 'bs_voix_regler', inputs: { VITESSE: nombre(1), HAUTEUR: nombre(1) } },
         { kind: 'block', type: 'bs_voix_taire' },
-        etiquette('Musique et temps'),
+        etiquette(T('Musique et temps')),
         { kind: 'block', type: 'bs_note', inputs: { SEC: nombre(0.5) } },
         { kind: 'block', type: 'bs_attendre', inputs: { SEC: nombre(1) } },
         { kind: 'block', type: 'bs_maintenant' },
         { kind: 'block', type: 'bs_temps_texte', inputs: { VAL: nombre(213) } },
-        etiquette('Dates'),
+        etiquette(T('Dates')),
         { kind: 'block', type: 'bs_date_ecart', inputs: { D1: AUJOURDHUI(), D2: texte('25/12/2026') } },
         { kind: 'block', type: 'bs_date_plus', inputs: { DATE: AUJOURDHUI(), JOURS: nombre(7) } },
         { kind: 'block', type: 'bs_date_jour_semaine', inputs: { DATE: texte('14/07/2027') } },
-        etiquette('Micro'),
+        etiquette(T('Micro')),
         { kind: 'block', type: 'bs_volume_micro' },
         { kind: 'block', type: 'bs_quand_micro' }
       ]
     },
     {
-      kind: 'category', name: 'Mémoire', colour: COULEUR_MEMOIRE, contents: [
-        { kind: 'block', type: 'bs_memoriser', inputs: { VAL: texte('Marie'), NOM: texte('prénom') } },
-        { kind: 'block', type: 'bs_memoire', inputs: { NOM: texte('prénom') } },
-        { kind: 'block', type: 'bs_oublier', inputs: { NOM: texte('prénom') } },
+      kind: 'category', name: T('Mémoire'), colour: COULEUR_MEMOIRE, contents: [
+        { kind: 'block', type: 'bs_memoriser', inputs: { VAL: texte(T('Marie')), NOM: texte(T('prénom')) } },
+        { kind: 'block', type: 'bs_memoire', inputs: { NOM: texte(T('prénom')) } },
+        { kind: 'block', type: 'bs_oublier', inputs: { NOM: texte(T('prénom')) } },
         { kind: 'block', type: 'bs_tout_oublier' },
-        etiquette('Fichiers (pour plus de choix : un contrôle 📁 Fichier)'),
-        { kind: 'block', type: 'bs_fichier_enregistrer', inputs: { VAL: texte('Bonjour !'), NOM: texte('mon fichier.txt') } },
+        etiquette(T('Fichiers (pour plus de choix : un contrôle 📁 Fichier)')),
+        { kind: 'block', type: 'bs_fichier_enregistrer', inputs: { VAL: texte(T('Bonjour !')), NOM: texte(T('mon fichier.txt')) } },
         { kind: 'block', type: 'bs_fichier_ouvrir' }
       ]
     },
     { kind: 'sep' },
     {
-      kind: 'category', name: 'Logique', categorystyle: 'logic_category', contents: [
+      kind: 'category', name: T('Logique'), categorystyle: 'logic_category', contents: [
         { kind: 'block', type: 'controls_if' },
         { kind: 'block', type: 'controls_if', extraState: { hasElse: true } },
         { kind: 'block', type: 'logic_compare' },
@@ -2748,7 +2748,7 @@
       ]
     },
     {
-      kind: 'category', name: 'Boucles', categorystyle: 'loop_category', contents: [
+      kind: 'category', name: T('Boucles'), categorystyle: 'loop_category', contents: [
         { kind: 'block', type: 'bs_attendre', inputs: { SEC: nombre(1) } },
         { kind: 'block', type: 'bs_toujours' },
         { kind: 'block', type: 'controls_repeat_ext', inputs: { TIMES: nombre(10) } },
@@ -2759,7 +2759,7 @@
       ]
     },
     {
-      kind: 'category', name: 'Maths', categorystyle: 'math_category', contents: [
+      kind: 'category', name: T('Maths'), categorystyle: 'math_category', contents: [
         { kind: 'block', type: 'math_number' },
         { kind: 'block', type: 'math_arithmetic', inputs: { A: nombre(1), B: nombre(1) } },
         { kind: 'block', type: 'math_single' },
@@ -2778,38 +2778,38 @@
       ]
     },
     {
-      kind: 'category', name: 'Internet', colour: COULEUR_INTERNET, contents: [
-        etiquette('Météo (il faut une connexion à Internet)'),
-        { kind: 'block', type: 'bs_meteo', inputs: { VAL: texte('Paris') } },
-        { kind: 'block', type: 'bs_meteo', inputs: { VAL: texte('Paris') }, fields: { QUOI: 'emoji' } },
-        etiquette('Données d\'un service Internet'),
+      kind: 'category', name: T('Internet'), colour: COULEUR_INTERNET, contents: [
+        etiquette(T('Météo (il faut une connexion à Internet)')),
+        { kind: 'block', type: 'bs_meteo', inputs: { VAL: texte(T('Paris')) } },
+        { kind: 'block', type: 'bs_meteo', inputs: { VAL: texte(T('Paris')) }, fields: { QUOI: 'emoji' } },
+        etiquette(T('Données d\'un service Internet')),
         { kind: 'block', type: 'bs_web_lire', inputs: { VAL: texte('https://api.open-meteo.com/v1/forecast?latitude=48.85&longitude=2.35&current=temperature_2m') } },
         { kind: 'block', type: 'bs_json_valeur', inputs: { CHEMIN: texte('current.temperature_2m') } },
-        etiquette('Une liste d\'éléments (ici : les communes de France dont le nom commence par « saint-ma »)'),
+        etiquette(T('Une liste d\'éléments (ici : les communes de France dont le nom commence par « saint-ma »)')),
         { kind: 'block', type: 'bs_web_lire', inputs: { VAL: texte('https://geo.api.gouv.fr/communes?nom=saint-ma&fields=nom,codesPostaux,departement&boost=population&limit=10') } },
         { kind: 'block', type: 'bs_json_liste', inputs: { CHEMIN: texte('nom') } },
-        etiquette('Pages web'),
-        { kind: 'block', type: 'bs_web_ouvrir', inputs: { VAL: texte('www.google.fr') } }
+        etiquette(T('Pages web')),
+        { kind: 'block', type: 'bs_web_ouvrir', inputs: { VAL: texte(T('www.google.fr')) } }
       ]
     },
     {
-      kind: 'category', name: 'Conversions', colour: COULEUR_CONVERSIONS, contents: [
-        etiquette('Temps'),
+      kind: 'category', name: T('Conversions'), colour: COULEUR_CONVERSIONS, contents: [
+        etiquette(T('Temps')),
         { kind: 'block', type: 'bs_temps_texte', inputs: { VAL: nombre(213) } },
         { kind: 'block', type: 'bs_temps_secondes', inputs: { VAL: texte('3:33') } },
         { kind: 'block', type: 'bs_convertir_temps', inputs: { VAL: nombre(90) } },
-        etiquette('Distances'),
+        etiquette(T('Distances')),
         { kind: 'block', type: 'bs_convertir_distance', inputs: { VAL: nombre(1) }, fields: { DE: 'kilometres', VERS: 'metres' } },
-        etiquette('Masses'),
+        etiquette(T('Masses')),
         { kind: 'block', type: 'bs_convertir_masse', inputs: { VAL: nombre(1.5) }, fields: { DE: 'kilogrammes', VERS: 'grammes' } },
-        etiquette('Volumes'),
+        etiquette(T('Volumes')),
         { kind: 'block', type: 'bs_convertir_volume', inputs: { VAL: nombre(1) }, fields: { DE: 'litres', VERS: 'centilitres' } },
-        etiquette('Températures'),
+        etiquette(T('Températures')),
         { kind: 'block', type: 'bs_convertir_temperature', inputs: { VAL: nombre(20) } }
       ]
     },
     {
-      kind: 'category', name: 'Texte', categorystyle: 'text_category', contents: [
+      kind: 'category', name: T('Texte'), categorystyle: 'text_category', contents: [
         { kind: 'block', type: 'text' },
         { kind: 'block', type: 'bs_emoji' },
         { kind: 'block', type: 'text_join' },
@@ -2819,8 +2819,8 @@
         { kind: 'block', type: 'text_append', inputs: { TEXT: texte('') } },
         { kind: 'block', type: 'text_length' },
         { kind: 'block', type: 'text_isEmpty' },
-        { kind: 'block', type: 'bs_contient', inputs: { VAL: texte('jour') } },
-        { kind: 'block', type: 'text_indexOf', inputs: { FIND: texte('jour') } },
+        { kind: 'block', type: 'bs_contient', inputs: { VAL: texte(T('jour')) } },
+        { kind: 'block', type: 'text_indexOf', inputs: { FIND: texte(T('jour')) } },
         { kind: 'block', type: 'text_charAt', inputs: { AT: nombre(1) } },
         { kind: 'block', type: 'text_getSubstring', inputs: { AT1: nombre(1), AT2: nombre(3) } },
         { kind: 'block', type: 'text_replace', inputs: { FROM: texte('a'), TO: texte('b') } },
@@ -2833,7 +2833,7 @@
       ]
     },
     {
-      kind: 'category', name: 'Listes', categorystyle: 'list_category', contents: [
+      kind: 'category', name: T('Listes'), categorystyle: 'list_category', contents: [
         { kind: 'block', type: 'lists_create_empty' },
         { kind: 'block', type: 'lists_create_with' },
         { kind: 'block', type: 'lists_length' },
@@ -2849,24 +2849,24 @@
         { kind: 'block', type: 'bs_liste_melanger' },
         { kind: 'block', type: 'lists_reverse' },
         { kind: 'block', type: 'lists_split', inputs: { DELIM: texte(',') } },
-        etiquette('Dictionnaires : des valeurs rangées par nom (« Marie » → 12)'),
+        etiquette(T('Dictionnaires : des valeurs rangées par nom (« Marie » → 12)')),
         { kind: 'block', type: 'bs_dico_vide' },
-        { kind: 'block', type: 'bs_dico_mettre', inputs: { DICO: DICO_VAR(), CLE: texte('Marie'), VAL: nombre(12) } },
-        { kind: 'block', type: 'bs_dico_valeur', inputs: { DICO: DICO_VAR(), CLE: texte('Marie') } },
-        { kind: 'block', type: 'bs_dico_contient', inputs: { DICO: DICO_VAR(), CLE: texte('Marie') } },
+        { kind: 'block', type: 'bs_dico_mettre', inputs: { DICO: DICO_VAR(), CLE: texte(T('Marie')), VAL: nombre(12) } },
+        { kind: 'block', type: 'bs_dico_valeur', inputs: { DICO: DICO_VAR(), CLE: texte(T('Marie')) } },
+        { kind: 'block', type: 'bs_dico_contient', inputs: { DICO: DICO_VAR(), CLE: texte(T('Marie')) } },
         { kind: 'block', type: 'bs_dico_cles', inputs: { DICO: DICO_VAR() } },
-        { kind: 'block', type: 'bs_dico_retirer', inputs: { DICO: DICO_VAR(), CLE: texte('Marie') } }
+        { kind: 'block', type: 'bs_dico_retirer', inputs: { DICO: DICO_VAR(), CLE: texte(T('Marie')) } }
       ]
     },
-    { kind: 'category', name: 'Variables', categorystyle: 'variable_category', custom: 'VARIABLE' },
-    { kind: 'category', name: 'Fonctions', categorystyle: 'procedure_category', custom: 'PROCEDURE' }
+    { kind: 'category', name: T('Variables'), categorystyle: 'variable_category', custom: 'VARIABLE' },
+    { kind: 'category', name: T('Fonctions'), categorystyle: 'procedure_category', custom: 'PROCEDURE' }
   ];
 
   // Avancé : les blocs où l'on choisit le contrôle dans une liste (utile avec « 👉 moi » dans les clones).
   const TOUS_LES_CONTROLES = {
-    kind: 'category', name: 'Tous les contrôles', colour: COULEUR_CONTROLES, toolboxitemid: 'tous-les-controles', contents: [
-      etiquette('Blocs où l\'on choisit le contrôle (et « 👉 moi » pour un clone)'),
-      { kind: 'block', type: 'bs_ecrire', inputs: { VAL: texte('Bonjour') } },
+    kind: 'category', name: T('Tous les contrôles'), colour: COULEUR_CONTROLES, toolboxitemid: 'tous-les-controles', contents: [
+      etiquette(T('Blocs où l\'on choisit le contrôle (et « 👉 moi » pour un clone)')),
+      { kind: 'block', type: 'bs_ecrire', inputs: { VAL: texte(T('Bonjour')) } },
       { kind: 'block', type: 'bs_lire' },
       { kind: 'block', type: 'bs_couleur' },
       { kind: 'block', type: 'bs_quand_clic' },
@@ -2948,7 +2948,7 @@
     if (CLONABLES.includes(t)) evenements.push(b('bs_quand_clone'));
 
     const mouvement = () => [
-      etiquette('Mouvement'),
+      etiquette(T('Mouvement')),
       b('bs_avancer', { PAS: nombre(10) }),
       b('bs_deplacer', { DX: nombre(10), DY: nombre(0) }),
       b('bs_placer', { X: nombre(0), Y: nombre(0) }),
@@ -2965,13 +2965,13 @@
       b('bs_se_touchent'),
       b('bs_cote_contact'),
       b('bs_touche_couleur', { COUL: couleurOmbre() }),
-      etiquette('Gravité et saut (jeux de plateforme)'),
+      etiquette(T('Gravité et saut (jeux de plateforme)')),
       b('bs_gravite', { FORCE: nombre(1) }),
       b('bs_sauter', { FORCE: nombre(12) }),
       b('bs_au_sol')
     ];
     const clones = () => [
-      etiquette('Clones'),
+      etiquette(T('Clones')),
       b('bs_creer_clone'),
       { kind: 'block', type: 'bs_supprimer_clone' },
       b('bs_supprimer_clones'),
@@ -2981,63 +2981,63 @@
     switch (t) {
       case 'sprite':
         actions.push(
-          { kind: 'button', text: '🎨 Dessiner un sprite…', callbackKey: 'nouveauSprite', 'web-class': 'bouton-sprite' },
-          { kind: 'button', text: '📁 Importer une image…', callbackKey: 'importerSprite', 'web-class': 'bouton-sprite' },
-          etiquette('Costumes et animation'),
+          { kind: 'button', text: T('🎨 Dessiner un sprite…'), callbackKey: 'nouveauSprite', 'web-class': 'bouton-sprite' },
+          { kind: 'button', text: T('📁 Importer une image…'), callbackKey: 'importerSprite', 'web-class': 'bouton-sprite' },
+          etiquette(T('Costumes et animation')),
           b('bs_sprite_animer'), b('bs_sprite_arreter'), b('bs_sprite_suivant'),
           b('bs_sprite_costume', { VAL: nombre(1) }), b('bs_sprite_numero'),
           b('bs_sprite_changer'),
-          etiquette('Orientation et effets'),
+          etiquette(T('Orientation et effets')),
           b('bs_sprite_regarder'), b('bs_sprite_tourner', { DEG: nombre(15) }),
           b('bs_sprite_taille', { VAL: nombre(150) }), b('bs_sprite_grandir', { VAL: nombre(10) }),
           b('bs_sprite_transparence', { VAL: nombre(50) }), b('bs_sprite_fondu', { SEC: nombre(1) }),
           ...mouvement(), ...clones());
         break;
       case 'image':
-        actions.push(etiquette('Fond qui défile'), b('bs_image_defiler', { DX: nombre(-2), DY: nombre(0) }), ...mouvement(), ...clones());
+        actions.push(etiquette(T('Fond qui défile')), b('bs_image_defiler', { DX: nombre(-2), DY: nombre(0) }), ...mouvement(), ...clones());
         break;
       case 'forme':
         actions.push(...mouvement(), ...clones());
         break;
       case 'etiquette':
-        actions.push(etiquette('Score, vies…'), b('bs_compteur_ajouter', { VAL: nombre(1) }), b('bs_compteur_valeur'),
+        actions.push(etiquette(T('Score, vies…')), b('bs_compteur_ajouter', { VAL: nombre(1) }), b('bs_compteur_valeur'),
           ...mouvement(), ...clones());
         break;
       case 'barreprogression':
         actions.push(b('bs_compteur_ajouter', { VAL: nombre(-10) }), b('bs_compteur_valeur'));
         break;
       case 'zonedessin':
-        actions.push(etiquette('Dessin'),
+        actions.push(etiquette(T('Dessin')),
           b('bs_dessin_couleur', { VAL: couleurOmbre() }),
           b('bs_dessin_epaisseur', { VAL: nombre(3) }),
           b('bs_dessin_trait', { X1: nombre(10), Y1: nombre(10), X2: nombre(100), Y2: nombre(80) }),
           b('bs_dessin_rectangle', { X: nombre(20), Y: nombre(20), L: nombre(80), H: nombre(50) }),
           b('bs_dessin_cercle', { X: nombre(60), Y: nombre(60), R: nombre(30) }),
           b('bs_dessin_point', { X: nombre(50), Y: nombre(50) }),
-          b('bs_dessin_texte', { TXT: texte('Bonjour'), X: nombre(10), Y: nombre(10), T: nombre(20) }),
+          b('bs_dessin_texte', { TXT: texte(T('Bonjour')), X: nombre(10), Y: nombre(10), T: nombre(20) }),
           b('bs_dessin_effacer'),
-          etiquette('Souris'),
+          etiquette(T('Souris')),
           b('bs_souris'), b('bs_souris', null, { QUOI: 'y' }));
         break;
       case 'listederoulante': case 'zoneliste':
-        actions.push(b('bs_liste_ajouter', { VAL: texte('Nouveau choix') }), b('bs_liste_retirer', { NUM: nombre(1) }), b('bs_liste_vider'));
+        actions.push(b('bs_liste_ajouter', { VAL: texte(T('Nouveau choix')) }), b('bs_liste_retirer', { NUM: nombre(1) }), b('bs_liste_vider'));
         break;
       case 'tableau':
         actions.push(
-          b('bs_tableau_ajouter', { LIGNE: listeTextes('Dupont', 'Marie') }),
+          b('bs_tableau_ajouter', { LIGNE: listeTextes(T('Dupont'), T('Marie')) }),
           b('bs_tableau_supprimer', { NUM: nombre(1) }),
-          b('bs_tableau_remplacer', { NUM: nombre(1), LIGNE: listeTextes('Dupont', 'Marie') }),
-          b('bs_tableau_ecrire_cellule', { COL: texte('Nom'), NUM: nombre(1), VAL: texte('Martin') }),
+          b('bs_tableau_remplacer', { NUM: nombre(1), LIGNE: listeTextes(T('Dupont'), T('Marie')) }),
+          b('bs_tableau_ecrire_cellule', { COL: texte(T('Nom')), NUM: nombre(1), VAL: texte(T('Martin')) }),
           b('bs_tableau_vider'),
-          b('bs_tableau_trier', { COL: texte('Nom') }),
-          b('bs_tableau_cellule', { COL: texte('Nom'), NUM: nombre(1) }),
+          b('bs_tableau_trier', { COL: texte(T('Nom')) }),
+          b('bs_tableau_cellule', { COL: texte(T('Nom')), NUM: nombre(1) }),
           b('bs_tableau_ligne', { NUM: nombre(1) }),
-          b('bs_tableau_colonne', { COL: texte('Nom') }),
-          b('bs_tableau_chercher', { COL: texte('Nom'), VAL: texte('Dupont') }),
+          b('bs_tableau_colonne', { COL: texte(T('Nom')) }),
+          b('bs_tableau_chercher', { COL: texte(T('Nom')), VAL: texte(T('Dupont')) }),
           b('bs_base_choisie'),
-          etiquette('Fichiers (CSV, lisible par Excel)'),
+          etiquette(T('Fichiers (CSV, lisible par Excel)')),
           b('bs_tableau_csv'), b('bs_tableau_remplir_csv'),
-          etiquette('Données d\'Internet (JSON)'),
+          etiquette(T('Données d\'Internet (JSON)')),
           b('bs_tableau_remplir_json', { CHEMINS: listeTextes('nom', 'code') }));
         break;
       case 'calendrier':
@@ -3047,7 +3047,7 @@
           b('bs_calendrier_vider'));
         break;
       case 'graphique':
-        actions.push(b('bs_graphique_ajouter', { VAL: nombre(10), ETIQ: texte('Sam') }), b('bs_graphique_vider'));
+        actions.push(b('bs_graphique_ajouter', { VAL: nombre(10), ETIQ: texte(T('Sam')) }), b('bs_graphique_vider'));
         break;
       case 'panneau': {
         // « pour montrer » propose d'abord un contrôle posé dans ce panneau.
@@ -3058,13 +3058,13 @@
       }
       case 'arborescence':
         actions.push(
-          b('bs_arbre_ajouter', { VAL: texte('Chats'), DANS: texte('Animaux') }),
-          b('bs_arbre_supprimer', { CHEMIN: texte('Animaux › Chats') }),
+          b('bs_arbre_ajouter', { VAL: texte(T('Chats')), DANS: texte(T('Animaux')) }),
+          b('bs_arbre_supprimer', { CHEMIN: texte(T('Animaux › Chats')) }),
           b('bs_arbre_ctrl'),
-          b('bs_arbre_enfants', { CHEMIN: texte('Animaux') }));
+          b('bs_arbre_enfants', { CHEMIN: texte(T('Animaux')) }));
         break;
       case 'barreetat':
-        actions.push(b('bs_barreetat_ecrire', { VAL: texte('Prêt'), NUM: nombre(1) }), b('bs_barreetat_case', { NUM: nombre(1) }));
+        actions.push(b('bs_barreetat_ecrire', { VAL: texte(T('Prêt')), NUM: nombre(1) }), b('bs_barreetat_case', { NUM: nombre(1) }));
         break;
       case 'camera':
         actions.push(b('bs_camera_ctrl'), b('bs_camera_ctrl', null, { ACTION: 'eteindre' }), b('bs_camera_photo'), b('bs_camera_photo_dans'));
@@ -3081,26 +3081,26 @@
       case 'fichier':
         actions.push(
           b('bs_fichier_ouvrir_avec'), b('bs_fichier_contenu'),
-          b('bs_fichier_enregistrer_avec', { VAL: texte('Bonjour !') }),
+          b('bs_fichier_enregistrer_avec', { VAL: texte(T('Bonjour !')) }),
           b('bs_fichier_annule'), b('bs_fichier_nom'),
-          etiquette('Raccourcis : un tableau, une base, une image, un dessin, une photo'),
+          etiquette(T('Raccourcis : un tableau, une base, une image, un dessin, une photo')),
           b('bs_fichier_ouvrir_dans'), b('bs_fichier_enregistrer_de'));
         break;
       case 'basedonnees':
         actions.push(
-          etiquette('Ajouter et montrer'),
+          etiquette(T('Ajouter et montrer')),
           b('bs_base_ajouter', null, null, { extraState: { champs: (c.champs || []).slice() } }),
           b('bs_base_afficher'),
-          etiquette('Chercher'),
+          etiquette(T('Chercher')),
           b('bs_base_chercher', { VAL: texte('') }),
           b('bs_base_premiere', { VAL: texte('') }),
-          etiquette('Lire et modifier une fiche'),
+          etiquette(T('Lire et modifier une fiche')),
           b('bs_base_champ', { N: nombre(1) }),
           b('bs_base_modifier', { N: nombre(1), VAL: texte('') }),
           b('bs_base_supprimer', { N: nombre(1) }),
-          etiquette('Toute la base'),
+          etiquette(T('Toute la base')),
           b('bs_base_nombre'), b('bs_base_trier'), b('bs_base_colonne'), b('bs_base_vider'),
-          etiquette('Fichiers (CSV, lisible par Excel)'),
+          etiquette(T('Fichiers (CSV, lisible par Excel)')),
           b('bs_base_csv'), b('bs_base_remplir'));
         break;
     }
@@ -3128,10 +3128,10 @@
     }
 
     return [
-      ...(evenements.length ? [etiquette('Événements'), ...evenements] : []),
-      ...(actions.length && actions[0].kind !== 'label' && actions[0].kind !== 'button' ? [etiquette('Actions')] : []),
+      ...(evenements.length ? [etiquette(T('Événements')), ...evenements] : []),
+      ...(actions.length && actions[0].kind !== 'label' && actions[0].kind !== 'button' ? [etiquette(T('Actions'))] : []),
       ...actions,
-      ...(proprietes.length ? [etiquette('Propriétés'), ...proprietes] : [])
+      ...(proprietes.length ? [etiquette(T('Propriétés')), ...proprietes] : [])
     ];
   }
 
@@ -3140,16 +3140,16 @@
     const contenu = [];
     if (principale) {
       contenu.push(
-        { kind: 'button', text: '🪟 Créer une autre fenêtre…', callbackKey: 'nouvelleFenetre', 'web-class': 'bouton-fenetre' },
+        { kind: 'button', text: T('🪟 Créer une autre fenêtre…'), callbackKey: 'nouvelleFenetre', 'web-class': 'bouton-fenetre' },
         { kind: 'block', type: 'bs_quand_demarre' },
         { kind: 'block', type: 'bs_fond_fenetre', inputs: { VAL: couleurOmbre() } },
-        { kind: 'block', type: 'bs_fenetre_titre', fields: { FENETRE: '' }, inputs: { VAL: texte(f.titre || 'Mon programme') } },
-        etiquette('Plein écran'),
+        { kind: 'block', type: 'bs_fenetre_titre', fields: { FENETRE: '' }, inputs: { VAL: texte(f.titre || T('Mon programme')) } },
+        etiquette(T('Plein écran')),
         { kind: 'block', type: 'bs_plein_ecran' },
         { kind: 'block', type: 'bs_plein_ecran', fields: { QUOI: 'quitter' } },
         { kind: 'block', type: 'bs_est_plein_ecran' });
       if (BlocRuntime.cheminsMenus(f.menus).length) {
-        contenu.push(etiquette('Menus'), { kind: 'block', type: 'bs_quand_menu' }, { kind: 'block', type: 'bs_menu_actif' });
+        contenu.push(etiquette(T('Menus')), { kind: 'block', type: 'bs_quand_menu' }, { kind: 'block', type: 'bs_menu_actif' });
       }
     } else {
       const fen = (type, champs, inputs) => Object.assign({ kind: 'block', type, fields: Object.assign({ FENETRE: f.id }, champs) }, inputs && { inputs });
@@ -3162,12 +3162,12 @@
     }
     // Sa taille : la principale a l'identifiant ''.
     const taille = (type, champs, inputs) => Object.assign({ kind: 'block', type, fields: Object.assign({ FENETRE: principale ? '' : f.id }, champs) }, inputs && { inputs });
-    contenu.push(etiquette('Taille'),
+    contenu.push(etiquette(T('Taille')),
       taille('bs_quand_fenetre_taille'),
       taille('bs_fenetre_dimension'), taille('bs_fenetre_dimension', { QUOI: 'hauteur' }),
       taille('bs_fenetre_changer_taille', null, { L: nombre(f.largeur), H: nombre(f.hauteur) }));
     const ctrls = BlocStudio.controles().filter(c => (c.fenetre || '') === (principale ? '' : f.id));
-    if (!ctrls.length) contenu.push(etiquette('Posez des contrôles sur cette fenêtre (onglet Fenêtre) : chacun aura ici ses blocs.'));
+    if (!ctrls.length) contenu.push(etiquette(T('Posez des contrôles sur cette fenêtre (onglet Fenêtre) : chacun aura ici ses blocs.')));
     for (const c of ctrls) {
       contenu.push({
         kind: 'category', name: `${icones[c.type] || '🔹'} ${c.nom}`, colour: couleurDuType(c.type),
@@ -3175,7 +3175,7 @@
       });
     }
     return {
-      kind: 'category', name: '🪟 ' + (principale ? 'Fenêtre principale' : f.nom), colour: COULEUR_FENETRES,
+      kind: 'category', name: '🪟 ' + (principale ? T('Fenêtre principale') : f.nom), colour: COULEUR_FENETRES,
       toolboxitemid: 'fen-' + (principale ? 'principale' : f.id), expanded: 'true', contents: contenu
     };
   }

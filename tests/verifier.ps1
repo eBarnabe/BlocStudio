@@ -10,7 +10,9 @@
 #     horloge, fond qui défile, manette) ;
 #   - chaque exemple de la galerie : il s'ouvre, toutes ses catégories de blocs s'affichent,
 #     il s'exécute (avec un appui sur Espace) sans erreur ;
-#   - chaque projet .bstudio posé dans ce dossier tests\ : même chose.
+#   - chaque projet .bstudio posé dans ce dossier tests\ : même chose ;
+#   - l'éditeur en anglais, et un programme exporté en anglais.
+# Les pages sont en français (quelle que soit la langue de l'ordinateur), sauf celle de l'anglais.
 # Code de sortie : 0 si tout passe, 1 sinon. Rien à installer (Chrome ou Edge suffit).
 
 $ErrorActionPreference = 'Stop'
@@ -36,9 +38,9 @@ $index = [IO.File]::ReadAllText((Join-Path $racine 'index.html'), [Text.Encoding
 $utf8 = New-Object Text.UTF8Encoding $false
 
 # Une page de test : index.html avec les scripts de test, ouverte dans un profil neuf.
-# $avant : du JavaScript exécuté avant BlocStudio (mode, projet à charger…).
+# $avant : du JavaScript exécuté avant BlocStudio (mode, projet à charger, langue…).
 function Lancer-Tests([string]$nom, [string]$avant) {
-  $tete = "<head><base href=""$base""><script>$avant</script><script src=""tests/preparer.js""></script>"
+  $tete = "<head><base href=""$base""><script>localStorage.setItem('blocstudio.langue', 'fr'); $avant</script><script src=""tests/preparer.js""></script>"
   $page = $index.Replace('<head>', $tete).Replace('</body>', '<script src="tests/verifier.js"></script></body>')
   $fichier = Join-Path $dossierTemp "$nom.html"
   [IO.File]::WriteAllText($fichier, $page, $utf8)
@@ -79,9 +81,14 @@ foreach ($f in Get-ChildItem $ici -Filter *.bstudio) {
   $toutes += $lignes
 }
 
+Write-Host "`n== En anglais" -ForegroundColor Cyan
+$lignes = Lancer-Tests 'anglais' "window.__MODE = 'anglais'; localStorage.setItem('blocstudio.langue', 'en');"
+Afficher $lignes
+$toutes += $lignes
+
 $echecs = @($toutes | Where-Object { $_.StartsWith('ÉCHEC') }).Count
 $finis = @($toutes | Where-Object { $_ -eq 'FIN' }).Count
-$attendus = 1 + @(Get-ChildItem $ici -Filter *.bstudio).Count
+$attendus = 2 + @(Get-ChildItem $ici -Filter *.bstudio).Count
 if ($finis -lt $attendus) { $echecs++; Write-Host "`nÉCHEC   une page de test ne s'est pas terminée" -ForegroundColor Red }
 if ($echecs) { Write-Host "`n$echecs échec(s)." -ForegroundColor Red; exit 1 }
 Write-Host "`nTout est bon." -ForegroundColor Green

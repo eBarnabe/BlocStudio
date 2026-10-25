@@ -2,6 +2,7 @@
 // Les résultats sont écrits dans <pre id="resultats-tests"> (une ligne par test), que verifier.ps1 relit.
 //   window.__MODE === 'tout'   : chargement, moteur, boîte à outils, puis chaque exemple de la galerie
 //   window.__MODE === 'projet' : seulement le projet déjà chargé (un fichier .bstudio, voir verifier.ps1)
+//   window.__MODE === 'anglais' : l'éditeur en anglais, et un programme exporté en anglais
 (async function () {
   const sortie = document.createElement('pre');
   sortie.id = 'resultats-tests';
@@ -63,7 +64,7 @@
           boite.setSelectedItem(it);
           const flyout = boite.getFlyout();
           if (flyout && flyout.isVisible() && !flyout.getWorkspace().getTopBlocks(false).length &&
-            !/Variables|Fonctions/.test(it.getName())) vides.push(it.getName());
+            !/Variables|Fonctions|Functions/.test(it.getName())) vides.push(it.getName());
         } catch (e) { erreurs.push(it.getName() + ' : ' + e.message); }
         if (it.getChildToolboxItems) parcourir(it.getChildToolboxItems());
       }
@@ -87,9 +88,56 @@
     return;
   }
 
+  // L'éditeur en anglais : nombres, jours, valeurs tapées en anglais, messages ; et un programme exporté,
+  // qui doit emporter la langue et les traductions du moteur.
+  if (window.__MODE === 'anglais') {
+    const verifierAnglais = (quoi, app) => {
+      egal(quoi + ' : format de nombre', [app.formatNombre(3.14159, 2), app.formatNombre(1234567.891, 0)], ['3.14', '1,234,568']);
+      egal(quoi + ' : nombre depuis un texte', [app.nombre('1,234.5'), app.nombre(app.formatNombre(1234567, 0)), app.nombre('3,5')],
+        [1234.5, 1234567, 3.5]);
+      egal(quoi + ' : jour de la semaine', app.jourSemaine('25/12/2026'), 'Friday');
+      app.ecrire('e', 'alignement', 'right');
+      app.ecrire('e', 'bordure', 'Sunken');
+      egal(quoi + ' : valeurs tapées en anglais', [app.lire('e', 'alignement'), app.lire('e', 'bordure')], ['droite', 'creuse']);
+      let message = '';
+      try { app.dicoValeur('x', 'a'); } catch (e) { message = e.message; }
+      egal(quoi + ' : message d\'erreur', message, '“x” is not a dictionary: first put “empty dictionary” in the variable.');
+    };
+    const etiquette = [{ id: 'e', type: 'etiquette', x: 0, y: 0, largeur: 100, hauteur: 20 }];
+    await essayer('anglais : moteur', async () => {
+      const t = lancer(etiquette);
+      verifierAnglais('anglais', t.app);
+      t.fin();
+    });
+    await essayer('anglais : programme exporté', async () => {
+      const source = BlocRuntimeFactory.toString();
+      const Fabrique = new Function(BlocLangues.pourExport(source) + '\n' + source + '\nreturn BlocRuntimeFactory;')();
+      const t = lancer(etiquette, {}, Fabrique());
+      verifierAnglais('anglais exporté', t.app);
+      t.fin();
+    });
+    await essayer('anglais : éditeurs', async () => {
+      StudioMusique.ouvrir({}, () => {});
+      const studio = $('studio-musique');
+      egal('anglais : studio de musique', [studio.querySelector('h2').textContent, $('studio-garder').textContent, $('studio-nom').value,
+        studio.querySelector('.studio-piste').textContent], ['🎹 8-bit music studio', 'Keep this music', 'music', '🎵 Melody']);
+      $('studio-annuler').click();
+      const ferme = EditeurSprite.ouvrir(null, { nom: 'Sprite1' }); // se termine à la fermeture
+      await dort(300);
+      egal('anglais : éditeur de sprites', $('es-costume-numero').textContent, 'Costume 1 of 1');
+      $('es-annuler').click();
+      await ferme;
+    });
+    await verifierExemples();
+    ecrire(`RÉSULTAT : ${reussis} réussi(s), ${echecs} échec(s)`);
+    ecrire('FIN');
+    return;
+  }
+
   // ---------------------------------------------------------------- Moteur d'exécution
   // Un petit programme lancé à part : « app » donne accès aux fonctions appelées par les blocs.
-  function lancer(controles, fenetre) {
+  // `moteur` : un autre moteur que celui de l'éditeur (celui d'un programme exporté).
+  function lancer(controles, fenetre, moteur = BlocRuntime) {
     const C = c => Object.assign({ texte: '', visible: true, couleurFond: '', taillePolice: 14 }, c, { nom: c.nom || c.id });
     const projet = {
       id: 'tests', sons: [], sprites: [], fenetres: [],
@@ -100,7 +148,7 @@
     hote.style.cssText = 'position:absolute;left:-5000px;top:0';
     document.body.appendChild(hote);
     let erreur = null;
-    const exec = BlocRuntime.lancer(projet, 'window.__app = app;', hote, m => { erreur = m; });
+    const exec = moteur.lancer(projet, 'window.__app = app;', hote, m => { erreur = m; });
     const app = window.__app;
     return { app, hote, erreur: () => erreur, fin: () => { exec.arreter(); hote.remove(); } };
   }
@@ -313,26 +361,30 @@
   });
 
   // ---------------------------------------------------------------- Boîte à outils et exemples
-  document.querySelector('.onglet:nth-child(2)').click();
-  await dort(300);
-  for (const ex of window.BlocStudioExemples) {
-    const nom = 'exemple « ' + ex.titre.replace(/^\S+\s/, '') + ' »';
-    await essayer(nom, async () => {
-      $('btn-exemples').click();
-      await dort(100);
-      const carte = [...document.querySelectorAll('.carte-exemple')].find(c => c.title.includes(ex.titre.replace(/^\S+\s/, '')));
-      if (!carte) throw new Error('absent de la galerie');
-      const avant = erreursPage.length;
-      carte.click();
-      await dort(400);
-      if (erreursPage.length > avant) throw new Error('ouverture : ' + erreursPage.slice(avant).join(' ; '));
-      document.querySelector('.onglet:nth-child(2)').click();
-      await dort(200);
-      await verifierBoite(nom);
-      await executerProjet(nom);
-    });
-  }
-
+  await verifierExemples();
   ecrire(`RÉSULTAT : ${reussis} réussi(s), ${echecs} échec(s)`);
   ecrire('FIN');
+
+  // Chaque exemple de la galerie : il s'ouvre, sa boîte à outils s'affiche, il s'exécute sans erreur.
+  async function verifierExemples() {
+    document.querySelector('.onglet:nth-child(2)').click();
+    await dort(300);
+    for (const ex of window.BlocStudioExemples) {
+      const nom = 'exemple « ' + ex.titre.replace(/^\S+\s/, '') + ' »';
+      await essayer(nom, async () => {
+        $('btn-exemples').click();
+        await dort(100);
+        const carte = [...document.querySelectorAll('.carte-exemple')].find(c => c.title.includes(ex.titre.replace(/^\S+\s/, '')));
+        if (!carte) throw new Error('absent de la galerie');
+        const avant = erreursPage.length;
+        carte.click();
+        await dort(400);
+        if (erreursPage.length > avant) throw new Error('ouverture : ' + erreursPage.slice(avant).join(' ; '));
+        document.querySelector('.onglet:nth-child(2)').click();
+        await dort(200);
+        await verifierBoite(nom);
+        await executerProjet(nom);
+      });
+    }
+  }
 })();

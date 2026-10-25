@@ -24,6 +24,10 @@
         </div>
       </div>
       <button id="btn-executer" class="executer" title="Lancer le programme (F5)">▶ Exécuter</button>
+      <div class="menu-conteneur">
+        <button id="btn-langue" class="langue" title="Langue de BlocStudio">🌐</button>
+        <div id="menu-langue" class="menu menu-droite menu-langue" hidden></div>
+      </div>
     </div>
     <input type="file" id="fichier" accept=".bstudio,.json" hidden>
   </header>
@@ -314,7 +318,9 @@
   <script src="lib/blockly/blockly_compressed.js"></script>
   <script src="lib/blockly/blocks_compressed.js"></script>
   <script src="lib/blockly/javascript_compressed.js"></script>
-  <script src="lib/blockly/msg/fr.js"></script>
+  <script src="js/langues.js"></script>
+  <!-- Les textes de Blockly et de BlocStudio dans la langue choisie (menu 🌐) -->
+  <script>BlocLangues.ecrireScripts();</script>
   <script src="js/runtime.js"></script>
   <script src="js/emojis.js"></script>
   <script src="js/blocks.js"></script>

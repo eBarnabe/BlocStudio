@@ -405,6 +405,8 @@ button.puce:hover { border-color: var(--accent); background: #eef2ff; }
 
 /* ---------- Export ---------- */
 .menu-droite { left: auto; right: 0; width: 340px; }
+.menu-langue { width: 170px; }
+.actions .menu-item.actif { font-weight: 600; background: #eef2ff; }
 .info-boite {
   max-width: 520px;
   margin: 16px;

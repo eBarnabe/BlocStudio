@@ -353,156 +353,156 @@
 
   const exemples = [
     {
-      titre: '👋 Bonjour',
+      titre: T('👋 Bonjour'),
       theme: 'debut',
-      description: 'Le tout premier programme : une question, un bouton, une réponse.',
+      description: T('Le tout premier programme : une question, un bouton, une réponse.'),
       creer: () => projet(
-        { titre: 'Mon premier programme', largeur: 440, hauteur: 190 },
+        { titre: T('Mon premier programme'), largeur: 440, hauteur: 190 },
         [
-          { type: 'etiquette', nom: 'Question', texte: 'Quel est ton prénom ?', largeur: 300, taillePolice: 16 },
+          { type: 'etiquette', nom: 'Question', texte: T('Quel est ton prénom ?'), largeur: 300, taillePolice: 16 },
           { type: 'zonetexte', nom: 'Prenom', y: 54, largeur: 200, hauteur: 30 },
-          { type: 'bouton', nom: 'BoutonBonjour', texte: 'Dire bonjour', x: 232, y: 54, largeur: 130, hauteur: 30 },
+          { type: 'bouton', nom: 'BoutonBonjour', texte: T('Dire bonjour'), x: 232, y: 54, largeur: 130, hauteur: 30 },
           { type: 'etiquette', nom: 'Resultat', y: 110, largeur: 400, hauteur: 40, taillePolice: 24, couleurTexte: '#4f46e5' }
         ],
         [],
         () => [
-          presentation('Le tout premier programme : quand on clique sur le bouton, il lit le prénom écrit dans la case et répond « Bonjour … ! ».'),
+          presentation(T('Le tout premier programme : quand on clique sur le bouton, il lit le prénom écrit dans la case et répond « Bonjour … ! ».')),
           evt('bs_quand_clic', 'c3', [
-            note('Clic sur « Dire bonjour » : si la case Prenom est vide, on prévient. Sinon, on écrit « Bonjour » + le prénom dans l\'étiquette Resultat.'),
+            note(T('Clic sur « Dire bonjour » : si la case Prenom est vide, on prévient. Sinon, on écrit « Bonjour » + le prénom dans l\'étiquette Resultat.')),
             si({ type: 'text_isEmpty', inputs: { VALUE: I(lire('texte', 'c2')) } },
-              [message(t("Écris d'abord ton prénom !"), 'attention')],
-              [ecrire('c4', 'texte', joindre(t('Bonjour '), lire('texte', 'c2'), t(' !')))])
+              [message(t(T("Écris d'abord ton prénom !")), 'attention')],
+              [ecrire('c4', 'texte', joindre(t(T('Bonjour ')), lire('texte', 'c2'), t(' !')))])
           ])
         ])
     },
     {
-      titre: '📋 Fiche d\'inscription',
+      titre: T('📋 Fiche d\'inscription'),
       theme: 'debut',
-      description: 'Un formulaire : boutons radio, cadre, sélecteur de nombre, texte sur plusieurs lignes.',
+      description: T('Un formulaire : boutons radio, cadre, sélecteur de nombre, texte sur plusieurs lignes.'),
       creer: () => projet(
-        { titre: 'Inscription au club', largeur: 440, hauteur: 390 },
+        { titre: T('Inscription au club'), largeur: 440, hauteur: 390 },
         [
-          { type: 'etiquette', nom: 'Titre', texte: 'Inscription au club', largeur: 400, hauteur: 32, taillePolice: 20 },
-          { type: 'etiquette', nom: 'LibellePrenom', texte: 'Prénom', y: 58, largeur: 80 },
+          { type: 'etiquette', nom: 'Titre', texte: T('Inscription au club'), largeur: 400, hauteur: 32, taillePolice: 20 },
+          { type: 'etiquette', nom: 'LibellePrenom', texte: T('Prénom'), y: 58, largeur: 80 },
           { type: 'zonetexte', nom: 'Prenom', x: 110, y: 54, largeur: 200, hauteur: 28 },
-          { type: 'etiquette', nom: 'LibelleAge', texte: 'Âge', y: 94, largeur: 80 },
+          { type: 'etiquette', nom: 'LibelleAge', texte: T('Âge'), y: 94, largeur: 80 },
           { type: 'selecteurnombre', nom: 'Age', x: 110, y: 90, largeur: 80, hauteur: 28, valeur: 12, min: 5, max: 99, pas: 1 },
-          { type: 'cadre', nom: 'CadreActivite', texte: 'Activité', y: 128, largeur: 400, hauteur: 64 },
-          { type: 'boutonradio', nom: 'Foot', texte: '⚽ Foot', x: 36, y: 156, largeur: 110, hauteur: 24, groupe: 'activite', coche: true },
-          { type: 'boutonradio', nom: 'Danse', texte: '💃 Danse', x: 156, y: 156, largeur: 110, hauteur: 24, groupe: 'activite' },
-          { type: 'boutonradio', nom: 'Musique', texte: '🎸 Musique', x: 276, y: 156, largeur: 120, hauteur: 24, groupe: 'activite' },
-          { type: 'etiquette', nom: 'LibellePresentation', texte: 'Présente-toi en quelques mots :', y: 206, largeur: 300 },
+          { type: 'cadre', nom: 'CadreActivite', texte: T('Activité'), y: 128, largeur: 400, hauteur: 64 },
+          { type: 'boutonradio', nom: 'Foot', texte: T('⚽ Foot'), x: 36, y: 156, largeur: 110, hauteur: 24, groupe: 'activite', coche: true },
+          { type: 'boutonradio', nom: 'Danse', texte: T('💃 Danse'), x: 156, y: 156, largeur: 110, hauteur: 24, groupe: 'activite' },
+          { type: 'boutonradio', nom: 'Musique', texte: T('🎸 Musique'), x: 276, y: 156, largeur: 120, hauteur: 24, groupe: 'activite' },
+          { type: 'etiquette', nom: 'LibellePresentation', texte: T('Présente-toi en quelques mots :'), y: 206, largeur: 300 },
           { type: 'zonetexte', nom: 'Presentation', y: 230, largeur: 400, hauteur: 90, multiligne: true },
-          { type: 'bouton', nom: 'Valider', texte: '✔ Valider l\'inscription', y: 336, largeur: 200, hauteur: 34 }
+          { type: 'bouton', nom: 'Valider', texte: T('✔ Valider l\'inscription'), y: 336, largeur: 200, hauteur: 34 }
         ],
         [],
         () => [
-          presentation('Un formulaire : quand on valide, le programme rassemble tout ce qui a été saisi dans un seul message.'),
+          presentation(T('Un formulaire : quand on valide, le programme rassemble tout ce qui a été saisi dans un seul message.')),
           evt('bs_quand_clic', 'c12', [
-            note('Le prénom est obligatoire. Ensuite, « créer un texte avec » colle les morceaux : prénom, âge, activité (le bouton radio coché du groupe « activite ») et présentation.'),
+            note(T('Le prénom est obligatoire. Ensuite, « créer un texte avec » colle les morceaux : prénom, âge, activité (le bouton radio coché du groupe « activite ») et présentation.')),
             si(estVide(lire('texte', 'c3')),
-              [message(t('Merci d\'indiquer ton prénom.'), 'attention')],
+              [message(t(T('Merci d\'indiquer ton prénom.')), 'attention')],
               [message(joindre(
-                t('Bienvenue au club, '), lire('texte', 'c3'), t(' !'), retourLigne(), retourLigne(),
-                t('Âge : '), lire('valeur', 'c5'), t(' ans'), retourLigne(),
-                t('Activité : '), radioChoisi('activite'), retourLigne(),
-                t('Présentation : '), lire('texte', 'c11')), 'succes')])
+                t(T('Bienvenue au club, ')), lire('texte', 'c3'), t(' !'), retourLigne(), retourLigne(),
+                t(T('Âge : ')), lire('valeur', 'c5'), t(T(' ans')), retourLigne(),
+                t(T('Activité : ')), radioChoisi('activite'), retourLigne(),
+                t(T('Présentation : ')), lire('texte', 'c11')), 'succes')])
           ])
         ])
     },
     {
-      titre: '✅ Liste de tâches',
+      titre: T('✅ Liste de tâches'),
       theme: 'applications',
-      description: 'Ajouter, terminer et effacer des tâches dans une zone de liste.',
+      description: T('Ajouter, terminer et effacer des tâches dans une zone de liste.'),
       creer: () => projet(
-        { titre: 'Ma liste de tâches', largeur: 380, hauteur: 330 },
+        { titre: T('Ma liste de tâches'), largeur: 380, hauteur: 330 },
         [
-          { type: 'etiquette', nom: 'Titre', texte: 'Ma liste de tâches', largeur: 340, hauteur: 30, taillePolice: 20 },
+          { type: 'etiquette', nom: 'Titre', texte: T('Ma liste de tâches'), largeur: 340, hauteur: 30, taillePolice: 20 },
           { type: 'zonetexte', nom: 'NouvelleTache', y: 54, largeur: 230, hauteur: 30 },
-          { type: 'bouton', nom: 'Ajouter', texte: '➕ Ajouter', x: 260, y: 54, largeur: 100, hauteur: 30 },
-          { type: 'zoneliste', nom: 'Taches', y: 94, largeur: 340, hauteur: 170, elements: ['Faire mes devoirs', 'Ranger ma chambre'] },
-          { type: 'bouton', nom: 'Terminer', texte: '✔ Tâche terminée', y: 278, largeur: 160, hauteur: 32 },
-          { type: 'bouton', nom: 'Vider', texte: '🗑️ Tout effacer', x: 200, y: 278, largeur: 160, hauteur: 32 }
+          { type: 'bouton', nom: 'Ajouter', texte: T('➕ Ajouter'), x: 260, y: 54, largeur: 100, hauteur: 30 },
+          { type: 'zoneliste', nom: 'Taches', y: 94, largeur: 340, hauteur: 170, elements: [T('Faire mes devoirs'), T('Ranger ma chambre')] },
+          { type: 'bouton', nom: 'Terminer', texte: T('✔ Tâche terminée'), y: 278, largeur: 160, hauteur: 32 },
+          { type: 'bouton', nom: 'Vider', texte: T('🗑️ Tout effacer'), x: 200, y: 278, largeur: 160, hauteur: 32 }
         ],
         [],
         () => [
-          presentation('Une zone de liste (Taches) qu\'on remplit et qu\'on vide avec trois boutons.'),
+          presentation(T('Une zone de liste (Taches) qu\'on remplit et qu\'on vide avec trois boutons.')),
           evt('bs_quand_clic', 'c3', [
-            note('➕ Ajouter : la tâche écrite dans la case va à la fin de la liste, puis la case est vidée pour la suivante.'),
+            note(T('➕ Ajouter : la tâche écrite dans la case va à la fin de la liste, puis la case est vidée pour la suivante.')),
             si(estVide(lire('texte', 'c2')),
-              [message(t('Écris d\'abord une tâche dans la case.'), 'attention')],
+              [message(t(T('Écris d\'abord une tâche dans la case.')), 'attention')],
               [listeAjouter('c4', lire('texte', 'c2')), ecrire('c2', 'texte', t(''))])
           ]),
           evt('bs_quand_clic', 'c5', [
-            note('✔ Terminée : « numéro choisi » vaut 0 si aucune tâche n\'est sélectionnée ; sinon, on retire celle-là.'),
+            note(T('✔ Terminée : « numéro choisi » vaut 0 si aucune tâche n\'est sélectionnée ; sinon, on retire celle-là.')),
             si(compare('EQ', lire('numero', 'c4'), n(0)),
-              [message(t('Clique d\'abord sur une tâche dans la liste.'), 'info')],
-              [listeRetirer('c4', lire('numero', 'c4')), message(t('Bravo, une tâche de moins !'), 'succes')])
+              [message(t(T('Clique d\'abord sur une tâche dans la liste.')), 'info')],
+              [listeRetirer('c4', lire('numero', 'c4')), message(t(T('Bravo, une tâche de moins !')), 'succes')])
           ]),
           evt('bs_quand_clic', 'c6', [
-            note('🗑️ Tout effacer : on demande d\'abord confirmation.'),
-            si(confirmer('Effacer toutes les tâches ?'), [listeVider('c4')])
+            note(T('🗑️ Tout effacer : on demande d\'abord confirmation.')),
+            si(confirmer(T('Effacer toutes les tâches ?')), [listeVider('c4')])
           ])
         ])
     },
     {
-      titre: '🎨 Mini-Paint',
+      titre: T('🎨 Mini-Paint'),
       theme: 'multimedia',
-      description: 'Un logiciel de dessin : couleurs, épaisseur du crayon, effacer, ouvrir une image et enregistrer son dessin en PNG.',
+      description: T('Un logiciel de dessin : couleurs, épaisseur du crayon, effacer, ouvrir une image et enregistrer son dessin en PNG.'),
       creer: () => projet(
-        { titre: 'Mini-Paint', largeur: 600, hauteur: 380 },
+        { titre: T('Mini-Paint'), largeur: 600, hauteur: 380 },
         [
           { type: 'zonedessin', nom: 'Toile', x: 10, y: 10, largeur: 420, hauteur: 360, couleurFond: '#ffffff' },
-          { type: 'etiquette', nom: 'TitreCouleur', texte: 'Couleur', x: 450, y: 16 },
+          { type: 'etiquette', nom: 'TitreCouleur', texte: T('Couleur'), x: 450, y: 16 },
           { type: 'listederoulante', nom: 'Couleurs', x: 450, y: 40, largeur: 130,
             elements: ['noir', 'rouge', 'orange', 'jaune', 'vert', 'bleu', 'violet', 'rose', 'blanc'] },
-          { type: 'etiquette', nom: 'TitreEpaisseur', texte: 'Épaisseur', x: 450, y: 90 },
+          { type: 'etiquette', nom: 'TitreEpaisseur', texte: T('Épaisseur'), x: 450, y: 90 },
           { type: 'curseur', nom: 'Epaisseur', x: 450, y: 114, largeur: 130, hauteur: 24, min: 1, max: 40, valeur: 5 },
-          { type: 'bouton', nom: 'Effacer', texte: '🗑️ Tout effacer', x: 450, y: 170, largeur: 130, hauteur: 34 },
-          { type: 'etiquette', nom: 'Aide', texte: 'Dessine avec la souris !\n(astuce : « blanc » sert de gomme)',
+          { type: 'bouton', nom: 'Effacer', texte: T('🗑️ Tout effacer'), x: 450, y: 170, largeur: 130, hauteur: 34 },
+          { type: 'etiquette', nom: 'Aide', texte: T('Dessine avec la souris !\n(astuce : « blanc » sert de gomme)'),
             x: 450, y: 300, largeur: 140, hauteur: 70, taillePolice: 12, couleurTexte: '#64748b' },
-          { type: 'bouton', nom: 'Ouvrir', texte: '📂 Ouvrir une image', x: 450, y: 214, largeur: 130, hauteur: 34 },
-          { type: 'bouton', nom: 'Enregistrer', texte: '💾 Enregistrer', x: 450, y: 256, largeur: 130, hauteur: 34 },
-          { type: 'fichier', nom: 'FichierImage', typeFichier: 'image', nomPropose: 'mon dessin.png', largeur: 0, hauteur: 0 }
+          { type: 'bouton', nom: 'Ouvrir', texte: T('📂 Ouvrir une image'), x: 450, y: 214, largeur: 130, hauteur: 34 },
+          { type: 'bouton', nom: 'Enregistrer', texte: T('💾 Enregistrer'), x: 450, y: 256, largeur: 130, hauteur: 34 },
+          { type: 'fichier', nom: 'FichierImage', typeFichier: 'image', nomPropose: T('mon dessin.png'), largeur: 0, hauteur: 0 }
         ],
         [],
         () => [
-          presentation('Un logiciel de dessin. Quand la souris bouge avec le bouton enfoncé, la Toile trace un petit trait entre l\'ancienne position de la souris et la nouvelle : mis bout à bout, ces traits font le dessin.'),
+          presentation(T('Un logiciel de dessin. Quand la souris bouge avec le bouton enfoncé, la Toile trace un petit trait entre l\'ancienne position de la souris et la nouvelle : mis bout à bout, ces traits font le dessin.')),
           evt('bs_quand_demarre', null, [
-            note('Au départ, le crayon prend la couleur et l\'épaisseur choisies à droite.'),
+            note(T('Au départ, le crayon prend la couleur et l\'épaisseur choisies à droite.')),
             dessin('bs_dessin_couleur', 'c1', { VAL: lire('texte', 'c3') }),
             dessin('bs_dessin_epaisseur', 'c1', { VAL: lire('valeur', 'c5') })
           ]),
           evt('bs_quand_glisse', 'c1', [
-            note('Un trait de l\'ancienne position de la souris (px, py) à la nouvelle (x, y).'),
+            note(T('Un trait de l\'ancienne position de la souris (px, py) à la nouvelle (x, y).')),
             dessin('bs_dessin_trait', 'c1', {
               X1: souris('px', 'c1'), Y1: souris('py', 'c1'), X2: souris('x', 'c1'), Y2: souris('y', 'c1')
             })
           ]),
           evt('bs_quand_clic', 'c1', [
-            note('Un simple clic dessine un point.'),
+            note(T('Un simple clic dessine un point.')),
             dessin('bs_dessin_point', 'c1', { X: souris('x', 'c1'), Y: souris('y', 'c1') })
           ]),
           evt('bs_quand_change', 'c3', [
-            note('Nouvelle couleur choisie dans la liste : le crayon change.'),
+            note(T('Nouvelle couleur choisie dans la liste : le crayon change.')),
             dessin('bs_dessin_couleur', 'c1', { VAL: lire('texte', 'c3') })
           ]),
           evt('bs_quand_change', 'c5', [
-            note('Le curseur règle l\'épaisseur du crayon.'),
+            note(T('Le curseur règle l\'épaisseur du crayon.')),
             dessin('bs_dessin_epaisseur', 'c1', { VAL: lire('valeur', 'c5') })
           ]),
           evt('bs_quand_clic', 'c6', [
-            note('On demande avant d\'effacer, pour ne pas perdre un dessin par erreur.'),
-            si(confirmer('Effacer tout le dessin ?'), [dessin('bs_dessin_effacer', 'c1')])
+            note(T('On demande avant d\'effacer, pour ne pas perdre un dessin par erreur.')),
+            si(confirmer(T('Effacer tout le dessin ?')), [dessin('bs_dessin_effacer', 'c1')])
           ]),
-          evt('bs_quand_clic', 'c8', [note('Le contrôle Fichier fait tout : la fenêtre « Ouvrir » de Windows, puis l\'image posée dans la Toile.'), bloc('bs_fichier_ouvrir_dans', 'c10', null, { CIBLE: 'c1' })]),
-          evt('bs_quand_clic', 'c9', [note('Enregistre le dessin de la Toile dans une image PNG.'), bloc('bs_fichier_enregistrer_de', 'c10', null, { CIBLE: 'c1' })])
+          evt('bs_quand_clic', 'c8', [note(T('Le contrôle Fichier fait tout : la fenêtre « Ouvrir » de Windows, puis l\'image posée dans la Toile.')), bloc('bs_fichier_ouvrir_dans', 'c10', null, { CIBLE: 'c1' })]),
+          evt('bs_quand_clic', 'c9', [note(T('Enregistre le dessin de la Toile dans une image PNG.')), bloc('bs_fichier_enregistrer_de', 'c10', null, { CIBLE: 'c1' })])
         ])
     },
     {
-      titre: '🔐 Carnet secret',
+      titre: T('🔐 Carnet secret'),
       theme: 'applications',
-      description: 'Un mot de passe pour entrer, des pages rangées dans une arborescence, une barre d\'état. Les notes sont gardées d\'une fois sur l\'autre.',
+      description: T('Un mot de passe pour entrer, des pages rangées dans une arborescence, une barre d\'état. Les notes sont gardées d\'une fois sur l\'autre.'),
       creer: () => {
         // c1-c4 : l'entrée (étiquette, mot de passe, interrupteur « Montrer », bouton Entrer)
         // c5 Pages (arborescence) · c6 Note · c7 Garder · c8 Verrouiller · c9 Etat (barre d'état) · c10 Notes (base)
@@ -510,104 +510,104 @@
         const montrer = (ids, oui) => ids.map(id => ecrire(id, 'visible', vrai(oui)));
         const etat = (num, x) => bloc('bs_barreetat_ecrire', 'c9', { VAL: x, NUM: n(num) });
         const chemin = () => lire('chemin', 'c5');
-        const ficheDeLaPage = () => bloc('bs_base_premiere', 'c10', { VAL: chemin() }, { CHAMP: 'Page', OP: 'egal' });
+        const ficheDeLaPage = () => bloc('bs_base_premiere', 'c10', { VAL: chemin() }, { CHAMP: T('Page'), OP: 'egal' });
         return projet(
-          { titre: 'Carnet secret', largeur: 560, hauteur: 350, couleurFond: '#f5f3ff' },
+          { titre: T('Carnet secret'), largeur: 560, hauteur: 350, couleurFond: '#f5f3ff' },
           [
-            { type: 'etiquette', nom: 'Invitation', texte: '🔐 Mot de passe :', x: 90, y: 120, largeur: 130, hauteur: 28, taillePolice: 15 },
+            { type: 'etiquette', nom: 'Invitation', texte: T('🔐 Mot de passe :'), x: 90, y: 120, largeur: 130, hauteur: 28, taillePolice: 15 },
             { type: 'zonetexte', nom: 'MotDePasse', motDePasse: true, x: 220, y: 118, largeur: 160, hauteur: 30 },
-            { type: 'interrupteur', nom: 'Montrer', texte: 'Montrer', x: 390, y: 122, largeur: 100, hauteur: 26 },
-            { type: 'bouton', nom: 'Entrer', texte: '🔓 Entrer', x: 220, y: 160, largeur: 160, hauteur: 34 },
+            { type: 'interrupteur', nom: 'Montrer', texte: T('Montrer'), x: 390, y: 122, largeur: 100, hauteur: 26 },
+            { type: 'bouton', nom: 'Entrer', texte: T('🔓 Entrer'), x: 220, y: 160, largeur: 160, hauteur: 34 },
             { type: 'arborescence', nom: 'Pages', x: 10, y: 10, largeur: 190, hauteur: 300, visible: false, deplie: true,
-              arbre: 'École\n  Devoirs\n  Copains\nMaison\n  Cachettes\n  Liste de cadeaux\nIdées\n  Inventions\n  Histoires' },
+              arbre: T('École\n  Devoirs\n  Copains\nMaison\n  Cachettes\n  Liste de cadeaux\nIdées\n  Inventions\n  Histoires') },
             { type: 'zonetexte', nom: 'Note', multiligne: true, x: 210, y: 10, largeur: 340, hauteur: 258, couleurFond: '#ffffff', visible: false },
-            { type: 'bouton', nom: 'Garder', texte: '💾 Garder la note', x: 210, y: 276, largeur: 160, hauteur: 34, visible: false },
-            { type: 'bouton', nom: 'Verrouiller', texte: '🔒 Verrouiller', x: 410, y: 276, largeur: 140, hauteur: 34, visible: false },
-            { type: 'barreetat', nom: 'Etat', texte: '🔒 Verrouillé|Astuce : le mot de passe est 1234', x: 0, y: 326, largeur: 560, hauteur: 24, taillePolice: 12 },
+            { type: 'bouton', nom: 'Garder', texte: T('💾 Garder la note'), x: 210, y: 276, largeur: 160, hauteur: 34, visible: false },
+            { type: 'bouton', nom: 'Verrouiller', texte: T('🔒 Verrouiller'), x: 410, y: 276, largeur: 140, hauteur: 34, visible: false },
+            { type: 'barreetat', nom: 'Etat', texte: T('🔒 Verrouillé|Astuce : le mot de passe est 1234'), x: 0, y: 326, largeur: 560, hauteur: 24, taillePolice: 12 },
             {
-              type: 'basedonnees', nom: 'Notes', largeur: 0, hauteur: 0, memoriser: true, champs: ['Page', 'Note'],
-              fiches: [['Maison › Cachettes', 'La clé du coffre est sous le pot de fleurs 🌼'], ['Idées › Inventions', 'Un robot qui range ma chambre 🤖']]
+              type: 'basedonnees', nom: 'Notes', largeur: 0, hauteur: 0, memoriser: true, champs: [T('Page'), T('Note')],
+              fiches: [[T('Maison › Cachettes'), T('La clé du coffre est sous le pot de fleurs 🌼')], [T('Idées › Inventions'), T('Un robot qui range ma chambre 🤖')]]
             }
           ],
           ['numero'],
           () => [
-            presentation('Deux « écrans » dans la même fenêtre : l\'entrée (mot de passe) et le carnet. On passe de l\'un à l\'autre en cachant certains contrôles et en montrant les autres. Les notes sont rangées dans la base de données Notes : une fiche par page.'),
-            evt('bs_quand_change', 'c3', [note('L\'interrupteur « Montrer » affiche le mot de passe en clair, ou le cache.'), ecrire('c2', 'motDePasse', non(lire('coche', 'c3')))]),
+            presentation(T('Deux « écrans » dans la même fenêtre : l\'entrée (mot de passe) et le carnet. On passe de l\'un à l\'autre en cachant certains contrôles et en montrant les autres. Les notes sont rangées dans la base de données Notes : une fiche par page.')),
+            evt('bs_quand_change', 'c3', [note(T('L\'interrupteur « Montrer » affiche le mot de passe en clair, ou le cache.')), ecrire('c2', 'motDePasse', non(lire('coche', 'c3')))]),
             evt('bs_quand_clic', 'c4', [
-              note('Le bon mot de passe cache l\'entrée et montre le carnet. Sinon : un son d\'erreur, et la case est vidée.'),
+              note(T('Le bon mot de passe cache l\'entrée et montre le carnet. Sinon : un son d\'erreur, et la case est vidée.')),
               si(compare('EQ', lire('texte', 'c2'), t('1234')),
                 [
                   ...montrer(entree, false), ...montrer(carnet, true),
                   ecrire('c6', 'texte', t('')),
-                  etat(1, t('🔓 Carnet ouvert')), etat(2, t('Choisissez une page à gauche')),
+                  etat(1, t(T('🔓 Carnet ouvert'))), etat(2, t(T('Choisissez une page à gauche'))),
                   bloc('bs_son', null, null, { SON: 'succes' })
                 ],
                 [
                   bloc('bs_son', null, null, { SON: 'erreur' }),
-                  etat(2, t('❌ Mauvais mot de passe, essayez encore')),
+                  etat(2, t(T('❌ Mauvais mot de passe, essayez encore'))),
                   ecrire('c2', 'texte', t(''))
                 ])
             ]),
             // Une page choisie : on cherche sa note dans la base.
             evt('bs_quand_change', 'c5', [
-              note('Une page choisie dans l\'arborescence : on cherche sa fiche dans la base (0 = pas encore de note) et on affiche sa note.'),
+              note(T('Une page choisie dans l\'arborescence : on cherche sa fiche dans la base (0 = pas encore de note) et on affiche sa note.')),
               fixer('v_numero', ficheDeLaPage()),
               si(compare('EQ', v('v_numero'), n(0)),
                 [ecrire('c6', 'texte', t(''))],
-                [ecrire('c6', 'texte', bloc('bs_base_champ', 'c10', { N: v('v_numero') }, { CHAMP: 'Note' }))]),
+                [ecrire('c6', 'texte', bloc('bs_base_champ', 'c10', { N: v('v_numero') }, { CHAMP: T('Note') }))]),
               etat(2, joindre(t('📄 '), chemin()))
             ]),
             evt('bs_quand_clic', 'c7', [
-              note('💾 Garder : si la page n\'a pas encore de fiche, on en ajoute une ; sinon, on modifie sa note.'),
+              note(T('💾 Garder : si la page n\'a pas encore de fiche, on en ajoute une ; sinon, on modifie sa note.')),
               si(estVide(chemin()),
-                [message(t('Choisissez d\'abord une page dans la liste de gauche.'), 'info')],
+                [message(t(T('Choisissez d\'abord une page dans la liste de gauche.')), 'info')],
                 [
                   fixer('v_numero', ficheDeLaPage()),
                   si(compare('EQ', v('v_numero'), n(0)),
                     [{
-                      type: 'bs_base_ajouter', fields: { CTRL: 'c10' }, extraState: { champs: ['Page', 'Note'] },
+                      type: 'bs_base_ajouter', fields: { CTRL: 'c10' }, extraState: { champs: [T('Page'), T('Note')] },
                       inputs: { V0: I(chemin()), V1: I(lire('texte', 'c6')) }
                     }],
-                    [bloc('bs_base_modifier', 'c10', { N: v('v_numero'), VAL: lire('texte', 'c6') }, { CHAMP: 'Note' })]),
-                  etat(2, joindre(t('💾 Note gardée : '), chemin()))
+                    [bloc('bs_base_modifier', 'c10', { N: v('v_numero'), VAL: lire('texte', 'c6') }, { CHAMP: T('Note') })]),
+                  etat(2, joindre(t(T('💾 Note gardée : ')), chemin()))
                 ])
             ]),
             evt('bs_quand_clic', 'c8', [
-              note('🔒 Verrouiller : le carnet disparaît, l\'entrée revient.'),
+              note(T('🔒 Verrouiller : le carnet disparaît, l\'entrée revient.')),
               ...montrer(carnet, false), ...montrer(entree, true),
               ecrire('c2', 'texte', t('')),
-              etat(1, t('🔒 Verrouillé')), etat(2, t('À bientôt !'))
+              etat(1, t(T('🔒 Verrouillé'))), etat(2, t(T('À bientôt !')))
             ])
           ]);
       }
     },
     {
-      titre: '📸 Photomaton',
+      titre: T('📸 Photomaton'),
       theme: 'multimedia',
-      description: 'La webcam en direct : compte à rebours 3, 2, 1, photo, enregistrement en PNG, et un détecteur de mouvement.',
+      description: T('La webcam en direct : compte à rebours 3, 2, 1, photo, enregistrement en PNG, et un détecteur de mouvement.'),
       creer: () => {
         // c1 Camera · c2 Photo (image) · c3 bouton Photo · c4 interrupteur · c5 bouton Enregistrer
         // c6 Compte (grand chiffre sur la caméra) · c7 Alerte · c8 FichierPhoto (invisible)
         const compte = x => [ecrire('c6', 'texte', t(x)), bloc('bs_son', null, null, { SON: 'bip' }), attendre(1)];
         return projet(
-          { titre: 'Photomaton', largeur: 670, hauteur: 310, couleurFond: '#1e293b' },
+          { titre: T('Photomaton'), largeur: 670, hauteur: 310, couleurFond: '#1e293b' },
           [
             { type: 'camera', nom: 'Camera', x: 10, y: 10, largeur: 320, hauteur: 240, miroir: true, allumerAuDemarrage: true, seuilMouvement: 10 },
             { type: 'image', nom: 'Photo', x: 340, y: 10, largeur: 320, hauteur: 240, couleurFond: '#334155' },
-            { type: 'bouton', nom: 'BoutonPhoto', texte: '📸 Prendre une photo', x: 10, y: 262, largeur: 160, hauteur: 36 },
-            { type: 'interrupteur', nom: 'Allumee', texte: 'Caméra allumée', coche: true, x: 180, y: 268, largeur: 150, hauteur: 26, couleurTexte: '#e2e8f0' },
-            { type: 'bouton', nom: 'Enregistrer', texte: '💾 Enregistrer la photo', x: 340, y: 262, largeur: 170, hauteur: 36 },
+            { type: 'bouton', nom: 'BoutonPhoto', texte: T('📸 Prendre une photo'), x: 10, y: 262, largeur: 160, hauteur: 36 },
+            { type: 'interrupteur', nom: 'Allumee', texte: T('Caméra allumée'), coche: true, x: 180, y: 268, largeur: 150, hauteur: 26, couleurTexte: '#e2e8f0' },
+            { type: 'bouton', nom: 'Enregistrer', texte: T('💾 Enregistrer la photo'), x: 340, y: 262, largeur: 170, hauteur: 36 },
             { type: 'etiquette', nom: 'Compte', texte: '', x: 130, y: 80, largeur: 80, hauteur: 90, taillePolice: 72,
               couleurTexte: '#ffffff', visible: false },
             { type: 'etiquette', nom: 'Alerte', texte: '', x: 520, y: 270, largeur: 140, hauteur: 24, couleurTexte: '#fbbf24' },
-            { type: 'fichier', nom: 'FichierPhoto', typeFichier: 'image', nomPropose: 'ma photo.png', largeur: 0, hauteur: 0 }
+            { type: 'fichier', nom: 'FichierPhoto', typeFichier: 'image', nomPropose: T('ma photo.png'), largeur: 0, hauteur: 0 }
           ],
           [],
           () => [
-            presentation('La caméra filme en direct. Le bouton lance un compte à rebours, prend la photo et la montre à droite ; on peut ensuite l\'enregistrer.'),
-            evt('bs_quand_demarre', null, [note('Pas encore de photo : rien à enregistrer, le bouton est grisé.'), ecrire('c5', 'active', vrai(false))]),
+            presentation(T('La caméra filme en direct. Le bouton lance un compte à rebours, prend la photo et la montre à droite ; on peut ensuite l\'enregistrer.')),
+            evt('bs_quand_demarre', null, [note(T('Pas encore de photo : rien à enregistrer, le bouton est grisé.')), ecrire('c5', 'active', vrai(false))]),
             evt('bs_quand_clic', 'c3', [
-              note('Le bouton est grisé pendant le compte à rebours, pour ne pas le relancer. Puis 3, 2, 1 : un chiffre et un bip par seconde.'),
+              note(T('Le bouton est grisé pendant le compte à rebours, pour ne pas le relancer. Puis 3, 2, 1 : un chiffre et un bip par seconde.')),
               ecrire('c3', 'active', vrai(false)),
               ecrire('c6', 'visible', vrai(true)),
               ...compte('3'), ...compte('2'), ...compte('1'),
@@ -620,16 +620,16 @@
               ecrire('c3', 'active', vrai(true))
             ]),
             evt('bs_quand_clic', 'c5', [
-              note('« annulé ? » est vrai si on a fermé la fenêtre « Enregistrer » sans choisir de fichier.'),
+              note(T('« annulé ? » est vrai si on a fermé la fenêtre « Enregistrer » sans choisir de fichier.')),
               bloc('bs_fichier_enregistrer_de', 'c8', null, { CIBLE: 'c1' }),
               si(non(bloc('bs_fichier_annule', 'c8')), [
                 ecrire('c7', 'texte', joindre(t('💾 '), bloc('bs_fichier_nom', 'c8')))
               ])
             ]),
-            evt('bs_quand_change', 'c4', [note('L\'interrupteur allume ou éteint la caméra.'), ecrire('c1', 'allumee', lire('coche', 'c4'))]),
+            evt('bs_quand_change', 'c4', [note(T('L\'interrupteur allume ou éteint la caméra.')), ecrire('c1', 'allumee', lire('coche', 'c4'))]),
             evt('bs_quand_camera_mouvement', 'c1', [
-              note('La caméra compare chaque image à la précédente : si assez de pixels changent, c\'est un mouvement.'),
-              ecrire('c7', 'texte', t('👀 Ça bouge !')),
+              note(T('La caméra compare chaque image à la précédente : si assez de pixels changent, c\'est un mouvement.')),
+              ecrire('c7', 'texte', t(T('👀 Ça bouge !'))),
               attendre(1),
               ecrire('c7', 'texte', t(''))
             ])
@@ -637,9 +637,9 @@
       }
     },
     {
-      titre: '📝 Bloc-notes',
+      titre: T('📝 Bloc-notes'),
       theme: 'applications',
-      description: 'Un petit traitement de texte : menus Fichier, barre d\'outils, menu au clic droit sur le texte, glisser-déposer d\'un fichier. On peut agrandir la fenêtre : le texte suit (ancrage).',
+      description: T('Un petit traitement de texte : menus Fichier, barre d\'outils, menu au clic droit sur le texte, glisser-déposer d\'un fichier. On peut agrandir la fenêtre : le texte suit (ancrage).'),
       creer: () => {
         // c1 Texte · c2 Etat · c3 FichierTexte (contrôle Fichier, invisible)
         // c4 Outils (barre d'outils) · c5 MenuTexte (menu contextuel du texte, invisible)
@@ -654,36 +654,36 @@
         const casse = c => ({ type: 'text_changeCase', fields: { CASE: c }, inputs: { TEXT: I(lire('texte', 'c1')) } });
         return projet(
           {
-            titre: 'Bloc-notes', largeur: 520, hauteur: 380, couleurFond: '#f1f5f9', menus: 'Fichier\n  Nouveau\n  Ouvrir…\n  Enregistrer…',
+            titre: T('Bloc-notes'), largeur: 520, hauteur: 380, couleurFond: '#f1f5f9', menus: T('Fichier\n  Nouveau\n  Ouvrir…\n  Enregistrer…'),
             redimensionnable: true, agrandir: true, largeurMin: 300, hauteurMin: 200
           },
           [
             // Le texte s'étire avec la fenêtre ; la ligne d'état reste collée en bas. Clic droit : son menu (MenuTexte).
             { type: 'zonetexte', nom: 'Texte', multiligne: true, ancrage: 'hbgd', menuContextuel: 'c5', x: 10, y: 44, largeur: 500, hauteur: 278, taillePolice: 15,
-              couleurFond: '#ffffff', texte: 'Écrivez ici, puis 💾 Enregistrer.\n\nAstuces : faites un clic droit sur le texte, ou glissez un fichier texte sur la fenêtre pour l\'ouvrir.' },
-            { type: 'etiquette', nom: 'Etat', ancrage: 'bgd', texte: '📄 Nouveau document', x: 10, y: 330, largeur: 500, hauteur: 22, taillePolice: 13, couleurTexte: '#475569' },
-            { type: 'fichier', nom: 'FichierTexte', typeFichier: 'texte', nomPropose: 'mes notes.txt', largeur: 0, hauteur: 0 },
-            { type: 'barreoutils', nom: 'Outils', boutons: '📄 Nouveau\n📂 Ouvrir\n💾 Enregistrer', x: 0, y: 0, largeur: 520, hauteur: 34, taillePolice: 13 },
-            { type: 'menucontextuel', nom: 'MenuTexte', menu: '🔠 MAJUSCULES\n🔡 minuscules\n-\n🧹 Tout effacer', largeur: 0, hauteur: 0 }
+              couleurFond: '#ffffff', texte: T('Écrivez ici, puis 💾 Enregistrer.\n\nAstuces : faites un clic droit sur le texte, ou glissez un fichier texte sur la fenêtre pour l\'ouvrir.') },
+            { type: 'etiquette', nom: 'Etat', ancrage: 'bgd', texte: T('📄 Nouveau document'), x: 10, y: 330, largeur: 500, hauteur: 22, taillePolice: 13, couleurTexte: '#475569' },
+            { type: 'fichier', nom: 'FichierTexte', typeFichier: 'texte', nomPropose: T('mes notes.txt'), largeur: 0, hauteur: 0 },
+            { type: 'barreoutils', nom: 'Outils', boutons: T('📄 Nouveau\n📂 Ouvrir\n💾 Enregistrer'), x: 0, y: 0, largeur: 520, hauteur: 34, taillePolice: 13 },
+            { type: 'menucontextuel', nom: 'MenuTexte', menu: T('🔠 MAJUSCULES\n🔡 minuscules\n-\n🧹 Tout effacer'), largeur: 0, hauteur: 0 }
           ],
           [],
           () => [
-            presentation('Le menu Fichier et la barre d\'outils font la même chose : chacun envoie juste un message (« nouveau », « ouvrir », « enregistrer »). Le travail n\'est écrit qu\'une fois, dans « quand je reçois … ».'),
-            evtMenu('Fichier › Nouveau', [envoyer('nouveau')]),
-            evtMenu('Fichier › Ouvrir…', [envoyer('ouvrir')]),
-            evtMenu('Fichier › Enregistrer…', [envoyer('enregistrer')]),
-            quandOutil('📄 Nouveau', [envoyer('nouveau')]),
-            quandOutil('📂 Ouvrir', [envoyer('ouvrir')]),
-            quandOutil('💾 Enregistrer', [envoyer('enregistrer')]),
+            presentation(T('Le menu Fichier et la barre d\'outils font la même chose : chacun envoie juste un message (« nouveau », « ouvrir », « enregistrer »). Le travail n\'est écrit qu\'une fois, dans « quand je reçois … ».')),
+            evtMenu(T('Fichier › Nouveau'), [envoyer('nouveau')]),
+            evtMenu(T('Fichier › Ouvrir…'), [envoyer('ouvrir')]),
+            evtMenu(T('Fichier › Enregistrer…'), [envoyer('enregistrer')]),
+            quandOutil(T('📄 Nouveau'), [envoyer('nouveau')]),
+            quandOutil(T('📂 Ouvrir'), [envoyer('ouvrir')]),
+            quandOutil(T('💾 Enregistrer'), [envoyer('enregistrer')]),
             quandMessage('nouveau', [
-              note('On demande avant d\'effacer le texte.'),
-              si(confirmer('Effacer le texte pour commencer un nouveau document ?'), [
+              note(T('On demande avant d\'effacer le texte.')),
+              si(confirmer(T('Effacer le texte pour commencer un nouveau document ?')), [
                 ecrire('c1', 'texte', t('')),
-                etat(t('📄 Nouveau document'))
+                etat(t(T('📄 Nouveau document')))
               ])
             ]),
             quandMessage('ouvrir', [
-              note('La fenêtre « Ouvrir » de Windows. Si on n\'a pas annulé, le contenu du fichier va dans le texte et son nom dans la ligne d\'état.'),
+              note(T('La fenêtre « Ouvrir » de Windows. Si on n\'a pas annulé, le contenu du fichier va dans le texte et son nom dans la ligne d\'état.')),
               bloc('bs_fichier_ouvrir_avec', 'c3'),
               si(non(annule()), [
                 ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),
@@ -691,29 +691,29 @@
               ])
             ]),
             quandMessage('enregistrer', [
-              note('La fenêtre « Enregistrer sous », puis le texte est écrit dans le fichier choisi.'),
+              note(T('La fenêtre « Enregistrer sous », puis le texte est écrit dans le fichier choisi.')),
               { type: 'bs_fichier_enregistrer_avec', fields: { CTRL: 'c3' }, inputs: { VAL: I(lire('texte', 'c1')) } },
               si(annule(),
-                [etat(t('Enregistrement annulé.'))],
-                [etat(joindre(t('💾 Enregistré : '), nomFichier()))])
+                [etat(t(T('Enregistrement annulé.')))],
+                [etat(joindre(t(T('💾 Enregistré : ')), nomFichier()))])
             ]),
-            quandMenuTexte('🔠 MAJUSCULES', [note('Le menu du clic droit sur le texte (menu contextuel MenuTexte).'), ecrire('c1', 'texte', casse('UPPERCASE'))]),
-            quandMenuTexte('🔡 minuscules', [ecrire('c1', 'texte', casse('LOWERCASE'))]),
-            quandMenuTexte('🧹 Tout effacer', [
-              si(confirmer('Effacer tout le texte ?'), [ecrire('c1', 'texte', t(''))])
+            quandMenuTexte(T('🔠 MAJUSCULES'), [note(T('Le menu du clic droit sur le texte (menu contextuel MenuTexte).')), ecrire('c1', 'texte', casse('UPPERCASE'))]),
+            quandMenuTexte(T('🔡 minuscules'), [ecrire('c1', 'texte', casse('LOWERCASE'))]),
+            quandMenuTexte(T('🧹 Tout effacer'), [
+              si(confirmer(T('Effacer tout le texte ?')), [ecrire('c1', 'texte', t(''))])
             ]),
             evt('bs_quand_fichier_depose', 'c3', [
-              note('Un fichier glissé sur la fenêtre est ouvert directement.'),
+              note(T('Un fichier glissé sur la fenêtre est ouvert directement.')),
               ecrire('c1', 'texte', bloc('bs_fichier_contenu', 'c3')),
-              etat(joindre(t('📄 '), nomFichier(), t(' (déposé)')))
+              etat(joindre(t('📄 '), nomFichier(), t(T(' (déposé)'))))
             ])
           ]);
       }
     },
     {
-      titre: '💬 Messagerie',
+      titre: T('💬 Messagerie'),
       theme: 'applications',
-      description: 'Une discussion avec Robi, un petit robot : chaque message est une bulle (un clone) ajoutée dans un panneau défilant, qui descend tout en bas.',
+      description: T('Une discussion avec Robi, un petit robot : chaque message est une bulle (un clone) ajoutée dans un panneau défilant, qui descend tout en bas.'),
       creer: () => {
         // c1 Fil (panneau défilant) · c2 Bulle (dans le panneau, cachée : ce sont ses clones qu'on voit)
         // c3 Saisie · c4 Envoyer
@@ -724,55 +724,55 @@
         // Une ligne de bulle pour environ 28 lettres.
         const lignes = { type: 'math_round', fields: { OP: 'ROUNDUP' }, inputs: { NUM: I(calc('DIVIDE', { type: 'text_length', inputs: { VALUE: I(v('v_texte')) } }, n(28))) } };
         return projet(
-          { titre: 'Messagerie', largeur: 400, hauteur: 340, couleurFond: '#f0f2f5' },
+          { titre: T('Messagerie'), largeur: 400, hauteur: 340, couleurFond: '#f0f2f5' },
           [
             { type: 'panneau', nom: 'Fil', x: 10, y: 10, largeur: 380, hauteur: 276, couleurFond: '#e5ddd5', defilement: 'vertical', largeurContenu: 0, hauteurContenu: 0 },
             { type: 'etiquette', nom: 'Bulle', panneau: 'c1', visible: false, alignement: 'centre', x: 8, y: 10, largeur: 220, hauteur: 33, couleurFond: '#ffffff' },
-            { type: 'zonetexte', nom: 'Saisie', texteInvite: 'Écris un message… (Entrée pour envoyer)', x: 10, y: 296, largeur: 288, hauteur: 32 },
-            { type: 'bouton', nom: 'Envoyer', texte: 'Envoyer ➤', x: 306, y: 296, largeur: 84, hauteur: 32, couleurFond: '#25d366', couleurTexte: '#ffffff', gras: true }
+            { type: 'zonetexte', nom: 'Saisie', texteInvite: T('Écris un message… (Entrée pour envoyer)'), x: 10, y: 296, largeur: 288, hauteur: 32 },
+            { type: 'bouton', nom: 'Envoyer', texte: T('Envoyer ➤'), x: 306, y: 296, largeur: 84, hauteur: 32, couleurFond: '#25d366', couleurTexte: '#ffffff', gras: true }
           ],
           ['texte', 'deMoi', 'prochainY'],
           () => [
-            presentation('Chaque message est une bulle : un clone de l\'étiquette Bulle (cachée), posé dans le panneau défilant Fil. La variable prochainY retient où poser la bulle suivante.'),
+            presentation(T('Chaque message est une bulle : un clone de l\'étiquette Bulle (cachée), posé dans le panneau défilant Fil. La variable prochainY retient où poser la bulle suivante.')),
             evt('bs_quand_demarre', null, [
-              note('Robi dit bonjour : on prépare le texte de sa bulle, puis on la crée.'),
+              note(T('Robi dit bonjour : on prépare le texte de sa bulle, puis on la crée.')),
               fixer('v_prochainY', n(10)),
               fixer('v_deMoi', vrai(false)),
-              fixer('v_texte', t('Salut ! Je suis Robi 🤖. Écris-moi quelque chose !')),
+              fixer('v_texte', t(T('Salut ! Je suis Robi 🤖. Écris-moi quelque chose !'))),
               bloc('bs_creer_clone', 'c2'),
               bloc('bs_focus', 'c3')
             ]),
             evt('bs_quand_clic', 'c4', [appeler('envoyer')]),
-            evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [note('Entrée envoie le message, comme le bouton.'), appeler('envoyer')]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [note(T('Entrée envoie le message, comme le bouton.')), appeler('envoyer')]),
             // Ma bulle, puis la réponse de Robi une seconde plus tard.
             fonction('envoyer', [
-              note('Ma bulle d\'abord, puis la réponse de Robi une seconde plus tard (« Robi écrit… » dans la barre de titre en attendant).'),
+              note(T('Ma bulle d\'abord, puis la réponse de Robi une seconde plus tard (« Robi écrit… » dans la barre de titre en attendant).')),
               si(non(estVide(lire('texte', 'c3'))), [
                 fixer('v_texte', lire('texte', 'c3')),
                 fixer('v_deMoi', vrai(true)),
                 bloc('bs_creer_clone', 'c2'),
                 ecrire('c3', 'texte', t('')),
                 bloc('bs_focus', 'c3'),
-                titre('Robi écrit…'),
+                titre(T('Robi écrit…')),
                 attendre(1),
                 appeler('réponse de Robi'),
                 fixer('v_deMoi', vrai(false)),
                 bloc('bs_creer_clone', 'c2'),
-                titre('Messagerie')
+                titre(T('Messagerie'))
               ])
             ]),
             // Robi cherche des mots dans le message (en minuscules) ; sinon, il répond au hasard.
             fonction('réponse de Robi', [
-              note('Robi cherche des mots dans le message (mis en minuscules pour trouver aussi « Bonjour ») ; sinon, il répond une phrase au hasard.'),
-              si(ou(contient('bonjour'), contient('salut')), [fixer('v_texte', t('Salut ! 👋 Comment ça va ?'))], [
-                si(contient('?'), [fixer('v_texte', t('Bonne question… Je dirais oui ! 🤔'))], [
-                  fixer('v_texte', auHasard('Ah oui ? Raconte !', 'Trop bien ! 😄', 'Intéressant…', 'Je suis d\'accord ! 👍', 'Hi hi 😊'))
+              note(T('Robi cherche des mots dans le message (mis en minuscules pour trouver aussi « Bonjour ») ; sinon, il répond une phrase au hasard.')),
+              si(ou(contient(T('bonjour', 'mot cherché')), contient(T('salut', 'mot cherché'))), [fixer('v_texte', t(T('Salut ! 👋 Comment ça va ?')))], [
+                si(contient('?'), [fixer('v_texte', t(T('Bonne question… Je dirais oui ! 🤔')))], [
+                  fixer('v_texte', auHasard(T('Ah oui ? Raconte !'), T('Trop bien ! 😄'), T('Intéressant…'), T('Je suis d\'accord ! 👍'), T('Hi hi 😊')))
                 ])
               ])
             ]),
             // Chaque bulle est un clone : à droite et en vert pour moi, à gauche et en blanc pour Robi.
             evt('bs_quand_clone', 'c2', [
-              note('Une nouvelle bulle : son texte, sa hauteur (une ligne pour environ 28 lettres), à droite en vert pour moi ou à gauche en blanc pour Robi. Puis le fil descend tout en bas.'),
+              note(T('Une nouvelle bulle : son texte, sa hauteur (une ligne pour environ 28 lettres), à droite en vert pour moi ou à gauche en blanc pour Robi. Puis le fil descend tout en bas.')),
               ecrire('__moi', 'texte', v('v_texte')),
               ecrire('__moi', 'hauteur', calc('ADD', n(14), calc('MULTIPLY', n(19), lignes))),
               si(v('v_deMoi'),
@@ -787,61 +787,61 @@
       }
     },
     {
-      titre: '🌦️ Météo',
+      titre: T('🌦️ Météo'),
       theme: 'applications',
-      description: 'La météo en ce moment dans la ville de son choix, lue sur Internet (il faut une connexion) : température, temps qu\'il fait, vent…',
+      description: T('La météo en ce moment dans la ville de son choix, lue sur Internet (il faut une connexion) : température, temps qu\'il fait, vent…'),
       creer: () => {
         // c1 Ville · c2 Voir · c3 Emoji · c4 Temperature · c5 Details · c6 Lieu · c7 Source (lien vers Open-Meteo)
         const meteo = quoi => bloc('bs_meteo', null, { VAL: lire('texte', 'c1') }, { QUOI: quoi });
         const arrondi = x => ({ type: 'math_round', fields: { OP: 'ROUND' }, inputs: { NUM: I(x) } });
         return projet(
-          { titre: 'Météo', largeur: 420, hauteur: 312, couleurFond: '#e0f2fe' },
+          { titre: T('Météo'), largeur: 420, hauteur: 312, couleurFond: '#e0f2fe' },
           [
-            { type: 'zonetexte', nom: 'Ville', texte: 'Paris', texteInvite: 'Une ville…', x: 16, y: 16, largeur: 250, hauteur: 32, taillePolice: 16 },
-            { type: 'bouton', nom: 'Voir', texte: '🔍 Voir la météo', x: 274, y: 16, largeur: 130, hauteur: 32, couleurFond: '#0369a1', couleurTexte: '#ffffff', gras: true },
+            { type: 'zonetexte', nom: 'Ville', texte: T('Paris'), texteInvite: T('Une ville…'), x: 16, y: 16, largeur: 250, hauteur: 32, taillePolice: 16 },
+            { type: 'bouton', nom: 'Voir', texte: T('🔍 Voir la météo'), x: 274, y: 16, largeur: 130, hauteur: 32, couleurFond: '#0369a1', couleurTexte: '#ffffff', gras: true },
             { type: 'etiquette', nom: 'Emoji', texte: '', alignement: 'centre', x: 16, y: 92, largeur: 110, hauteur: 90, taillePolice: 60 },
             { type: 'etiquette', nom: 'Temperature', texte: '', x: 134, y: 104, largeur: 270, hauteur: 60, taillePolice: 42, couleurTexte: '#0c4a6e', gras: true },
             { type: 'etiquette', nom: 'Details', texte: '', x: 16, y: 190, largeur: 388, hauteur: 90, taillePolice: 14, couleurTexte: '#334155' },
             { type: 'etiquette', nom: 'Lieu', texte: '', x: 16, y: 60, largeur: 388, hauteur: 26, taillePolice: 15, couleurTexte: '#0c4a6e', gras: true },
             {
-              type: 'lien', nom: 'Source', texte: 'Météo : Open-Meteo.com', adresse: 'https://open-meteo.com', alignement: 'droite',
+              type: 'lien', nom: 'Source', texte: T('Météo : Open-Meteo.com'), adresse: 'https://open-meteo.com', alignement: 'droite',
               x: 204, y: 286, largeur: 200, hauteur: 20, taillePolice: 12, couleurTexte: '#0369a1'
             }
           ],
           [],
           () => [
-            presentation('Le bloc « météo à … » demande la météo sur Internet (service Open-Meteo) pour la ville écrite dans la case. ' +
-              'Ces données sont libres à condition de citer leur source : c\'est le rôle du lien « Météo : Open-Meteo.com » en bas de la fenêtre.'),
-            evt('bs_quand_demarre', null, [note('Au lancement, on montre déjà la météo de la ville écrite dans la case.'), appeler('afficher la météo')]),
+            presentation(T('Le bloc « météo à … » demande la météo sur Internet (service Open-Meteo) pour la ville écrite dans la case. ') +
+              T('Ces données sont libres à condition de citer leur source : c\'est le rôle du lien « Météo : Open-Meteo.com » en bas de la fenêtre.')),
+            evt('bs_quand_demarre', null, [note(T('Au lancement, on montre déjà la météo de la ville écrite dans la case.')), appeler('afficher la météo')]),
             evt('bs_quand_clic', 'c2', [appeler('afficher la météo')]),
             evtChamps('bs_quand_touche', { TOUCHE: 'entree' }, [appeler('afficher la météo')]),
             // Chaque « météo à … » lit Internet ; les suivants, dans les 5 minutes, réutilisent la même réponse.
             fonction('afficher la météo', [
-              note('« trouvée ? » est faux si la ville est inconnue (ou sans Internet). Sinon, on lit chaque information : ville, emoji, température, vent…'),
+              note(T('« trouvée ? » est faux si la ville est inconnue (ou sans Internet). Sinon, on lit chaque information : ville, emoji, température, vent…')),
               ecrire('c3', 'texte', t('⏳')),
               ecrire('c4', 'texte', t('')),
-              ecrire('c5', 'texte', t('Je demande la météo sur Internet…')),
+              ecrire('c5', 'texte', t(T('Je demande la météo sur Internet…'))),
               si(meteo('trouvee'), [
                 ecrire('c6', 'texte', joindre(t('📍 '), meteo('ville'))),
                 ecrire('c3', 'texte', meteo('emoji')),
                 ecrire('c4', 'texte', joindre(arrondi(meteo('temperature')), t(' °C'))),
                 ecrire('c5', 'texte', joindre(
-                  meteo('description'), t(', ressenti '), arrondi(meteo('ressenti')), t(' °C'), retourLigne(),
-                  t('💨 Vent : '), arrondi(meteo('vent')), t(' km/h   💧 Humidité : '), meteo('humidite'), t(' %'), retourLigne(),
-                  t('📈 Aujourd\'hui : de '), arrondi(meteo('min')), t(' à '), arrondi(meteo('max')), t(' °C')))
+                  meteo('description'), t(T(', ressenti ')), arrondi(meteo('ressenti')), t(' °C'), retourLigne(),
+                  t(T('💨 Vent : ')), arrondi(meteo('vent')), t(T(' km/h   💧 Humidité : ')), meteo('humidite'), t(' %'), retourLigne(),
+                  t(T('📈 Aujourd\'hui : de ')), arrondi(meteo('min')), t(T(' à ')), arrondi(meteo('max')), t(' °C')))
               ], [
                 ecrire('c6', 'texte', t('')),
                 ecrire('c3', 'texte', t('🤷')),
-                ecrire('c5', 'texte', joindre(t('Je ne trouve pas la ville « '), lire('texte', 'c1'), t(' ». Vérifiez son orthographe.')))
+                ecrire('c5', 'texte', joindre(t(T('Je ne trouve pas la ville « ')), lire('texte', 'c1'), t(T(' ». Vérifiez son orthographe.'))))
               ])
             ])
           ]);
       }
     },
     {
-      titre: '🏘️ Communes de France',
+      titre: T('🏘️ Communes de France'),
       theme: 'applications',
-      description: 'Les 34 969 communes, lues sur un service de l\'État : une recherche pendant la frappe, ou toutes dans un tableau, avec des suggestions, et un enregistrement en Excel.',
+      description: T('Les 34 969 communes, lues sur un service de l\'État : une recherche pendant la frappe, ou toutes dans un tableau, avec des suggestions, et un enregistrement en Excel.'),
       creer: () => {
         // c1 Pages (onglets) · page 1 : c2 Recherche, c3 Resultats, c4 Fiche, c5 Explication
         // page 2 : c6 Charger, c7 Commune, c8 Trouver, c9 Exporter, c10 Communes (tableau), c11 Etat · c12 Fichier (Excel)
@@ -851,69 +851,69 @@
         const dansChoisie = champ => json(joindre(v('v_numero'), t('.' + champ)), v('v_resultats'));
         const longueur = x => ({ type: 'text_length', inputs: { VALUE: I(x) } });
         return projet(
-          { titre: 'Communes de France', largeur: 640, hauteur: 470, couleurFond: '#f1f5f9' },
+          { titre: T('Communes de France'), largeur: 640, hauteur: 470, couleurFond: '#f1f5f9' },
           [
-            { type: 'onglets', nom: 'Pages', x: 8, y: 8, largeur: 624, hauteur: 454, pages: ['🔍 Rechercher (Internet)', '📋 Toutes les communes'], page: 0 },
-            page(0, { type: 'zonetexte', nom: 'Recherche', texteInvite: 'Le début d\'un nom : saint-ma, aix…', x: 24, y: 56, largeur: 300, hauteur: 32, taillePolice: 15 }),
+            { type: 'onglets', nom: 'Pages', x: 8, y: 8, largeur: 624, hauteur: 454, pages: [T('🔍 Rechercher (Internet)'), T('📋 Toutes les communes')], page: 0 },
+            page(0, { type: 'zonetexte', nom: 'Recherche', texteInvite: T('Le début d\'un nom : saint-ma, aix…'), x: 24, y: 56, largeur: 300, hauteur: 32, taillePolice: 15 }),
             page(0, { type: 'zoneliste', nom: 'Resultats', elements: [], x: 24, y: 96, largeur: 300, hauteur: 350, taillePolice: 14 }),
-            page(0, { type: 'etiquette', nom: 'Fiche', texte: 'Tapez le début d\'un nom, puis choisissez une commune dans la liste.', x: 340, y: 96,
+            page(0, { type: 'etiquette', nom: 'Fiche', texte: T('Tapez le début d\'un nom, puis choisissez une commune dans la liste.'), x: 340, y: 96,
               largeur: 276, hauteur: 160, taillePolice: 15, couleurTexte: '#0f172a', couleurFond: '#ffffff', bordure: 'simple' }),
             page(0, { type: 'etiquette', nom: 'Explication', x: 340, y: 270, largeur: 276, hauteur: 176, taillePolice: 12, couleurTexte: '#475569',
-              texte: 'À chaque lettre tapée, le programme demande à un service de l\'État les 15 communes les plus peuplées dont le nom commence ainsi.\n\n' +
-                'Données : geo.api.gouv.fr (Licence Ouverte), il faut une connexion à Internet.' }),
-            page(1, { type: 'bouton', nom: 'Charger', texte: '📥 Charger les communes', x: 24, y: 56, largeur: 230, hauteur: 32, couleurFond: '#0369a1', couleurTexte: '#ffffff', gras: true }),
-            page(1, { type: 'zonetexte', nom: 'Commune', texteInvite: 'Une commune…', x: 24, y: 98, largeur: 230, hauteur: 30, taillePolice: 14 }),
-            page(1, { type: 'bouton', nom: 'Trouver', texte: '➜ La trouver', x: 262, y: 98, largeur: 120, hauteur: 30 }),
-            page(1, { type: 'bouton', nom: 'Exporter', texte: '📤 Enregistrer en Excel', x: 440, y: 56, largeur: 176, hauteur: 32 }),
-            page(1, { type: 'tableau', nom: 'Communes', colonnes: ['Nom', 'Code postal', 'Département'], lignes: [], x: 24, y: 138, largeur: 592, hauteur: 270, taillePolice: 13 }),
-            page(1, { type: 'etiquette', nom: 'Etat', texte: 'Cliquez sur « Charger » : les 34 969 communes vont remplir le tableau (≈ 2 Mo à télécharger).',
+              texte: T('À chaque lettre tapée, le programme demande à un service de l\'État les 15 communes les plus peuplées dont le nom commence ainsi.\n\n') +
+                T('Données : geo.api.gouv.fr (Licence Ouverte), il faut une connexion à Internet.') }),
+            page(1, { type: 'bouton', nom: 'Charger', texte: T('📥 Charger les communes'), x: 24, y: 56, largeur: 230, hauteur: 32, couleurFond: '#0369a1', couleurTexte: '#ffffff', gras: true }),
+            page(1, { type: 'zonetexte', nom: 'Commune', texteInvite: T('Une commune…'), x: 24, y: 98, largeur: 230, hauteur: 30, taillePolice: 14 }),
+            page(1, { type: 'bouton', nom: 'Trouver', texte: T('➜ La trouver'), x: 262, y: 98, largeur: 120, hauteur: 30 }),
+            page(1, { type: 'bouton', nom: 'Exporter', texte: T('📤 Enregistrer en Excel'), x: 440, y: 56, largeur: 176, hauteur: 32 }),
+            page(1, { type: 'tableau', nom: 'Communes', colonnes: [T('Nom'), T('Code postal'), T('Département')], lignes: [], x: 24, y: 138, largeur: 592, hauteur: 270, taillePolice: 13 }),
+            page(1, { type: 'etiquette', nom: 'Etat', texte: T('Cliquez sur « Charger » : les 34 969 communes vont remplir le tableau (≈ 2 Mo à télécharger).'),
               x: 24, y: 414, largeur: 592, hauteur: 40, taillePolice: 13, couleurTexte: '#334155' }),
-            { type: 'fichier', nom: 'Fichier', typeFichier: 'excel', nomPropose: 'communes de France.xlsx', largeur: 0, hauteur: 0 }
+            { type: 'fichier', nom: 'Fichier', typeFichier: 'excel', nomPropose: T('communes de France.xlsx'), largeur: 0, hauteur: 0 }
           ],
           ['resultats', 'numero', 'toutes', 'ligne'],
           () => [
-            presentation('Deux façons de lire des données d\'Internet (au format JSON). Page 1 : une petite demande à chaque lettre tapée. ' +
-              'Page 2 : toutes les communes d\'un coup, dans un tableau qui reste fluide malgré ses 34 969 lignes.'),
+            presentation(T('Deux façons de lire des données d\'Internet (au format JSON). Page 1 : une petite demande à chaque lettre tapée. ') +
+              T('Page 2 : toutes les communes d\'un coup, dans un tableau qui reste fluide malgré ses 34 969 lignes.')),
             evt('bs_quand_change', 'c2', [
-              note('Dès 2 lettres : on demande les communes dont le nom commence ainsi. « liste des nom » fait une liste de tous les noms reçus.'),
+              note(T('Dès 2 lettres : on demande les communes dont le nom commence ainsi. « liste des nom » fait une liste de tous les noms reçus.')),
               si(compare('GTE', longueur(lire('texte', 'c2')), n(2)), [
                 fixer('v_resultats', bloc('bs_web_lire', null, { VAL: joindre(t(API + '&boost=population&limit=15&nom='), lire('texte', 'c2')) })),
                 ecrire('c3', 'elements', bloc('bs_json_liste', null, { CHEMIN: t('nom'), VAL: v('v_resultats') }))
               ], [listeVider('c3')])
             ]),
             evt('bs_quand_change', 'c3', [
-              note('La commune choisie : son numéro dans la liste sert à lire ses informations (« 3.departement.nom » pour la 3e).'),
+              note(T('La commune choisie : son numéro dans la liste sert à lire ses informations (« 3.departement.nom » pour la 3e).')),
               fixer('v_numero', lire('numero', 'c3')),
               si(compare('GT', v('v_numero'), n(0)), [
                 ecrire('c4', 'texte', joindre(
                   t('📍 '), dansChoisie('nom'), retourLigne(),
-                  t('✉️ Code postal : '), dansChoisie('codesPostaux'), retourLigne(),
+                  t(T('✉️ Code postal : ')), dansChoisie('codesPostaux'), retourLigne(),
                   t('🗺️ '), dansChoisie('departement.nom'), t(' ('), dansChoisie('departement.code'), t(')'), retourLigne(),
-                  t('👥 '), bloc('bs_format_nombre', null, { VAL: dansChoisie('population'), DEC: n(0) }), t(' habitants')))
+                  t('👥 '), bloc('bs_format_nombre', null, { VAL: dansChoisie('population'), DEC: n(0) }), t(T(' habitants'))))
               ])
             ]),
             evt('bs_quand_clic', 'c6', [
-              note('Toutes les communes : une ligne par commune, et une colonne par chemin (le 1er code postal, le nom du département). ' +
-                'Leurs noms deviennent aussi les suggestions de la zone de texte.'),
-              ecrire('c11', 'texte', t('⏳ Je télécharge les communes…')),
+              note(T('Toutes les communes : une ligne par commune, et une colonne par chemin (le 1er code postal, le nom du département). ') +
+                T('Leurs noms deviennent aussi les suggestions de la zone de texte.')),
+              ecrire('c11', 'texte', t(T('⏳ Je télécharge les communes…'))),
               fixer('v_toutes', bloc('bs_web_lire', null, { VAL: t(API) })),
               bloc('bs_tableau_remplir_json', 'c10', { VAL: v('v_toutes'), CHEMINS: liste(t('nom'), t('codesPostaux.1'), t('departement.nom')) }),
-              bloc('bs_tableau_trier', 'c10', { COL: t('Nom') }, { SENS: 'croissant' }),
+              bloc('bs_tableau_trier', 'c10', { COL: t(T('Nom')) }, { SENS: 'croissant' }),
               ecrire('c7', 'suggestions', bloc('bs_json_liste', null, { CHEMIN: t('nom'), VAL: v('v_toutes') })),
               ecrire('c11', 'texte', joindre(bloc('bs_format_nombre', null, { VAL: lire('nombreLignes', 'c10'), DEC: n(0) }),
-                t(' communes. Tapez-en une (les suggestions s\'affichent), ou enregistrez-les dans un classeur Excel.')))
+                t(T(' communes. Tapez-en une (les suggestions s\'affichent), ou enregistrez-les dans un classeur Excel.'))))
             ]),
             evt('bs_quand_clic', 'c8', [
-              note('« n° de la ligne où la colonne Nom vaut… » trouve la commune ; la choisir fait défiler le tableau jusqu\'à elle.'),
-              fixer('v_ligne', bloc('bs_tableau_chercher', 'c10', { COL: t('Nom'), VAL: lire('texte', 'c7') })),
+              note(T('« n° de la ligne où la colonne Nom vaut… » trouve la commune ; la choisir fait défiler le tableau jusqu\'à elle.')),
+              fixer('v_ligne', bloc('bs_tableau_chercher', 'c10', { COL: t(T('Nom')), VAL: lire('texte', 'c7') })),
               si(compare('GT', v('v_ligne'), n(0)), [
                 ecrire('c10', 'numero', v('v_ligne')),
-                ecrire('c11', 'texte', joindre(lire('texte', 'c7'), t(' : ligne '), v('v_ligne'), t('.')))
-              ], [ecrire('c11', 'texte', joindre(t('Je ne trouve pas « '), lire('texte', 'c7'), t(' » (avez-vous chargé les communes ?).')))])
+                ecrire('c11', 'texte', joindre(lire('texte', 'c7'), t(T(' : ligne ')), v('v_ligne'), t('.')))
+              ], [ecrire('c11', 'texte', joindre(t(T('Je ne trouve pas « ')), lire('texte', 'c7'), t(T(' » (avez-vous chargé les communes ?).'))))])
             ]),
             evt('bs_quand_clic', 'c9', [
-              note('Le contrôle Fichier est réglé sur « Classeur Excel » : le tableau devient un fichier .xlsx.'),
-              si(compare('EQ', lire('nombreLignes', 'c10'), n(0)), [message(t('Chargez d\'abord les communes (bouton « Charger »).'))], [
+              note(T('Le contrôle Fichier est réglé sur « Classeur Excel » : le tableau devient un fichier .xlsx.')),
+              si(compare('EQ', lire('nombreLignes', 'c10'), n(0)), [message(t(T('Chargez d\'abord les communes (bouton « Charger »).')))], [
                 bloc('bs_fichier_enregistrer_de', 'c12', null, { CIBLE: 'c10' })
               ])
             ])
@@ -921,68 +921,68 @@
       }
     },
     {
-      titre: '🧮 Quiz de calcul',
+      titre: T('🧮 Quiz de calcul'),
       theme: 'debut',
-      description: '5 multiplications au hasard, un score et une barre de progression.',
+      description: T('5 multiplications au hasard, un score et une barre de progression.'),
       creer: () => projet(
-        { titre: 'Quiz de calcul', largeur: 400, hauteur: 220 },
+        { titre: T('Quiz de calcul'), largeur: 400, hauteur: 220 },
         [
-          { type: 'etiquette', nom: 'Titre', texte: 'Tables de multiplication', largeur: 360, hauteur: 32, taillePolice: 22 },
-          { type: 'bouton', nom: 'Commencer', texte: '▶ Commencer le quiz', y: 66, largeur: 200, hauteur: 36 },
+          { type: 'etiquette', nom: 'Titre', texte: T('Tables de multiplication'), largeur: 360, hauteur: 32, taillePolice: 22 },
+          { type: 'bouton', nom: 'Commencer', texte: T('▶ Commencer le quiz'), y: 66, largeur: 200, hauteur: 36 },
           { type: 'barreprogression', nom: 'Progression', y: 122, largeur: 360, hauteur: 18, valeur: 0, max: 5, couleurBarre: '#4f46e5' },
-          { type: 'etiquette', nom: 'Score', texte: 'Score : 0 / 5', y: 156, largeur: 360, hauteur: 30, taillePolice: 18 }
+          { type: 'etiquette', nom: 'Score', texte: T('Score : 0 / 5'), y: 156, largeur: 360, hauteur: 30, taillePolice: 18 }
         ],
         ['score', 'a', 'b', 'question', 'reponse'],
         () => [
-          presentation('Une boucle « pour » pose 5 questions : la variable question compte de 1 à 5. La barre de progression montre où on en est.'),
+          presentation(T('Une boucle « pour » pose 5 questions : la variable question compte de 1 à 5. La barre de progression montre où on en est.')),
           evt('bs_quand_clic', 'c2', [
-            note('Le bouton est grisé pendant le quiz, et le score repart de 0.'),
+            note(T('Le bouton est grisé pendant le quiz, et le score repart de 0.')),
             ecrire('c2', 'active', vrai(false)),
             fixer('v_score', n(0)),
-            ecrire('c4', 'texte', t('Score : 0 / 5')),
+            ecrire('c4', 'texte', t(T('Score : 0 / 5'))),
             pour('v_question', 1, 5, [
               ecrire('c3', 'valeur', calc('MINUS', v('v_question'), n(1))),
-              note('Deux nombres au hasard entre 2 et 10, puis on demande le résultat de leur multiplication.'),
+              note(T('Deux nombres au hasard entre 2 et 10, puis on demande le résultat de leur multiplication.')),
               fixer('v_a', hasard(2, 10)),
               fixer('v_b', hasard(2, 10)),
               fixer('v_reponse', demanderNombre(joindre(
-                t('Question '), v('v_question'), t(' : combien font '), v('v_a'), t(' × '), v('v_b'), t(' ?')))),
+                t(T('Question ')), v('v_question'), t(T(' : combien font ')), v('v_a'), t(' × '), v('v_b'), t(' ?')))),
               si(compare('EQ', v('v_reponse'), calc('MULTIPLY', v('v_a'), v('v_b'))),
-                [ajouter('v_score', n(1)), message(t('Bravo, c\'est juste !'), 'succes')],
-                [message(joindre(t('Raté… La bonne réponse était '), calc('MULTIPLY', v('v_a'), v('v_b'))), 'erreur')]),
+                [ajouter('v_score', n(1)), message(t(T('Bravo, c\'est juste !')), 'succes')],
+                [message(joindre(t(T('Raté… La bonne réponse était ')), calc('MULTIPLY', v('v_a'), v('v_b'))), 'erreur')]),
               ecrire('c3', 'valeur', v('v_question')),
-              ecrire('c4', 'texte', joindre(t('Score : '), v('v_score'), t(' / 5')))
+              ecrire('c4', 'texte', joindre(t(T('Score : ')), v('v_score'), t(' / 5')))
             ]),
-            message(joindre(t('Quiz terminé ! Ton score : '), v('v_score'), t(' sur 5.')), 'info'),
+            message(joindre(t(T('Quiz terminé ! Ton score : ')), v('v_score'), t(T(' sur 5.'))), 'info'),
             ecrire('c2', 'active', vrai(true))
           ])
         ])
     },
     {
-      titre: '⏱️ Compte à rebours',
+      titre: T('⏱️ Compte à rebours'),
       theme: 'debut',
-      description: 'Choisis une durée avec le curseur, puis lance le minuteur.',
+      description: T('Choisis une durée avec le curseur, puis lance le minuteur.'),
       creer: () => projet(
-        { titre: 'Compte à rebours', largeur: 360, hauteur: 260 },
+        { titre: T('Compte à rebours'), largeur: 360, hauteur: 260 },
         [
-          { type: 'etiquette', nom: 'Consigne', texte: 'Durée : 10 secondes', largeur: 320, taillePolice: 15 },
+          { type: 'etiquette', nom: 'Consigne', texte: T('Durée : 10 secondes'), largeur: 320, taillePolice: 15 },
           { type: 'curseur', nom: 'Duree', y: 48, largeur: 320, hauteur: 24, min: 1, max: 60, valeur: 10 },
           { type: 'etiquette', nom: 'Affichage', texte: '10', y: 84, largeur: 320, hauteur: 80, taillePolice: 64, couleurTexte: '#1e1b4b' },
           { type: 'barreprogression', nom: 'Barre', y: 172, largeur: 320, hauteur: 16, valeur: 10, max: 10, couleurBarre: '#f59e0b' },
-          { type: 'bouton', nom: 'Demarrer', texte: '▶ Démarrer', y: 204, largeur: 140, hauteur: 34 }
+          { type: 'bouton', nom: 'Demarrer', texte: T('▶ Démarrer'), y: 204, largeur: 140, hauteur: 34 }
         ],
         ['reste'],
         () => [
-          presentation('Le curseur choisit la durée ; une boucle compte à rebours, une seconde à la fois.'),
+          presentation(T('Le curseur choisit la durée ; une boucle compte à rebours, une seconde à la fois.')),
           evt('bs_quand_change', 'c2', [
-            note('Le curseur bouge : on met à jour le texte, le grand chiffre et la barre.'),
-            ecrire('c1', 'texte', joindre(t('Durée : '), lire('valeur', 'c2'), t(' secondes'))),
+            note(T('Le curseur bouge : on met à jour le texte, le grand chiffre et la barre.')),
+            ecrire('c1', 'texte', joindre(t(T('Durée : ')), lire('valeur', 'c2'), t(T(' secondes')))),
             ecrire('c3', 'texte', lire('valeur', 'c2')),
             ecrire('c4', 'max', lire('valeur', 'c2')),
             ecrire('c4', 'valeur', lire('valeur', 'c2'))
           ]),
           evt('bs_quand_clic', 'c5', [
-            note('Pendant le décompte, le bouton et le curseur sont grisés. La variable reste diminue de 1 chaque seconde, jusqu\'à 0.'),
+            note(T('Pendant le décompte, le bouton et le curseur sont grisés. La variable reste diminue de 1 chaque seconde, jusqu\'à 0.')),
             ecrire('c5', 'active', vrai(false)),
             ecrire('c2', 'active', vrai(false)),
             fixer('v_reste', lire('valeur', 'c2')),
@@ -995,7 +995,7 @@
             ]),
             ecrire('c3', 'texte', t('0')),
             ecrire('c4', 'valeur', n(0)),
-            message(t('⏰ Le temps est écoulé !'), 'attention'),
+            message(t(T('⏰ Le temps est écoulé !')), 'attention'),
             ecrire('c3', 'texte', lire('valeur', 'c2')),
             ecrire('c4', 'valeur', lire('valeur', 'c2')),
             ecrire('c5', 'active', vrai(true)),
@@ -1004,28 +1004,28 @@
         ])
     },
     {
-      titre: '⚽ Balle qui rebondit',
+      titre: T('⚽ Balle qui rebondit'),
       theme: 'jeux',
-      description: 'Une animation avec « répéter indéfiniment » et « attendre ».',
+      description: T('Une animation avec « répéter indéfiniment » et « attendre ».'),
       creer: () => projet(
-        { titre: 'Balle qui rebondit', largeur: 420, hauteur: 300 },
+        { titre: T('Balle qui rebondit'), largeur: 420, hauteur: 300 },
         [
           { type: 'zonedessin', nom: 'Terrain', x: 10, y: 10, largeur: 400, hauteur: 240, couleurFond: '#ecfdf5' },
-          { type: 'etiquette', nom: 'Info', texte: 'Clique sur le terrain pour changer de couleur', x: 10, y: 262, largeur: 400, taillePolice: 13, couleurTexte: '#475569' }
+          { type: 'etiquette', nom: 'Info', texte: T('Clique sur le terrain pour changer de couleur'), x: 10, y: 262, largeur: 400, taillePolice: 13, couleurTexte: '#475569' }
         ],
         ['x', 'y', 'vx', 'vy'],
         () => [
-          presentation('Une animation dessinée : à chaque tour de boucle, on efface, on dessine la balle, puis on la déplace de vx et vy. Au bord, la vitesse change de signe : la balle repart dans l\'autre sens.'),
+          presentation(T('Une animation dessinée : à chaque tour de boucle, on efface, on dessine la balle, puis on la déplace de vx et vy. Au bord, la vitesse change de signe : la balle repart dans l\'autre sens.')),
           evt('bs_quand_demarre', null, [
             fixer('v_x', n(60)), fixer('v_y', n(60)), fixer('v_vx', n(4)), fixer('v_vy', n(3)),
             dessin('bs_dessin_couleur', 'c1', { VAL: couleur('rouge') }),
             toujours([
-              note('Une image de l\'animation : 50 par seconde, grâce à « attendre 0,02 ».'),
+              note(T('Une image de l\'animation : 50 par seconde, grâce à « attendre 0,02 ».')),
               dessin('bs_dessin_effacer', 'c1'),
               dessin('bs_dessin_cercle', 'c1', { X: v('v_x'), Y: v('v_y'), R: n(16) }, { PLEIN: 'TRUE' }),
               ajouter('v_x', v('v_vx')),
               ajouter('v_y', v('v_vy')),
-              note('Bord gauche ou droit : vx change de signe. Bord du haut ou du bas : vy.'),
+              note(T('Bord gauche ou droit : vx change de signe. Bord du haut ou du bas : vy.')),
               si(ou(compare('LT', v('v_x'), n(16)), compare('GT', v('v_x'), n(384))),
                 [fixer('v_vx', calc('MINUS', n(0), v('v_vx')))]),
               si(ou(compare('LT', v('v_y'), n(16)), compare('GT', v('v_y'), n(224))),
@@ -1034,7 +1034,7 @@
             ])
           ]),
           evt('bs_quand_clic', 'c1', [
-            note('Clic sur le terrain : une couleur au hasard dans la liste.'),
+            note(T('Clic sur le terrain : une couleur au hasard dans la liste.')),
             dessin('bs_dessin_couleur', 'c1', {
               VAL: { type: 'lists_getIndex', fields: { MODE: 'GET', WHERE: 'RANDOM' }, inputs: { VALUE: I({
                 type: 'lists_create_with', extraState: { itemCount: 5 },
@@ -1045,44 +1045,44 @@
         ])
     },
     {
-      titre: '📇 Carnet d\'adresses',
+      titre: T('📇 Carnet d\'adresses'),
       theme: 'applications',
-      description: 'Un tableau qui garde ses contacts d\'une fois sur l\'autre, des menus, l\'export vers Excel.',
+      description: T('Un tableau qui garde ses contacts d\'une fois sur l\'autre, des menus, l\'export vers Excel.'),
       creer: () => {
         const compteur = () => ecrire('c11', 'texte',
-          joindre(lire('nombreLignes', 'c10'), t(' contact(s) · gardés automatiquement d\'une fois sur l\'autre')));
+          joindre(lire('nombreLignes', 'c10'), t(T(' contact(s) · gardés automatiquement d\'une fois sur l\'autre'))));
         const choisie = lire('numero', 'c10');
         const cellule = col => bloc('bs_tableau_cellule', 'c10', { COL: t(col), NUM: choisie });
         return projet(
           {
-            titre: 'Carnet d\'adresses', largeur: 520, hauteur: 360,
-            menus: 'Fichier\n  Exporter pour Excel (CSV)…\n  Importer un fichier CSV…\n  -\n  Tout effacer\nAide\n  À propos'
+            titre: T('Carnet d\'adresses'), largeur: 520, hauteur: 360,
+            menus: T('Fichier\n  Exporter pour Excel (CSV)…\n  Importer un fichier CSV…\n  -\n  Tout effacer\nAide\n  À propos')
           },
           [
-            { type: 'etiquette', nom: 'LibelleNom', texte: 'Nom', y: 14, largeur: 150, hauteur: 20 },
+            { type: 'etiquette', nom: 'LibelleNom', texte: T('Nom'), y: 14, largeur: 150, hauteur: 20 },
             { type: 'zonetexte', nom: 'Nom', y: 36, largeur: 150, hauteur: 28 },
-            { type: 'etiquette', nom: 'LibellePrenom', texte: 'Prénom', x: 180, y: 14, largeur: 150, hauteur: 20 },
+            { type: 'etiquette', nom: 'LibellePrenom', texte: T('Prénom'), x: 180, y: 14, largeur: 150, hauteur: 20 },
             { type: 'zonetexte', nom: 'Prenom', x: 180, y: 36, largeur: 150, hauteur: 28 },
-            { type: 'etiquette', nom: 'LibelleTelephone', texte: 'Téléphone', x: 340, y: 14, largeur: 160, hauteur: 20 },
+            { type: 'etiquette', nom: 'LibelleTelephone', texte: T('Téléphone'), x: 340, y: 14, largeur: 160, hauteur: 20 },
             { type: 'zonetexte', nom: 'Telephone', x: 340, y: 36, largeur: 160, hauteur: 28 },
-            { type: 'bouton', nom: 'Ajouter', texte: '➕ Ajouter', y: 76, largeur: 120, hauteur: 30 },
-            { type: 'bouton', nom: 'Supprimer', texte: '🗑️ Supprimer', x: 150, y: 76, largeur: 120, hauteur: 30 },
-            { type: 'bouton', nom: 'Trier', texte: '🔤 Trier par nom', x: 280, y: 76, largeur: 140, hauteur: 30 },
+            { type: 'bouton', nom: 'Ajouter', texte: T('➕ Ajouter'), y: 76, largeur: 120, hauteur: 30 },
+            { type: 'bouton', nom: 'Supprimer', texte: T('🗑️ Supprimer'), x: 150, y: 76, largeur: 120, hauteur: 30 },
+            { type: 'bouton', nom: 'Trier', texte: T('🔤 Trier par nom'), x: 280, y: 76, largeur: 140, hauteur: 30 },
             {
               type: 'tableau', nom: 'Contacts', y: 118, largeur: 480, hauteur: 196, memoriser: true,
-              colonnes: ['Nom', 'Prénom', 'Téléphone'],
-              lignes: [['Dupont', 'Marie', '06 12 34 56 78'], ['Martin', 'Lucas', '07 98 76 54 32']]
+              colonnes: [T('Nom'), T('Prénom'), T('Téléphone')],
+              lignes: [[T('Dupont'), T('Marie'), '06 12 34 56 78'], [T('Martin'), T('Lucas'), '07 98 76 54 32']]
             },
             { type: 'etiquette', nom: 'Compteur', y: 324, largeur: 480, hauteur: 22, taillePolice: 13, couleurTexte: '#64748b' }
           ],
           ['contenu'],
           () => [
-            presentation('Le tableau Contacts a sa case « garder » cochée : son contenu est retrouvé au prochain lancement. Le menu Fichier l\'exporte au format CSV, que lit Excel.'),
+            presentation(T('Le tableau Contacts a sa case « garder » cochée : son contenu est retrouvé au prochain lancement. Le menu Fichier l\'exporte au format CSV, que lit Excel.')),
             evt('bs_quand_demarre', null, [compteur()]),
             evt('bs_quand_clic', 'c7', [
-              note('➕ Ajouter : une ligne avec les trois cases, puis on les vide.'),
+              note(T('➕ Ajouter : une ligne avec les trois cases, puis on les vide.')),
               si(estVide(lire('texte', 'c2')),
-                [message(t('Écrivez au moins un nom.'), 'attention')],
+                [message(t(T('Écrivez au moins un nom.')), 'attention')],
                 [
                   bloc('bs_tableau_ajouter', 'c10', { LIGNE: liste(lire('texte', 'c2'), lire('texte', 'c4'), lire('texte', 'c6')) }),
                   ecrire('c2', 'texte', t('')), ecrire('c4', 'texte', t('')), ecrire('c6', 'texte', t('')),
@@ -1091,46 +1091,46 @@
                 ])
             ]),
             evt('bs_quand_change', 'c10', [
-              note('Clic sur une ligne du tableau : ses valeurs reviennent dans les cases.'),
-              ecrire('c2', 'texte', cellule('Nom')),
-              ecrire('c4', 'texte', cellule('Prénom')),
-              ecrire('c6', 'texte', cellule('Téléphone'))
+              note(T('Clic sur une ligne du tableau : ses valeurs reviennent dans les cases.')),
+              ecrire('c2', 'texte', cellule(T('Nom'))),
+              ecrire('c4', 'texte', cellule(T('Prénom'))),
+              ecrire('c6', 'texte', cellule(T('Téléphone')))
             ]),
             evt('bs_quand_clic', 'c8', [
-              note('« numéro choisi » vaut 0 si aucune ligne n\'est sélectionnée.'),
+              note(T('« numéro choisi » vaut 0 si aucune ligne n\'est sélectionnée.')),
               si(compare('EQ', choisie, n(0)),
-                [message(t('Cliquez d\'abord sur un contact dans le tableau.'))],
-                [si(confirmer('Supprimer ce contact ?'), [
+                [message(t(T('Cliquez d\'abord sur un contact dans le tableau.')))],
+                [si(confirmer(T('Supprimer ce contact ?')), [
                   bloc('bs_tableau_supprimer', 'c10', { NUM: choisie }),
                   compteur()
                 ])])
             ]),
-            evt('bs_quand_clic', 'c9', [bloc('bs_tableau_trier', 'c10', { COL: t('Nom') }, { SENS: 'croissant' })]),
-            evtMenu('Fichier › Exporter pour Excel (CSV)…', [
+            evt('bs_quand_clic', 'c9', [bloc('bs_tableau_trier', 'c10', { COL: t(T('Nom')) }, { SENS: 'croissant' })]),
+            evtMenu(T('Fichier › Exporter pour Excel (CSV)…'), [
               bloc('bs_fichier_enregistrer', null, { VAL: bloc('bs_tableau_csv', 'c10'), NOM: t('contacts.csv') })
             ]),
-            evtMenu('Fichier › Importer un fichier CSV…', [
-              note('« ouvrir un fichier » donne un texte vide si on annule.'),
+            evtMenu(T('Fichier › Importer un fichier CSV…'), [
+              note(T('« ouvrir un fichier » donne un texte vide si on annule.')),
               fixer('v_contenu', { type: 'bs_fichier_ouvrir' }),
               si({ type: 'logic_negate', inputs: { BOOL: I(estVide(v('v_contenu'))) } }, [
                 bloc('bs_tableau_remplir_csv', 'c10', { VAL: v('v_contenu') }),
                 compteur()
               ])
             ]),
-            evtMenu('Fichier › Tout effacer', [
-              si(confirmer('Effacer tous les contacts ?'), [bloc('bs_tableau_vider', 'c10'), compteur()])
+            evtMenu(T('Fichier › Tout effacer'), [
+              si(confirmer(T('Effacer tous les contacts ?')), [bloc('bs_tableau_vider', 'c10'), compteur()])
             ]),
-            evtMenu('Aide › À propos', [
-              message(joindre(t('Carnet d\'adresses, créé avec BlocStudio.'), retourLigne(), retourLigne(),
-                t('Les contacts sont gardés automatiquement : fermez le programme, relancez-le, ils sont toujours là !')))
+            evtMenu(T('Aide › À propos'), [
+              message(joindre(t(T('Carnet d\'adresses, créé avec BlocStudio.')), retourLigne(), retourLigne(),
+                t(T('Les contacts sont gardés automatiquement : fermez le programme, relancez-le, ils sont toujours là !'))))
             ])
           ]);
       }
     },
     {
-      titre: '📚 Ma bibliothèque',
+      titre: T('📚 Ma bibliothèque'),
       theme: 'applications',
-      description: 'Une base de données de livres : ajouter, chercher, trier, supprimer. Les livres sont gardés d\'une fois sur l\'autre.',
+      description: T('Une base de données de livres : ajouter, chercher, trier, supprimer. Les livres sont gardés d\'une fois sur l\'autre.'),
       creer: () => {
         // c1-c6 saisie · c7 Ajouter · c8 Supprimer · c9 Trier · c10-c11 recherche
         // c12 Livres (Tableau) · c13 Compteur · c14 Bibliotheque (Base de données)
@@ -1141,110 +1141,110 @@
         const recherche = () => lire('texte', 'c11');
         const choisie = () => bloc('bs_base_choisie', 'c12');
         return projet(
-          { titre: 'Ma bibliothèque', largeur: 560, hauteur: 420, couleurFond: '#fffbeb' },
+          { titre: T('Ma bibliothèque'), largeur: 560, hauteur: 420, couleurFond: '#fffbeb' },
           [
-            { type: 'etiquette', nom: 'LibelleTitre', texte: 'Titre', y: 14, largeur: 220, hauteur: 20 },
+            { type: 'etiquette', nom: 'LibelleTitre', texte: T('Titre'), y: 14, largeur: 220, hauteur: 20 },
             { type: 'zonetexte', nom: 'Titre', y: 36, largeur: 220, hauteur: 28 },
-            { type: 'etiquette', nom: 'LibelleAuteur', texte: 'Auteur', x: 250, y: 14, largeur: 180, hauteur: 20 },
+            { type: 'etiquette', nom: 'LibelleAuteur', texte: T('Auteur'), x: 250, y: 14, largeur: 180, hauteur: 20 },
             { type: 'zonetexte', nom: 'Auteur', x: 250, y: 36, largeur: 180, hauteur: 28 },
-            { type: 'etiquette', nom: 'LibelleAnnee', texte: 'Année', x: 440, y: 14, largeur: 100, hauteur: 20 },
+            { type: 'etiquette', nom: 'LibelleAnnee', texte: T('Année'), x: 440, y: 14, largeur: 100, hauteur: 20 },
             { type: 'selecteurnombre', nom: 'Annee', x: 440, y: 36, largeur: 100, hauteur: 28, valeur: 2024, min: 1, max: 2100, pas: 1 },
-            { type: 'bouton', nom: 'Ajouter', texte: '➕ Ajouter le livre', y: 76, largeur: 160, hauteur: 30 },
-            { type: 'bouton', nom: 'Supprimer', texte: '🗑️ Supprimer', x: 190, y: 76, largeur: 120, hauteur: 30 },
-            { type: 'bouton', nom: 'Trier', texte: '🔤 Trier par titre', x: 320, y: 76, largeur: 150, hauteur: 30 },
-            { type: 'etiquette', nom: 'LibelleRecherche', texte: '🔍 Chercher un titre ou un auteur :', y: 124, largeur: 250, hauteur: 22 },
+            { type: 'bouton', nom: 'Ajouter', texte: T('➕ Ajouter le livre'), y: 76, largeur: 160, hauteur: 30 },
+            { type: 'bouton', nom: 'Supprimer', texte: T('🗑️ Supprimer'), x: 190, y: 76, largeur: 120, hauteur: 30 },
+            { type: 'bouton', nom: 'Trier', texte: T('🔤 Trier par titre'), x: 320, y: 76, largeur: 150, hauteur: 30 },
+            { type: 'etiquette', nom: 'LibelleRecherche', texte: T('🔍 Chercher un titre ou un auteur :'), y: 124, largeur: 250, hauteur: 22 },
             { type: 'zonetexte', nom: 'Recherche', x: 270, y: 120, largeur: 270, hauteur: 28 },
             { type: 'tableau', nom: 'Livres', y: 158, largeur: 520, hauteur: 210, colonnes: [], lignes: [] },
             { type: 'etiquette', nom: 'Compteur', y: 378, largeur: 520, hauteur: 22, taillePolice: 13, couleurTexte: '#78716c' },
             {
               type: 'basedonnees', nom: 'Bibliotheque', largeur: 0, hauteur: 0, memoriser: true,
-              champs: ['Titre', 'Auteur', 'Année'],
-              fiches: [['Le Petit Prince', 'Antoine de Saint-Exupéry', 1943], ['Harry Potter à l\'école des sorciers', 'J. K. Rowling', 1997],
-                ['Le Hobbit', 'J. R. R. Tolkien', 1937], ['Matilda', 'Roald Dahl', 1988]]
+              champs: [T('Titre'), T('Auteur'), T('Année')],
+              fiches: [[T('Le Petit Prince'), T('Antoine de Saint-Exupéry'), 1943], [T('Harry Potter à l\'école des sorciers'), 'J. K. Rowling', 1997],
+                [T('Le Hobbit'), 'J. R. R. Tolkien', 1937], [T('Matilda'), T('Roald Dahl'), 1988]]
             }
           ],
           ['trouves'],
           () => [
-            presentation('Les livres sont rangés dans une base de données (Bibliotheque) ; le tableau Livres ne fait que les montrer. La fonction actualiser remplit le tableau, avec ou sans recherche.'),
+            presentation(T('Les livres sont rangés dans une base de données (Bibliotheque) ; le tableau Livres ne fait que les montrer. La fonction actualiser remplit le tableau, avec ou sans recherche.')),
             evt('bs_quand_demarre', null, [appeler('actualiser')]),
             // Montre toute la base, ou seulement les livres dont le titre ou l'auteur contient la recherche.
             fonction('actualiser', [
-              note('Recherche vide : toute la base. Sinon, on cherche dans les titres, puis dans les auteurs si aucun titre ne correspond.'),
+              note(T('Recherche vide : toute la base. Sinon, on cherche dans les titres, puis dans les auteurs si aucun titre ne correspond.')),
               si(estVide(recherche()),
                 [bloc('bs_base_afficher', 'c14', null, { TAB: 'c12' })],
                 [
-                  fixer('v_trouves', bloc('bs_base_chercher', 'c14', { VAL: recherche() }, { CHAMP: 'Titre', OP: 'contient' })),
+                  fixer('v_trouves', bloc('bs_base_chercher', 'c14', { VAL: recherche() }, { CHAMP: T('Titre'), OP: 'contient' })),
                   si(estVide(v('v_trouves')), [
-                    fixer('v_trouves', bloc('bs_base_chercher', 'c14', { VAL: recherche() }, { CHAMP: 'Auteur', OP: 'contient' }))
+                    fixer('v_trouves', bloc('bs_base_chercher', 'c14', { VAL: recherche() }, { CHAMP: T('Auteur'), OP: 'contient' }))
                   ]),
                   bloc('bs_base_afficher', 'c14', { NUMS: v('v_trouves') }, { TAB: 'c12' })
                 ]),
-              ecrire('c13', 'texte', joindre(bloc('bs_base_nombre', 'c14'), t(' livre(s) dans la bibliothèque · gardés d\'une fois sur l\'autre')))
+              ecrire('c13', 'texte', joindre(bloc('bs_base_nombre', 'c14'), t(T(' livre(s) dans la bibliothèque · gardés d\'une fois sur l\'autre'))))
             ]),
             evt('bs_quand_clic', 'c7', [
-              note('Une nouvelle fiche : titre, auteur et année.'),
+              note(T('Une nouvelle fiche : titre, auteur et année.')),
               si(estVide(lire('texte', 'c2')),
-                [message(t('Écrivez au moins le titre du livre.'), 'attention')],
+                [message(t(T('Écrivez au moins le titre du livre.')), 'attention')],
                 [
-                  ajouterFiche({ Titre: lire('texte', 'c2'), Auteur: lire('texte', 'c4'), 'Année': lire('valeur', 'c6') }),
+                  ajouterFiche({ [T('Titre')]: lire('texte', 'c2'), [T('Auteur')]: lire('texte', 'c4'), [T('Année')]: lire('valeur', 'c6') }),
                   ecrire('c2', 'texte', t('')), ecrire('c4', 'texte', t('')),
                   bloc('bs_son', null, null, { SON: 'succes' }),
                   appeler('actualiser')
                 ])
             ]),
             evt('bs_quand_clic', 'c8', [
-              note('« fiche choisie » : celle de la ligne sélectionnée dans le tableau (0 = aucune).'),
+              note(T('« fiche choisie » : celle de la ligne sélectionnée dans le tableau (0 = aucune).')),
               si(compare('EQ', choisie(), n(0)),
-                [message(t('Cliquez d\'abord sur un livre dans le tableau.'), 'info')],
+                [message(t(T('Cliquez d\'abord sur un livre dans le tableau.')), 'info')],
                 [
-                  si({ type: 'bs_confirmer', inputs: { VAL: I(joindre(t('Supprimer « '),
-                    bloc('bs_base_champ', 'c14', { N: choisie() }, { CHAMP: 'Titre' }), t(' » ?'))) } }, [
+                  si({ type: 'bs_confirmer', inputs: { VAL: I(joindre(t(T('Supprimer « ')),
+                    bloc('bs_base_champ', 'c14', { N: choisie() }, { CHAMP: T('Titre') }), t(' » ?'))) } }, [
                     bloc('bs_base_supprimer', 'c14', { N: choisie() }),
                     appeler('actualiser')
                   ])
                 ])
             ]),
             evt('bs_quand_clic', 'c9', [
-              bloc('bs_base_trier', 'c14', null, { CHAMP: 'Titre', SENS: 'croissant' }),
+              bloc('bs_base_trier', 'c14', null, { CHAMP: T('Titre'), SENS: 'croissant' }),
               appeler('actualiser')
             ]),
-            evt('bs_quand_change', 'c11', [note('La recherche se refait à chaque lettre tapée.'), appeler('actualiser')])
+            evt('bs_quand_change', 'c11', [note(T('La recherche se refait à chaque lettre tapée.')), appeler('actualiser')])
           ]);
       }
     },
     {
-      titre: '🪙 Attrape la pièce',
+      titre: T('🪙 Attrape la pièce'),
       theme: 'jeux',
-      description: 'Un vrai petit jeu : sprites animés, clavier ou souris, minuteur, musique de fond et record.',
+      description: T('Un vrai petit jeu : sprites animés, clavier ou souris, minuteur, musique de fond et record.'),
       creer: () => {
         // c1 Score · c2 Vies · c3 Piece · c4 Panier · c5 Consigne · c6 Musique (Son) · c7 Chute (Minuteur)
-        const score = () => ecrire('c1', 'texte', joindre(t('Score : '), v('v_score')));
-        const vies = () => ecrire('c2', 'texte', joindre(t('Vies : '), v('v_vies')));
+        const score = () => ecrire('c1', 'texte', joindre(t(T('Score : ')), v('v_score')));
+        const vies = () => ecrire('c2', 'texte', joindre(t(T('Vies : ')), v('v_vies')));
         const x = id => lire('x', id), yy = id => lire('y', id);
         const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record') }) });
         const touche = nom => ({ type: 'bs_touche_enfoncee', fields: { TOUCHE: nom } });
         const p = projet(
-          { titre: 'Attrape la pièce', largeur: 480, hauteur: 360, couleurFond: '#bae6fd' },
+          { titre: T('Attrape la pièce'), largeur: 480, hauteur: 360, couleurFond: '#bae6fd' },
           [
-            { type: 'etiquette', nom: 'Score', texte: 'Score : 0', x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#0c4a6e' },
-            { type: 'etiquette', nom: 'Vies', texte: 'Vies : 3', x: 360, y: 8, largeur: 110, hauteur: 30, taillePolice: 20, couleurTexte: '#be123c' },
+            { type: 'etiquette', nom: 'Score', texte: T('Score : 0'), x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#0c4a6e' },
+            { type: 'etiquette', nom: 'Vies', texte: T('Vies : 3'), x: 360, y: 8, largeur: 110, hauteur: 30, taillePolice: 20, couleurTexte: '#be123c' },
             { type: 'sprite', nom: 'Piece', sprite: 'spr_piece', costume: 0, anime: true, x: 216, y: -50, largeur: 48, hauteur: 48 },
             { type: 'sprite', nom: 'Panier', sprite: 'spr_panier', costume: 0, x: 204, y: 284, largeur: 72, hauteur: 72 },
             {
               type: 'etiquette', nom: 'Consigne', x: 40, y: 120, largeur: 400, hauteur: 110, taillePolice: 18, couleurTexte: '#0c4a6e',
-              texte: 'Attrape les pièces avec le panier !\n\nFlèches ← → ou souris pour bouger.\nAppuie sur Espace (ou clique) pour commencer.'
+              texte: T('Attrape les pièces avec le panier !\n\nFlèches ← → ou souris pour bouger.\nAppuie sur Espace (ou clique) pour commencer.')
             },
             { type: 'son', nom: 'Musique', son: 'son_musique', volume: 35, boucle: true, autoDemarrage: false, largeur: 0, hauteur: 0 },
             { type: 'minuteur', nom: 'Chute', intervalle: 0.03, active: false, largeur: 0, hauteur: 0 }
           ],
           ['score', 'vies', 'vitesse', 'enJeu'],
           () => [
-            presentation('Le minuteur Chute fait avancer le jeu : toutes les 0,03 seconde, la pièce descend et on regarde si le panier la touche. La variable enJeu vaut vrai pendant une partie.'),
+            presentation(T('Le minuteur Chute fait avancer le jeu : toutes les 0,03 seconde, la pièce descend et on regarde si le panier la touche. La variable enJeu vaut vrai pendant une partie.')),
             evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
-              note('Tout remettre à zéro, puis démarrer le minuteur et la musique.'),
+              note(T('Tout remettre à zéro, puis démarrer le minuteur et la musique.')),
               fixer('v_score', n(0)), fixer('v_vies', n(3)), fixer('v_vitesse', n(3)), fixer('v_enJeu', vrai(true)),
               score(), vies(),
               ecrire('c5', 'visible', vrai(false)),
@@ -1253,12 +1253,12 @@
               bloc('bs_sonctrl', 'c6', null, { ACTION: 'jouer' })
             ]),
             fonction('replacer la pièce', [
-              note('La pièce repart d\'en haut (au-dessus de la fenêtre), à un endroit au hasard.'),
+              note(T('La pièce repart d\'en haut (au-dessus de la fenêtre), à un endroit au hasard.')),
               ecrire('c3', 'y', n(-50)),
               ecrire('c3', 'x', hasard(10, 420))
             ]),
             evt('bs_quand_minuteur', 'c7', [
-              note('Les flèches enfoncées déplacent le panier, sans sortir de la fenêtre. Puis la pièce descend ; elle tombe un peu plus vite à chaque pièce attrapée.'),
+              note(T('Les flèches enfoncées déplacent le panier, sans sortir de la fenêtre. Puis la pièce descend ; elle tombe un peu plus vite à chaque pièce attrapée.')),
               si(et(touche('gauche'), compare('GT', x('c4'), n(0))), [ecrire('c4', 'x', calc('MINUS', x('c4'), n(8)))]),
               si(et(touche('droite'), compare('LT', x('c4'), n(408))), [ecrire('c4', 'x', calc('ADD', x('c4'), n(8)))]),
               ecrire('c3', 'y', calc('ADD', yy('c3'), v('v_vitesse'))),
@@ -1268,7 +1268,7 @@
                 ajouter('v_vitesse', n(0.3)),
                 appeler('replacer la pièce')
               ]),
-              note('Pièce ratée (sortie par le bas) : une vie de moins.'),
+              note(T('Pièce ratée (sortie par le bas) : une vie de moins.')),
               si(compare('GT', yy('c3'), n(360)), [
                 bloc('bs_son', null, null, { SON: 'erreur' }),
                 ajouter('v_vies', n(-1)), vies(),
@@ -1277,11 +1277,11 @@
               ])
             ]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'bouge' }, [
-              note('Le panier suit la souris (on retire la moitié de sa largeur pour le centrer).'),
+              note(T('Le panier suit la souris (on retire la moitié de sa largeur pour le centrer).')),
               si(v('v_enJeu'), [ecrire('c4', 'x', calc('MINUS', { type: 'bs_souris_fenetre', fields: { QUOI: 'x' } }, n(36)))])
             ]),
             fonction('fin de partie', [
-              note('Le record est gardé en mémoire d\'une fois sur l\'autre.'),
+              note(T('Le record est gardé en mémoire d\'une fois sur l\'autre.')),
               bloc('bs_minuteur_ctrl', 'c7', null, { ACTION: 'arreter' }),
               bloc('bs_sonctrl', 'c6', null, { ACTION: 'arreter' }),
               fixer('v_enJeu', vrai(false)),
@@ -1289,9 +1289,9 @@
                 bloc('bs_memoriser', null, { VAL: v('v_score'), NOM: t('record') }),
                 bloc('bs_son', null, null, { SON: 'succes' })
               ]),
-              ecrire('c5', 'texte', joindre(t('Partie terminée ! Score : '), v('v_score'), retourLigne(),
-                t('Record : '), record(), retourLigne(), retourLigne(),
-                t('Espace (ou clic) pour rejouer.'))),
+              ecrire('c5', 'texte', joindre(t(T('Partie terminée ! Score : ')), v('v_score'), retourLigne(),
+                t(T('Record : ')), record(), retourLigne(), retourLigne(),
+                t(T('Espace (ou clic) pour rejouer.')))),
               ecrire('c5', 'visible', vrai(true))
             ])
           ]);
@@ -1301,13 +1301,13 @@
       }
     },
     {
-      titre: '☄️ Pluie de météorites',
+      titre: T('☄️ Pluie de météorites'),
       theme: 'jeux',
-      description: 'Un jeu avec des clones : des météorites de plus en plus nombreuses, à éviter avec la souris ou les flèches.',
+      description: T('Un jeu avec des clones : des météorites de plus en plus nombreuses, à éviter avec la souris ou les flèches.'),
       creer: () => {
         // c1 Score · c2 Vaisseau · c3 Meteorite (cachée : ce sont ses clones qui tombent) · c4 Consigne · c5 Apparition (Minuteur)
         // c0 Etoiles : le ciel qui défile, posé en premier pour être derrière tout le reste
-        const score = () => ecrire('c1', 'texte', joindre(t('Score : '), v('v_score')));
+        const score = () => ecrire('c1', 'texte', joindre(t(T('Score : ')), v('v_score')));
         const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record météorites') }) });
         const intervalle = () => lire('intervalle', 'c5');
         const bouger = dx => [
@@ -1317,24 +1317,24 @@
           ])
         ];
         const p = projet(
-          { titre: 'Pluie de météorites', largeur: 480, hauteur: 360, couleurFond: '#0b1026' },
+          { titre: T('Pluie de météorites'), largeur: 480, hauteur: 360, couleurFond: '#0b1026' },
           [
             { id: 'c0', type: 'image', nom: 'Etoiles', image: imageEtoiles(), ajustement: 'etiree', x: 0, y: 0, largeur: 480, hauteur: 360 },
-            { type: 'etiquette', nom: 'Score', texte: 'Score : 0', x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#fde68a' },
+            { type: 'etiquette', nom: 'Score', texte: T('Score : 0'), x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#fde68a' },
             { type: 'sprite', nom: 'Vaisseau', sprite: 'spr_vaisseau', costume: 0, anime: true, x: 216, y: 296, largeur: 48, hauteur: 48 },
             { type: 'sprite', nom: 'Meteorite', sprite: 'spr_meteorite', costume: 0, anime: true, visible: false, x: 216, y: 60, largeur: 48, hauteur: 48 },
             {
               type: 'etiquette', nom: 'Consigne', x: 40, y: 110, largeur: 400, hauteur: 120, taillePolice: 18, couleurTexte: '#e0e7ff',
-              texte: 'Évite les météorites !\n\nSouris ou flèches ← → pour piloter.\nAppuie sur Espace (ou clique) pour décoller.'
+              texte: T('Évite les météorites !\n\nSouris ou flèches ← → pour piloter.\nAppuie sur Espace (ou clique) pour décoller.')
             },
             { type: 'minuteur', nom: 'Apparition', intervalle: 0.6, active: false, largeur: 0, hauteur: 0 }
           ],
           ['score', 'enJeu'],
           () => [
-            presentation('Un jeu avec des clones : Meteorite reste cachée, ce sont ses copies qui tombent. Le minuteur Apparition en crée une à chaque tic, de plus en plus souvent.'),
+            presentation(T('Un jeu avec des clones : Meteorite reste cachée, ce sont ses copies qui tombent. Le minuteur Apparition en crée une à chaque tic, de plus en plus souvent.')),
             evt('bs_quand_demarre', null, [
               fixer('v_enJeu', vrai(false)),
-              note('Le ciel étoilé défile vers le bas, sans fin : le vaisseau a l\'air d\'avancer. Plus vite pendant la partie.'),
+              note(T('Le ciel étoilé défile vers le bas, sans fin : le vaisseau a l\'air d\'avancer. Plus vite pendant la partie.')),
               toujours([
                 bloc('bs_image_defiler', 'c0', { DX: n(0), DY: { type: 'logic_ternary', inputs: { IF: I(v('v_enJeu')), THEN: I(n(3)), ELSE: I(n(1)) } } }),
                 attendre(0.02)
@@ -1343,7 +1343,7 @@
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
-              note('Plus aucune météorite, score à zéro, et le minuteur démarre.'),
+              note(T('Plus aucune météorite, score à zéro, et le minuteur démarre.')),
               bloc('bs_supprimer_clones', 'c3'),
               fixer('v_score', n(0)), score(),
               fixer('v_enJeu', vrai(true)),
@@ -1353,14 +1353,14 @@
             ]),
             // Chaque « tic » fait apparaître une météorite, de plus en plus souvent.
             evt('bs_quand_minuteur', 'c5', [
-              note('Chaque tic : une météorite de plus, un point, et le minuteur accélère (jusqu\'à une toutes les 0,2 seconde).'),
+              note(T('Chaque tic : une météorite de plus, un point, et le minuteur accélère (jusqu\'à une toutes les 0,2 seconde).')),
               bloc('bs_creer_clone', 'c3'),
               ajouter('v_score', n(1)), score(),
               si(compare('GT', intervalle(), n(0.2)), [ecrire('c5', 'intervalle', calc('MINUS', intervalle(), n(0.01)))])
             ]),
             // La vie d'un clone : il apparaît en haut, tombe, et disparaît en bas.
             evt('bs_quand_clone', 'c3', [
-              note('La vie d\'un clone : il apparaît en haut à un endroit au hasard, tombe un peu en biais et disparaît en bas. « 👉 moi » désigne ce clone-là.'),
+              note(T('La vie d\'un clone : il apparaît en haut à un endroit au hasard, tombe un peu en biais et disparaît en bas. « 👉 moi » désigne ce clone-là.')),
               bloc('bs_placer', '__moi', { X: hasard(0, 432), Y: n(-48) }),
               bloc('bs_orienter', '__moi', { DIR: hasard(160, 200) }),
               ecrire('__moi', 'visible', vrai(true)),
@@ -1371,13 +1371,13 @@
                 attendre(0.02)
               ])
             ]),
-            evtChamps('bs_quand_touche', { TOUCHE: 'gauche' }, [note('Les flèches déplacent le vaisseau ; « rebondir » le garde dans la fenêtre.'), ...bouger(-14)]),
+            evtChamps('bs_quand_touche', { TOUCHE: 'gauche' }, [note(T('Les flèches déplacent le vaisseau ; « rebondir » le garde dans la fenêtre.')), ...bouger(-14)]),
             evtChamps('bs_quand_touche', { TOUCHE: 'droite' }, bouger(14)),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'bouge' }, [
               si(v('v_enJeu'), [ecrire('c2', 'x', calc('MINUS', { type: 'bs_souris_fenetre', fields: { QUOI: 'x' } }, n(24)))])
             ]),
             fonction('fin de partie', [
-              note('« si enJeu » évite de finir deux fois quand deux météorites touchent le vaisseau en même temps.'),
+              note(T('« si enJeu » évite de finir deux fois quand deux météorites touchent le vaisseau en même temps.')),
               si(v('v_enJeu'), [
                 fixer('v_enJeu', vrai(false)),
                 bloc('bs_minuteur_ctrl', 'c5', null, { ACTION: 'arreter' }),
@@ -1385,8 +1385,8 @@
                 si(compare('GT', v('v_score'), record()), [
                   bloc('bs_memoriser', null, { VAL: v('v_score'), NOM: t('record météorites') })
                 ]),
-                ecrire('c4', 'texte', joindre(t('Boum ! Score : '), v('v_score'), retourLigne(),
-                  t('Record : '), record(), retourLigne(), retourLigne(), t('Espace (ou clic) pour rejouer.'))),
+                ecrire('c4', 'texte', joindre(t(T('Boum ! Score : ')), v('v_score'), retourLigne(),
+                  t(T('Record : ')), record(), retourLigne(), retourLigne(), t(T('Espace (ou clic) pour rejouer.')))),
                 ecrire('c4', 'visible', vrai(true))
               ])
             ])
@@ -1396,40 +1396,40 @@
       }
     },
     {
-      titre: '👻 Chasse aux fantômes',
+      titre: T('👻 Chasse aux fantômes'),
       theme: 'jeux',
-      description: 'Clique sur les fantômes avant qu\'ils ne deviennent trop gros ! Effets de sprite (taille, fondu) et musique composée dans le studio 8 bits.',
+      description: T('Clique sur les fantômes avant qu\'ils ne deviennent trop gros ! Effets de sprite (taille, fondu) et musique composée dans le studio 8 bits.'),
       creer: () => {
         // c1 Score · c2 Vies · c3 Fantome (caché : ce sont ses clones qui hantent la fenêtre)
         // c4 Consigne · c5 Apparition (Minuteur) · c6 Musique (Son)
-        const score = () => ecrire('c1', 'texte', joindre(t('Score : '), v('v_score')));
-        const vies = () => ecrire('c2', 'texte', joindre(t('Vies : '), v('v_vies')));
+        const score = () => ecrire('c1', 'texte', joindre(t(T('Score : ')), v('v_score')));
+        const vies = () => ecrire('c2', 'texte', joindre(t(T('Vies : ')), v('v_vies')));
         const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record fantômes') }) });
         const intervalle = () => lire('intervalle', 'c5');
         const fondu = (sens, secondes) => bloc('bs_sprite_fondu', '__moi', { SEC: n(secondes) }, { SENS: sens });
         // Un fantôme touché par un clic devient un peu transparent : c'est le signal qu'il est attrapé.
         const libre = () => compare('EQ', lire('transparence', '__moi'), n(0));
         const p = projet(
-          { titre: 'Chasse aux fantômes', largeur: 480, hauteur: 360, couleurFond: '#1e1b4b' },
+          { titre: T('Chasse aux fantômes'), largeur: 480, hauteur: 360, couleurFond: '#1e1b4b' },
           [
-            { type: 'etiquette', nom: 'Score', texte: 'Score : 0', x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#fde68a' },
-            { type: 'etiquette', nom: 'Vies', texte: 'Vies : 3', x: 360, y: 8, largeur: 110, hauteur: 30, taillePolice: 20, couleurTexte: '#f9a8d4' },
+            { type: 'etiquette', nom: 'Score', texte: T('Score : 0'), x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#fde68a' },
+            { type: 'etiquette', nom: 'Vies', texte: T('Vies : 3'), x: 360, y: 8, largeur: 110, hauteur: 30, taillePolice: 20, couleurTexte: '#f9a8d4' },
             { type: 'sprite', nom: 'Fantome', sprite: 'spr_fantome', costume: 0, anime: true, visible: false, x: 208, y: 150, largeur: 64, hauteur: 64 },
             {
               type: 'etiquette', nom: 'Consigne', x: 40, y: 110, largeur: 400, hauteur: 130, taillePolice: 18, couleurTexte: '#e0e7ff',
-              texte: 'Les fantômes envahissent le château !\n\nClique sur chaque fantôme avant qu\'il ne devienne trop gros.\nClique (ou appuie sur Espace) pour commencer.'
+              texte: T('Les fantômes envahissent le château !\n\nClique sur chaque fantôme avant qu\'il ne devienne trop gros.\nClique (ou appuie sur Espace) pour commencer.')
             },
             { type: 'minuteur', nom: 'Apparition', intervalle: 1.2, active: false, largeur: 0, hauteur: 0 },
             { type: 'son', nom: 'Musique', son: 'son_fantomes', volume: 40, boucle: true, autoDemarrage: false, largeur: 0, hauteur: 0 }
           ],
           ['score', 'vies', 'enJeu'],
           () => [
-            presentation('Les fantômes sont des clones de Fantome (caché). Un fantôme attrapé devient un peu transparent : c\'est le signal, pour sa propre boucle, qu\'il doit s\'arrêter.'),
+            presentation(T('Les fantômes sont des clones de Fantome (caché). Un fantôme attrapé devient un peu transparent : c\'est le signal, pour sa propre boucle, qu\'il doit s\'arrêter.')),
             evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
-              note('Tout remettre à zéro, puis démarrer le minuteur et la musique.'),
+              note(T('Tout remettre à zéro, puis démarrer le minuteur et la musique.')),
               bloc('bs_supprimer_clones', 'c3'),
               fixer('v_score', n(0)), fixer('v_vies', n(3)), fixer('v_enJeu', vrai(true)),
               score(), vies(),
@@ -1440,13 +1440,13 @@
             ]),
             // Les fantômes arrivent de plus en plus souvent.
             evt('bs_quand_minuteur', 'c5', [
-              note('Un fantôme de plus, et le prochain arrivera un peu plus vite.'),
+              note(T('Un fantôme de plus, et le prochain arrivera un peu plus vite.')),
               bloc('bs_creer_clone', 'c3'),
               si(compare('GT', intervalle(), n(0.45)), [ecrire('c5', 'intervalle', calc('MINUS', intervalle(), n(0.03)))])
             ]),
             // La vie d'un fantôme : il apparaît tout petit, en fondu, puis grossit…
             evt('bs_quand_clone', 'c3', [
-              note('Il apparaît petit et en fondu, puis grossit tant que la partie continue, qu\'il n\'est pas attrapé et qu\'il fait moins de 160 %.'),
+              note(T('Il apparaît petit et en fondu, puis grossit tant que la partie continue, qu\'il n\'est pas attrapé et qu\'il fait moins de 160 %.')),
               bloc('bs_placer', '__moi', { X: hasard(20, 396), Y: hasard(50, 276) }), // il reste dans la fenêtre même à 160 %
               bloc('bs_sprite_taille', '__moi', { VAL: n(40) }),
               fondu('apparaitre', 0.5),
@@ -1455,7 +1455,7 @@
                 attendre(0.05)
               ]),
               // … et s'il devient trop gros sans avoir été attrapé, il s'échappe.
-              note('Trop gros sans avoir été attrapé : il s\'échappe, une vie de moins.'),
+              note(T('Trop gros sans avoir été attrapé : il s\'échappe, une vie de moins.')),
               si(et(v('v_enJeu'), libre()), [
                 bloc('bs_son', null, null, { SON: 'erreur' }),
                 ajouter('v_vies', n(-1)), vies(),
@@ -1468,7 +1468,7 @@
             ]),
             // Un clic sur un fantôme (un clone) : attrapé !
             evt('bs_quand_clic', 'c3', [
-              note('Un clic sur un fantôme : attrapé ! Il devient transparent à 10 %, ce qui arrête sa boucle.'),
+              note(T('Un clic sur un fantôme : attrapé ! Il devient transparent à 10 %, ce qui arrête sa boucle.')),
               si(et(v('v_enJeu'), libre()), [
                 bloc('bs_sprite_transparence', '__moi', { VAL: n(10) }),
                 bloc('bs_son', null, null, { SON: 'piece' }),
@@ -1478,7 +1478,7 @@
               ])
             ]),
             fonction('fin de partie', [
-              note('Le record est gardé en mémoire d\'une fois sur l\'autre.'),
+              note(T('Le record est gardé en mémoire d\'une fois sur l\'autre.')),
               si(v('v_enJeu'), [
                 fixer('v_enJeu', vrai(false)),
                 bloc('bs_minuteur_ctrl', 'c5', null, { ACTION: 'arreter' }),
@@ -1487,8 +1487,8 @@
                   bloc('bs_memoriser', null, { VAL: v('v_score'), NOM: t('record fantômes') }),
                   bloc('bs_son', null, null, { SON: 'succes' })
                 ]),
-                ecrire('c4', 'texte', joindre(t('Les fantômes ont gagné… Score : '), v('v_score'), retourLigne(),
-                  t('Record : '), record(), retourLigne(), retourLigne(), t('Clique (ou Espace) pour rejouer.'))),
+                ecrire('c4', 'texte', joindre(t(T('Les fantômes ont gagné… Score : ')), v('v_score'), retourLigne(),
+                  t(T('Record : ')), record(), retourLigne(), retourLigne(), t(T('Clique (ou Espace) pour rejouer.')))),
                 ecrire('c4', 'visible', vrai(true))
               ])
             ])
@@ -1503,14 +1503,14 @@
       }
     },
     {
-      titre: '🧱 Casse-briques',
+      titre: T('🧱 Casse-briques'),
       theme: 'jeux',
-      description: 'Casse toutes les briques avec la balle ! Rebond « en visant » sur la raquette : touche-la près du bout pour envoyer la balle en biais.',
+      description: T('Casse toutes les briques avec la balle ! Rebond « en visant » sur la raquette : touche-la près du bout pour envoyer la balle en biais.'),
       creer: () => {
         // c1 Score · c2 Vies · c3 Raquette · c4 Balle · c5 Brique (cachée : ce sont ses clones qui forment le mur)
         // c6 Consigne
-        const score = () => ecrire('c1', 'texte', joindre(t('Score : '), v('v_score')));
-        const vies = () => ecrire('c2', 'texte', joindre(t('Vies : '), v('v_vies')));
+        const score = () => ecrire('c1', 'texte', joindre(t(T('Score : ')), v('v_score')));
+        const vies = () => ecrire('c2', 'texte', joindre(t(T('Vies : ')), v('v_vies')));
         const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record casse-briques') }) });
         const rebond = (qui, sur, mode) => ({ type: 'bs_rebondir_sur', fields: { CTRL: qui, CTRL2: sur, MODE: mode } });
         const bouger = dx => [
@@ -1527,25 +1527,25 @@
             bloc('bs_memoriser', null, { VAL: v('v_score'), NOM: t('record casse-briques') })
           ]),
           ecrire('c6', 'texte', joindre(t(texte), v('v_score'), retourLigne(),
-            t('Record : '), record(), retourLigne(), retourLigne(), t('Clique (ou Espace) pour rejouer.'))),
+            t(T('Record : ')), record(), retourLigne(), retourLigne(), t(T('Clique (ou Espace) pour rejouer.')))),
           ecrire('c6', 'visible', vrai(true))
         ];
         const p = projet(
-          { titre: 'Casse-briques', largeur: 480, hauteur: 360, couleurFond: '#0f172a' },
+          { titre: T('Casse-briques'), largeur: 480, hauteur: 360, couleurFond: '#0f172a' },
           [
-            { type: 'etiquette', nom: 'Score', texte: 'Score : 0', x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, couleurTexte: '#fde68a' },
-            { type: 'etiquette', nom: 'Vies', texte: 'Vies : 3', x: 370, y: 6, largeur: 100, hauteur: 28, taillePolice: 18, couleurTexte: '#f9a8d4' },
+            { type: 'etiquette', nom: 'Score', texte: T('Score : 0'), x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, couleurTexte: '#fde68a' },
+            { type: 'etiquette', nom: 'Vies', texte: T('Vies : 3'), x: 370, y: 6, largeur: 100, hauteur: 28, taillePolice: 18, couleurTexte: '#f9a8d4' },
             { type: 'sprite', nom: 'Raquette', sprite: 'spr_raquette', costume: 0, x: 192, y: 290, largeur: 96, hauteur: 96 },
             { type: 'sprite', nom: 'Balle', sprite: 'spr_balle', costume: 0, visible: false, x: 224, y: 300, largeur: 32, hauteur: 32 },
             { type: 'sprite', nom: 'Brique', sprite: 'spr_brique', costume: 0, visible: false, x: 20, y: 35, largeur: 48, hauteur: 48 },
             {
               type: 'etiquette', nom: 'Consigne', x: 40, y: 150, largeur: 400, hauteur: 130, taillePolice: 18, couleurTexte: '#e0e7ff',
-              texte: 'Casse toutes les briques !\n\nSouris ou flèches ← → pour la raquette.\nTouche-la près du bout pour viser.\nClique (ou appuie sur Espace) pour commencer.'
+              texte: T('Casse toutes les briques !\n\nSouris ou flèches ← → pour la raquette.\nTouche-la près du bout pour viser.\nClique (ou appuie sur Espace) pour commencer.')
             }
           ],
           ['score', 'vies', 'enJeu', 'briques', 'vitesse', 'ligne', 'colonne'],
           () => [
-            presentation('Le mur est fait de clones de Brique. Chaque brique surveille elle-même la balle : touchée, elle la fait rebondir et disparaît. La balle, elle, ne s\'occupe que des bords et de la raquette.'),
+            presentation(T('Le mur est fait de clones de Brique. Chaque brique surveille elle-même la balle : touchée, elle la fait rebondir et disparaît. La balle, elle, ne s\'occupe que des bords et de la raquette.')),
             evt('bs_quand_demarre', null, [fixer('v_enJeu', vrai(false))]),
             evtChamps('bs_quand_touche', { TOUCHE: 'espace' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
@@ -1555,7 +1555,7 @@
               score(), vies(),
               ecrire('c6', 'visible', vrai(false)),
               // Le mur : 5 rangées de 8 briques. On place l'original (caché), puis on le clone.
-              note('Le mur : 5 rangées de 8 briques. On place l\'original (caché), on lui met le costume de sa rangée (5 couleurs), puis on le clone.'),
+              note(T('Le mur : 5 rangées de 8 briques. On place l\'original (caché), on lui met le costume de sa rangée (5 couleurs), puis on le clone.')),
               pour('v_ligne', 1, 5, [
                 pour('v_colonne', 1, 8, [
                   bloc('bs_placer', 'c5', {
@@ -1569,7 +1569,7 @@
               ]),
               appeler('servir'),
               // La balle avance ; si elle passe sous la raquette, une vie est perdue.
-              note('La boucle du jeu : la balle avance. Sous la raquette, une vie est perdue ; sinon, elle rebondit sur les bords, et sur la raquette « en visant ».'),
+              note(T('La boucle du jeu : la balle avance. Sous la raquette, une vie est perdue ; sinon, elle rebondit sur les bords, et sur la raquette « en visant ».')),
               tantQue(v('v_enJeu'), [
                 bloc('bs_avancer', 'c4', { PAS: v('v_vitesse') }),
                 si(compare('GT', lire('y', 'c4'), n(322)), [appeler('balle perdue')], [
@@ -1580,7 +1580,7 @@
               ])
             ]),
             fonction('servir', [
-              note('La balle repart du milieu de la raquette, vers le haut, un peu au hasard.'),
+              note(T('La balle repart du milieu de la raquette, vers le haut, un peu au hasard.')),
               bloc('bs_placer', 'c4', { X: calc('ADD', lire('x', 'c3'), n(32)), Y: n(300) }),
               bloc('bs_orienter', 'c4', { DIR: hasard(-40, 40) }),
               fixer('v_vitesse', n(5)),
@@ -1589,14 +1589,14 @@
             ]),
             fonction('balle perdue', [
               ajouter('v_vies', n(-1)), vies(),
-              si(compare('LTE', v('v_vies'), n(0)), finir('Perdu ! Score : ', 'erreur'), [
+              si(compare('LTE', v('v_vies'), n(0)), finir(T('Perdu ! Score : '), 'erreur'), [
                 bloc('bs_son', null, null, { SON: 'erreur' }),
                 appeler('servir')
               ])
             ]),
             // Chaque brique surveille la balle : touchée, elle la renvoie et disparaît.
             evt('bs_quand_clone', 'c5', [
-              note('Chaque brique : touchée par la balle, elle la renvoie (« si Balle touche 👉 moi, rebondir »), compte les points, puis se supprime.'),
+              note(T('Chaque brique : touchée par la balle, elle la renvoie (« si Balle touche 👉 moi, rebondir »), compte les points, puis se supprime.')),
               ecrire('__moi', 'visible', vrai(true)),
               tantQue(v('v_enJeu'), [
                 si({ type: 'bs_se_touchent', fields: { CTRL: '__moi', CTRL2: 'c4' } }, [
@@ -1605,7 +1605,7 @@
                   ajouter('v_score', n(10)), score(),
                   ajouter('v_vitesse', n(0.1)),
                   ajouter('v_briques', n(-1)),
-                  si(compare('EQ', v('v_briques'), n(0)), finir('Bravo, toutes les briques sont cassées ! Score : ', 'succes')),
+                  si(compare('EQ', v('v_briques'), n(0)), finir(T('Bravo, toutes les briques sont cassées ! Score : '), 'succes')),
                   bloc('bs_supprimer_clone')
                 ]),
                 attendre(0.02)
@@ -1614,7 +1614,7 @@
             evtChamps('bs_quand_touche', { TOUCHE: 'gauche' }, bouger(-20)),
             evtChamps('bs_quand_touche', { TOUCHE: 'droite' }, bouger(20)),
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'bouge' }, [
-              note('La raquette suit la souris ; « rebondir » la garde dans la fenêtre.'),
+              note(T('La raquette suit la souris ; « rebondir » la garde dans la fenêtre.')),
               si(v('v_enJeu'), [
                 ecrire('c3', 'x', calc('MINUS', { type: 'bs_souris_fenetre', fields: { QUOI: 'x' } }, n(48))),
                 bloc('bs_rebondir', 'c3')
@@ -1626,9 +1626,9 @@
       }
     },
     {
-      titre: '🍄 Plateformes',
+      titre: T('🍄 Plateformes'),
       theme: 'jeux',
-      description: 'Cours, saute de plateforme en plateforme et ramasse les pièces, sans tomber dans le trou ni toucher le fantôme. Gravité, saut, score, vies… et ça se joue aussi à la manette !',
+      description: T('Cours, saute de plateforme en plateforme et ramasse les pièces, sans tomber dans le trou ni toucher le fantôme. Gravité, saut, score, vies… et ça se joue aussi à la manette !'),
       creer: () => {
         // c1 Score · c2 Vies · c3 Héros · c4-c5 le sol (avec un trou au milieu) · c6-c9 plateformes
         // c10 Pièce · c11 Fantôme · c12 Consigne
@@ -1644,9 +1644,9 @@
         const solide = (nom, x, y, l, h, genre, fond, trait) =>
           ({ type: 'forme', nom, genre, x, y, largeur: l, hauteur: h, couleurFond: fond, couleurBordure: trait, epaisseur: 2, solide: true });
         const p = projet(
-          { titre: 'Plateformes', largeur: 480, hauteur: 360, couleurFond: '#7dd3fc' },
+          { titre: T('Plateformes'), largeur: 480, hauteur: 360, couleurFond: '#7dd3fc' },
           [
-            { type: 'etiquette', nom: 'Score', texte: 'Pièces : 0', x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, gras: true, couleurTexte: '#713f12' },
+            { type: 'etiquette', nom: 'Score', texte: T('Pièces : 0'), x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, gras: true, couleurTexte: '#713f12' },
             { type: 'etiquette', nom: 'Vies', texte: '❤️❤️❤️', x: 360, y: 6, largeur: 110, hauteur: 28, taillePolice: 18, alignement: 'droite' },
             { type: 'sprite', nom: 'Héros', sprite: 'spr_heros', costume: 0, x: 48, y: 60, largeur: 40, hauteur: 40 },
             solide('SolGauche', 0, 320, 200, 40, 'rectangle', '#22c55e', '#14532d'),
@@ -1660,18 +1660,18 @@
             {
               type: 'etiquette', nom: 'Consigne', x: 50, y: 120, largeur: 380, hauteur: 160, taillePolice: 16, couleurTexte: '#ffffff',
               couleurFond: '#1e3a8a', alignement: 'centre',
-              texte: 'Ramasse un maximum de pièces !\n\n← → pour courir, Espace ou ↑ pour sauter.\nAttention au fantôme et au trou !\n' +
-                'À la manette : la croix et le bouton A.\n\nEspace, Entrée ou clic pour commencer.'
+              texte: T('Ramasse un maximum de pièces !\n\n← → pour courir, Espace ou ↑ pour sauter.\nAttention au fantôme et au trou !\n') +
+                T('À la manette : la croix et le bouton A.\n\nEspace, Entrée ou clic pour commencer.')
             }
           ],
           ['vies', 'enJeu', 'place'],
           () => [
-            presentation('Le sol et les plateformes sont des formes « solides » (case cochée dans leurs propriétés). Le héros tombe avec « faire tomber … avec une gravité » : il se pose sur ce qui est solide. « faire sauter » ne marche que s\'il est posé.'),
+            presentation(T('Le sol et les plateformes sont des formes « solides » (case cochée dans leurs propriétés). Le héros tombe avec « faire tomber … avec une gravité » : il se pose sur ce qui est solide. « faire sauter » ne marche que s\'il est posé.')),
             evt('bs_quand_demarre', null, [
               fixer('v_enJeu', vrai(false)),
               bloc('bs_sprite_animer', 'c10', null, { MODE: 'boucle' }),
               bloc('bs_sprite_animer', 'c11', null, { MODE: 'boucle' }),
-              note('Le fantôme fait des allers-retours d\'un bord à l\'autre de la fenêtre (il vole au-dessus du trou).'),
+              note(T('Le fantôme fait des allers-retours d\'un bord à l\'autre de la fenêtre (il vole au-dessus du trou).')),
               bloc('bs_orienter', 'c11', { DIR: n(90) }),
               toujours([
                 si(v('v_enJeu'), [bloc('bs_avancer', 'c11', { PAS: n(2) }), bloc('bs_rebondir', 'c11')]),
@@ -1683,15 +1683,15 @@
             evtChamps('bs_quand_souris_fenetre', { QUOI: 'clic' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             evtChamps('bs_quand_manette', { BOUTON: 'start' }, [si(non(v('v_enJeu')), [appeler('nouvelle partie')])]),
             fonction('nouvelle partie', [
-              note('« ajouter … au nombre de Score » change le nombre écrit dans l\'étiquette : « Pièces : 0 » devient « Pièces : 1 ».'),
-              ecrire('c1', 'texte', t('Pièces : 0')),
+              note(T('« ajouter … au nombre de Score » change le nombre écrit dans l\'étiquette : « Pièces : 0 » devient « Pièces : 1 ».')),
+              ecrire('c1', 'texte', t(T('Pièces : 0'))),
               fixer('v_vies', n(3)), vies(),
               ecrire('c12', 'visible', vrai(false)),
               bloc('bs_placer', 'c11', { X: n(300), Y: n(284) }),
               appeler('remettre le héros'),
               appeler('placer la pièce'),
               fixer('v_enJeu', vrai(true)),
-              note('La boucle du jeu : courir, sauter, tomber (gravité), puis regarder ce que le héros touche.'),
+              note(T('La boucle du jeu : courir, sauter, tomber (gravité), puis regarder ce que le héros touche.')),
               tantQue(v('v_enJeu'), [
                 si(touche('gauche'), [
                   bloc('bs_deplacer', 'c3', { DX: n(-4), DY: n(0) }),
@@ -1707,7 +1707,7 @@
                 ]),
                 bloc('bs_gravite', 'c3', { FORCE: n(1) }, { FOND: 'vide' }),
                 ecrire('c3', 'x', { type: 'math_constrain', inputs: { VALUE: I(lire('x', 'c3')), LOW: I(n(0)), HIGH: I(n(440)) } }),
-                note('Le costume : « saut » en l\'air ; au sol, les deux costumes de marche alternent selon sa position.'),
+                note(T('Le costume : « saut » en l\'air ; au sol, les deux costumes de marche alternent selon sa position.')),
                 si(non(auSol()), [bloc('bs_sprite_costume', 'c3', { VAL: n(3) })], [
                   bloc('bs_sprite_costume', 'c3', {
                     VAL: calc('ADD', { type: 'math_modulo', inputs: {
@@ -1726,12 +1726,12 @@
               ])
             ]),
             fonction('remettre le héros', [
-              note('Il repart en haut à gauche, sur la plateforme la plus haute, loin du fantôme.'),
+              note(T('Il repart en haut à gauche, sur la plateforme la plus haute, loin du fantôme.')),
               bloc('bs_placer', 'c3', { X: n(48), Y: n(60) }),
               ecrire('c3', 'vitesseY', n(0))
             ]),
             fonction('placer la pièce', [
-              note('Une des 6 places, au hasard : au-dessus d\'une plateforme ou du sol.'),
+              note(T('Une des 6 places, au hasard : au-dessus d\'une plateforme ou du sol.')),
               fixer('v_place', hasard(1, 6)),
               bloc('bs_placer', 'c10', { X: choix(101, 236, 371, 61, 86, 366), Y: choix(211, 146, 81, 76, 286, 286) })
             ]),
@@ -1743,8 +1743,8 @@
                 si(compare('GT', pieces(), record()), [
                   bloc('bs_memoriser', null, { VAL: pieces(), NOM: t('record plateformes') })
                 ]),
-                ecrire('c12', 'texte', joindre(t('Perdu ! Pièces ramassées : '), pieces(), retourLigne(),
-                  t('Record : '), record(), retourLigne(), retourLigne(), t('Espace, Entrée ou clic pour rejouer.'))),
+                ecrire('c12', 'texte', joindre(t(T('Perdu ! Pièces ramassées : ')), pieces(), retourLigne(),
+                  t(T('Record : ')), record(), retourLigne(), retourLigne(), t(T('Espace, Entrée ou clic pour rejouer.')))),
                 ecrire('c12', 'visible', vrai(true))
               ], [
                 appeler('remettre le héros'),
@@ -1757,9 +1757,9 @@
       }
     },
     {
-      titre: '🪟 Plusieurs fenêtres',
+      titre: T('🪟 Plusieurs fenêtres'),
       theme: 'debut',
-      description: 'Une fenêtre de réglages (OK / Annuler) et une fenêtre « À propos » : comment ouvrir d\'autres fenêtres et récupérer ce qu\'on y a saisi.',
+      description: T('Une fenêtre de réglages (OK / Annuler) et une fenêtre « À propos » : comment ouvrir d\'autres fenêtres et récupérer ce qu\'on y a saisi.'),
       creer: () => {
         // Fenêtre principale : c1 Bonjour · c2 Reglages (bouton) · c3 Info
         // Fenêtre « Parametres » (f2) : c4 c5 prénom · c6 c7 couleur · c8 OK · c9 Annuler
@@ -1767,50 +1767,50 @@
         const ouvrir = (id, attendre) => bloc('bs_fenetre_ouvrir', null, null, { FENETRE: id, MODE: attendre ? 'attendre' : 'normal' });
         const fermer = id => bloc('bs_fenetre_fermer', null, null, { FENETRE: id });
         const p = projet(
-          { titre: 'Mon programme personnalisé', largeur: 440, hauteur: 260, couleurFond: '#f0f9ff', menus: 'Aide\n À propos' },
+          { titre: T('Mon programme personnalisé'), largeur: 440, hauteur: 260, couleurFond: '#f0f9ff', menus: T('Aide\n À propos') },
           [
-            { type: 'etiquette', nom: 'Bonjour', texte: 'Bonjour !', x: 20, y: 40, largeur: 400, hauteur: 50, taillePolice: 28, couleurTexte: '#0c4a6e' },
-            { type: 'bouton', nom: 'Reglages', texte: '⚙️ Réglages…', x: 20, y: 120, largeur: 160, hauteur: 36 },
-            { type: 'etiquette', nom: 'Info', texte: 'Clique sur « Réglages… » pour choisir ton prénom et ta couleur.', x: 20, y: 180, largeur: 400, hauteur: 40, couleurTexte: '#475569' },
-            { fenetre: 'f2', type: 'etiquette', nom: 'TexteNom', texte: 'Ton prénom :', x: 20, y: 20, largeur: 120, hauteur: 24 },
+            { type: 'etiquette', nom: 'Bonjour', texte: T('Bonjour !'), x: 20, y: 40, largeur: 400, hauteur: 50, taillePolice: 28, couleurTexte: '#0c4a6e' },
+            { type: 'bouton', nom: 'Reglages', texte: T('⚙️ Réglages…'), x: 20, y: 120, largeur: 160, hauteur: 36 },
+            { type: 'etiquette', nom: 'Info', texte: T('Clique sur « Réglages… » pour choisir ton prénom et ta couleur.'), x: 20, y: 180, largeur: 400, hauteur: 40, couleurTexte: '#475569' },
+            { fenetre: 'f2', type: 'etiquette', nom: 'TexteNom', texte: T('Ton prénom :'), x: 20, y: 20, largeur: 120, hauteur: 24 },
             { fenetre: 'f2', type: 'zonetexte', nom: 'Prenom', texte: '', x: 140, y: 16, largeur: 160, hauteur: 30 },
-            { fenetre: 'f2', type: 'etiquette', nom: 'TexteCouleur', texte: 'Couleur du fond :', x: 20, y: 66, largeur: 120, hauteur: 24 },
+            { fenetre: 'f2', type: 'etiquette', nom: 'TexteCouleur', texte: T('Couleur du fond :'), x: 20, y: 66, largeur: 120, hauteur: 24 },
             { fenetre: 'f2', type: 'selecteurcouleur', nom: 'Couleur', texte: '#f0f9ff', x: 140, y: 60, largeur: 60, hauteur: 32 },
             { fenetre: 'f2', type: 'bouton', nom: 'OK', texte: 'OK', x: 120, y: 130, largeur: 90, hauteur: 32 },
-            { fenetre: 'f2', type: 'bouton', nom: 'Annuler', texte: 'Annuler', x: 220, y: 130, largeur: 90, hauteur: 32 },
-            { fenetre: 'f3', type: 'etiquette', nom: 'TexteAPropos', texte: 'Programme créé avec BlocStudio.\n\nCette fenêtre ne bloque pas le reste : on peut la déplacer et continuer à utiliser la fenêtre principale.', x: 16, y: 12, largeur: 268, hauteur: 100 },
-            { fenetre: 'f3', type: 'bouton', nom: 'Fermer', texte: 'Fermer', x: 190, y: 116, largeur: 90, hauteur: 30 }
+            { fenetre: 'f2', type: 'bouton', nom: 'Annuler', texte: T('Annuler'), x: 220, y: 130, largeur: 90, hauteur: 32 },
+            { fenetre: 'f3', type: 'etiquette', nom: 'TexteAPropos', texte: T('Programme créé avec BlocStudio.\n\nCette fenêtre ne bloque pas le reste : on peut la déplacer et continuer à utiliser la fenêtre principale.'), x: 16, y: 12, largeur: 268, hauteur: 100 },
+            { fenetre: 'f3', type: 'bouton', nom: 'Fermer', texte: T('Fermer'), x: 190, y: 116, largeur: 90, hauteur: 30 }
           ],
           ['valide'],
           () => [
-            presentation('Trois fenêtres : la principale, Parametres et APropos. « ouvrir … et attendre » met le programme en pause jusqu\'à la fermeture : idéal pour une boîte OK / Annuler.'),
+            presentation(T('Trois fenêtres : la principale, Parametres et APropos. « ouvrir … et attendre » met le programme en pause jusqu\'à la fermeture : idéal pour une boîte OK / Annuler.')),
             // La fenêtre de réglages bloque le reste du programme : les blocs qui suivent
             // attendent qu'on l'ait fermée, puis lisent ce qu'on y a saisi.
             evt('bs_quand_clic', 'c2', [
-              note('La variable valide dira si on a fermé avec OK (vrai) ou avec Annuler (faux).'),
+              note(T('La variable valide dira si on a fermé avec OK (vrai) ou avec Annuler (faux).')),
               fixer('v_valide', vrai(false)),
               ouvrir('f2', true),
               si(v('v_valide'), [
                 si(estVide(lire('texte', 'c5')),
-                  [ecrire('c1', 'texte', t('Bonjour !'))],
-                  [ecrire('c1', 'texte', joindre(t('Bonjour '), lire('texte', 'c5'), t(' !')))]),
+                  [ecrire('c1', 'texte', t(T('Bonjour !')))],
+                  [ecrire('c1', 'texte', joindre(t(T('Bonjour ')), lire('texte', 'c5'), t(' !')))]),
                 bloc('bs_fond_fenetre', null, { VAL: lire('texte', 'c7') }),
-                ecrire('c3', 'texte', t('✔ Réglages enregistrés.'))
+                ecrire('c3', 'texte', t(T('✔ Réglages enregistrés.')))
               ], [
-                ecrire('c3', 'texte', t('Réglages annulés : rien n\'a changé.'))
+                ecrire('c3', 'texte', t(T('Réglages annulés : rien n\'a changé.')))
               ])
             ]),
-            evt('bs_quand_clic', 'c8', [note('OK : on retient que les réglages sont validés, puis on ferme.'), fixer('v_valide', vrai(true)), fermer('f2')]),
+            evt('bs_quand_clic', 'c8', [note(T('OK : on retient que les réglages sont validés, puis on ferme.')), fixer('v_valide', vrai(true)), fermer('f2')]),
             evt('bs_quand_clic', 'c9', [fermer('f2')]),
             evtChamps('bs_quand_fenetre', { FENETRE: 'f2', QUOI: 'ouverture' }, [
-              bloc('bs_fenetre_titre', null, { VAL: t('Réglages') }, { FENETRE: 'f2' })
+              bloc('bs_fenetre_titre', null, { VAL: t(T('Réglages')) }, { FENETRE: 'f2' })
             ]),
-            evtMenu('Aide › À propos', [note('« ouvrir » sans attendre : la fenêtre À propos ne bloque rien.'), ouvrir('f3', false)]),
+            evtMenu(T('Aide › À propos'), [note(T('« ouvrir » sans attendre : la fenêtre À propos ne bloque rien.')), ouvrir('f3', false)]),
             evt('bs_quand_clic', 'c11', [fermer('f3')])
           ]);
         p.fenetres = [
-          { id: 'f2', nom: 'Parametres', titre: 'Paramètres', largeur: 320, hauteur: 180, couleurFond: '#f8fafc' },
-          { id: 'f3', nom: 'APropos', titre: 'À propos', largeur: 300, hauteur: 160, couleurFond: '#ffffff' }
+          { id: 'f2', nom: 'Parametres', titre: T('Paramètres'), largeur: 320, hauteur: 180, couleurFond: '#f8fafc' },
+          { id: 'f3', nom: 'APropos', titre: T('À propos'), largeur: 300, hauteur: 160, couleurFond: '#ffffff' }
         ];
         return p;
       }

@@ -8,16 +8,16 @@
   const HAUTEUR_LIGNE = 16;
   const LARGEUR_CASE = 20;
   const TRAINE = 0.3;            // secondes ajoutées à la fin (les dernières notes s'éteignent)
-  const NOMS_NOTES = ['do', 'do#', 'ré', 'ré#', 'mi', 'fa', 'fa#', 'sol', 'sol#', 'la', 'la#', 'si'];
+  const NOMS_NOTES = ['do', 'do#', 'ré', 'ré#', 'mi', 'fa', 'fa#', 'sol', 'sol#', 'la', 'la#', 'si'].map(n => T(n, 'note'));
 
   // Rangées de bas en haut : notes MIDI (60 = do du milieu), ou sons de batterie.
   const notes = (de, a) => Array.from({ length: a - de + 1 }, (_, i) => de + i);
   const PISTES = [
-    { nom: 'Mélodie', icone: '🎵', onde: 'carre', rapport: 0.5, gain: 0.22, couleur: '#4f46e5', rangees: notes(60, 84) },
-    { nom: 'Accompagnement', icone: '🎶', onde: 'carre', rapport: 0.25, gain: 0.16, couleur: '#0891b2', rangees: notes(55, 79) },
-    { nom: 'Basse', icone: '🎸', onde: 'triangle', gain: 0.32, couleur: '#16a34a', rangees: notes(36, 60) },
-    { nom: 'Batterie', icone: '🥁', onde: 'bruit', gain: 0.3, couleur: '#ea580c', rangees: [0, 1, 2],
-      libelles: ['Grosse caisse', 'Caisse claire', 'Charleston'] }
+    { nom: T('Mélodie'), icone: '🎵', onde: 'carre', rapport: 0.5, gain: 0.22, couleur: '#4f46e5', rangees: notes(60, 84) },
+    { nom: T('Accompagnement'), icone: '🎶', onde: 'carre', rapport: 0.25, gain: 0.16, couleur: '#0891b2', rangees: notes(55, 79) },
+    { nom: T('Basse'), icone: '🎸', onde: 'triangle', gain: 0.32, couleur: '#16a34a', rangees: notes(36, 60) },
+    { nom: T('Batterie'), icone: '🥁', onde: 'bruit', gain: 0.3, couleur: '#ea580c', rangees: [0, 1, 2],
+      libelles: [T('Grosse caisse'), T('Caisse claire'), T('Charleston')] }
   ];
 
   const nomNote = h => NOMS_NOTES[h % 12] + (Math.floor(h / 12) - 1);
@@ -182,6 +182,7 @@
         </div>
       </div>`;
     document.body.appendChild(voile);
+    BlocLangues.traduirePage(voile);
 
     $('studio-tempo').addEventListener('change', () => {
       etat.musique.tempo = Math.min(240, Math.max(60, Math.round(Number($('studio-tempo').value) || 120)));
@@ -196,14 +197,14 @@
     $('studio-jouer').addEventListener('click', basculerLecture);
     $('studio-boucle').addEventListener('change', () => { if (etat.lecture) etat.lecture.source.loop = $('studio-boucle').checked; });
     $('studio-exemple').addEventListener('click', () => {
-      if (aDesNotes() && !confirm('Remplacer toute la musique par la mélodie d\'exemple ?')) return;
+      if (aDesNotes() && !confirm(T('Remplacer toute la musique par la mélodie d\'exemple ?'))) return;
       etat.musique = musiqueExemple();
       modifie();
       afficherReglages();
     });
     $('studio-effacer').addEventListener('click', () => {
       const piste = etat.musique.pistes[etat.piste];
-      if (!piste.notes.length || !confirm(`Effacer toutes les notes de la piste « ${PISTES[etat.piste].nom} » ?`)) return;
+      if (!piste.notes.length || !confirm(T('Effacer toutes les notes de la piste « {nom} » ?', { nom: PISTES[etat.piste].nom }))) return;
       piste.notes = [];
       modifie();
       dessiner();
@@ -244,9 +245,9 @@
     etat.surFin = surFin;
     etat.modifie = false;
     etat.piste = 0;
-    $('studio-nom').value = options.nom || 'musique';
+    $('studio-nom').value = options.nom || T('musique');
     $('studio-nom').disabled = !!options.modification;
-    $('studio-nom').title = options.modification ? 'Pour renommer la musique, utilisez « ✏️ Renommer » dans le Sommaire.' : '';
+    $('studio-nom').title = options.modification ? T('Pour renommer la musique, utilisez « ✏️ Renommer » dans le Sommaire.') : '';
     $('studio-musique').hidden = false;
     afficherReglages();
     $('studio-jouer').focus();
@@ -266,12 +267,12 @@
 
   function fermer(garder) {
     if (garder) {
-      if (!aDesNotes()) return alert('La musique est vide : posez au moins une note dans la grille.');
+      if (!aDesNotes()) return alert(T('La musique est vide : posez au moins une note dans la grille.'));
       const nom = $('studio-nom').value.trim();
-      if (!nom) return alert('Donnez un nom à la musique.');
+      if (!nom) return alert(T('Donnez un nom à la musique.'));
       arreterLecture();
       etat.surFin({ nom, musique: structuredClone(etat.musique), donnees: enWav(rendre(etat.musique)) });
-    } else if (etat.modifie && aDesNotes() && !confirm('Fermer le studio sans garder les changements ?')) {
+    } else if (etat.modifie && aDesNotes() && !confirm(T('Fermer le studio sans garder les changements ?'))) {
       return;
     }
     arreterLecture();
@@ -440,7 +441,7 @@
     const source = jouerTampon(rendre(etat.musique), $('studio-boucle').checked, depuis);
     const lecture = etat.lecture = { source, depart: contexte().currentTime - depuis, pas: -1, animation: 0 };
     source.onended = () => { if (etat.lecture === lecture) arreterLecture(); };
-    $('studio-jouer').textContent = '⏹ Arrêter';
+    $('studio-jouer').textContent = T('⏹ Arrêter');
     const dp = dureePas(etat.musique);
     const suivre = () => {
       if (etat.lecture !== lecture) return;
@@ -464,7 +465,7 @@
     etat.lecture = null;
     cancelAnimationFrame(lecture.animation);
     try { lecture.source.stop(); } catch (e) { /* déjà fini */ }
-    $('studio-jouer').textContent = '▶ Écouter';
+    $('studio-jouer').textContent = T('▶ Écouter');
     dessiner();
   }
 

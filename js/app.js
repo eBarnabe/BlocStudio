@@ -5,77 +5,77 @@
   const GRILLE = 4;
 
   const TYPES = {
-    bouton:     { prefixe: 'Bouton',    texte: 'Bouton',        largeur: 110, hauteur: 32 },
-    etiquette:  { prefixe: 'Etiquette', texte: 'Étiquette',     largeur: 120, hauteur: 24 },
-    zonetexte:  { prefixe: 'ZoneTexte', texte: '',              largeur: 170, hauteur: 30 },
-    casecocher: { prefixe: 'Case',      texte: 'Case à cocher', largeur: 150, hauteur: 24 },
-    image:      { prefixe: 'Image',     texte: '',              largeur: 100, hauteur: 100 },
-    sprite: { prefixe: 'Sprite', texte: '', largeur: 64, hauteur: 64,
+    bouton:     { prefixe: T('Bouton'),    texte: T('Bouton'),        largeur: 110, hauteur: 32 },
+    etiquette:  { prefixe: T('Etiquette'), texte: T('Étiquette'),     largeur: 120, hauteur: 24 },
+    zonetexte:  { prefixe: T('ZoneTexte'), texte: '',              largeur: 170, hauteur: 30 },
+    casecocher: { prefixe: T('Case'),      texte: T('Case à cocher'), largeur: 150, hauteur: 24 },
+    image:      { prefixe: T('Image'),     texte: '',              largeur: 100, hauteur: 100 },
+    sprite: { prefixe: T('Sprite'), texte: '', largeur: 64, hauteur: 64,
       defauts: { sprite: '', costume: 0, anime: false, miroir: false, rotation: 0 } },
-    listederoulante: { prefixe: 'Liste', texte: '', largeur: 160, hauteur: 28,
-      defauts: { elements: ['Choix 1', 'Choix 2', 'Choix 3'] } },
-    curseur: { prefixe: 'Curseur', texte: '', largeur: 160, hauteur: 24,
+    listederoulante: { prefixe: T('Liste'), texte: '', largeur: 160, hauteur: 28,
+      defauts: { elements: [T('Choix 1'), T('Choix 2'), T('Choix 3')] } },
+    curseur: { prefixe: T('Curseur'), texte: '', largeur: 160, hauteur: 24,
       defauts: { valeur: 50, min: 0, max: 100 } },
-    barreprogression: { prefixe: 'Barre', texte: '', largeur: 200, hauteur: 20,
+    barreprogression: { prefixe: T('Barre'), texte: '', largeur: 200, hauteur: 20,
       defauts: { valeur: 30, max: 100, couleurBarre: '#16a34a' } },
-    zonedessin: { prefixe: 'Dessin', texte: '', largeur: 240, hauteur: 160,
+    zonedessin: { prefixe: T('Dessin'), texte: '', largeur: 240, hauteur: 160,
       defauts: { couleurFond: '#ffffff' } },
-    boutonradio: { prefixe: 'Radio', texte: 'Option', largeur: 150, hauteur: 24,
+    boutonradio: { prefixe: T('Radio'), texte: T('Option'), largeur: 150, hauteur: 24,
       defauts: { groupe: 'groupe1' } },
-    cadre: { prefixe: 'Cadre', texte: 'Groupe', largeur: 220, hauteur: 140 },
-    panneau: { prefixe: 'Panneau', texte: '', largeur: 240, hauteur: 160,
+    cadre: { prefixe: T('Cadre'), texte: T('Groupe'), largeur: 220, hauteur: 140 },
+    panneau: { prefixe: T('Panneau'), texte: '', largeur: 240, hauteur: 160,
       defauts: { defilement: 'vertical', largeurContenu: 0, hauteurContenu: 400, couleurFond: '#ffffff' } },
-    zoneliste: { prefixe: 'ZoneListe', texte: '', largeur: 160, hauteur: 120,
-      defauts: { elements: ['Élément 1', 'Élément 2', 'Élément 3'] } },
-    selecteurnombre: { prefixe: 'Nombre', texte: '', largeur: 90, hauteur: 28,
+    zoneliste: { prefixe: T('ZoneListe'), texte: '', largeur: 160, hauteur: 120,
+      defauts: { elements: [T('Élément 1'), T('Élément 2'), T('Élément 3')] } },
+    selecteurnombre: { prefixe: T('Nombre'), texte: '', largeur: 90, hauteur: 28,
       defauts: { valeur: 0, min: 0, max: 100, pas: 1 } },
-    tableau: { prefixe: 'Tableau', texte: '', largeur: 300, hauteur: 160,
-      defauts: { colonnes: ['Nom', 'Prénom'], lignes: [['Dupont', 'Marie'], ['Martin', 'Lucas']], memoriser: false } },
-    date: { prefixe: 'Date', texte: '', largeur: 150, hauteur: 28, defauts: { date: '' } },
-    heure: { prefixe: 'Heure', texte: '', largeur: 110, hauteur: 28, defauts: { heure: '' } },
-    calendrier: { prefixe: 'Calendrier', texte: '', largeur: 230, hauteur: 210, defauts: { date: '', couleurBarre: '#4f46e5' } },
-    horloge: { prefixe: 'Horloge', texte: '', largeur: 120, hauteur: 120,
+    tableau: { prefixe: T('Tableau'), texte: '', largeur: 300, hauteur: 160,
+      defauts: { colonnes: [T('Nom'), T('Prénom')], lignes: [[T('Dupont'), T('Marie')], [T('Martin'), T('Lucas')]], memoriser: false } },
+    date: { prefixe: T('Date'), texte: '', largeur: 150, hauteur: 28, defauts: { date: '' } },
+    heure: { prefixe: T('Heure'), texte: '', largeur: 110, hauteur: 28, defauts: { heure: '' } },
+    calendrier: { prefixe: T('Calendrier'), texte: '', largeur: 230, hauteur: 210, defauts: { date: '', couleurBarre: '#4f46e5' } },
+    horloge: { prefixe: T('Horloge'), texte: '', largeur: 120, hauteur: 120,
       defauts: { genre: 'aiguilles', secondes: true, decalageHeures: 0, couleurBarre: '#dc2626', taillePolice: 24 } },
-    forme: { prefixe: 'Forme', texte: '', largeur: 100, hauteur: 100,
+    forme: { prefixe: T('Forme'), texte: '', largeur: 100, hauteur: 100,
       defauts: { genre: 'ovale', couleurFond: '#60a5fa', couleurBordure: '#1e3a8a', epaisseur: 2, sens: 'horizontale' } },
-    selecteurcouleur: { prefixe: 'Couleur', texte: '#4f46e5', largeur: 60, hauteur: 30 },
-    navigateur: { prefixe: 'Navigateur', texte: '', largeur: 400, hauteur: 260,
-      defauts: { adresse: 'https://fr.wikipedia.org' } },
-    onglets: { prefixe: 'Onglets', texte: '', largeur: 340, hauteur: 220,
+    selecteurcouleur: { prefixe: T('Couleur'), texte: '#4f46e5', largeur: 60, hauteur: 30 },
+    navigateur: { prefixe: T('Navigateur'), texte: '', largeur: 400, hauteur: 260,
+      defauts: { adresse: T('https://fr.wikipedia.org') } },
+    onglets: { prefixe: T('Onglets'), texte: '', largeur: 340, hauteur: 220,
       defauts: { pages: ['Page 1', 'Page 2', 'Page 3'], page: 0 } },
-    graphique: { prefixe: 'Graphique', texte: 'Mon graphique', largeur: 320, hauteur: 200,
-      defauts: { genre: 'barres', etiquettes: ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven'], valeurs: [3, 5, 2, 6, 4],
+    graphique: { prefixe: T('Graphique'), texte: T('Mon graphique'), largeur: 320, hauteur: 200,
+      defauts: { genre: 'barres', etiquettes: [T('Lun'), T('Mar'), T('Mer'), T('Jeu'), T('Ven')], valeurs: [3, 5, 2, 6, 4],
         couleurBarre: '#4f46e5', couleurFond: '#ffffff', maxValeurs: 0 } },
-    interrupteur: { prefixe: 'Interrupteur', texte: 'Activé', largeur: 150, hauteur: 26 },
-    lien: { prefixe: 'Lien', texte: 'Visiter le site', largeur: 140, hauteur: 24,
-      defauts: { adresse: 'https://fr.wikipedia.org', couleurTexte: '#2563eb' } },
-    video: { prefixe: 'Video', texte: '', largeur: 320, hauteur: 180,
+    interrupteur: { prefixe: T('Interrupteur'), texte: T('Activé'), largeur: 150, hauteur: 26 },
+    lien: { prefixe: T('Lien'), texte: T('Visiter le site'), largeur: 140, hauteur: 24,
+      defauts: { adresse: T('https://fr.wikipedia.org'), couleurTexte: '#2563eb' } },
+    video: { prefixe: T('Video'), texte: '', largeur: 320, hauteur: 180,
       defauts: { video: '', barreVideo: true, boucle: false, volume: 100 } },
-    camera: { prefixe: 'Camera', texte: '', largeur: 320, hauteur: 240,
+    camera: { prefixe: T('Camera'), texte: '', largeur: 320, hauteur: 240,
       defauts: { miroir: true, allumerAuDemarrage: true, seuilMouvement: 10 } },
-    arborescence: { prefixe: 'Arbre', texte: '', largeur: 200, hauteur: 180,
-      defauts: { arbre: 'Animaux\n  Chats\n  Chiens\nPlantes\n  Fleurs\n  Arbres', deplie: true } },
+    arborescence: { prefixe: T('Arbre'), texte: '', largeur: 200, hauteur: 180,
+      defauts: { arbre: T('Animaux\n  Chats\n  Chiens\nPlantes\n  Fleurs\n  Arbres'), deplie: true } },
     // Toujours collée en bas de sa fenêtre, sur toute la largeur (voir amarrerBarresEtat).
-    barreetat: { prefixe: 'BarreEtat', texte: 'Prêt|', largeur: 300, hauteur: 24, defauts: { taillePolice: 12 } },
+    barreetat: { prefixe: T('BarreEtat'), texte: T('Prêt|'), largeur: 300, hauteur: 24, defauts: { taillePolice: 12 } },
     // Toujours collée en haut de sa fenêtre (sous les menus), sur toute la largeur.
-    barreoutils: { prefixe: 'BarreOutils', texte: '', largeur: 300, hauteur: 34,
-      defauts: { boutons: '📄 Nouveau\n📂 Ouvrir\n💾 Enregistrer\n-\n✂️ Couper\n📋 Copier\n📌 Coller', iconesSeules: false, taillePolice: 13 } },
+    barreoutils: { prefixe: T('BarreOutils'), texte: '', largeur: 300, hauteur: 34,
+      defauts: { boutons: T('📄 Nouveau\n📂 Ouvrir\n💾 Enregistrer\n-\n✂️ Couper\n📋 Copier\n📌 Coller'), iconesSeules: false, taillePolice: 13 } },
     // Contrôles invisibles : ils n'ont ni position ni taille à l'écran.
-    son: { prefixe: 'Son', texte: '', largeur: 0, hauteur: 0,
+    son: { prefixe: T('Son'), texte: '', largeur: 0, hauteur: 0,
       defauts: { son: '', volume: 100, boucle: false, autoDemarrage: false } },
-    minuteur: { prefixe: 'Minuteur', texte: '', largeur: 0, hauteur: 0,
+    minuteur: { prefixe: T('Minuteur'), texte: '', largeur: 0, hauteur: 0,
       defauts: { intervalle: 1, active: true } },
-    fichier: { prefixe: 'Fichier', texte: '', largeur: 0, hauteur: 0,
-      defauts: { typeFichier: 'texte', nomPropose: 'mon fichier.txt' } },
-    menucontextuel: { prefixe: 'MenuContextuel', texte: '', largeur: 0, hauteur: 0,
-      defauts: { menu: 'Copier\nColler\n-\nSupprimer' } },
-    basedonnees: { prefixe: 'Base', texte: '', largeur: 0, hauteur: 0,
-      defauts: { champs: ['Nom', 'Prénom', 'Téléphone'], fiches: [], memoriser: true } }
+    fichier: { prefixe: T('Fichier'), texte: '', largeur: 0, hauteur: 0,
+      defauts: { typeFichier: 'texte', nomPropose: T('mon fichier.txt') } },
+    menucontextuel: { prefixe: T('MenuContextuel'), texte: '', largeur: 0, hauteur: 0,
+      defauts: { menu: T('Copier\nColler\n-\nSupprimer') } },
+    basedonnees: { prefixe: T('Base'), texte: '', largeur: 0, hauteur: 0,
+      defauts: { champs: [T('Nom'), T('Prénom'), T('Téléphone')], fiches: [], memoriser: true } }
   };
 
   // Entrées de la palette qui créent un contrôle d'un autre type, déjà réglé.
   const VARIANTES = {
-    motdepasse: { type: 'zonetexte', prefixe: 'MotDePasse', valeurs: { motDePasse: true } }
+    motdepasse: { type: 'zonetexte', prefixe: T('MotDePasse'), valeurs: { motDePasse: true } }
   };
 
   // Contrôles qui affichent du texte (taille et couleur du texte réglables).
@@ -90,12 +90,16 @@
     'curseur', 'selecteurnombre', 'tableau', 'date', 'heure', 'selecteurcouleur', 'navigateur', 'interrupteur', 'onglets', 'arborescence', 'panneau', 'barreprogression', 'calendrier'];
 
   const NOMS_TYPES = {
-    bouton: 'Bouton', etiquette: 'Étiquette', zonetexte: 'Zone de texte',
-    casecocher: 'Case à cocher', image: 'Image', listederoulante: 'Liste déroulante',
-    curseur: 'Curseur', barreprogression: 'Barre de progression', zonedessin: 'Zone de dessin',
-    boutonradio: 'Bouton radio', cadre: 'Cadre', panneau: 'Panneau défilant', zoneliste: 'Zone de liste',
-    selecteurnombre: 'Sélecteur de nombre', tableau: 'Tableau', date: 'Sélecteur de date',
-    selecteurcouleur: 'Sélecteur de couleur', navigateur: 'Navigateur web', interrupteur: 'Interrupteur', lien: 'Lien', video: 'Vidéo', camera: 'Caméra', arborescence: 'Arborescence', barreetat: 'Barre d\'état', barreoutils: 'Barre d\'outils', menucontextuel: 'Menu contextuel', heure: 'Sélecteur d\'heure', calendrier: 'Calendrier', horloge: 'Horloge', forme: 'Forme', graphique: 'Graphique', onglets: 'Onglets', son: 'Son', minuteur: 'Minuteur', basedonnees: 'Base de données', fichier: 'Fichier', sprite: 'Sprite'
+    bouton: T('Bouton'), etiquette: T('Étiquette'), zonetexte: T('Zone de texte'),
+    casecocher: T('Case à cocher'), image: T('Image'), listederoulante: T('Liste déroulante'),
+    curseur: T('Curseur'), barreprogression: T('Barre de progression'), zonedessin: T('Zone de dessin'),
+    boutonradio: T('Bouton radio'), cadre: T('Cadre'), panneau: T('Panneau défilant'), zoneliste: T('Zone de liste'),
+    selecteurnombre: T('Sélecteur de nombre'), tableau: T('Tableau'), date: T('Sélecteur de date'),
+    selecteurcouleur: T('Sélecteur de couleur'), navigateur: T('Navigateur web'), interrupteur: T('Interrupteur'), lien: T('Lien'),
+    video: T('Vidéo'), camera: T('Caméra'), arborescence: T('Arborescence'), barreetat: T('Barre d\'état'), barreoutils: T('Barre d\'outils'),
+    menucontextuel: T('Menu contextuel'), heure: T('Sélecteur d\'heure'), calendrier: T('Calendrier'), horloge: T('Horloge'), forme: T('Forme'),
+    graphique: T('Graphique'), onglets: T('Onglets'), son: T('Son'), minuteur: T('Minuteur'), basedonnees: T('Base de données'),
+    fichier: T('Fichier'), sprite: T('Sprite')
   };
 
   const estInvisible = c => BlocRuntime.INVISIBLES.includes(c.type);
@@ -121,7 +125,7 @@
     return {
       format: 'BlocStudio', version: 1,
       id: nouvelId(),
-      fenetre: { titre: 'Mon programme', largeur: 480, hauteur: 320, couleurFond: '#f0f0f0', menus: '' },
+      fenetre: { titre: T('Mon programme'), largeur: 480, hauteur: 320, couleurFond: '#f0f0f0', menus: '' },
       controles: [],
       sons: [],
       sprites: [],
@@ -173,7 +177,7 @@
         convertirBulles();
       } catch (e) {
         console.error(e);
-        alert('Certains blocs n\'ont pas pu être chargés.');
+        alert(T('Certains blocs n\'ont pas pu être chargés.'));
       }
     }
     workspace.clearUndo();
@@ -238,8 +242,8 @@
         // Le plus souvent : trop de sons ou d'images pour la sauvegarde automatique (≈ 5 Mo).
         if (e.name === 'QuotaExceededError' && !tropGrosSignale) {
           tropGrosSignale = true;
-          alert('Le projet est devenu trop gros pour la sauvegarde automatique (sons ou images trop lourds).\n\n' +
-            'Pensez à l\'enregistrer vous-même avec 💾 Enregistrer, ou supprimez un son ou un sprite dans le Sommaire.');
+          alert(T('Le projet est devenu trop gros pour la sauvegarde automatique (sons ou images trop lourds).') + '\n\n' +
+            T('Pensez à l\'enregistrer vous-même avec 💾 Enregistrer, ou supprimez un son ou un sprite dans le Sommaire.'));
         }
       }
     }, 400);
@@ -270,25 +274,25 @@
       if (id) b.addEventListener('dblclick', () => ouvrirEvenementFenetre(id));
       return b;
     };
-    const nouvelle = el('button', 'onglet-fenetre onglet-nouvelle', '➕ Nouvelle fenêtre');
-    nouvelle.title = 'Ajouter une fenêtre au programme (réglages, fiche, à propos…)';
+    const nouvelle = el('button', 'onglet-fenetre onglet-nouvelle', T('➕ Nouvelle fenêtre'));
+    nouvelle.title = T('Ajouter une fenêtre au programme (réglages, fiche, à propos…)');
     nouvelle.addEventListener('click', nouvelleFenetre);
     $('onglets-fenetres').replaceChildren(
-      onglet('🪟 Fenêtre principale', '', 'La fenêtre qui s\'ouvre au lancement du programme'),
-      ...projet.fenetres.map(f => onglet('🪟 ' + f.nom, f.id, 'Double-clic : écrire ce qui se passe quand elle s\'ouvre')),
+      onglet(T('🪟 Fenêtre principale'), '', T('La fenêtre qui s\'ouvre au lancement du programme')),
+      ...projet.fenetres.map(f => onglet('🪟 ' + f.nom, f.id, T('Double-clic : écrire ce qui se passe quand elle s\'ouvre'))),
       nouvelle);
   }
 
   function nouvelleFenetre() {
     let i = 2;
-    while (projet.fenetres.some(f => f.nom === 'Fenetre' + i)) i++;
-    const f = { id: 'f' + nouvelId(), nom: 'Fenetre' + i, titre: 'Fenêtre ' + i, largeur: 360, hauteur: 240, couleurFond: '#f0f0f0' };
+    while (projet.fenetres.some(f => f.nom === T('Fenetre') + i)) i++;
+    const f = { id: 'f' + nouvelId(), nom: T('Fenetre') + i, titre: T('Fenêtre {n}', { n: i }), largeur: 360, hauteur: 240, couleurFond: '#f0f0f0' };
     projet.fenetres.push(f);
     blocsAPerimes = true;
     afficherVue('vue-fenetre');
     changerFenetre(f.id);
     planifierSauvegarde();
-    $('astuce').textContent = `🪟 Fenêtre « ${f.nom} » créée : posez-y des contrôles, puis ouvrez-la avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 ${f.nom} »).`;
+    $('astuce').textContent = T('🪟 Fenêtre « {nom} » créée : posez-y des contrôles, puis ouvrez-la avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 {nom} »).', { nom: f.nom });
   }
 
   function supprimerFenetre(f) {
@@ -296,8 +300,9 @@
     const ids = new Set(ctrls.map(c => c.id));
     const lies = workspace.getAllBlocks(false).filter(b =>
       (b.getField('FENETRE') && b.getFieldValue('FENETRE') === f.id) || (b.getField('CTRL') && ids.has(b.getFieldValue('CTRL'))));
-    const details = [ctrls.length && `${ctrls.length} contrôle(s)`, lies.length && `${lies.length} bloc(s) qui l'utilisent`].filter(Boolean);
-    if (!confirm(`Supprimer la fenêtre « ${f.nom} »` + (details.length ? ` avec ${details.join(' et ')} ?` : ' ?'))) return;
+    const details = [ctrls.length && T('{n} contrôle(s)', { n: ctrls.length }), lies.length && T('{n} bloc(s) qui l\'utilisent', { n: lies.length })].filter(Boolean);
+    if (!confirm(details.length ? T('Supprimer la fenêtre « {nom} » avec {details} ?', { nom: f.nom, details: details.join(T(' et ')) })
+      : T('Supprimer la fenêtre « {nom} » ?', { nom: f.nom }))) return;
     noterHistorique();
     const blocsAvant = supprimerBlocs(lies);
     projet.controles = projet.controles.filter(c => !ids.has(c.id));
@@ -353,7 +358,7 @@
     const w = document.createElement('div');
     w.className = 'd-ctrl';
     w.dataset.id = c.id;
-    w.title = c.nom + ' — double-clic pour écrire son code';
+    w.title = T('{nom} — double-clic pour écrire son code', { nom: c.nom });
     w.appendChild(creerElementDesign(c));
     const poignee = document.createElement('div');
     poignee.className = 'poignee';
@@ -534,9 +539,9 @@
   }
 
   function proprietesOnglets(liste, c, maj) {
-    champTexte(liste, 'Titres des pages (un par ligne)', (c.pages || []).join('\n'), v => {
+    champTexte(liste, T('Titres des pages (un par ligne)'), (c.pages || []).join('\n'), v => {
       c.pages = v.split('\n').map(t => t.trim()).filter(t => t);
-      if (!c.pages.length) c.pages = ['Page 1'];
+      if (!c.pages.length) c.pages = [T('Page 1')];
       const derniere = c.pages.length - 1;
       c.page = Math.min(c.page || 0, derniere);
       // Les contrôles d'une page supprimée vont sur la dernière page.
@@ -544,7 +549,7 @@
       maj();
       replacerTout();
     }, true);
-    const d = prop(liste, 'Page affichée au démarrage');
+    const d = prop(liste, T('Page affichée au démarrage'));
     const choix = document.createElement('select');
     (c.pages || []).forEach((t, i) => choix.add(new Option(`${i + 1}. ${t}`, String(i))));
     choix.value = String(c.page || 0);
@@ -556,7 +561,7 @@
     d.appendChild(choix);
     const aide = document.createElement('p');
     aide.className = 'info-petit';
-    aide.textContent = 'Cliquez sur le titre d\'une page pour l\'afficher, puis glissez-y des contrôles : ils en font partie et se déplacent avec les onglets.';
+    aide.textContent = T('Cliquez sur le titre d\'une page pour l\'afficher, puis glissez-y des contrôles : ils en font partie et se déplacent avec les onglets.');
     liste.appendChild(aide);
   }
 
@@ -571,18 +576,19 @@
       puce.className = 'd-invisible';
       puce.dataset.id = c.id;
       marquerSelection(puce);
-      puce.title = c.nom + ' — double-clic pour écrire son code';
+      puce.title = T('{nom} — double-clic pour écrire son code', { nom: c.nom });
       puce.append(ICONES_TYPES[c.type] + ' ' + c.nom + ' ');
       const detail = document.createElement('small');
       detail.textContent = c.type === 'minuteur'
-        ? `${String(c.intervalle).replace('.', ',')} s${c.active === false ? ', arrêté' : ''}`
+        ? `${BlocLangues.nombre(c.intervalle)} s${c.active === false ? T(', arrêté') : ''}`
         : c.type === 'basedonnees'
-          ? `${(c.champs || []).length} champ(s), ${(c.fiches || []).length} fiche(s) au départ`
+          ? T('{champs} champ(s), {fiches} fiche(s) au départ', { champs: (c.champs || []).length, fiches: (c.fiches || []).length })
         : c.type === 'fichier'
           ? (TYPES_FICHIER_EDITEUR[c.typeFichier] || TYPES_FICHIER_EDITEUR.tous).split(' ')[0]
         : c.type === 'menucontextuel'
-          ? `${BlocRuntime.elementsMenuContextuel(c.menu).length} élément(s), sur ${utilisateursMenu(c).length || 'aucun'} contrôle(s)`
-          : (projet.sons.find(s => s.id === c.son)?.nom || (c.flux ? '🌐 son en ligne' : 'aucun son'));
+          ? T('{elements} élément(s), sur {controles} contrôle(s)', { elements: BlocRuntime.elementsMenuContextuel(c.menu).length,
+            controles: utilisateursMenu(c).length || T('aucun') })
+          : (projet.sons.find(s => s.id === c.son)?.nom || (c.flux ? T('🌐 son en ligne') : T('aucun son')));
       puce.appendChild(detail);
       puce.addEventListener('pointerdown', e => {
         e.stopPropagation();
@@ -782,8 +788,8 @@
     if (!liste.length) return;
     ids = liste.map(c => c.id);
     const lies = workspace.getAllBlocks(false).filter(b => b.getField('CTRL') && ids.includes(b.getFieldValue('CTRL')));
-    const quoi = liste.length > 1 ? `ces ${liste.length} contrôles` : `« ${liste[0].nom} »`;
-    if (lies.length && !confirm(`${lies.length} bloc(s) utilisent ${quoi}. Ils seront supprimés aussi. Continuer ?`)) return;
+    const quoi = liste.length > 1 ? T('ces {n} contrôles', { n: liste.length }) : T('« {nom} »', { nom: liste[0].nom });
+    if (lies.length && !confirm(T('{n} bloc(s) utilisent {quoi}. Ils seront supprimés aussi. Continuer ?', { n: lies.length, quoi }))) return;
     noterHistorique();
     const blocsAvant = supprimerBlocs(lies);
     projet.controles = projet.controles.filter(c => !ids.includes(c.id));
@@ -908,8 +914,8 @@
     const liste = avecContenu(selectionnes());
     if (!liste.length) return;
     pressePapiers = { controles: structuredClone(liste), fenetre: fenetreActive, collages: 0 };
-    $('astuce').textContent = (liste.length > 1 ? `📄 ${liste.length} contrôles copiés` : `📄 « ${liste[0].nom} » copié`) +
-      ' : Ctrl+V pour coller, dans cette fenêtre ou dans une autre.';
+    $('astuce').textContent = (liste.length > 1 ? T('📄 {n} contrôles copiés', { n: liste.length }) : T('📄 « {nom} » copié', { nom: liste[0].nom })) +
+      T(' : Ctrl+V pour coller, dans cette fenêtre ou dans une autre.');
   }
 
   function couper() {
@@ -1026,30 +1032,30 @@
     const seul = liste.length === 1 ? liste[0] : null;
     menuContextuel(x, y, [
       ...(seul ? [
-        { texte: '🧩 Écrire son code', touche: 'double-clic', action: () => ouvrirEvenement(seul) },
-        { texte: `🧰 Ses blocs (catégorie « ${seul.nom} »)`, action: () => montrerBlocsDe(seul) },
-        (n => ({ texte: n ? `🔎 Voir les blocs qui l'utilisent (${n})` : '🔎 Aucun bloc ne l\'utilise encore',
+        { texte: T('🧩 Écrire son code'), touche: 'double-clic', action: () => ouvrirEvenement(seul) },
+        { texte: T('🧰 Ses blocs (catégorie « {nom} »)', { nom: seul.nom }), action: () => montrerBlocsDe(seul) },
+        (n => ({ texte: n ? T('🔎 Voir les blocs qui l\'utilisent ({n})', { n }) : T('🔎 Aucun bloc ne l\'utilise encore'),
           action: () => voirBlocsDuControle(seul), actif: n > 0 }))(blocsDuControle(seul.id).length),
         '-'] : []),
-      { texte: '✂️ Couper', touche: 'Ctrl+X', action: couper },
-      { texte: '📄 Copier', touche: 'Ctrl+C', action: copier },
-      { texte: '📋 Coller', touche: 'Ctrl+V', action: () => coller(), actif: !!pressePapiers },
-      { texte: '⧉ Dupliquer', touche: 'Ctrl+D', action: dupliquer },
+      { texte: T('✂️ Couper'), touche: 'Ctrl+X', action: couper },
+      { texte: T('📄 Copier'), touche: 'Ctrl+C', action: copier },
+      { texte: T('📋 Coller'), touche: 'Ctrl+V', action: () => coller(), actif: !!pressePapiers },
+      { texte: T('⧉ Dupliquer'), touche: 'Ctrl+D', action: dupliquer },
       ...(liste.some(c => !estInvisible(c)) ? ['-',
-        { texte: '⬆️ Mettre au premier plan', action: () => changerPlan(true) },
-        { texte: '⬇️ Mettre à l\'arrière-plan', action: () => changerPlan(false) }] : []),
+        { texte: T('⬆️ Mettre au premier plan'), action: () => changerPlan(true) },
+        { texte: T('⬇️ Mettre à l\'arrière-plan'), action: () => changerPlan(false) }] : []),
       '-',
-      { texte: liste.length > 1 ? `🗑️ Supprimer les ${liste.length} contrôles` : '🗑️ Supprimer', touche: 'Suppr', action: () => supprimerControles([...choisis]) }
+      { texte: liste.length > 1 ? T('🗑️ Supprimer les {n} contrôles', { n: liste.length }) : T('🗑️ Supprimer'), touche: T('Suppr'), action: () => supprimerControles([...choisis]) }
     ]);
   }
 
   function menuSurface(x, y) {
     menuContextuel(x, y, [
-      { texte: '📋 Coller', touche: 'Ctrl+V', action: () => coller(), actif: !!pressePapiers },
-      { texte: '☑️ Tout sélectionner', touche: 'Ctrl+A', action: toutSelectionner, actif: projet.controles.some(dansFenetreActive) },
+      { texte: T('📋 Coller'), touche: 'Ctrl+V', action: () => coller(), actif: !!pressePapiers },
+      { texte: T('☑️ Tout sélectionner'), touche: 'Ctrl+A', action: toutSelectionner, actif: projet.controles.some(dansFenetreActive) },
       '-',
-      { texte: '↶ Annuler', touche: 'Ctrl+Z', action: annuler, actif: peutAnnuler() },
-      { texte: '↷ Rétablir', touche: 'Ctrl+Y', action: retablir, actif: historique.futur.length > 0 }
+      { texte: T('↶ Annuler'), touche: 'Ctrl+Z', action: annuler, actif: peutAnnuler() },
+      { texte: T('↷ Rétablir'), touche: 'Ctrl+Y', action: retablir, actif: historique.futur.length > 0 }
     ]);
   }
 
@@ -1186,40 +1192,40 @@
     // Liste de choix façon Visual Basic : la fenêtre puis tous les contrôles.
     const choix = $('choix-controle');
     choix.innerHTML = '';
-    choix.add(new Option('🪟 ' + (fenetreActive ? fenetreCourante().nom : 'Fenêtre principale'), ''));
+    choix.add(new Option('🪟 ' + (fenetreActive ? fenetreCourante().nom : T('Fenêtre principale')), ''));
     projet.controles.filter(dansFenetreActive).sort((a, b) => a.nom.localeCompare(b.nom, 'fr')).forEach(x =>
       choix.add(new Option(`${ICONES_TYPES[x.type] || ''} ${x.nom} — ${NOMS_TYPES[x.type]}`, x.id)));
     choix.value = selection || '';
     $('btn-supprimer').hidden = !choisis.size;
-    $('btn-supprimer').textContent = choisis.size > 1 ? `🗑️ Supprimer ces ${choisis.size} contrôles` : '🗑️ Supprimer ce contrôle';
+    $('btn-supprimer').textContent = choisis.size > 1 ? T('🗑️ Supprimer ces {n} contrôles', { n: choisis.size }) : T('🗑️ Supprimer ce contrôle');
 
     if (choisis.size > 1) return proprietesPlusieurs(liste, selectionnes());
     if (!c) {
       const f = fenetreCourante();
       if (f !== projet.fenetre) return proprietesAutreFenetre(liste, f);
-      $('titre-proprietes').textContent = 'Fenêtre principale';
-      champTexte(liste, 'Titre', f.titre, v => { f.titre = v; $('titre-design').textContent = v; });
+      $('titre-proprietes').textContent = T('Fenêtre principale');
+      champTexte(liste, T('Titre'), f.titre, v => { f.titre = v; $('titre-design').textContent = v; });
       groupe(liste, [
-        g => champNombre(g, 'Largeur', f.largeur, v => { f.largeur = Math.max(100, v); afficherConcepteur(); }),
-        g => champNombre(g, 'Hauteur', f.hauteur, v => { f.hauteur = Math.max(60, v); afficherConcepteur(); })
+        g => champNombre(g, T('Largeur'), f.largeur, v => { f.largeur = Math.max(100, v); afficherConcepteur(); }),
+        g => champNombre(g, T('Hauteur'), f.hauteur, v => { f.hauteur = Math.max(60, v); afficherConcepteur(); })
       ]);
-      champCouleur(liste, 'Couleur de fond', f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
+      champCouleur(liste, T('Couleur de fond'), f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
       champsRedimensionnement(liste, f, true);
       champMenuContextuel(liste, f);
-      champTexte(liste, "Menus — un par ligne ; leurs éléments en dessous, décalés d'un espace ; « - » pour un trait",
+      champTexte(liste, T('Menus — un par ligne ; leurs éléments en dessous, décalés d\'un espace ; « - » pour un trait'),
         f.menus, v => { f.menus = v; blocsAPerimes = true; afficherConcepteur(); }, true,
-        'Fichier\n  Nouveau\n  -\n  Quitter\nAide\n  À propos');
+        T('Fichier\n  Nouveau\n  -\n  Quitter\nAide\n  À propos'));
       return;
     }
 
     $('titre-proprietes').textContent = NOMS_TYPES[c.type];
     const maj = () => { rafraichirControle(c); planifierSauvegarde(); };
 
-    champTexte(liste, 'Nom (utilisé dans les blocs)', c.nom, (v, input) => {
+    champTexte(liste, T('Nom (utilisé dans les blocs)'), c.nom, (v, input) => {
       const valide = /^[A-Za-zÀ-ÖØ-öø-ÿ_][A-Za-zÀ-ÖØ-öø-ÿ0-9_]*$/.test(v) &&
         !projet.controles.some(x => x !== c && x.nom === v);
       input.classList.toggle('invalide', !valide);
-      input.title = valide ? '' : 'Lettres, chiffres et _ seulement, sans espace, et pas deux fois le même nom.';
+      input.title = valide ? '' : T('Lettres, chiffres et _ seulement, sans espace, et pas deux fois le même nom.');
       if (valide) {
         c.nom = v;
         blocsAPerimes = true;
@@ -1228,8 +1234,8 @@
         maj();
       }
     });
-    const voirBlocs = el('button', 'bouton-ses-blocs', `🧰 Ses blocs (onglet Code)`);
-    voirBlocs.title = 'Ouvre la catégorie de ce contrôle dans la boîte à outils : ses événements, ses actions et ses propriétés.';
+    const voirBlocs = el('button', 'bouton-ses-blocs', T('🧰 Ses blocs (onglet Code)'));
+    voirBlocs.title = T('Ouvre la catégorie de ce contrôle dans la boîte à outils : ses événements, ses actions et ses propriétés.');
     voirBlocs.addEventListener('click', () => montrerBlocsDe(c));
     liste.appendChild(voirBlocs);
     if (c.type === 'son') return proprietesSon(liste, c, maj);
@@ -1238,12 +1244,12 @@
     if (c.type === 'fichier') return proprietesFichier(liste, c, maj);
     if (c.type === 'menucontextuel') return proprietesMenuContextuel(liste, c, maj);
     if (c.type === 'barreoutils') {
-      champTexte(liste, 'Boutons — un par ligne, en commençant par un emoji pour l\'icône ; « - » pour un trait',
-        c.boutons || '', v => { c.boutons = v; blocsAPerimes = true; maj(); }, true, '📄 Nouveau\n💾 Enregistrer\n-\n✂️ Couper');
-      champCase(liste, 'Icônes seules (le texte s\'affiche quand la souris passe dessus)', c.iconesSeules, v => { c.iconesSeules = v; maj(); });
+      champTexte(liste, T('Boutons — un par ligne, en commençant par un emoji pour l\'icône ; « - » pour un trait'),
+        c.boutons || '', v => { c.boutons = v; blocsAPerimes = true; maj(); }, true, T('📄 Nouveau\n💾 Enregistrer\n-\n✂️ Couper'));
+      champCase(liste, T('Icônes seules (le texte s\'affiche quand la souris passe dessus)'), c.iconesSeules, v => { c.iconesSeules = v; maj(); });
       liste.appendChild(el('p', 'aide',
-        'Toujours collée en haut de la fenêtre. Double-cliquez dessus pour écrire ce que fait un bouton ; ' +
-        'ses blocs (bouton 🧰 ci-dessus) ont un « quand on clique sur … » tout prêt pour chaque bouton.'));
+        T('Toujours collée en haut de la fenêtre. Double-cliquez dessus pour écrire ce que fait un bouton ; ' +
+        'ses blocs (bouton 🧰 ci-dessus) ont un « quand on clique sur … » tout prêt pour chaque bouton.')));
     }
     if (['bouton', 'etiquette', 'zonetexte', 'casecocher', 'boutonradio', 'cadre', 'interrupteur', 'lien'].includes(c.type)) {
       const multiligne = c.type === 'etiquette' || (c.type === 'zonetexte' && c.multiligne);
@@ -1251,7 +1257,7 @@
     }
     if (c.type === 'zonetexte') {
       if (!c.motDePasse) {
-        champCase(liste, 'Multiligne (plusieurs lignes)', c.multiligne, v => {
+        champCase(liste, T('Multiligne (plusieurs lignes)'), c.multiligne, v => {
           c.multiligne = v;
           if (v && c.hauteur < 80) c.hauteur = 100;
           maj();
@@ -1259,63 +1265,63 @@
         });
       }
       if (!c.multiligne) {
-        champCase(liste, 'Mot de passe (les lettres sont cachées par des •)', c.motDePasse, v => {
+        champCase(liste, T('Mot de passe (les lettres sont cachées par des •)'), c.motDePasse, v => {
           c.motDePasse = v;
           maj();
           afficherProprietes();
         });
       }
-      champTexte(liste, 'Texte d\'invite (grisé tant que la zone est vide)', c.texteInvite || '',
-        v => { c.texteInvite = v; maj(); }, false, 'Tapez votre nom…');
+      champTexte(liste, T('Texte d\'invite (grisé tant que la zone est vide)'), c.texteInvite || '',
+        v => { c.texteInvite = v; maj(); }, false, T('Tapez votre nom…'));
       if (!c.multiligne && !c.motDePasse) {
         if ((c.suggestions || []).length > TROP_POUR_LES_PROPRIETES) {
-          resumeGrossesDonnees(liste, 'Suggestions pendant la frappe', c.suggestions.length, () => { c.suggestions = []; });
+          resumeGrossesDonnees(liste, T('Suggestions pendant la frappe'), c.suggestions.length, () => { c.suggestions = []; });
         } else {
-          champTexte(liste, 'Suggestions pendant la frappe (une par ligne ; elles se resserrent sur ce qu\'on tape)',
-            (c.suggestions || []).join('\n'), v => { c.suggestions = v.split('\n').filter(e => e.trim() !== ''); maj(); }, true, 'Paris\nLyon\nMarseille');
+          champTexte(liste, T('Suggestions pendant la frappe (une par ligne ; elles se resserrent sur ce qu\'on tape)'),
+            (c.suggestions || []).join('\n'), v => { c.suggestions = v.split('\n').filter(e => e.trim() !== ''); maj(); }, true, T('Paris\nLyon\nMarseille'));
         }
         boutonsDonnees(liste, c);
       }
-      champCase(liste, 'Lecture seule (on peut lire et copier, pas écrire)', c.lectureSeule, v => { c.lectureSeule = v; maj(); });
-      champNombre(liste, 'Longueur maximale, en lettres (0 = sans limite)', c.longueurMax || 0,
+      champCase(liste, T('Lecture seule (on peut lire et copier, pas écrire)'), c.lectureSeule, v => { c.lectureSeule = v; maj(); });
+      champNombre(liste, T('Longueur maximale, en lettres (0 = sans limite)'), c.longueurMax || 0,
         v => { c.longueurMax = Math.max(0, Math.round(v)); maj(); });
     }
     if (c.type === 'arborescence') {
-      champTexte(liste, 'Éléments — un par ligne ; décalez une ligne d\'espaces pour la ranger dans celle du dessus',
-        c.arbre || '', v => { c.arbre = v; maj(); }, true, 'Animaux\n  Chats\n  Chiens\nPlantes');
-      champCase(liste, 'Tout déplié au départ', c.deplie !== false, v => { c.deplie = v; maj(); });
+      champTexte(liste, T('Éléments — un par ligne ; décalez une ligne d\'espaces pour la ranger dans celle du dessus'),
+        c.arbre || '', v => { c.arbre = v; maj(); }, true, T('Animaux\n  Chats\n  Chiens\nPlantes'));
+      champCase(liste, T('Tout déplié au départ'), c.deplie !== false, v => { c.deplie = v; maj(); });
       liste.appendChild(el('p', 'aide',
-        'Comme l\'Explorateur de Windows : on déplie un dossier avec sa flèche ou un double-clic. ' +
+        T('Comme l\'Explorateur de Windows : on déplie un dossier avec sa flèche ou un double-clic. ' +
         'Double-cliquez sur l\'arborescence pour réagir quand on choisit un élément ; « chemin de l\'élément choisi » ' +
-        'donne par exemple « Animaux › Chats ».'));
+        'donne par exemple « Animaux › Chats ».')));
     }
     if (c.type === 'barreetat') {
-      champTexte(liste, 'Texte des cases, séparées par |', c.texte, v => { c.texte = v; maj(); }, false, 'Prêt|Page 1');
+      champTexte(liste, T('Texte des cases, séparées par |'), c.texte, v => { c.texte = v; maj(); }, false, T('Prêt|Page 1'));
       liste.appendChild(el('p', 'aide',
-        'Toujours collée en bas de la fenêtre. Pour changer une case pendant le programme : ' +
-        '« écrire … dans la case n° … » (dans ses blocs : bouton 🧰 ci-dessus).'));
+        T('Toujours collée en bas de la fenêtre. Pour changer une case pendant le programme : ' +
+        '« écrire … dans la case n° … » (dans ses blocs : bouton 🧰 ci-dessus).')));
     }
-    if (c.type === 'casecocher') champCase(liste, 'Coché', c.coche, v => { c.coche = v; maj(); });
-    if (c.type === 'interrupteur') champCase(liste, 'Allumé', c.coche, v => { c.coche = v; maj(); });
+    if (c.type === 'casecocher') champCase(liste, T('Coché'), c.coche, v => { c.coche = v; maj(); });
+    if (c.type === 'interrupteur') champCase(liste, T('Allumé'), c.coche, v => { c.coche = v; maj(); });
     if (c.type === 'lien') {
-      champTexte(liste, 'Adresse web (s\'ouvre dans le navigateur ; vide = simple texte cliquable)', c.adresse || '',
+      champTexte(liste, T('Adresse web (s\'ouvre dans le navigateur ; vide = simple texte cliquable)'), c.adresse || '',
         v => { c.adresse = v.trim(); maj(); });
     }
     if (c.type === 'video') proprietesVideo(liste, c, maj);
     if (c.type === 'camera') {
-      champCase(liste, 'S\'allume toute seule au démarrage', c.allumerAuDemarrage !== false, v => { c.allumerAuDemarrage = v; maj(); });
-      champCase(liste, 'En miroir (comme dans une glace)', c.miroir !== false, v => { c.miroir = v; maj(); });
-      champNombre(liste, 'Seuil de mouvement (%) : plus petit = plus sensible', c.seuilMouvement ?? 10,
+      champCase(liste, T('S\'allume toute seule au démarrage'), c.allumerAuDemarrage !== false, v => { c.allumerAuDemarrage = v; maj(); });
+      champCase(liste, T('En miroir (comme dans une glace)'), c.miroir !== false, v => { c.miroir = v; maj(); });
+      champNombre(liste, T('Seuil de mouvement (%) : plus petit = plus sensible'), c.seuilMouvement ?? 10,
         v => { c.seuilMouvement = Math.min(100, Math.max(1, v)); maj(); });
       liste.appendChild(el('p', 'aide',
-        'La webcam s\'affiche quand le programme tourne ; la première fois, Windows demande la permission. ' +
+        T('La webcam s\'affiche quand le programme tourne ; la première fois, Windows demande la permission. ' +
         'Ses blocs (bouton 🧰 ci-dessus) : « prendre une photo avec… », « mettre la photo de… dans… » (une image ou une zone de dessin), ' +
-        '« enregistrer … dans un fichier » avec un contrôle Fichier. Double-cliquez sur la caméra pour réagir quand elle voit bouger.'));
+        '« enregistrer … dans un fichier » avec un contrôle Fichier. Double-cliquez sur la caméra pour réagir quand elle voit bouger.')));
     }
     if (c.type === 'graphique') proprietesGraphique(liste, c, maj);
     if (c.type === 'onglets') proprietesOnglets(liste, c, maj);
     if (c.type === 'boutonradio') {
-      champCase(liste, 'Sélectionné', c.coche, v => {
+      champCase(liste, T('Sélectionné'), c.coche, v => {
         // Dans un groupe, un seul bouton radio peut être sélectionné.
         if (v) {
           for (const o of projet.controles) {
@@ -1328,7 +1334,7 @@
         c.coche = v;
         maj();
       });
-      champTexte(liste, 'Groupe (les boutons d\'un même groupe s\'excluent)', c.groupe, v => {
+      champTexte(liste, T('Groupe (les boutons d\'un même groupe s\'excluent)'), c.groupe, v => {
         c.groupe = v.trim() || 'groupe1';
         blocsAPerimes = true;
         maj();
@@ -1336,63 +1342,63 @@
     }
     if (c.type === 'image') {
       champImage(liste, c, maj);
-      champChoix(liste, 'Ajustement de l\'image', [['entiere', 'Entière'], ['etiree', 'Étirée'], ['recadree', 'Recadrée']],
+      champChoix(liste, T('Ajustement de l\'image'), [['entiere', T('Entière')], ['etiree', T('Étirée')], ['recadree', T('Recadrée')]],
         c.ajustement || 'entiere', v => { c.ajustement = v; maj(); });
     }
     if (c.type === 'image' || c.type === 'etiquette') {
-      champChoix(liste, 'Bordure', [['aucune', 'Aucune'], ['simple', 'Simple'], ['creuse', 'Creuse']],
+      champChoix(liste, T('Bordure'), [['aucune', T('Aucune')], ['simple', T('Simple')], ['creuse', T('Creuse')]],
         c.bordure || 'aucune', v => { c.bordure = v; maj(); });
     }
     if (c.type === 'sprite') proprietesSprite(liste, c, maj);
     if (c.type === 'selecteurnombre') {
       groupe(liste, [
-        g => champNombre(g, 'Minimum', c.min, v => { c.min = v; maj(); }),
-        g => champNombre(g, 'Maximum', c.max, v => { c.max = v; maj(); }),
-        g => champNombre(g, 'Pas', c.pas, v => { c.pas = v; maj(); }),
-        g => champNombre(g, 'Valeur', c.valeur, v => { c.valeur = v; maj(); })
+        g => champNombre(g, T('Minimum'), c.min, v => { c.min = v; maj(); }),
+        g => champNombre(g, T('Maximum'), c.max, v => { c.max = v; maj(); }),
+        g => champNombre(g, T('Pas'), c.pas, v => { c.pas = v; maj(); }),
+        g => champNombre(g, T('Valeur'), c.valeur, v => { c.valeur = v; maj(); })
       ]);
     }
     if (c.type === 'listederoulante' || c.type === 'zoneliste') {
       boutonsDonnees(liste, c);
       if ((c.elements || []).length > TROP_POUR_LES_PROPRIETES) {
-        resumeGrossesDonnees(liste, 'Éléments', c.elements.length, () => { c.elements = []; rafraichirControle(c); });
+        resumeGrossesDonnees(liste, T('Éléments'), c.elements.length, () => { c.elements = []; rafraichirControle(c); });
       } else {
-        champTexte(liste, 'Éléments (un par ligne)', (c.elements || []).join('\n'),
+        champTexte(liste, T('Éléments (un par ligne)'), (c.elements || []).join('\n'),
           v => { c.elements = v.split('\n').filter(e => e.trim() !== ''); maj(); }, true);
       }
-      champCase(liste, 'Triée par ordre alphabétique (même ce qu\'on ajoute ensuite)', c.trie, v => { c.trie = v; maj(); });
+      champCase(liste, T('Triée par ordre alphabétique (même ce qu\'on ajoute ensuite)'), c.trie, v => { c.trie = v; maj(); });
     }
     if (c.type === 'curseur') {
       groupe(liste, [
-        g => champNombre(g, 'Minimum', c.min, v => { c.min = v; maj(); }),
-        g => champNombre(g, 'Maximum', c.max, v => { c.max = v; maj(); }),
-        g => champNombre(g, 'Pas', c.pas ?? 1, v => { c.pas = v > 0 ? v : 1; maj(); }),
-        g => champNombre(g, 'Valeur', c.valeur, v => { c.valeur = v; maj(); })
+        g => champNombre(g, T('Minimum'), c.min, v => { c.min = v; maj(); }),
+        g => champNombre(g, T('Maximum'), c.max, v => { c.max = v; maj(); }),
+        g => champNombre(g, T('Pas'), c.pas ?? 1, v => { c.pas = v > 0 ? v : 1; maj(); }),
+        g => champNombre(g, T('Valeur'), c.valeur, v => { c.valeur = v; maj(); })
       ]);
-      champChoix(liste, 'Orientation', [['horizontale', '↔ Horizontale'], ['verticale', '↕ Verticale']], c.orientation || 'horizontale', v => {
+      champChoix(liste, T('Orientation'), [['horizontale', T('↔ Horizontale')], ['verticale', T('↕ Verticale')]], c.orientation || 'horizontale', v => {
         // On le tourne : la largeur et la hauteur s'échangent.
         if ((v === 'verticale') === (c.largeur > c.hauteur)) [c.largeur, c.hauteur] = [c.hauteur, c.largeur];
         c.orientation = v;
         maj();
         afficherProprietes();
       });
-      champCouleur(liste, 'Couleur du curseur', c.couleurBarre || '#4f46e5', v => { c.couleurBarre = v; maj(); });
+      champCouleur(liste, T('Couleur du curseur'), c.couleurBarre || '#4f46e5', v => { c.couleurBarre = v; maj(); });
     }
     if (c.type === 'tableau') {
       boutonsDonnees(liste, c);
-      champTexte(liste, 'Colonnes (une par ligne)', c.colonnes.join('\n'),
+      champTexte(liste, T('Colonnes (une par ligne)'), c.colonnes.join('\n'),
         v => { c.colonnes = v.split('\n').map(e => e.trim()).filter(e => e); maj(); }, true);
       if (c.lignes.length > TROP_POUR_LES_PROPRIETES) {
-        resumeGrossesDonnees(liste, 'Lignes de départ', c.lignes.length, () => { c.lignes = []; rafraichirControle(c); });
+        resumeGrossesDonnees(liste, T('Lignes de départ'), c.lignes.length, () => { c.lignes = []; rafraichirControle(c); });
       } else {
-        champTexte(liste, 'Lignes de départ (une par ligne, valeurs séparées par ;)',
+        champTexte(liste, T('Lignes de départ (une par ligne, valeurs séparées par ;)'),
           c.lignes.map(l => l.join(' ; ')).join('\n'),
           v => { c.lignes = v.split('\n').filter(l => l.trim()).map(l => l.split(';').map(e => e.trim())); maj(); }, true);
       }
-      champCase(liste, 'Mémoriser le contenu (le retrouver au prochain lancement)', c.memoriser, v => { c.memoriser = v; maj(); });
+      champCase(liste, T('Mémoriser le contenu (le retrouver au prochain lancement)'), c.memoriser, v => { c.memoriser = v; maj(); });
     }
     if (c.type === 'date') {
-      const d = prop(liste, "Date au départ (vide = aujourd'hui)");
+      const d = prop(liste, T('Date au départ (vide = aujourd\'hui)'));
       const i = document.createElement('input');
       i.type = 'date';
       i.value = c.date || '';
@@ -1400,26 +1406,26 @@
       d.appendChild(i);
     }
     if (c.type === 'calendrier') {
-      const d = prop(liste, 'Date choisie au départ (vide = aujourd\'hui)');
+      const d = prop(liste, T('Date choisie au départ (vide = aujourd\'hui)'));
       const i = document.createElement('input');
       i.type = 'date';
       i.value = c.date || '';
       i.addEventListener('input', () => { c.date = i.value; maj(); });
       d.appendChild(i);
-      champCouleur(liste, 'Couleur du mois et de la date choisie', c.couleurBarre || '#4f46e5', v => { c.couleurBarre = v; maj(); });
-      liste.appendChild(el('p', 'aide', 'Un clic sur un jour le choisit (double-cliquez sur le calendrier pour écrire « quand … change »). ' +
-        'Ses blocs peuvent aussi marquer des dates d\'un point de couleur : un agenda, des anniversaires…'));
+      champCouleur(liste, T('Couleur du mois et de la date choisie'), c.couleurBarre || '#4f46e5', v => { c.couleurBarre = v; maj(); });
+      liste.appendChild(el('p', 'aide', T('Un clic sur un jour le choisit (double-cliquez sur le calendrier pour écrire « quand … change »). ' +
+        'Ses blocs peuvent aussi marquer des dates d\'un point de couleur : un agenda, des anniversaires…')));
     }
     if (c.type === 'horloge') {
-      champChoix(liste, 'Affichage', [['aiguilles', '🕰️ À aiguilles'], ['chiffres', '🔢 En chiffres']], c.genre || 'aiguilles',
+      champChoix(liste, T('Affichage'), [['aiguilles', T('🕰️ À aiguilles')], ['chiffres', T('🔢 En chiffres')]], c.genre || 'aiguilles',
         v => { c.genre = v; maj(); });
-      champCase(liste, 'Avec les secondes', c.secondes !== false, v => { c.secondes = v; maj(); });
-      champNombre(liste, 'Décalage en heures (l\'heure d\'un autre pays : Tokyo +7, New York -6…)', c.decalageHeures || 0,
+      champCase(liste, T('Avec les secondes'), c.secondes !== false, v => { c.secondes = v; maj(); });
+      champNombre(liste, T('Décalage en heures (l\'heure d\'un autre pays : Tokyo +7, New York -6…)'), c.decalageHeures || 0,
         v => { c.decalageHeures = v; maj(); });
-      champCouleur(liste, 'Couleur de la trotteuse (aiguille des secondes)', c.couleurBarre || '#dc2626', v => { c.couleurBarre = v; maj(); });
+      champCouleur(liste, T('Couleur de la trotteuse (aiguille des secondes)'), c.couleurBarre || '#dc2626', v => { c.couleurBarre = v; maj(); });
     }
     if (c.type === 'heure') {
-      const d = prop(liste, 'Heure au départ (vide = l\'heure qu\'il est)');
+      const d = prop(liste, T('Heure au départ (vide = l\'heure qu\'il est)'));
       const i = document.createElement('input');
       i.type = 'time';
       i.value = c.heure || '';
@@ -1427,10 +1433,10 @@
       d.appendChild(i);
     }
     if (c.type === 'forme') {
-      const d = prop(liste, 'Forme');
+      const d = prop(liste, T('Forme'));
       const choix = document.createElement('select');
-      [['rectangle', '▭ Rectangle'], ['arrondi', '▢ Rectangle arrondi'], ['ovale', '⬭ Ovale (ou cercle si elle est carrée)'],
-        ['triangle', '△ Triangle'], ['ligne', '╱ Ligne']].forEach(([v, t]) => choix.add(new Option(t, v)));
+      [['rectangle', T('▭ Rectangle')], ['arrondi', T('▢ Rectangle arrondi')], ['ovale', T('⬭ Ovale (ou cercle si elle est carrée)')],
+        ['triangle', T('△ Triangle')], ['ligne', T('╱ Ligne')]].forEach(([v, t]) => choix.add(new Option(t, v)));
       choix.value = c.genre || 'rectangle';
       choix.addEventListener('change', () => {
         // Devenue une ligne : un trait fin (horizontal par défaut) plutôt qu'un grand carré.
@@ -1441,83 +1447,83 @@
       });
       d.appendChild(choix);
       if (c.genre === 'ligne') {
-        champChoix(liste, 'Sens de la ligne', [['horizontale', '—'], ['verticale', '|'], ['descendante', '╲'], ['montante', '╱']],
+        champChoix(liste, T('Sens de la ligne'), [['horizontale', '—'], ['verticale', '|'], ['descendante', '╲'], ['montante', '╱']],
           c.sens || 'horizontale', v => { c.sens = v; maj(); });
       }
       groupe(liste, [
-        g => champNombre(g, 'Épaisseur du trait', c.epaisseur ?? 2, v => { c.epaisseur = Math.max(0, v); maj(); }),
-        g => champCouleur(g, 'Couleur du trait', c.couleurBordure, v => { c.couleurBordure = v; maj(); })
+        g => champNombre(g, T('Épaisseur du trait'), c.epaisseur ?? 2, v => { c.epaisseur = Math.max(0, v); maj(); }),
+        g => champCouleur(g, T('Couleur du trait'), c.couleurBordure, v => { c.couleurBordure = v; maj(); })
       ]);
       if (c.genre !== 'ligne') {
-        liste.appendChild(el('p', 'aide', 'Sa « couleur de fond » (plus bas) la remplit ; vide = transparente. Épaisseur 0 : pas de bord.'));
+        liste.appendChild(el('p', 'aide', T('Sa « couleur de fond » (plus bas) la remplit ; vide = transparente. Épaisseur 0 : pas de bord.')));
       }
     }
     if (c.type === 'navigateur') {
-      champTexte(liste, 'Adresse web (ex. : fr.wikipedia.org, une vidéo YouTube, une carte Google Maps)', c.adresse || '',
+      champTexte(liste, T('Adresse web (ex. : fr.wikipedia.org, une vidéo YouTube, une carte Google Maps)'), c.adresse || '',
         v => { c.adresse = v.trim(); maj(); });
-      liste.appendChild(el('p', 'aide', 'Google, Facebook, Amazon… refusent de s\'afficher à l\'intérieur d\'un programme : ' +
-        'le Navigateur web propose alors de les ouvrir dans le navigateur de l\'ordinateur (ou bloc « ouvrir … dans le navigateur », catégorie Internet).'));
+      liste.appendChild(el('p', 'aide', T('Google, Facebook, Amazon… refusent de s\'afficher à l\'intérieur d\'un programme : ' +
+        'le Navigateur web propose alors de les ouvrir dans le navigateur de l\'ordinateur (ou bloc « ouvrir … dans le navigateur », catégorie Internet).')));
     }
-    if (c.type === 'selecteurcouleur') champCouleur(liste, 'Couleur choisie', c.texte, v => { c.texte = v; maj(); });
+    if (c.type === 'selecteurcouleur') champCouleur(liste, T('Couleur choisie'), c.texte, v => { c.texte = v; maj(); });
     if (c.type === 'barreprogression') {
       groupe(liste, [
-        g => champNombre(g, 'Valeur', c.valeur, v => { c.valeur = v; maj(); }),
-        g => champNombre(g, 'Maximum', c.max, v => { c.max = v; maj(); })
+        g => champNombre(g, T('Valeur'), c.valeur, v => { c.valeur = v; maj(); }),
+        g => champNombre(g, T('Maximum'), c.max, v => { c.max = v; maj(); })
       ]);
-      champCouleur(liste, 'Couleur de la barre', c.couleurBarre, v => { c.couleurBarre = v; maj(); });
-      champCase(liste, 'Cliquable : un clic (ou un glisser) choisit la valeur, puis « quand … change »', c.cliquable,
+      champCouleur(liste, T('Couleur de la barre'), c.couleurBarre, v => { c.couleurBarre = v; maj(); });
+      champCase(liste, T('Cliquable : un clic (ou un glisser) choisit la valeur, puis « quand … change »'), c.cliquable,
         v => { c.cliquable = v; maj(); afficherProprietes(); });
       if (c.cliquable) {
-        liste.appendChild(el('p', 'aide', 'Par exemple pour un lecteur de musique : dans « quand ' + c.nom +
-          ' change », mettre la position du son à la valeur de ' + c.nom + ' (avec le maximum = la durée du son).'));
+        liste.appendChild(el('p', 'aide', T('Par exemple pour un lecteur de musique : dans « quand {nom} change », ' +
+          'mettre la position du son à la valeur de {nom} (avec le maximum = la durée du son).', { nom: c.nom })));
       }
     }
 
     if (c.type === 'panneau') {
-      champChoix(liste, 'Défilement', [['vertical', '↕ Vertical'], ['horizontal', '↔ Horizontal'], ['deux', '✥ Les deux']],
+      champChoix(liste, T('Défilement'), [['vertical', T('↕ Vertical')], ['horizontal', T('↔ Horizontal')], ['deux', T('✥ Les deux')]],
         c.defilement || 'vertical', v => { c.defilement = v; maj(); });
       groupe(liste, [
-        g => champNombre(g, 'Largeur du contenu', c.largeurContenu || 0, v => { c.largeurContenu = Math.max(0, v); maj(); }),
-        g => champNombre(g, 'Hauteur du contenu', c.hauteurContenu || 0, v => { c.hauteurContenu = Math.max(0, v); maj(); })
+        g => champNombre(g, T('Largeur du contenu'), c.largeurContenu || 0, v => { c.largeurContenu = Math.max(0, v); maj(); }),
+        g => champNombre(g, T('Hauteur du contenu'), c.hauteurContenu || 0, v => { c.hauteurContenu = Math.max(0, v); maj(); })
       ]);
       liste.appendChild(el('p', 'aide',
-        'Posez des contrôles dedans : ils défilent avec lui. Faites défiler le panneau (molette ou barre de défilement) ' +
-        'pour en poser plus bas. Le contenu s\'agrandit tout seul jusqu\'au dernier contrôle ; « Hauteur du contenu » réserve de la place en plus.'));
+        T('Posez des contrôles dedans : ils défilent avec lui. Faites défiler le panneau (molette ou barre de défilement) ' +
+        'pour en poser plus bas. Le contenu s\'agrandit tout seul jusqu\'au dernier contrôle ; « Hauteur du contenu » réserve de la place en plus.')));
     }
     if (panneauDe(c)) {
-      liste.appendChild(el('p', 'aide', `Posé dans « ${panneauDe(c).nom} » : X et Y comptent depuis le coin de son contenu. ` +
-        'Pour l\'en sortir, tirez-le hors du panneau.'));
+      liste.appendChild(el('p', 'aide', T('Posé dans « {nom} » : X et Y comptent depuis le coin de son contenu. ' +
+        'Pour l\'en sortir, tirez-le hors du panneau.', { nom: panneauDe(c).nom })));
     }
     groupe(liste, [
-      g => champNombre(g, 'X', c.x, v => { c.x = v; maj(); }),
-      g => champNombre(g, 'Y', c.y, v => { c.y = v; maj(); }),
-      g => champNombre(g, 'Largeur', c.largeur, v => { c.largeur = Math.max(10, v); maj(); }),
-      g => champNombre(g, 'Hauteur', c.hauteur, v => { c.hauteur = Math.max(10, v); maj(); })
+      g => champNombre(g, T('X'), c.x, v => { c.x = v; maj(); }),
+      g => champNombre(g, T('Y'), c.y, v => { c.y = v; maj(); }),
+      g => champNombre(g, T('Largeur'), c.largeur, v => { c.largeur = Math.max(10, v); maj(); }),
+      g => champNombre(g, T('Hauteur'), c.hauteur, v => { c.hauteur = Math.max(10, v); maj(); })
     ]);
     if (AVEC_TEXTE.includes(c.type)) {
-      champNombre(liste, 'Taille du texte', c.taillePolice, v => { c.taillePolice = Math.max(6, v); maj(); });
+      champNombre(liste, T('Taille du texte'), c.taillePolice, v => { c.taillePolice = Math.max(6, v); maj(); });
       groupe(liste, [
-        g => champCase(g, 'Gras', c.gras, v => { c.gras = v; maj(); }),
-        g => champCase(g, 'Italique', c.italique, v => { c.italique = v; maj(); })
+        g => champCase(g, T('Gras'), c.gras, v => { c.gras = v; maj(); }),
+        g => champCase(g, T('Italique'), c.italique, v => { c.italique = v; maj(); })
       ]);
       if (ALIGNABLES.includes(c.type)) {
-        champChoix(liste, 'Alignement du texte', [['gauche', '⇤ Gauche'], ['centre', '↔ Centre'], ['droite', '⇥ Droite']],
+        champChoix(liste, T('Alignement du texte'), [['gauche', T('⇤ Gauche')], ['centre', T('↔ Centre')], ['droite', T('⇥ Droite')]],
           c.alignement || (c.type === 'bouton' ? 'centre' : 'gauche'), v => { c.alignement = v; maj(); });
       }
-      champCouleur(liste, 'Couleur du texte', c.couleurTexte, v => { c.couleurTexte = v; maj(); });
+      champCouleur(liste, T('Couleur du texte'), c.couleurTexte, v => { c.couleurTexte = v; maj(); });
     }
-    champCouleur(liste, 'Couleur de fond', c.couleurFond, v => { c.couleurFond = v; maj(); });
-    champTexte(liste, 'Infobulle (petit texte montré quand la souris reste dessus)', c.infobulle || '',
-      v => { c.infobulle = v; maj(); }, false, 'Cliquez ici pour…');
-    champCase(liste, 'Visible au démarrage', c.visible !== false, v => { c.visible = v; maj(); });
-    champCase(liste, 'Déplaçable à la souris (pendant le programme)', c.deplacable, v => { c.deplacable = v; maj(); });
-    champCase(liste, 'Solide : sol, plateforme ou mur (bloc « faire tomber… avec une gravité »)', c.solide, v => { c.solide = v; maj(); });
+    champCouleur(liste, T('Couleur de fond'), c.couleurFond, v => { c.couleurFond = v; maj(); });
+    champTexte(liste, T('Infobulle (petit texte montré quand la souris reste dessus)'), c.infobulle || '',
+      v => { c.infobulle = v; maj(); }, false, T('Cliquez ici pour…'));
+    champCase(liste, T('Visible au démarrage'), c.visible !== false, v => { c.visible = v; maj(); });
+    champCase(liste, T('Déplaçable à la souris (pendant le programme)'), c.deplacable, v => { c.deplacable = v; maj(); });
+    champCase(liste, T('Solide : sol, plateforme ou mur (bloc « faire tomber… avec une gravité »)'), c.solide, v => { c.solide = v; maj(); });
     if (!AMARRES.includes(c.type)) champAncrage(liste, c.ancrage, v => { c.ancrage = v; });
     champMenuContextuel(liste, c);
   }
 
   function proprietesPlusieurs(liste, ctrls) {
-    $('titre-proprietes').textContent = `${ctrls.length} contrôles sélectionnés`;
+    $('titre-proprietes').textContent = T('{n} contrôles sélectionnés', { n: ctrls.length });
     const visibles = ctrls.filter(c => !estInvisible(c));
     const ref = visibles.find(c => c.id === selection) || visibles[0];
     const boutons = (parent, defs, classe) => {
@@ -1532,77 +1538,78 @@
       parent.appendChild(zone);
     };
     if (visibles.length > 1) {
-      boutons(prop(liste, `Aligner sur « ${ref.nom} » (entouré en plein)`), [
-        ['⇤ Gauche', 'gauche', 'Bords gauches alignés'],
-        ['↔ Centre', 'centre', 'Centrés les uns sous les autres'],
-        ['⇥ Droite', 'droite', 'Bords droits alignés'],
-        ['⤒ Haut', 'haut', 'Bords du haut alignés'],
-        ['↕ Milieu', 'milieu', 'Centrés sur une même ligne'],
-        ['⤓ Bas', 'bas', 'Bords du bas alignés']
+      boutons(prop(liste, T('Aligner sur « {nom} » (entouré en plein)', { nom: ref.nom })), [
+        [T('⇤ Gauche'), 'gauche', T('Bords gauches alignés')],
+        [T('↔ Centre'), 'centre', T('Centrés les uns sous les autres')],
+        [T('⇥ Droite'), 'droite', T('Bords droits alignés')],
+        [T('⤒ Haut'), 'haut', T('Bords du haut alignés')],
+        [T('↕ Milieu'), 'milieu', T('Centrés sur une même ligne')],
+        [T('⤓ Bas'), 'bas', T('Bords du bas alignés')]
       ], 'alignements');
-      boutons(prop(liste, 'Taille et espacement'), [
-        ['Même largeur', 'largeur', `Largeur de « ${ref.nom} » pour tous`],
-        ['Même hauteur', 'hauteur', `Hauteur de « ${ref.nom} » pour tous`],
-        ['Espacer ↔', 'espacerH', 'Même espace entre eux, de gauche à droite (au moins 3 contrôles)', visibles.length > 2],
-        ['Espacer ↕', 'espacerV', 'Même espace entre eux, de haut en bas (au moins 3 contrôles)', visibles.length > 2]
+      boutons(prop(liste, T('Taille et espacement')), [
+        [T('Même largeur'), 'largeur', T('Largeur de « {nom} » pour tous', { nom: ref.nom })],
+        [T('Même hauteur'), 'hauteur', T('Hauteur de « {nom} » pour tous', { nom: ref.nom })],
+        [T('Espacer ↔'), 'espacerH', T('Même espace entre eux, de gauche à droite (au moins 3 contrôles)'), visibles.length > 2],
+        [T('Espacer ↕'), 'espacerV', T('Même espace entre eux, de haut en bas (au moins 3 contrôles)'), visibles.length > 2]
       ], 'tailles');
     }
     // Propriétés communes : changées pour tous à la fois.
     const pourTous = (liste2, f) => { liste2.forEach(c => { f(c); rafraichirControle(c); }); };
     const avecTexte = visibles.filter(c => AVEC_TEXTE.includes(c.type));
     if (avecTexte.length) {
-      champNombre(liste, 'Taille du texte', avecTexte[0].taillePolice, v => pourTous(avecTexte, c => { c.taillePolice = Math.max(6, v); }));
-      champCouleur(liste, 'Couleur du texte', avecTexte[0].couleurTexte, v => pourTous(avecTexte, c => { c.couleurTexte = v; }));
+      champNombre(liste, T('Taille du texte'), avecTexte[0].taillePolice, v => pourTous(avecTexte, c => { c.taillePolice = Math.max(6, v); }));
+      champCouleur(liste, T('Couleur du texte'), avecTexte[0].couleurTexte, v => pourTous(avecTexte, c => { c.couleurTexte = v; }));
     }
     if (visibles.length) {
-      champCouleur(liste, 'Couleur de fond', visibles[0].couleurFond, v => pourTous(visibles, c => { c.couleurFond = v; }));
-      champCase(liste, 'Visibles au démarrage', visibles.every(c => c.visible !== false), v => pourTous(visibles, c => { c.visible = v; }));
-      champCase(liste, 'Solides : sol, plateformes ou murs (gravité)', visibles.every(c => c.solide), v => pourTous(visibles, c => { c.solide = v; }));
+      champCouleur(liste, T('Couleur de fond'), visibles[0].couleurFond, v => pourTous(visibles, c => { c.couleurFond = v; }));
+      champCase(liste, T('Visibles au démarrage'), visibles.every(c => c.visible !== false), v => pourTous(visibles, c => { c.visible = v; }));
+      champCase(liste, T('Solides : sol, plateformes ou murs (gravité)'), visibles.every(c => c.solide), v => pourTous(visibles, c => { c.solide = v; }));
       const ancres = visibles.filter(c => !AMARRES.includes(c.type));
       if (ancres.length) champAncrage(liste, ancres[0].ancrage, v => ancres.forEach(c => { c.ancrage = v; }));
     }
     liste.appendChild(el('p', 'aide',
-      'Ctrl+clic : ajouter ou retirer un contrôle. Glissez l\'un d\'eux pour les déplacer tous ; ' +
-      'flèches : déplacer au pixel près (Maj : de 10). Clic droit : copier, coller, dupliquer…'));
+      T('Ctrl+clic : ajouter ou retirer un contrôle. Glissez l\'un d\'eux pour les déplacer tous ; ' +
+      'flèches : déplacer au pixel près (Maj : de 10). Clic droit : copier, coller, dupliquer…')));
   }
 
   // Fenêtre que l'on peut agrandir ou rétrécir pendant le programme.
   function champsRedimensionnement(liste, f, principale) {
-    champCase(liste, 'Redimensionnable (on peut tirer son bord pour changer sa taille)', f.redimensionnable, v => {
+    champCase(liste, T('Redimensionnable (on peut tirer son bord pour changer sa taille)'), f.redimensionnable, v => {
       f.redimensionnable = v;
       afficherProprietes();
     });
     if (f.redimensionnable) {
       groupe(liste, [
-        g => champNombre(g, 'Largeur minimale', f.largeurMin ?? 100, v => { f.largeurMin = Math.max(100, v); }),
-        g => champNombre(g, 'Hauteur minimale', f.hauteurMin ?? 60, v => { f.hauteurMin = Math.max(60, v); })
+        g => champNombre(g, T('Largeur minimale'), f.largeurMin ?? 100, v => { f.largeurMin = Math.max(100, v); }),
+        g => champNombre(g, T('Hauteur minimale'), f.hauteurMin ?? 60, v => { f.hauteurMin = Math.max(60, v); })
       ]);
     }
     if (principale) {
-      champCase(liste, 'Bouton Agrandir dans la barre de titre (application .exe)', f.agrandir, v => { f.agrandir = v; });
-      champCase(liste, 'Démarrer agrandie, sur tout l\'écran (application .exe)', f.agrandie, v => { f.agrandie = v; });
+      champCase(liste, T('Bouton Agrandir dans la barre de titre (application .exe)'), f.agrandir, v => { f.agrandir = v; });
+      champCase(liste, T('Démarrer agrandie, sur tout l\'écran (application .exe)'), f.agrandie, v => { f.agrandie = v; });
     }
     if (f.redimensionnable || f.agrandir || f.agrandie) {
       liste.appendChild(el('p', 'aide',
-        'Quand la fenêtre change de taille, chaque contrôle suit les bords choisis dans sa propriété « Ancrage » ' +
-        '(par défaut, il reste en haut à gauche). Pendant l\'essai dans BlocStudio, on la tire par la poignée ◢ de son coin.'));
+        T('Quand la fenêtre change de taille, chaque contrôle suit les bords choisis dans sa propriété « Ancrage » ' +
+        '(par défaut, il reste en haut à gauche). Pendant l\'essai dans BlocStudio, on la tire par la poignée ◢ de son coin.')));
     }
   }
 
   // Ancrage façon Visual Basic : les bords de la fenêtre (ou du conteneur) que le contrôle suit.
   // h : haut, b : bas, g : gauche, d : droite.
   function champAncrage(parent, valeur, surChange) {
-    const d = prop(parent, 'Ancrage : quand la fenêtre change de taille, le contrôle suit les bords en bleu');
+    const d = prop(parent, T('Ancrage : quand la fenêtre change de taille, le contrôle suit les bords en bleu'));
     let a = valeur ?? 'hg';
     const ligne = el('div', 'ligne');
     const boite = el('div', 'ancrage');
     boite.appendChild(el('span', 'ancrage-centre'));
     const explication = el('span', 'aide ancrage-texte');
-    const cotes = [['h', 'haut', 'du haut'], ['b', 'bas', 'du bas'], ['g', 'gauche', 'gauche'], ['d', 'droite', 'droit']];
-    const boutons = cotes.map(([l, classe, nom]) => {
+    const cotes = [['h', 'haut', T('Suivre le bord du haut')], ['b', 'bas', T('Suivre le bord du bas')],
+      ['g', 'gauche', T('Suivre le bord gauche')], ['d', 'droite', T('Suivre le bord droit')]];
+    const boutons = cotes.map(([l, classe, titre]) => {
       const b = el('button', 'ancrage-' + classe);
       b.type = 'button';
-      b.title = 'Suivre le bord ' + nom;
+      b.title = titre;
       b.addEventListener('click', () => {
         a = 'hbgd'.split('').filter(x => x === l ? !a.includes(x) : a.includes(x)).join('');
         surChange(a);
@@ -1623,20 +1630,20 @@
 
   function expliquerAncrage(a) {
     const g = a.includes('g'), d = a.includes('d'), h = a.includes('h'), b = a.includes('b');
-    const parties = [
-      g && d ? 's\'étire en largeur' : d ? 'reste collé à droite' : g ? '' : 'reste centré de gauche à droite',
-      h && b ? 's\'étire en hauteur' : b ? 'reste collé en bas' : h ? '' : 'reste centré de haut en bas'
+    if (g && d && h && b) return T('Il s\'étire en largeur et en hauteur.');
+    const phrases = [
+      g && d ? T('Il s\'étire en largeur.') : d ? T('Il reste collé à droite.') : g ? '' : T('Il reste centré de gauche à droite.'),
+      h && b ? T('Il s\'étire en hauteur.') : b ? T('Il reste collé en bas.') : h ? '' : T('Il reste centré de haut en bas.')
     ].filter(x => x);
-    if (g && d && h && b) return 'Il s\'étire en largeur et en hauteur.';
-    return parties.length ? 'Il ' + parties.join(' et ') + '.' : 'Il reste en haut à gauche (comme d\'habitude).';
+    return phrases.length ? phrases.join(' ') : T('Il reste en haut à gauche (comme d\'habitude).');
   }
 
   function proprietesAutreFenetre(liste, f) {
-    $('titre-proprietes').textContent = 'Autre fenêtre';
-    champTexte(liste, 'Nom (utilisé dans les blocs)', f.nom, (v, input) => {
+    $('titre-proprietes').textContent = T('Autre fenêtre');
+    champTexte(liste, T('Nom (utilisé dans les blocs)'), f.nom, (v, input) => {
       const valide = /^[A-Za-zÀ-ÖØ-öø-ÿ_][A-Za-zÀ-ÖØ-öø-ÿ0-9_]*$/.test(v) && !projet.fenetres.some(x => x !== f && x.nom === v);
       input.classList.toggle('invalide', !valide);
-      input.title = valide ? '' : 'Lettres, chiffres et _ seulement, sans espace, et pas deux fenêtres du même nom.';
+      input.title = valide ? '' : T('Lettres, chiffres et _ seulement, sans espace, et pas deux fenêtres du même nom.');
       if (valide) {
         f.nom = v;
         blocsAPerimes = true;
@@ -1644,44 +1651,44 @@
         $('choix-controle').options[0].text = '🪟 ' + v;
       }
     });
-    champTexte(liste, 'Titre', f.titre, v => { f.titre = v; $('titre-design').textContent = v; });
+    champTexte(liste, T('Titre'), f.titre, v => { f.titre = v; $('titre-design').textContent = v; });
     const tropGrande = () => f.largeur > projet.fenetre.largeur || f.hauteur + 30 > projet.fenetre.hauteur;
     groupe(liste, [
-      g => champNombre(g, 'Largeur', f.largeur, v => { f.largeur = Math.max(100, v); afficherConcepteur(); avertir(); }),
-      g => champNombre(g, 'Hauteur', f.hauteur, v => { f.hauteur = Math.max(60, v); afficherConcepteur(); avertir(); })
+      g => champNombre(g, T('Largeur'), f.largeur, v => { f.largeur = Math.max(100, v); afficherConcepteur(); avertir(); }),
+      g => champNombre(g, T('Hauteur'), f.hauteur, v => { f.hauteur = Math.max(60, v); afficherConcepteur(); avertir(); })
     ]);
-    const avertissement = el('p', 'aide avertissement', '⚠️ Plus grande que la fenêtre principale : dans l\'application .exe, elle serait coupée.');
+    const avertissement = el('p', 'aide avertissement', T('⚠️ Plus grande que la fenêtre principale : dans l\'application .exe, elle serait coupée.'));
     const avertir = () => { avertissement.hidden = !tropGrande(); };
     liste.appendChild(avertissement);
     avertir();
-    champCouleur(liste, 'Couleur de fond', f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
+    champCouleur(liste, T('Couleur de fond'), f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
     champsRedimensionnement(liste, f, false);
     champMenuContextuel(liste, f);
     liste.appendChild(el('p', 'aide',
-      'Cette fenêtre s\'ouvre par-dessus la fenêtre principale avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 ' + f.nom + ' »). ' +
-      'Double-cliquez sur son onglet pour écrire ce qui se passe quand elle s\'ouvre.'));
-    const supprimer = el('button', 'danger', '🗑️ Supprimer cette fenêtre');
+      T('Cette fenêtre s\'ouvre par-dessus la fenêtre principale avec le bloc « ouvrir la fenêtre » (onglet Code, catégorie « 🪟 {nom} »). ' +
+      'Double-cliquez sur son onglet pour écrire ce qui se passe quand elle s\'ouvre.', { nom: f.nom })));
+    const supprimer = el('button', 'danger', T('🗑️ Supprimer cette fenêtre'));
     supprimer.addEventListener('click', () => supprimerFenetre(f));
     liste.appendChild(supprimer);
   }
 
   function proprietesSon(liste, c, maj) {
-    const d = prop(liste, 'Son joué');
+    const d = prop(liste, T('Son joué'));
     const choix = document.createElement('select');
-    choix.add(new Option('(aucun son)', ''));
+    choix.add(new Option(T('(aucun son)'), ''));
     projet.sons.forEach(s => choix.add(new Option('🎵 ' + s.nom, s.id)));
     choix.value = projet.sons.some(s => s.id === c.son) ? c.son : '';
     choix.addEventListener('change', () => { c.son = choix.value; if (c.son) c.flux = ''; maj(); afficherProprietes(); });
     d.appendChild(choix);
     // Ou un son en ligne : un fichier son ou une radio sur Internet (joué si aucun son du projet n'est choisi).
-    champTexte(liste, '…ou un son en ligne : adresse web d\'un fichier son (MP3…) ou d\'une radio', c.flux || '', v => {
+    champTexte(liste, T('…ou un son en ligne : adresse web d\'un fichier son (MP3…) ou d\'une radio'), c.flux || '', v => {
       c.flux = v.trim();
       if (c.flux) { c.son = ''; choix.value = ''; }
       maj();
       afficherInvisibles();
     });
     if (c.flux && !c.son) {
-      const ecouteEnLigne = el('button', null, '▶ Écouter le son en ligne');
+      const ecouteEnLigne = el('button', null, T('▶ Écouter le son en ligne'));
       ecouteEnLigne.addEventListener('click', () => ecouterEnLigne(c.flux, ecouteEnLigne));
       prop(liste, '').appendChild(ecouteEnLigne);
     }
@@ -1698,17 +1705,17 @@
       return b;
     };
     const son = projet.sons.find(s => s.id === c.son);
-    const ecoute = bouton('▶ Écouter', () => ecouterSon(son, ecoute), !!son);
+    const ecoute = bouton(T('▶ Écouter'), () => ecouterSon(son, ecoute), !!son);
     suivreEcoute(ecoute, son);
-    bouton('✂️ Découper', () => ouvrirDecoupe(son), !!son);
+    bouton(T('✂️ Découper'), () => ouvrirDecoupe(son), !!son);
     const choisir = s => { c.son = s.id; maj(); afficherProprietes(); };
-    bouton('🎵 Importer…', () => importerSon(choisir));
-    bouton('🎤 Enregistrer…', () => ouvrirMicro(choisir));
-    bouton('🎹 Composer…', () => composerMusique(choisir));
-    if (son && son.musique) bouton('🎹 Modifier la musique', () => modifierMusique(son));
+    bouton(T('🎵 Importer…'), () => importerSon(choisir));
+    bouton(T('🎤 Enregistrer…'), () => ouvrirMicro(choisir));
+    bouton(T('🎹 Composer…'), () => composerMusique(choisir));
+    if (son && son.musique) bouton(T('🎹 Modifier la musique'), () => modifierMusique(son));
     prop(liste, '').appendChild(boutons);
 
-    const v = prop(liste, `Volume : ${c.volume ?? 100} %`);
+    const v = prop(liste, T('Volume : {n} %', { n: c.volume ?? 100 }));
     const curseur = document.createElement('input');
     curseur.type = 'range';
     curseur.min = 0;
@@ -1716,15 +1723,15 @@
     curseur.value = c.volume ?? 100;
     curseur.addEventListener('input', () => {
       c.volume = Number(curseur.value);
-      v.querySelector('label').textContent = `Volume : ${c.volume} %`;
+      v.querySelector('label').textContent = T('Volume : {n} %', { n: c.volume });
       planifierSauvegarde();
     });
     v.appendChild(curseur);
-    champCase(liste, 'Jouer en boucle (musique de fond)', c.boucle, val => { c.boucle = val; maj(); });
-    champCase(liste, 'Jouer dès le démarrage du programme', c.autoDemarrage, val => { c.autoDemarrage = val; maj(); });
+    champCase(liste, T('Jouer en boucle (musique de fond)'), c.boucle, val => { c.boucle = val; maj(); });
+    champCase(liste, T('Jouer dès le démarrage du programme'), c.autoDemarrage, val => { c.autoDemarrage = val; maj(); });
     liste.appendChild(el('p', 'aide',
-      'Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer « quand il se termine ». ' +
-      'Ses autres blocs : bouton 🧰 ci-dessus.'));
+      T('Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer « quand il se termine ». ' +
+      'Ses autres blocs : bouton 🧰 ci-dessus.')));
   }
 
   // Écoute d'un son en ligne dans le concepteur (▶ / ■).
@@ -1735,28 +1742,28 @@
       lecteurEnLigne.removeAttribute('src');
       lecteurEnLigne.load();
       const etaitCelui = lecteurEnLigne.bouton === bouton;
-      lecteurEnLigne.bouton.textContent = '▶ Écouter le son en ligne';
+      lecteurEnLigne.bouton.textContent = T('▶ Écouter le son en ligne');
       lecteurEnLigne = null;
       if (etaitCelui) return;
     }
     const url = /^https?:\/\//i.test(adresse) ? adresse : 'https://' + adresse;
     const a = lecteurEnLigne = new Audio(url);
     a.bouton = bouton;
-    bouton.textContent = '⏳ Connexion…';
-    a.addEventListener('playing', () => { if (lecteurEnLigne === a) bouton.textContent = '■ Arrêter l\'écoute'; });
-    a.addEventListener('ended', () => { if (lecteurEnLigne === a) { lecteurEnLigne = null; bouton.textContent = '▶ Écouter le son en ligne'; } });
+    bouton.textContent = T('⏳ Connexion…');
+    a.addEventListener('playing', () => { if (lecteurEnLigne === a) bouton.textContent = T('■ Arrêter l\'écoute'); });
+    a.addEventListener('ended', () => { if (lecteurEnLigne === a) { lecteurEnLigne = null; bouton.textContent = T('▶ Écouter le son en ligne'); } });
     a.addEventListener('error', () => {
       if (lecteurEnLigne !== a) return;
       lecteurEnLigne = null;
-      bouton.textContent = '▶ Écouter le son en ligne';
-      alert('Ce son en ligne ne peut pas être lu : adresse introuvable, pas de connexion à Internet, ou format non pris en charge.' +
-        (/^http:/i.test(url) ? '\nEssayez la même adresse en « https:// ».' : ''));
+      bouton.textContent = T('▶ Écouter le son en ligne');
+      alert(T('Ce son en ligne ne peut pas être lu : adresse introuvable, pas de connexion à Internet, ou format non pris en charge.') +
+        (/^http:/i.test(url) ? '\n' + T('Essayez la même adresse en « https:// ».') : ''));
     });
     a.play().catch(() => {});
   }
 
   function proprietesMinuteur(liste, c, maj) {
-    const d = prop(liste, 'Intervalle (secondes entre deux « tics »)');
+    const d = prop(liste, T('Intervalle (secondes entre deux « tics »)'));
     const i = document.createElement('input');
     i.type = 'number';
     i.min = 0.05;
@@ -1766,23 +1773,24 @@
       if (Number(i.value) > 0) { c.intervalle = Number(i.value); maj(); }
     });
     d.appendChild(i);
-    champCase(liste, 'En marche dès le démarrage', c.active !== false, val => { c.active = val; maj(); });
+    champCase(liste, T('En marche dès le démarrage'), c.active !== false, val => { c.active = val; maj(); });
     liste.appendChild(el('p', 'aide',
-      'Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer ce qu\'il fait à chaque « tic ». ' +
-      'On peut le démarrer, l\'arrêter ou changer son intervalle avec des blocs.'));
+      T('Double-cliquez sur ce contrôle (sous la fenêtre) pour programmer ce qu\'il fait à chaque « tic ». ' +
+      'On peut le démarrer, l\'arrêter ou changer son intervalle avec des blocs.')));
   }
 
   const TYPES_FICHIER_EDITEUR = {
-    texte: 'Texte (.txt)', csv: 'Tableur (.csv, lisible par Excel)', excel: 'Classeur Excel (.xlsx)', image: 'Image (PNG, JPG, GIF…)', son: 'Son (MP3, WAV, OGG…)', tous: 'Tous les fichiers'
+    texte: T('Texte (.txt)'), csv: T('Tableur (.csv, lisible par Excel)'), excel: T('Classeur Excel (.xlsx)'),
+    image: T('Image (PNG, JPG, GIF…)'), son: T('Son (MP3, WAV, OGG…)'), tous: T('Tous les fichiers')
   };
 
   // Menu qui s'ouvre au clic droit sur ce contrôle (ou sur le fond de cette fenêtre).
   function champMenuContextuel(liste, objet) {
     const menus = projet.controles.filter(m => m.type === 'menucontextuel');
     if (!menus.length) return;
-    const d = prop(liste, 'Menu contextuel (au clic droit)');
+    const d = prop(liste, T('Menu contextuel (au clic droit)'));
     const choix = document.createElement('select');
-    choix.add(new Option('(aucun)', ''));
+    choix.add(new Option(T('(aucun)'), ''));
     menus.forEach(m => choix.add(new Option('🖱️ ' + m.nom, m.id)));
     choix.value = menus.some(m => m.id === objet.menuContextuel) ? objet.menuContextuel : '';
     choix.addEventListener('change', () => {
@@ -1797,17 +1805,17 @@
   const utilisateursMenu = m => [projet.fenetre, ...projet.fenetres, ...projet.controles].filter(o => o.menuContextuel === m.id);
 
   function proprietesMenuContextuel(liste, c, maj) {
-    champTexte(liste, 'Éléments du menu — un par ligne ; « - » pour un trait', c.menu || '',
-      v => { c.menu = v; blocsAPerimes = true; maj(); afficherInvisibles(); }, true, 'Copier\nColler\n-\nSupprimer');
-    const qui = utilisateursMenu(c).map(o => o === projet.fenetre ? 'la fenêtre principale' : o.nom);
+    champTexte(liste, T('Éléments du menu — un par ligne ; « - » pour un trait'), c.menu || '',
+      v => { c.menu = v; blocsAPerimes = true; maj(); afficherInvisibles(); }, true, T('Copier\nColler\n-\nSupprimer'));
+    const qui = utilisateursMenu(c).map(o => o === projet.fenetre ? T('la fenêtre principale') : o.nom);
     liste.appendChild(el('p', 'aide',
-      (qui.length ? `Il s'ouvre au clic droit sur : ${qui.join(', ')}. ` : 'Il ne s\'ouvre encore nulle part. ') +
-      'Pour qu\'un contrôle (ou une fenêtre) l\'ouvre au clic droit, choisissez ce menu dans sa propriété « Menu contextuel ». ' +
-      'Double-cliquez sur le menu pour écrire ce que fait un élément ; ses blocs (bouton 🧰 ci-dessus) en ont un tout prêt pour chaque élément.'));
+      (qui.length ? T('Il s\'ouvre au clic droit sur : {qui}.', { qui: qui.join(', ') }) : T('Il ne s\'ouvre encore nulle part.')) + ' ' +
+      T('Pour qu\'un contrôle (ou une fenêtre) l\'ouvre au clic droit, choisissez ce menu dans sa propriété « Menu contextuel ». ' +
+      'Double-cliquez sur le menu pour écrire ce que fait un élément ; ses blocs (bouton 🧰 ci-dessus) en ont un tout prêt pour chaque élément.')));
   }
 
   function proprietesFichier(liste, c, maj) {
-    const d = prop(liste, 'Type de fichier proposé');
+    const d = prop(liste, T('Type de fichier proposé'));
     const choix = document.createElement('select');
     for (const [v, t] of Object.entries(TYPES_FICHIER_EDITEUR)) choix.add(new Option(t, v));
     choix.value = c.typeFichier || 'texte';
@@ -1821,16 +1829,16 @@
       afficherInvisibles();
     });
     d.appendChild(choix);
-    champTexte(liste, 'Nom proposé pour enregistrer', c.nomPropose || '', v => { c.nomPropose = v; maj(); });
+    champTexte(liste, T('Nom proposé pour enregistrer'), c.nomPropose || '', v => { c.nomPropose = v; maj(); });
     liste.appendChild(el('p', 'aide',
-      'Comme les boîtes « Ouvrir » et « Enregistrer sous » de Visual Basic. Ses blocs (bouton 🧰 ci-dessus) : ' +
+      T('Comme les boîtes « Ouvrir » et « Enregistrer sous » de Visual Basic. Ses blocs (bouton 🧰 ci-dessus) : ' +
       '« ouvrir un fichier avec… », puis « contenu du fichier » ; « enregistrer le texte … avec… » ; ' +
       'et des raccourcis pour un tableau ou une base (CSV), une image ou une zone de dessin (PNG). ' +
-      'Double-cliquez sur ce contrôle pour réagir quand on dépose un fichier sur la fenêtre.'));
+      'Double-cliquez sur ce contrôle pour réagir quand on dépose un fichier sur la fenêtre.')));
   }
 
   function proprietesBase(liste, c, maj) {
-    champTexte(liste, 'Champs (un par ligne)', (c.champs || []).join('\n'), v => {
+    champTexte(liste, T('Champs (un par ligne)'), (c.champs || []).join('\n'), v => {
       const avant = c.champs || [];
       const apres = [...new Set(v.split('\n').map(e => e.trim()).filter(e => e))];
       // Les fiches de départ suivent leurs champs : retrouvés par leur nom, ou par leur place
@@ -1843,9 +1851,9 @@
       afficherInvisibles();
     }, true);
     if ((c.fiches || []).length > TROP_POUR_LES_PROPRIETES) {
-      resumeGrossesDonnees(liste, 'Fiches de départ', c.fiches.length, () => { c.fiches = []; afficherInvisibles(); });
+      resumeGrossesDonnees(liste, T('Fiches de départ'), c.fiches.length, () => { c.fiches = []; afficherInvisibles(); });
     } else {
-      champTexte(liste, 'Fiches de départ (une par ligne, valeurs séparées par ;)',
+      champTexte(liste, T('Fiches de départ (une par ligne, valeurs séparées par ;)'),
         (c.fiches || []).map(f => f.join(' ; ')).join('\n'), v => {
           c.fiches = v.split('\n').filter(l => l.trim()).map(l => l.split(';').map(e => e.trim()));
           maj();
@@ -1853,10 +1861,10 @@
         }, true);
     }
     boutonsDonnees(liste, c);
-    champCase(liste, 'Garder les fiches d\'une fois à l\'autre', c.memoriser !== false, v => { c.memoriser = v; maj(); });
+    champCase(liste, T('Garder les fiches d\'une fois à l\'autre'), c.memoriser !== false, v => { c.memoriser = v; maj(); });
     liste.appendChild(el('p', 'aide',
-      'Une base de données range des fiches : une valeur pour chaque champ. Ses blocs (bouton 🧰 ci-dessus) servent à ajouter, chercher, modifier ou supprimer des fiches, et « afficher … dans le tableau » pour les voir. ' +
-      'Les fiches ajoutées pendant le programme sont gardées ; elles repartent des fiches de départ si vous changez celles-ci.'));
+      T('Une base de données range des fiches : une valeur pour chaque champ. Ses blocs (bouton 🧰 ci-dessus) servent à ajouter, chercher, modifier ou supprimer des fiches, et « afficher … dans le tableau » pour les voir. ' +
+      'Les fiches ajoutées pendant le programme sont gardées ; elles repartent des fiches de départ si vous changez celles-ci.')));
   }
 
   // ---------------------------------------------------------------- Importer / exporter des données
@@ -1869,7 +1877,7 @@
   const TROP_POUR_LES_PROPRIETES = 300;
 
   const lettreColonne = i => { let s = ''; for (i++; i > 0; i = Math.floor((i - 1) / 26)) s = String.fromCharCode(65 + (i - 1) % 26) + s; return s; };
-  const nombreLisible = n => n.toLocaleString('fr-FR');
+  const nombreLisible = n => n.toLocaleString(BlocLangues.locale());
 
   // Les données du contrôle, en lignes (la première : les titres).
   function donneesDuControle(c) {
@@ -1891,21 +1899,21 @@
       zone.appendChild(b);
     };
     const n = nombreDeDonnees(c);
-    bouton('📥 Importer…', 'Remplir avec un fichier CSV ou Excel (.xlsx) : vous choisissez les lignes et les colonnes', () => importerDonnees(c));
-    bouton('📤 Excel', 'Enregistrer ces données dans un classeur Excel (.xlsx)', () => exporterDonnees(c, 'excel'), n > 0);
-    bouton('📤 CSV', 'Enregistrer ces données dans un fichier CSV (lisible par Excel)', () => exporterDonnees(c, 'csv'), n > 0);
-    prop(liste, 'Données (fichier CSV ou Excel)').appendChild(zone);
+    bouton(T('📥 Importer…'), T('Remplir avec un fichier CSV ou Excel (.xlsx) : vous choisissez les lignes et les colonnes'), () => importerDonnees(c));
+    bouton('📤 Excel', T('Enregistrer ces données dans un classeur Excel (.xlsx)'), () => exporterDonnees(c, 'excel'), n > 0);
+    bouton('📤 CSV', T('Enregistrer ces données dans un fichier CSV (lisible par Excel)'), () => exporterDonnees(c, 'csv'), n > 0);
+    prop(liste, T('Données (fichier CSV ou Excel)')).appendChild(zone);
   }
 
   // Beaucoup de données : un résumé et un bouton pour tout effacer, à la place de la zone de texte.
   function resumeGrossesDonnees(liste, libelle, nombre, vider) {
     const d = prop(liste, libelle);
-    d.appendChild(el('p', 'aide', `${nombreLisible(nombre)} lignes : trop pour les modifier ici. ` +
-      'Réimportez un fichier pour les changer, ou utilisez les blocs pendant le programme.'));
+    d.appendChild(el('p', 'aide', T('{n} lignes : trop pour les modifier ici. ' +
+      'Réimportez un fichier pour les changer, ou utilisez les blocs pendant le programme.', { n: nombreLisible(nombre) })));
     const zone = el('div', 'prop-boutons');
-    const b = el('button', null, '🗑️ Tout effacer');
+    const b = el('button', null, T('🗑️ Tout effacer'));
     b.addEventListener('click', () => {
-      if (!confirm(`Effacer ces ${nombreLisible(nombre)} lignes ?`)) return;
+      if (!confirm(T('Effacer ces {n} lignes ?', { n: nombreLisible(nombre) }))) return;
       vider();
       planifierSauvegarde();
       afficherProprietes();
@@ -1920,7 +1928,7 @@
       if (format === 'excel') await telecharger(c.nom + '.xlsx', await BlocRuntime.ecrireClasseur(lignes, c.nom), MIME_EXCEL);
       else await telecharger(c.nom + '.csv', '﻿' + BlocRuntime.versCsv(lignes), 'text/csv');
     } catch (e) {
-      alert('Impossible d\'enregistrer le fichier : ' + e.message);
+      alert(T('Impossible d\'enregistrer le fichier : {erreur}', { erreur: e.message }));
     }
   }
 
@@ -1942,41 +1950,41 @@
     try {
       feuilles = (await BlocRuntime.lireTableur(fichier)).filter(f => f.lignes.length);
     } catch (e) {
-      alert(`Impossible de lire « ${fichier.name} » : ${e.message}`);
+      alert(T('Impossible de lire « {nom} » : {erreur}', { nom: fichier.name, erreur: e.message }));
       return;
     }
-    if (!feuilles.length) { alert(`« ${fichier.name} » ne contient aucune donnée.`); return; }
+    if (!feuilles.length) { alert(T('« {nom} » ne contient aucune donnée.', { nom: fichier.name })); return; }
     fenetreImport(c, fichier.name, feuilles);
   }
 
   // La fenêtre d'import : aperçu, feuille, titres, lignes et colonnes gardées.
   function fenetreImport(c, nomFichier, feuilles) {
     const plusieurs = PLUSIEURS_COLONNES.includes(c.type);
-    const cible = { tableau: 'les colonnes et les lignes du tableau', basedonnees: 'les champs et les fiches de la base',
-      listederoulante: 'les éléments de la liste', zoneliste: 'les éléments de la liste', zonetexte: 'les suggestions de la zone de texte' }[c.type];
+    const cible = { tableau: T('les colonnes et les lignes du tableau'), basedonnees: T('les champs et les fiches de la base'),
+      listederoulante: T('les éléments de la liste'), zoneliste: T('les éléments de la liste'), zonetexte: T('les suggestions de la zone de texte') }[c.type];
     const etat = { feuille: 0, titres: true, de: 1, a: 0, colonnes: new Set() };
 
     const voile = el('div', 'voile modale');
     const boite = el('div', 'info-boite import-boite');
     voile.appendChild(boite);
-    boite.appendChild(el('h2', null, `📥 Importer des données dans « ${c.nom} »`));
+    boite.appendChild(el('h2', null, T('📥 Importer des données dans « {nom} »', { nom: c.nom })));
     const infos = el('p', 'info-petit');
     const reglages = el('div', 'import-reglages');
     const colonnes = el('div', 'import-colonnes');
     const apercu = el('div', 'import-apercu');
     const note = el('p', 'info-petit');
     const actions = el('div', 'info-actions');
-    const annuler = el('button', 'secondaire', 'Annuler');
-    const importer = el('button', null, 'Importer');
+    const annuler = el('button', 'secondaire', T('Annuler'));
+    const importer = el('button', null, T('Importer'));
     actions.append(annuler, importer);
-    boite.append(infos, reglages, el('p', 'import-titre', plusieurs ? 'Colonnes gardées' : 'Colonne gardée'), colonnes,
-      el('p', 'import-titre', 'Aperçu'), apercu, note, actions);
+    boite.append(infos, reglages, el('p', 'import-titre', plusieurs ? T('Colonnes gardées') : T('Colonne gardée')), colonnes,
+      el('p', 'import-titre', T('Aperçu')), apercu, note, actions);
 
     const lignesDe = () => feuilles[etat.feuille].lignes;
     const largeur = () => Math.max(0, ...lignesDe().slice(0, 500).map(l => l.length));
     const titreColonne = i => {
       const t = etat.titres ? String(lignesDe()[0][i] ?? '').trim() : '';
-      return t || 'Colonne ' + lettreColonne(i);
+      return t || T('Colonne {lettre}', { lettre: lettreColonne(i) });
     };
     const donnees = () => lignesDe().slice(etat.titres ? 1 : 0); // sans la ligne des titres
     const gardees = () => [...etat.colonnes].sort((x, y) => x - y);
@@ -2006,12 +2014,12 @@
     };
 
     function dessinerReglages() {
-      infos.textContent = `${nomFichier} — ${nombreLisible(lignesDe().length)} lignes, ${largeur()} colonnes`;
+      infos.textContent = T('{fichier} — {lignes} lignes, {colonnes} colonnes', { fichier: nomFichier, lignes: nombreLisible(lignesDe().length), colonnes: largeur() });
       reglages.replaceChildren();
       if (feuilles.length > 1) {
-        const l = el('label', null, 'Feuille ');
+        const l = el('label', null, T('Feuille '));
         const s = el('select');
-        feuilles.forEach((f, i) => s.add(new Option(`${f.nom} (${nombreLisible(f.lignes.length)} lignes)`, i)));
+        feuilles.forEach((f, i) => s.add(new Option(T('{feuille} ({n} lignes)', { feuille: f.nom, n: nombreLisible(f.lignes.length) }), i)));
         s.value = etat.feuille;
         s.addEventListener('change', () => { etat.feuille = Number(s.value); nouvelleFeuille(); tout(); });
         l.appendChild(s);
@@ -2027,13 +2035,13 @@
         etat.a = donnees().length;
         tout();
       });
-      titres.append(caseTitres, ' La première ligne contient les titres des colonnes');
+      titres.append(caseTitres, ' ' + T('La première ligne contient les titres des colonnes'));
       reglages.appendChild(titres);
       const total = donnees().length;
       reglages.append(
-        nombre('Lignes de', etat.de, v => { etat.de = Math.min(Math.max(1, v), total); etat.a = Math.max(etat.a, etat.de); tout(); }),
+        nombre(T('Lignes de'), etat.de, v => { etat.de = Math.min(Math.max(1, v), total); etat.a = Math.max(etat.a, etat.de); tout(); }),
         nombre('à', etat.a, v => { etat.a = Math.min(Math.max(etat.de, v), total); tout(); }),
-        el('span', 'info-petit', `(sur ${nombreLisible(total)})`));
+        el('span', 'info-petit', T('(sur {n})', { n: nombreLisible(total) })));
     }
 
     function dessinerColonnes() {
@@ -2067,13 +2075,13 @@
         cols.forEach(i => r.appendChild(el('td', null, String(l[i] ?? ''))));
       }
       if (lignes.length > 8) {
-        corps.appendChild(el('tr')).appendChild(el('td', 'info-petit', `… et ${nombreLisible(lignes.length - 8)} autres lignes`)).colSpan = cols.length || 1;
+        corps.appendChild(el('tr')).appendChild(el('td', 'info-petit', T('… et {n} autres lignes', { n: nombreLisible(lignes.length - 8) }))).colSpan = cols.length || 1;
       }
       apercu.replaceChildren(table);
       importer.disabled = !cols.length || !lignes.length;
-      importer.textContent = `Importer ${nombreLisible(lignes.length)} ligne${lignes.length > 1 ? 's' : ''}`;
-      note.textContent = `Elles remplaceront ${cible}.` +
-        (lignes.length > 20000 ? ' C\'est beaucoup : le projet grossit d\'autant (et les programmes exportés aussi).' : '');
+      importer.textContent = lignes.length > 1 ? T('Importer {n} lignes', { n: nombreLisible(lignes.length) }) : T('Importer {n} ligne', { n: lignes.length });
+      note.textContent = T('Elles remplaceront {cible}.', { cible }) +
+        (lignes.length > 20000 ? ' ' + T('C\'est beaucoup : le projet grossit d\'autant (et les programmes exportés aussi).') : '');
     }
 
     function tout() { dessinerReglages(); dessinerColonnes(); dessinerApercu(); }
@@ -2144,7 +2152,7 @@
     if (!libelle.startsWith('Nom')) {
       const b = el('button', 'bouton-emoji', '😀');
       b.type = 'button';
-      b.title = 'Ajouter un émoji';
+      b.title = T('Ajouter un émoji');
       b.addEventListener('click', () => SelecteurEmoji.ouvrir(b, e => SelecteurEmoji.inserer(i, e)));
       d.querySelector('label').appendChild(b);
     }
@@ -2195,7 +2203,7 @@
     choix.type = 'color';
     const texte = document.createElement('input');
     texte.type = 'text';
-    texte.placeholder = 'aucune, rouge, #ff8800…';
+    texte.placeholder = T('aucune, rouge, #ff8800…');
     texte.value = valeur || '';
     const synchro = () => {
       const hex = BlocRuntime.couleur(texte.value);
@@ -2209,9 +2217,9 @@
   }
 
   function champImage(parent, c, maj) {
-    const d = prop(parent, 'Image');
+    const d = prop(parent, T('Image'));
     const b = document.createElement('button');
-    b.textContent = '📁 Choisir une image…';
+    b.textContent = T('📁 Choisir une image…');
     b.style.cssText = 'width:100%;padding:6px';
     const f = document.createElement('input');
     f.type = 'file';
@@ -2226,20 +2234,20 @@
       r.readAsDataURL(fichier);
     });
     d.append(b, f);
-    champTexte(parent, '…ou adresse web de l\'image', c.image.startsWith('data:') ? '' : c.image, v => { c.image = v; maj(); });
+    champTexte(parent, T('…ou adresse web de l\'image'), c.image.startsWith('data:') ? '' : c.image, v => { c.image = v; maj(); });
   }
 
   function proprietesGraphique(liste, c, maj) {
-    champTexte(liste, 'Titre', c.texte, v => { c.texte = v; maj(); });
-    const d = prop(liste, 'Genre');
+    champTexte(liste, T('Titre'), c.texte, v => { c.texte = v; maj(); });
+    const d = prop(liste, T('Genre'));
     const choix = document.createElement('select');
-    for (const [valeur, libelle] of [['barres', '📊 Barres'], ['courbe', '📈 Courbe'], ['secteurs', '🥧 Secteurs (camembert)']]) {
+    for (const [valeur, libelle] of [['barres', T('📊 Barres')], ['courbe', T('📈 Courbe')], ['secteurs', T('🥧 Secteurs (camembert)')]]) {
       choix.add(new Option(libelle, valeur));
     }
     choix.value = c.genre || 'barres';
     choix.addEventListener('change', () => { c.genre = choix.value; maj(); });
     d.appendChild(choix);
-    champTexte(liste, 'Valeurs de départ (une par ligne : étiquette ; nombre)',
+    champTexte(liste, T('Valeurs de départ (une par ligne : étiquette ; nombre)'),
       (c.valeurs || []).map((v, i) => `${(c.etiquettes || [])[i] ?? ''} ; ${v}`).join('\n'), v => {
         const lignes = v.split('\n').filter(l => l.trim()).map(l => {
           const morceaux = l.split(';');
@@ -2250,8 +2258,8 @@
         c.valeurs = lignes.map(l => l[1]);
         maj();
       }, true);
-    champCouleur(liste, 'Couleur des barres / de la courbe', c.couleurBarre, v => { c.couleurBarre = v; maj(); });
-    champNombre(liste, 'Garder seulement les N dernières valeurs (0 = toutes)', c.maxValeurs || 0,
+    champCouleur(liste, T('Couleur des barres / de la courbe'), c.couleurBarre, v => { c.couleurBarre = v; maj(); });
+    champNombre(liste, T('Garder seulement les N dernières valeurs (0 = toutes)'), c.maxValeurs || 0,
       v => { c.maxValeurs = Math.max(0, Math.round(v)); maj(); });
   }
 
@@ -2260,9 +2268,9 @@
   const TAILLE_MAX_VIDEO = 3 * 1024 * 1024;
 
   function proprietesVideo(liste, c, maj) {
-    const d = prop(liste, 'Vidéo');
+    const d = prop(liste, T('Vidéo'));
     const b = document.createElement('button');
-    b.textContent = '📁 Choisir une vidéo (MP4, WebM)…';
+    b.textContent = T('📁 Choisir une vidéo (MP4, WebM)…');
     b.style.cssText = 'width:100%;padding:6px';
     const f = document.createElement('input');
     f.type = 'file';
@@ -2273,18 +2281,18 @@
       const fichier = f.files[0];
       if (!fichier) return;
       if (fichier.size > TAILLE_MAX_VIDEO &&
-          !confirm(`Cette vidéo pèse ${(fichier.size / 1048576).toFixed(1)} Mo : le projet risque d'être trop gros ` +
-            'pour la sauvegarde automatique (pensez à 💾 Enregistrer). Continuer ?')) return;
+          !confirm(T('Cette vidéo pèse {n} Mo : le projet risque d\'être trop gros ' +
+            'pour la sauvegarde automatique (pensez à 💾 Enregistrer). Continuer ?', { n: BlocLangues.nombre((fichier.size / 1048576).toFixed(1)) }))) return;
       c.video = await lireEnDataUrl(fichier);
       maj();
       afficherProprietes();
     });
     d.append(b, f);
-    champTexte(liste, '…ou adresse web d\'un fichier vidéo (.mp4, .webm)', c.video.startsWith('data:') ? '' : c.video,
+    champTexte(liste, T('…ou adresse web d\'un fichier vidéo (.mp4, .webm)'), c.video.startsWith('data:') ? '' : c.video,
       v => { c.video = v.trim(); maj(); });
-    champCase(liste, 'Afficher la barre de lecture', c.barreVideo !== false, v => { c.barreVideo = v; maj(); });
-    champCase(liste, 'En boucle', c.boucle, v => { c.boucle = v; maj(); });
-    champNombre(liste, 'Volume (%)', c.volume ?? 100, v => { c.volume = Math.min(100, Math.max(0, v)); maj(); });
+    champCase(liste, T('Afficher la barre de lecture'), c.barreVideo !== false, v => { c.barreVideo = v; maj(); });
+    champCase(liste, T('En boucle'), c.boucle, v => { c.boucle = v; maj(); });
+    champNombre(liste, T('Volume (%)'), c.volume ?? 100, v => { c.volume = Math.min(100, Math.max(0, v)); maj(); });
   }
 
   // ---------------------------------------------------------------- Sprites
@@ -2308,10 +2316,10 @@
 
   function proprietesSprite(liste, c, maj) {
     const s = projet.sprites.find(x => x.id === c.sprite);
-    const d = prop(liste, 'Sprite affiché');
+    const d = prop(liste, T('Sprite affiché'));
     if (s) d.appendChild(miniatureSprite(s, 'apercu-sprite'));
     const choix = document.createElement('select');
-    choix.add(new Option('(aucun sprite)', ''));
+    choix.add(new Option(T('(aucun sprite)'), ''));
     projet.sprites.forEach(x => choix.add(new Option('🎭 ' + x.nom, x.id)));
     choix.value = s ? s.id : '';
     choix.addEventListener('change', () => {
@@ -2332,54 +2340,56 @@
       boutons.appendChild(b);
     };
     const choisir = nouveau => { donnerSprite(c, nouveau); maj(); afficherProprietes(); };
-    bouton('🎨 Modifier', () => modifierSprite(s), !!s);
-    bouton('➕ Dessiner…', () => nouveauSprite(choisir));
-    bouton('📁 Importer…', () => importerSprite(choisir));
+    bouton(T('🎨 Modifier'), () => modifierSprite(s), !!s);
+    bouton(T('➕ Dessiner…'), () => nouveauSprite(choisir));
+    bouton(T('📁 Importer…'), () => importerSprite(choisir));
     // Un sprite affiché par plusieurs contrôles : le modifier les change tous.
     const autres = s ? projet.controles.filter(x => x !== c && x.type === 'sprite' && x.sprite === s.id) : [];
-    if (autres.length) bouton('🧬 Copie à part', () => {
-      const copie = Object.assign(structuredClone(s), { id: 'spr_' + nouvelId(), nom: nomSpriteLibre(s.nom + ' copie') });
+    if (autres.length) bouton(T('🧬 Copie à part'), () => {
+      const copie = Object.assign(structuredClone(s), { id: 'spr_' + nouvelId(), nom: nomSpriteLibre(T('{nom} copie', { nom: s.nom })) });
       projet.sprites.push(copie);
       c.sprite = copie.id;
       apresChangementSprites();
     });
     prop(liste, '').appendChild(boutons);
     if (autres.length) liste.appendChild(el('p', 'aide',
-      `⚠️ Ce sprite est aussi affiché par ${autres.map(x => x.nom).join(', ')} : « Modifier » les changera aussi. ` +
-      '« Copie à part » donne à ce contrôle son propre exemplaire.'));
+      T('⚠️ Ce sprite est aussi affiché par {noms} : « Modifier » les changera aussi. ' +
+      '« Copie à part » donne à ce contrôle son propre exemplaire.', { noms: autres.map(x => x.nom).join(', ') })));
     if (!s) {
-      liste.appendChild(el('p', 'aide', 'Choisissez un sprite, dessinez-en un ou importez une image (PNG, JPG, GIF animé…).'));
+      liste.appendChild(el('p', 'aide', T('Choisissez un sprite, dessinez-en un ou importez une image (PNG, JPG, GIF animé…).')));
       return;
     }
 
-    const dc = prop(liste, 'Costume au démarrage');
+    const dc = prop(liste, T('Costume au démarrage'));
     const costume = document.createElement('select');
     s.costumes.forEach((x, i) => costume.add(new Option(`${i + 1}. ${x.nom}`, i)));
     costume.value = Math.min(Number(c.costume) || 0, s.costumes.length - 1);
     costume.addEventListener('change', () => { c.costume = Number(costume.value); maj(); });
     dc.appendChild(costume);
-    champChoix(liste, 'Collisions (blocs « touche… »)', [['precise', '✨ Au pixel près'], ['rectangle', '▭ Rectangle']],
+    champChoix(liste, T('Collisions (blocs « touche… »)'), [['precise', T('✨ Au pixel près')], ['rectangle', T('▭ Rectangle')]],
       c.collision === 'rectangle' ? 'rectangle' : 'precise', v => { c.collision = v; maj(); });
 
     // Agrandissement « entier » : les pixels restent tous de la même taille.
-    const dt = prop(liste, `Taille à l'écran (le dessin fait ${s.taille} × ${s.taille} pixels)`);
+    const dt = prop(liste, T('Taille à l\'écran (le dessin fait {n} × {n} pixels)', { n: s.taille }));
     const tailles = document.createElement('div');
     tailles.className = 'prop-boutons';
     for (const k of [1, 2, 3, 4, 6]) {
       const b = document.createElement('button');
       b.textContent = '×' + k;
-      b.title = `${s.taille * k} × ${s.taille * k} pixels`;
+      b.title = T('{n} × {n} pixels', { n: s.taille * k });
       if (c.largeur === s.taille * k && c.hauteur === s.taille * k) b.className = 'actif';
       b.addEventListener('click', () => { c.largeur = c.hauteur = s.taille * k; maj(); afficherProprietes(); });
       tailles.appendChild(b);
     }
     dt.appendChild(tailles);
-    champCase(liste, `Animé dès le démarrage (${s.costumes.length} costume${s.costumes.length > 1 ? 's' : ''}, ${s.vitesse || 8} images/s)`,
+    champCase(liste, s.costumes.length > 1
+      ? T('Animé dès le démarrage ({n} costumes, {vitesse} images/s)', { n: s.costumes.length, vitesse: s.vitesse || 8 })
+      : T('Animé dès le démarrage ({n} costume, {vitesse} images/s)', { n: s.costumes.length, vitesse: s.vitesse || 8 }),
       c.anime, v => { c.anime = v; maj(); });
-    champCase(liste, 'Retourné (miroir)', c.miroir, v => { c.miroir = v; maj(); });
-    champNombre(liste, 'Angle (degrés)', c.rotation || 0, v => { c.rotation = v; maj(); });
-    champNombre(liste, 'Taille (%, 100 = normale)', c.taille ?? 100, v => { c.taille = Math.max(0, v); maj(); });
-    champNombre(liste, 'Transparence (%, 0 = opaque)', c.transparence || 0, v => { c.transparence = Math.min(100, Math.max(0, v)); maj(); });
+    champCase(liste, T('Retourné (miroir)'), c.miroir, v => { c.miroir = v; maj(); });
+    champNombre(liste, T('Angle (degrés)'), c.rotation || 0, v => { c.rotation = v; maj(); });
+    champNombre(liste, T('Taille (%, 100 = normale)'), c.taille ?? 100, v => { c.taille = Math.max(0, v); maj(); });
+    champNombre(liste, T('Transparence (%, 0 = opaque)'), c.transparence || 0, v => { c.transparence = Math.min(100, Math.max(0, v)); maj(); });
   }
 
   function nomSpriteLibre(base) {
@@ -2410,7 +2420,7 @@
     const s = Object.assign({ id: 'spr_' + nouvelId() }, r);
     projet.sprites.push(s);
     apresChangementSprites();
-    $('astuce').textContent = `🎭 Sprite « ${s.nom} » créé : posez un contrôle Sprite dans la fenêtre pour l'afficher.`;
+    $('astuce').textContent = T('🎭 Sprite « {nom} » créé : posez un contrôle Sprite dans la fenêtre pour l\'afficher.', { nom: s.nom });
     if (typeof surAjout === 'function') surAjout(s);
   }
 
@@ -2458,16 +2468,16 @@
     const plusieurs = s.costumes.length > 1;
     menuContextuel(ev.clientX, ev.clientY, [
       ...s.costumes.slice(0, 8).map((c, i) => ({
-        texte: `🖼️ ${plusieurs ? `Costume ${i + 1} « ${c.nom} »` : 'Image'} en PNG`,
+        texte: plusieurs ? T('🖼️ Costume {n} « {nom} » en PNG', { n: i + 1, nom: c.nom }) : T('🖼️ Image en PNG'),
         action: async () => telechargerOuSignaler(`${nomDeFichier(s.nom)}${plusieurs ? ' - ' + nomDeFichier(c.nom) : ''}.png`, await pngCostumes(s, [c]), 'image/png')
       })),
       ...(plusieurs ? [{
-        texte: `🎞️ Tous les costumes côte à côte (planche PNG)`,
-        action: async () => telechargerOuSignaler(`${nomDeFichier(s.nom)} - planche.png`, await pngCostumes(s, s.costumes), 'image/png')
+        texte: T('🎞️ Tous les costumes côte à côte (planche PNG)'),
+        action: async () => telechargerOuSignaler(`${nomDeFichier(s.nom)} - ${T('planche')}.png`, await pngCostumes(s, s.costumes), 'image/png')
       }] : []),
       '-',
       {
-        texte: '📦 Sprite pour un autre projet (.bsprite)',
+        texte: T('📦 Sprite pour un autre projet (.bsprite)'),
         action: () => {
           const { nom, taille, lisse, vitesse, zone, costumes } = s;
           telechargerOuSignaler(nomDeFichier(s.nom) + '.bsprite',
@@ -2485,17 +2495,17 @@
       if (!s || !Array.isArray(s.costumes) || !s.costumes.length ||
         !s.costumes.every(c => typeof c.donnees === 'string' && c.donnees.startsWith('data:image/'))) throw new Error();
     } catch (e) {
-      return alert(`« ${fichier.name} » n'est pas un sprite BlocStudio lisible.`);
+      return alert(T('« {nom} » n\'est pas un sprite BlocStudio lisible.', { nom: fichier.name }));
     }
     const sprite = {
       id: 'spr_' + nouvelId(), nom: nomSpriteLibre(String(s.nom || fichier.name.replace(/\.[^.]+$/, ''))),
       taille: Math.max(1, Number(s.taille) || 32), lisse: !!s.lisse, vitesse: Number(s.vitesse) || 8,
       zone: EditeurSprite.zoneValide(s.zone),
-      costumes: s.costumes.map((c, i) => ({ nom: String(c.nom || 'costume ' + (i + 1)), donnees: c.donnees }))
+      costumes: s.costumes.map((c, i) => ({ nom: String(c.nom || T('costume {n}', { n: i + 1 })), donnees: c.donnees }))
     };
     projet.sprites.push(sprite);
     apresChangementSprites();
-    $('astuce').textContent = `🎭 Sprite « ${sprite.nom} » importé (${sprite.costumes.length} costume(s)).`;
+    $('astuce').textContent = T('🎭 Sprite « {nom} » importé ({n} costume(s)).', { nom: sprite.nom, n: sprite.costumes.length });
     if (typeof surAjout === 'function') surAjout(sprite);
   }
 
@@ -2523,18 +2533,19 @@
     const extension = { 'audio/mpeg': 'mp3', 'audio/mp3': 'mp3', 'audio/ogg': 'ogg', 'audio/webm': 'webm', 'audio/mp4': 'm4a', 'audio/x-m4a': 'm4a' }[type] || 'wav';
     const decoupe = s.fin > s.debut || s.debut > 0;
     menuContextuel(ev.clientX, ev.clientY, [
-      { texte: `🔊 Le son en fichier ${extension.toUpperCase()}${decoupe ? ' (en entier)' : ''}`,
+      { texte: decoupe ? T('🔊 Le son en fichier {format} (en entier)', { format: extension.toUpperCase() })
+        : T('🔊 Le son en fichier {format}', { format: extension.toUpperCase() }),
         action: () => telechargerOuSignaler(`${nomDeFichier(s.nom)}.${extension}`, octetsDataUrl(s.donnees), type) },
       ...(decoupe ? [{
-        texte: '✂️ Seulement la partie découpée (WAV)',
+        texte: T('✂️ Seulement la partie découpée (WAV)'),
         action: async () => {
           const tampon = await BlocRuntime.decoderSon(s.donnees);
           const [debut, fin] = BlocRuntime.extraitSon(s, tampon);
-          telechargerOuSignaler(`${nomDeFichier(s.nom)} (extrait).wav`, wavDepuisTampon(tampon, debut, fin), 'audio/wav');
+          telechargerOuSignaler(`${nomDeFichier(s.nom)} (${T('extrait')}).wav`, wavDepuisTampon(tampon, debut, fin), 'audio/wav');
         }
       }] : []),
       ...(s.musique ? ['-', {
-        texte: '🎹 La partition, pour un autre projet (.bmusique)',
+        texte: T('🎹 La partition, pour un autre projet (.bmusique)'),
         action: () => telechargerOuSignaler(nomDeFichier(s.nom) + '.bmusique',
           JSON.stringify({ format: 'BlocStudio-musique', version: 1, nom: s.nom, musique: s.musique }), 'application/json')
       }] : [])
@@ -2547,10 +2558,10 @@
       d = JSON.parse(await fichier.text());
       if (!d || d.format !== 'BlocStudio-musique' || !d.musique || !Array.isArray(d.musique.pistes)) throw new Error();
     } catch (e) {
-      return alert(`« ${fichier.name} » n'est pas une musique BlocStudio lisible.`);
+      return alert(T('« {nom} » n\'est pas une musique BlocStudio lisible.', { nom: fichier.name }));
     }
     const s = ajouterSon(String(d.nom || fichier.name.replace(/\.[^.]+$/, '')),
-      StudioMusique.enWav(StudioMusique.rendre(d.musique)), 'importé');
+      StudioMusique.enWav(StudioMusique.rendre(d.musique)), T('importé'));
     s.musique = d.musique;
     planifierSauvegarde();
     if ($('vue-sommaire').classList.contains('actif')) afficherSommaire();
@@ -2569,17 +2580,17 @@
   }
 
   function renommerSprite(s) {
-    const nom = (prompt('Nouveau nom du sprite :', s.nom) || '').trim();
+    const nom = (prompt(T('Nouveau nom du sprite :'), s.nom) || '').trim();
     if (!nom || nom === s.nom) return;
-    if (projet.sprites.some(autre => autre.nom === nom)) return alert(`Il y a déjà un sprite nommé « ${nom} ».`);
+    if (projet.sprites.some(autre => autre.nom === nom)) return alert(T('Il y a déjà un sprite nommé « {nom} ».', { nom }));
     s.nom = nom;
     apresChangementSprites();
   }
 
   function supprimerSprite(s, utilisations) {
     const avertissement = utilisations
-      ? `\n\nAttention : il est utilisé ${utilisations} fois (blocs ou contrôles Sprite), qui ne l'afficheront plus.` : '';
-    if (!confirm(`Supprimer le sprite « ${s.nom} » ?${avertissement}`)) return;
+      ? '\n\n' + T('Attention : il est utilisé {n} fois (blocs ou contrôles Sprite), qui ne l\'afficheront plus.', { n: utilisations }) : '';
+    if (!confirm(T('Supprimer le sprite « {nom} » ?', { nom: s.nom }) + avertissement)) return;
     projet.sprites = projet.sprites.filter(autre => autre !== s);
     projet.controles.forEach(c => { if (c.type === 'sprite' && c.sprite === s.id) c.sprite = ''; });
     apresChangementSprites();
@@ -2608,8 +2619,8 @@
       if (!fichier) return;
       if (/\.bmusique$/i.test(fichier.name)) return importerFichierMusique(fichier, surAjout);
       if (fichier.size > TAILLE_MAX_SON) {
-        alert(`Ce son est trop lourd (${(fichier.size / 1048576).toFixed(1)} Mo, maximum 1,5 Mo).\n\n` +
-          'Choisissez un son plus court, ou réduisez-le avec un logiciel comme Audacity.');
+        alert(T('Ce son est trop lourd ({n} Mo, maximum 1,5 Mo).', { n: BlocLangues.nombre((fichier.size / 1048576).toFixed(1)) }) + '\n\n' +
+          T('Choisissez un son plus court, ou réduisez-le avec un logiciel comme Audacity.'));
         return;
       }
       let donnees;
@@ -2617,10 +2628,10 @@
         donnees = await lireEnDataUrl(fichier);
         await BlocRuntime.decoderSon(donnees);
       } catch (e) {
-        alert(`« ${fichier.name} » n'est pas un son lisible. Essayez un fichier MP3 ou WAV.`);
+        alert(T('« {nom} » n\'est pas un son lisible. Essayez un fichier MP3 ou WAV.', { nom: fichier.name }));
         return;
       }
-      const s = ajouterSon(fichier.name.replace(/\.[^.]+$/, ''), donnees, 'importé');
+      const s = ajouterSon(fichier.name.replace(/\.[^.]+$/, ''), donnees, T('importé'));
       if (typeof surAjout === 'function') surAjout(s);
     });
     choix.click();
@@ -2640,7 +2651,7 @@
     planifierSauvegarde();
     blocsAPerimes = true;
     if ($('vue-sommaire').classList.contains('actif')) afficherSommaire();
-    $('astuce').textContent = `🎵 Son « ${nom} » ${comment} : choisissez-le dans un bloc « jouer le son » (catégorie Sons et temps).`;
+    $('astuce').textContent = T('🎵 Son « {nom} » {comment} : choisissez-le dans un bloc « jouer le son » (catégorie Sons et temps).', { nom, comment });
     return son;
   }
 
@@ -2649,7 +2660,7 @@
   // `donnees` contient sa version WAV, jouée comme n'importe quel son.
   function composerMusique(surAjout) {
     StudioMusique.ouvrir({ nom: nomSonLibre('musique') }, r => {
-      const s = ajouterSon(r.nom, r.donnees, 'composé');
+      const s = ajouterSon(r.nom, r.donnees, T('composé'));
       s.musique = r.musique;
       planifierSauvegarde();
       if ($('vue-sommaire').classList.contains('actif')) afficherSommaire(); // pour le bouton « Modifier »
@@ -2666,7 +2677,7 @@
       planifierSauvegarde();
       if ($('vue-sommaire').classList.contains('actif')) afficherSommaire();
       afficherProprietes();
-      $('astuce').textContent = `🎹 Musique « ${s.nom} » mise à jour.`;
+      $('astuce').textContent = T('🎹 Musique « {nom} » mise à jour.', { nom: s.nom });
     });
   }
 
@@ -2681,8 +2692,8 @@
     micro.donnees = null;
     $('micro-resultat').hidden = true;
     $('btn-micro-garder').disabled = true;
-    $('micro-consigne').textContent = 'Cliquez sur le bouton rouge, parlez, chantez ou faites un bruit, puis cliquez à nouveau pour arrêter.';
-    $('micro-temps').textContent = DUREE_MAX_MICRO + ' secondes maximum';
+    $('micro-consigne').textContent = T('Cliquez sur le bouton rouge, parlez, chantez ou faites un bruit, puis cliquez à nouveau pour arrêter.');
+    $('micro-temps').textContent = T('{n} secondes maximum', { n: DUREE_MAX_MICRO });
     $('micro').hidden = false;
   }
 
@@ -2698,8 +2709,8 @@
       micro.flux = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true } });
     } catch (e) {
       $('micro-consigne').textContent = e.name === 'NotFoundError'
-        ? '⚠️ Aucun micro n\'a été trouvé. Branchez-en un (ou un casque avec micro), puis réessayez.'
-        : '⚠️ BlocStudio n\'a pas pu utiliser le micro. Vérifiez dans les paramètres de Windows (Confidentialité → Microphone) qu\'il est autorisé.';
+        ? T('⚠️ Aucun micro n\'a été trouvé. Branchez-en un (ou un casque avec micro), puis réessayez.')
+        : T('⚠️ BlocStudio n\'a pas pu utiliser le micro. Vérifiez dans les paramètres de Windows (Confidentialité → Microphone) qu\'il est autorisé.');
       return;
     }
     micro.morceaux = [];
@@ -2721,17 +2732,17 @@
       for (const v of echantillons) pic = Math.max(pic, Math.abs(v));
       $('micro-niveau').style.width = Math.min(100, Math.sqrt(pic) * 110) + '%';
       const ecoule = (performance.now() - micro.debut) / 1000;
-      $('micro-temps').textContent = `🔴 ${ecoule.toFixed(1).replace('.', ',')} s / ${DUREE_MAX_MICRO} s maximum`;
+      $('micro-temps').textContent = T('🔴 {n} s / {max} s maximum', { n: BlocLangues.nombre(ecoule.toFixed(1)), max: DUREE_MAX_MICRO });
       if (ecoule >= DUREE_MAX_MICRO) return arreterMicro(true);
       micro.animation = requestAnimationFrame(suivre);
     };
     suivre();
 
     $('btn-micro-enreg').classList.add('en-cours');
-    $('btn-micro-enreg').title = 'Arrêter';
+    $('btn-micro-enreg').title = T('Arrêter');
     $('micro-resultat').hidden = true;
     $('btn-micro-garder').disabled = true;
-    $('micro-consigne').textContent = 'J\'écoute… Cliquez sur le bouton pour arrêter.';
+    $('micro-consigne').textContent = T('J\'écoute… Cliquez sur le bouton pour arrêter.');
   }
 
   // garder : false pour abandonner l'enregistrement en cours (fenêtre fermée).
@@ -2746,30 +2757,30 @@
     micro.flux = micro.contexte = null;
     $('micro-niveau').style.width = '0';
     $('btn-micro-enreg').classList.remove('en-cours');
-    $('btn-micro-enreg').title = 'Enregistrer';
+    $('btn-micro-enreg').title = T('Enregistrer');
   }
 
   async function traiterEnregistrement(blob) {
-    $('micro-consigne').textContent = 'Préparation du son…';
+    $('micro-consigne').textContent = T('Préparation du son…');
     try {
       const decodeur = new AudioContext();
       let tampon;
       try { tampon = await decodeur.decodeAudioData(await blob.arrayBuffer()); } finally { decodeur.close(); }
       const donnees = await nettoyerSon(tampon);
       if (!donnees) {
-        $('micro-consigne').textContent = '🤫 Je n\'ai rien entendu. Parlez plus près du micro, puis réessayez.';
-        $('micro-temps').textContent = DUREE_MAX_MICRO + ' secondes maximum';
+        $('micro-consigne').textContent = T('🤫 Je n\'ai rien entendu. Parlez plus près du micro, puis réessayez.');
+        $('micro-temps').textContent = T('{n} secondes maximum', { n: DUREE_MAX_MICRO });
         return;
       }
       micro.donnees = donnees.url;
-      $('micro-consigne').textContent = 'Voilà ! Écoutez le résultat. S\'il ne vous plaît pas, cliquez à nouveau sur le bouton rouge pour recommencer.';
-      $('micro-temps').textContent = `Durée : ${donnees.duree.toFixed(1).replace('.', ',')} s`;
+      $('micro-consigne').textContent = T('Voilà ! Écoutez le résultat. S\'il ne vous plaît pas, cliquez à nouveau sur le bouton rouge pour recommencer.');
+      $('micro-temps').textContent = T('Durée : {n} s', { n: BlocLangues.nombre(donnees.duree.toFixed(1)) });
       $('micro-nom').value = nomSonLibre('enregistrement');
       $('micro-resultat').hidden = false;
       $('btn-micro-garder').disabled = false;
       $('micro-nom').select();
     } catch (e) {
-      $('micro-consigne').textContent = '⚠️ L\'enregistrement n\'a pas pu être lu. Réessayez.';
+      $('micro-consigne').textContent = T('⚠️ L\'enregistrement n\'a pas pu être lu. Réessayez.');
     }
   }
 
@@ -2849,8 +2860,8 @@
     if (!lecture || !son || lecture.son !== son) return;
     lecture.bouton = bouton;
     lecture.texte = bouton.textContent;
-    bouton.textContent = lecture.texte === '▶ Écouter' ? '■ Arrêter' : lecture.texte.replace('▶', '■');
-    bouton.title = 'Arrêter l\'écoute';
+    bouton.textContent = lecture.texte === T('▶ Écouter') ? T('■ Arrêter') : lecture.texte.replace('▶', '■');
+    bouton.title = T('Arrêter l\'écoute');
   }
 
   function finEcoute(lecture) {
@@ -2866,7 +2877,7 @@
       const [debut, fin] = BlocRuntime.extraitSon(s, tampon);
       jouerExtrait(tampon, debut, fin, bouton, s);
     } catch (e) {
-      alert(`Le son « ${s.nom} » n'a pas pu être lu.`);
+      alert(T('Le son « {nom} » n\'a pas pu être lu.', { nom: s.nom }));
     }
   }
 
@@ -2880,11 +2891,11 @@
   async function ouvrirDecoupe(s) {
     let tampon;
     try { tampon = await BlocRuntime.decoderSon(s.donnees); } catch (e) {
-      return alert(`Le son « ${s.nom} » n'a pas pu être lu.`);
+      return alert(T('Le son « {nom} » n\'a pas pu être lu.', { nom: s.nom }));
     }
     Object.assign(decoupe, { son: s, tampon, glisse: null });
     [decoupe.debut, decoupe.fin] = BlocRuntime.extraitSon(s, tampon);
-    $('decoupe-titre').textContent = `✂️ Découper « ${s.nom} »`;
+    $('decoupe-titre').textContent = T('✂️ Découper « {nom} »', { nom: s.nom });
     $('decoupe').hidden = false;
 
     // Dessin net sur les écrans à haute résolution.
@@ -3005,13 +3016,13 @@
     }
 
     $('decoupe-infos').innerHTML = '';
-    for (const [libelle, valeur] of [['Début', decoupe.debut], ['Fin', decoupe.fin], ['Durée', decoupe.fin - decoupe.debut]]) {
-      const span = el('span', null, libelle + ' : ');
+    for (const [libelle, valeur] of [[T('Début'), decoupe.debut], [T('Fin'), decoupe.fin], [T('Durée'), decoupe.fin - decoupe.debut]]) {
+      const span = el('span', null, libelle + T(' : '));
       span.appendChild(el('b', null, secondes(valeur)));
       $('decoupe-infos').appendChild(span);
     }
-    $('decoupe-infos').appendChild(el('span', 'muet', `(son complet : ${secondes(duree)})`));
-    $('btn-decoupe-ecouter').textContent = lectureEnCours ? '■ Arrêter' : '▶ Écouter';
+    $('decoupe-infos').appendChild(el('span', 'muet', T('(son complet : {duree})', { duree: secondes(duree) })));
+    $('btn-decoupe-ecouter').textContent = lectureEnCours ? T('■ Arrêter') : T('▶ Écouter');
   }
 
   function animerDecoupe() {
@@ -3074,9 +3085,9 @@
   }
 
   function renommerSon(s) {
-    const nom = (prompt('Nouveau nom du son :', s.nom) || '').trim();
+    const nom = (prompt(T('Nouveau nom du son :'), s.nom) || '').trim();
     if (!nom || nom === s.nom) return;
-    if (projet.sons.some(autre => autre.nom === nom)) return alert(`Il y a déjà un son nommé « ${nom} ».`);
+    if (projet.sons.some(autre => autre.nom === nom)) return alert(T('Il y a déjà un son nommé « {nom} ».', { nom }));
     s.nom = nom;
     blocsAPerimes = true;
     planifierSauvegarde();
@@ -3085,8 +3096,8 @@
 
   function supprimerSon(s, utilisations) {
     const avertissement = utilisations
-      ? `\n\nAttention : il est utilisé ${utilisations} fois (blocs ou contrôles Son), qui ne le joueront plus.` : '';
-    if (!confirm(`Supprimer le son « ${s.nom} » ?${avertissement}`)) return;
+      ? '\n\n' + T('Attention : il est utilisé {n} fois (blocs ou contrôles Son), qui ne le joueront plus.', { n: utilisations }) : '';
+    if (!confirm(T('Supprimer le son « {nom} » ?', { nom: s.nom }) + avertissement)) return;
     projet.sons = projet.sons.filter(autre => autre !== s);
     projet.controles.forEach(c => { if (c.type === 'son' && c.son === s.id) c.son = ''; });
     afficherInvisibles();
@@ -3107,12 +3118,12 @@
       majBoite();
       window.BlocStudioVerifier(workspace);
       Blockly.svgResize(workspace);
-      $('astuce').textContent = 'Glissez des blocs depuis les catégories à gauche, puis emboîtez-les sous un bloc « quand… ».';
+      $('astuce').textContent = T('Glissez des blocs depuis les catégories à gauche, puis emboîtez-les sous un bloc « quand… ».');
     } else if (id === 'vue-sommaire') {
       afficherSommaire();
-      $('astuce').textContent = 'Cliquez sur un élément pour le retrouver dans la fenêtre ou dans le code.';
+      $('astuce').textContent = T('Cliquez sur un élément pour le retrouver dans la fenêtre ou dans le code.');
     } else {
-      $('astuce').textContent = 'Placez vos contrôles, puis double-cliquez sur l\'un d\'eux pour écrire son code.';
+      $('astuce').textContent = T('Placez vos contrôles, puis double-cliquez sur l\'un d\'eux pour écrire son code.');
     }
   }
 
@@ -3125,12 +3136,13 @@
     selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', heure: '🕒', calendrier: '🗓️', horloge: '🕰️', forme: '🔷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
-  const EVENEMENTS = { bs_quand_clic: 'clic', bs_quand_change: 'change', bs_quand_glisse: 'glisser',
-    bs_quand_son_fin: 'se termine', bs_quand_minuteur: 'sonne', bs_quand_fichier_depose: 'fichier déposé', bs_quand_camera_mouvement: 'voit bouger', bs_quand_souris_ctrl: 'souris', bs_quand_clone: 'cloné' };
+  const EVENEMENTS = { bs_quand_clic: T('clic'), bs_quand_change: T('change'), bs_quand_glisse: T('glisser'),
+    bs_quand_son_fin: T('se termine'), bs_quand_minuteur: T('sonne'), bs_quand_fichier_depose: T('fichier déposé'),
+    bs_quand_camera_mouvement: T('voit bouger'), bs_quand_souris_ctrl: T('souris'), bs_quand_clone: T('cloné') };
 
   // Libellé court d'un événement de contrôle, pour le Sommaire.
   const libelleEvenement = b => b.type === 'bs_quand_souris_ctrl'
-    ? { dblclic: 'double-clic', appui: 'bouton appuyé', relache: 'bouton relâché', entre: 'souris dessus', sort: 'souris partie' }[b.getFieldValue('QUOI')]
+    ? { dblclic: T('double-clic'), appui: T('bouton appuyé'), relache: T('bouton relâché'), entre: T('souris dessus'), sort: T('souris partie') }[b.getFieldValue('QUOI')]
     : EVENEMENTS[b.type];
 
   function nomControle(id) {
@@ -3142,28 +3154,29 @@
     const r = bloc.getRootBlock();
     const ctrl = () => nomControle(r.getFieldValue('CTRL'));
     switch (r.type) {
-      case 'bs_quand_demarre': return 'quand la fenêtre démarre';
-      case 'bs_quand_clic': return `quand ${ctrl()} est cliqué`;
-      case 'bs_quand_change': return `quand ${ctrl()} ${projet.controles.find(x => x.id === r.getFieldValue('CTRL'))?.type === 'panneau' ? 'défile' : 'change'}`;
-      case 'bs_quand_glisse': return `quand on glisse dans ${ctrl()}`;
-      case 'bs_quand_son_fin': return `quand ${ctrl()} se termine`;
-      case 'bs_quand_minuteur': return `quand ${ctrl()} sonne`;
-      case 'bs_quand_fichier_depose': return `quand on dépose un fichier (${ctrl()})`;
-      case 'bs_quand_camera_mouvement': return `quand ${ctrl()} voit bouger`;
-      case 'bs_quand_clone': return `quand un clone de ${ctrl()} est créé`;
-      case 'bs_quand_fenetre': return `quand la fenêtre ${nomFenetre(r.getFieldValue('FENETRE'))} ${r.getField('QUOI').getText()}`;
-      case 'bs_quand_fenetre_taille': return `quand la fenêtre ${nomFenetre(r.getFieldValue('FENETRE'))} change de taille`;
-      case 'bs_quand_souris_ctrl': return `quand on ${r.getField('QUOI').getText()} ${ctrl()}`;
-      case 'bs_quand_souris_fenetre': return `quand la souris ${r.getField('QUOI').getText()} dans la fenêtre`;
-      case 'bs_quand_touche': return `quand la touche ${r.getField('TOUCHE').getText()} est appuyée`;
-      case 'bs_toutes_les': return 'toutes les … secondes';
-      case 'bs_quand_menu': return `quand on choisit le menu ${r.getFieldValue('MENU')}`;
-      case 'bs_quand_menu_contextuel': return `quand on choisit ${r.getFieldValue('ITEM')} dans ${ctrl()}`;
-      case 'bs_quand_outil': return `quand on clique sur ${r.getFieldValue('ITEM')} dans ${ctrl()}`;
-      case 'bs_quand_message': return `quand je reçois ${r.getFieldValue('MSG')}`;
+      case 'bs_quand_demarre': return T('quand la fenêtre démarre');
+      case 'bs_quand_clic': return T('quand {nom} est cliqué', { nom: ctrl() });
+      case 'bs_quand_change': return projet.controles.find(x => x.id === r.getFieldValue('CTRL'))?.type === 'panneau'
+        ? T('quand {nom} défile', { nom: ctrl() }) : T('quand {nom} change', { nom: ctrl() });
+      case 'bs_quand_glisse': return T('quand on glisse dans {nom}', { nom: ctrl() });
+      case 'bs_quand_son_fin': return T('quand {nom} se termine', { nom: ctrl() });
+      case 'bs_quand_minuteur': return T('quand {nom} sonne', { nom: ctrl() });
+      case 'bs_quand_fichier_depose': return T('quand on dépose un fichier ({nom})', { nom: ctrl() });
+      case 'bs_quand_camera_mouvement': return T('quand {nom} voit bouger', { nom: ctrl() });
+      case 'bs_quand_clone': return T('quand un clone de {nom} est créé', { nom: ctrl() });
+      case 'bs_quand_fenetre': return T('quand la fenêtre {nom} {quoi}', { nom: nomFenetre(r.getFieldValue('FENETRE')), quoi: r.getField('QUOI').getText() });
+      case 'bs_quand_fenetre_taille': return T('quand la fenêtre {nom} change de taille', { nom: nomFenetre(r.getFieldValue('FENETRE')) });
+      case 'bs_quand_souris_ctrl': return T('quand on {quoi} {nom}', { quoi: r.getField('QUOI').getText(), nom: ctrl() });
+      case 'bs_quand_souris_fenetre': return T('quand la souris {quoi} dans la fenêtre', { quoi: r.getField('QUOI').getText() });
+      case 'bs_quand_touche': return T('quand la touche {touche} est appuyée', { touche: r.getField('TOUCHE').getText() });
+      case 'bs_toutes_les': return T('toutes les … secondes');
+      case 'bs_quand_menu': return T('quand on choisit le menu {menu}', { menu: r.getFieldValue('MENU') });
+      case 'bs_quand_menu_contextuel': return T('quand on choisit {element} dans {nom}', { element: r.getFieldValue('ITEM'), nom: ctrl() });
+      case 'bs_quand_outil': return T('quand on clique sur {element} dans {nom}', { element: r.getFieldValue('ITEM'), nom: ctrl() });
+      case 'bs_quand_message': return T('quand je reçois {message}', { message: r.getFieldValue('MSG') });
       case 'procedures_defnoreturn':
-      case 'procedures_defreturn': return `fonction ${r.getFieldValue('NAME')}`;
-      default: return 'blocs non reliés (inactifs)';
+      case 'procedures_defreturn': return T('fonction {nom}', { nom: r.getFieldValue('NAME') });
+      default: return T('blocs non reliés (inactifs)');
     }
   }
 
@@ -3219,10 +3232,10 @@
       barre.appendChild(b);
     };
     barre.appendChild(el('span', 'barre-reperes-nom', `🔎 ${ICONES_TYPES[c.type] || ''} ${c.nom}`));
-    bouton('◀', 'Endroit précédent', () => allerAuRepere(reperes.index - 1));
+    bouton('◀', T('Endroit précédent'), () => allerAuRepere(reperes.index - 1));
     barre.appendChild(texte);
-    bouton('▶', 'Endroit suivant', () => allerAuRepere(reperes.index + 1));
-    bouton('✕', 'Fermer (les blocs ne sont plus surlignés)', fermerReperes);
+    bouton('▶', T('Endroit suivant'), () => allerAuRepere(reperes.index + 1));
+    bouton('✕', T('Fermer (les blocs ne sont plus surlignés)'), fermerReperes);
     reperes.texte = texte;
     $('vue-code').appendChild(barre);
     allerAuRepere(0);
@@ -3320,16 +3333,16 @@
     const blocs = workspace.getAllBlocks(true);
 
     const intro = el('div', 'sommaire-titre');
-    intro.appendChild(el('h1', null, projet.fenetre.titre || 'Mon programme'));
-    intro.appendChild(el('p', 'muet',
-      `Fenêtre de ${projet.fenetre.largeur} × ${projet.fenetre.hauteur} pixels · ${blocs.length} bloc(s) au total`));
+    intro.appendChild(el('h1', null, projet.fenetre.titre || T('Mon programme')));
+    intro.appendChild(el('p', 'muet', T('Fenêtre de {largeur} × {hauteur} pixels · {n} bloc(s) au total',
+      { largeur: projet.fenetre.largeur, hauteur: projet.fenetre.hauteur, n: blocs.length })));
     zone.appendChild(intro);
 
     // --- Contrôles ---
-    const controles = [...projet.controles].sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
-    const corpsCtrl = sectionSommaire(zone, 'Contrôles', controles.length,
-      ['Nom', 'Type', 'Événements programmés', 'Utilisé dans'],
-      controles.length ? null : 'Aucun contrôle pour l\'instant. Ajoutez-en depuis l\'onglet Fenêtre.');
+    const controles = [...projet.controles].sort((a, b) => a.nom.localeCompare(b.nom, BlocLangues.langue()));
+    const corpsCtrl = sectionSommaire(zone, T('Contrôles'), controles.length,
+      [T('Nom'), T('Type'), T('Événements programmés'), T('Utilisé dans')],
+      controles.length ? null : T('Aucun contrôle pour l\'instant. Ajoutez-en depuis l\'onglet Fenêtre.'));
     for (const c of controles) {
       const tr = el('tr');
       const nom = el('td');
@@ -3340,7 +3353,7 @@
       const lies = blocs.filter(b => b.getField('CTRL') && b.getFieldValue('CTRL') === c.id);
       const evts = el('td');
       const chapeaux = lies.filter(b => EVENEMENTS[b.type]);
-      if (!chapeaux.length) evts.appendChild(el('span', 'muet', 'aucun'));
+      if (!chapeaux.length) evts.appendChild(el('span', 'muet', T('aucun')));
       for (const b of chapeaux) evts.appendChild(puce('⚡ ' + libelleEvenement(b), () => allerAuBloc(b), 'puce-evt'));
       tr.appendChild(evts);
 
@@ -3351,29 +3364,29 @@
     // --- Menus ---
     const chemins = BlocRuntime.cheminsMenus(projet.fenetre.menus);
     if (chemins.length) {
-      const corpsMenus = sectionSommaire(zone, 'Menus', chemins.length, ['Menu', 'Événement programmé']);
+      const corpsMenus = sectionSommaire(zone, T('Menus'), chemins.length, [T('Menu'), T('Événement programmé')]);
       for (const chemin of chemins) {
         const tr = el('tr');
         tr.appendChild(el('td')).appendChild(puce('☰ ' + chemin, () => ouvrirEvenementMenu(chemin), 'puce-nom'));
         const evt = blocs.find(b => b.type === 'bs_quand_menu' && b.getFieldValue('MENU') === chemin);
         const td = tr.appendChild(el('td'));
-        if (evt) td.appendChild(puce('⚡ choisi', () => allerAuBloc(evt), 'puce-evt'));
-        else td.appendChild(el('span', 'muet', 'aucun'));
+        if (evt) td.appendChild(puce(T('⚡ choisi'), () => allerAuBloc(evt), 'puce-evt'));
+        else td.appendChild(el('span', 'muet', T('aucun')));
         corpsMenus.appendChild(tr);
       }
     }
 
     // --- Autres fenêtres ---
     if (projet.fenetres.length) {
-      const corpsFen = sectionSommaire(zone, 'Autres fenêtres', projet.fenetres.length,
-        ['Fenêtre', 'Taille', 'Événements programmés', 'Ouverte par']);
+      const corpsFen = sectionSommaire(zone, T('Autres fenêtres'), projet.fenetres.length,
+        [T('Fenêtre'), T('Taille'), T('Événements programmés'), T('Ouverte par')]);
       for (const f of projet.fenetres) {
         const tr = el('tr');
         tr.appendChild(el('td')).appendChild(puce('🪟 ' + f.nom, () => { afficherVue('vue-fenetre'); changerFenetre(f.id); }, 'puce-nom'));
-        tr.appendChild(el('td', 'muet', `${f.largeur} × ${f.hauteur} · ${projet.controles.filter(c => c.fenetre === f.id).length} contrôle(s)`));
+        tr.appendChild(el('td', 'muet', T('{largeur} × {hauteur} · {n} contrôle(s)', { largeur: f.largeur, hauteur: f.hauteur, n: projet.controles.filter(c => c.fenetre === f.id).length })));
         const evts = tr.appendChild(el('td'));
         const chapeaux = blocs.filter(b => b.type === 'bs_quand_fenetre' && b.getFieldValue('FENETRE') === f.id);
-        if (!chapeaux.length) evts.appendChild(el('span', 'muet', 'aucun'));
+        if (!chapeaux.length) evts.appendChild(el('span', 'muet', T('aucun')));
         for (const b of chapeaux) evts.appendChild(puce('⚡ ' + b.getField('QUOI').getText(), () => allerAuBloc(b), 'puce-evt'));
         tr.appendChild(pucesEndroits(blocs.filter(b => b.type === 'bs_fenetre_ouvrir' && b.getFieldValue('FENETRE') === f.id)));
         corpsFen.appendChild(tr);
@@ -3381,9 +3394,9 @@
     }
 
     // --- Sprites ---
-    const corpsSprites = sectionSommaire(zone, 'Sprites', projet.sprites.length,
-      ['Sprite (cliquer pour le modifier)', 'Costumes', 'Utilisé dans', ''],
-      projet.sprites.length ? null : 'Aucun sprite pour l\'instant. Dessinez-en un ou importez une image : ce sont les personnages et objets de vos jeux.');
+    const corpsSprites = sectionSommaire(zone, T('Sprites'), projet.sprites.length,
+      [T('Sprite (cliquer pour le modifier)'), T('Costumes'), T('Utilisé dans'), ''],
+      projet.sprites.length ? null : T('Aucun sprite pour l\'instant. Dessinez-en un ou importez une image : ce sont les personnages et objets de vos jeux.'));
     for (const s of projet.sprites) {
       const usages = blocs.filter(b => b.getField('SPRITE') && b.getFieldValue('SPRITE') === s.id);
       const controles = projet.controles.filter(c => c.type === 'sprite' && c.sprite === s.id);
@@ -3396,63 +3409,63 @@
       if (controles.length) endroits.querySelector('.muet')?.remove();
       controles.forEach(c => endroits.prepend(puce('🎭 ' + c.nom, () => allerAuControle(c.id))));
       const actions = tr.appendChild(el('td', 'actions-son'));
-      actions.appendChild(puce('🎨 Modifier', () => modifierSprite(s)));
-      actions.appendChild(puce('💾 Exporter…', e => menuExporterSprite(e, s)));
-      actions.appendChild(puce('✏️ Renommer', () => renommerSprite(s)));
-      actions.appendChild(puce('🗑️ Supprimer', () => supprimerSprite(s, usages.length + controles.length)));
+      actions.appendChild(puce(T('🎨 Modifier'), () => modifierSprite(s)));
+      actions.appendChild(puce(T('💾 Exporter…'), e => menuExporterSprite(e, s)));
+      actions.appendChild(puce(T('✏️ Renommer'), () => renommerSprite(s)));
+      actions.appendChild(puce(T('🗑️ Supprimer'), () => supprimerSprite(s, usages.length + controles.length)));
       corpsSprites.appendChild(tr);
     }
-    zone.lastElementChild.appendChild(puce('🎨 Dessiner un sprite…', nouveauSprite, 'puce-importer puce-sprite'));
-    zone.lastElementChild.appendChild(puce('📁 Importer une image ou un sprite (.bsprite)…', importerSprite, 'puce-importer puce-sprite'));
+    zone.lastElementChild.appendChild(puce(T('🎨 Dessiner un sprite…'), nouveauSprite, 'puce-importer puce-sprite'));
+    zone.lastElementChild.appendChild(puce(T('📁 Importer une image ou un sprite (.bsprite)…'), importerSprite, 'puce-importer puce-sprite'));
 
     // --- Sons importés ---
-    const corpsSons = sectionSommaire(zone, 'Sons', projet.sons.length,
-      ['Son (cliquer pour écouter)', 'Taille', 'Utilisé dans', ''],
-      projet.sons.length ? null : 'Aucun son pour l\'instant. Importez un fichier (MP3, WAV…) ou enregistrez-vous avec le micro.');
+    const corpsSons = sectionSommaire(zone, T('Sons'), projet.sons.length,
+      [T('Son (cliquer pour écouter)'), T('Taille'), T('Utilisé dans'), ''],
+      projet.sons.length ? null : T('Aucun son pour l\'instant. Importez un fichier (MP3, WAV…) ou enregistrez-vous avec le micro.'));
     for (const s of projet.sons) {
       const usages = blocs.filter(b => b.getField('SON') && b.getFieldValue('SON') === s.id);
       const controles = projet.controles.filter(c => c.type === 'son' && c.son === s.id);
       const tr = el('tr');
       const ecoute = tr.appendChild(el('td')).appendChild(puce('▶ ' + s.nom, () => ecouterSon(s, ecoute), 'puce-nom'));
       suivreEcoute(ecoute, s);
-      tr.appendChild(el('td', 'muet', `${Math.max(1, Math.round(s.donnees.length * 0.75 / 1024))} Ko` +
-        (s.fin > s.debut || s.debut > 0 ? ' · ✂️ découpé' : '') + (s.musique ? ' · 🎹 8 bits' : '')));
+      tr.appendChild(el('td', 'muet', T('{n} Ko', { n: Math.max(1, Math.round(s.donnees.length * 0.75 / 1024)) }) +
+        (s.fin > s.debut || s.debut > 0 ? ' · ' + T('✂️ découpé') : '') + (s.musique ? ' · ' + T('🎹 8 bits') : '')));
       const endroits = tr.appendChild(pucesEndroits(usages));
       if (controles.length) endroits.querySelector('.muet')?.remove();
       controles.forEach(c => endroits.prepend(puce('🔊 ' + c.nom, () => allerAuControle(c.id))));
       const actions = tr.appendChild(el('td', 'actions-son'));
-      if (s.musique) actions.appendChild(puce('🎹 Modifier', () => modifierMusique(s)));
-      actions.appendChild(puce('✂️ Découper', () => ouvrirDecoupe(s)));
-      actions.appendChild(puce('💾 Exporter…', e => menuExporterSon(e, s)));
-      actions.appendChild(puce('✏️ Renommer', () => renommerSon(s)));
-      actions.appendChild(puce('🗑️ Supprimer', () => supprimerSon(s, usages.length + controles.length)));
+      if (s.musique) actions.appendChild(puce(T('🎹 Modifier'), () => modifierMusique(s)));
+      actions.appendChild(puce(T('✂️ Découper'), () => ouvrirDecoupe(s)));
+      actions.appendChild(puce(T('💾 Exporter…'), e => menuExporterSon(e, s)));
+      actions.appendChild(puce(T('✏️ Renommer'), () => renommerSon(s)));
+      actions.appendChild(puce(T('🗑️ Supprimer'), () => supprimerSon(s, usages.length + controles.length)));
       corpsSons.appendChild(tr);
     }
-    zone.lastElementChild.appendChild(puce('🎵 Importer un son ou une musique (.bmusique)…', importerSon, 'puce-importer'));
-    zone.lastElementChild.appendChild(puce('🎤 Enregistrer avec le micro…', ouvrirMicro, 'puce-importer'));
-    zone.lastElementChild.appendChild(puce('🎹 Composer une musique 8 bits…', composerMusique, 'puce-importer'));
+    zone.lastElementChild.appendChild(puce(T('🎵 Importer un son ou une musique (.bmusique)…'), importerSon, 'puce-importer'));
+    zone.lastElementChild.appendChild(puce(T('🎤 Enregistrer avec le micro…'), ouvrirMicro, 'puce-importer'));
+    zone.lastElementChild.appendChild(puce(T('🎹 Composer une musique 8 bits…'), composerMusique, 'puce-importer'));
 
     // --- Variables ---
     const variables = workspace.getVariableMap().getAllVariables()
       .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
-    const corpsVar = sectionSommaire(zone, 'Variables', variables.length,
-      ['Nom', 'Utilisations', 'Utilisée dans'],
-      variables.length ? null : 'Aucune variable. Créez-en une dans la catégorie « Variables » de l\'onglet Code.');
+    const corpsVar = sectionSommaire(zone, T('Variables'), variables.length,
+      [T('Nom'), T('Utilisations'), T('Utilisée dans')],
+      variables.length ? null : T('Aucune variable. Créez-en une dans la catégorie « Variables » de l\'onglet Code.'));
     for (const v of variables) {
       const usages = blocs.filter(b => b.getVarModels().some(m => m.getId() === v.getId()));
       const tr = el('tr');
       tr.appendChild(el('td')).appendChild(el('span', 'puce puce-var', v.name));
       tr.appendChild(el('td', usages.length ? null : 'muet',
-        usages.length ? `${usages.length} bloc(s)` : 'jamais utilisée'));
+        usages.length ? T('{n} bloc(s)', { n: usages.length }) : T('jamais utilisée')));
       tr.appendChild(pucesEndroits(usages));
       corpsVar?.appendChild(tr);
     }
 
     // --- Fonctions ---
     const definitions = blocs.filter(b => b.type === 'procedures_defnoreturn' || b.type === 'procedures_defreturn');
-    const corpsFn = sectionSommaire(zone, 'Fonctions', definitions.length,
-      ['Nom', 'Donne un résultat', 'Appelée dans'],
-      definitions.length ? null : 'Aucune fonction. Les fonctions servent à regrouper des blocs que l\'on réutilise (catégorie « Fonctions »).');
+    const corpsFn = sectionSommaire(zone, T('Fonctions'), definitions.length,
+      [T('Nom'), T('Donne un résultat'), T('Appelée dans')],
+      definitions.length ? null : T('Aucune fonction. Les fonctions servent à regrouper des blocs que l\'on réutilise (catégorie « Fonctions »).'));
     for (const d of definitions) {
       const nom = d.getFieldValue('NAME');
       const appels = blocs.filter(b => (b.type === 'procedures_callnoreturn' || b.type === 'procedures_callreturn') &&
@@ -3644,7 +3657,7 @@
     const lignes = Object.entries(valeurs || {});
     if (!lignes.length) {
       const tr = el('tr');
-      tr.appendChild(el('td', 'muet', 'Ce programme n\'a pas de variable.'));
+      tr.appendChild(el('td', 'muet', T('Ce programme n\'a pas de variable.')));
       table.replaceChildren(tr);
       return;
     }
@@ -3735,7 +3748,7 @@
 
   function telechargerOuSignaler(nom, contenu, type) {
     return telecharger(nom, contenu, type).catch(e => {
-      alert("Impossible d'enregistrer le fichier : " + e.message);
+      alert(T('Impossible d\'enregistrer le fichier : {erreur}', { erreur: e.message }));
       return null;
     });
   }
@@ -3757,7 +3770,7 @@
         chargerProjet(p);
         planifierSauvegarde();
       } catch (e) {
-        alert("Ce fichier n'est pas un projet BlocStudio valide.");
+        alert(T('Ce fichier n\'est pas un projet BlocStudio valide.'));
       }
     };
     r.readAsText(fichier);
@@ -3781,7 +3794,7 @@
   body { display: flex; align-items: center; justify-content: center; background: #dfe3ea; }
   #app { box-shadow: 0 10px 30px rgba(0,0,0,.2); }`;
     return `<!doctype html>
-<html lang="fr">
+<html lang="${BlocLangues.langue()}">
 <head>
 <meta charset="utf-8">
 <title>${titre}</title>
@@ -3795,11 +3808,12 @@
 <div id="erreur"></div>
 <script>
 // Programme créé avec BlocStudio
+${BlocLangues.pourExport(BlocRuntimeFactory.toString())}
 ${BlocRuntimeFactory.toString()}
 const BlocRuntime = BlocRuntimeFactory();
 BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app'), function (msg) {
   const e = document.getElementById('erreur');
-  e.textContent = 'Erreur : ' + msg;
+  e.textContent = ${JSON.stringify(T('Erreur : '))} + msg;
   e.style.display = 'block';
 }, { remplir: ${!!pourExe} });
 </script>
@@ -3820,7 +3834,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       const s = document.createElement('script');
       s.src = 'js/lanceur-data.js';
       s.onload = () => resoudre(window.BlocStudioLanceur);
-      s.onerror = () => rejeter(new Error('Fichier js/lanceur-data.js introuvable.'));
+      s.onerror = () => rejeter(new Error(T('Fichier js/lanceur-data.js introuvable.')));
       document.head.appendChild(s);
     });
   }
@@ -3836,7 +3850,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     for (let i = 0; i < binaire.length; i++) lanceur[i] = binaire.charCodeAt(i);
 
     const f = projet.fenetre;
-    const titre = (f.titre || 'Mon programme').replace(/[\r\n]+/g, ' ');
+    const titre = (f.titre || T('Mon programme')).replace(/[\r\n]+/g, ' ');
     const hauteur = f.hauteur + (BlocRuntime.lireMenus(f.menus).length ? BlocRuntime.HAUTEUR_MENUS : 0);
     const menus = hauteur - f.hauteur;
     const reglages = [`redim=${f.redimensionnable ? 1 : 0}`, `agrandir=${f.agrandir ? 1 : 0}`, `agrandie=${f.agrandie ? 1 : 0}`,
@@ -3869,7 +3883,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       $('info-exe-chemin').textContent = chemin;
       $('info-exe').hidden = false;
     } catch (e) {
-      alert("L'export en application Windows a échoué : " + e.message);
+      alert(T('L\'export en application Windows a échoué : {erreur}', { erreur: e.message }));
     }
   }
 
@@ -3930,14 +3944,14 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
 
   // ---- Palette : les contrôles rangés par thème, dans l'ordre alphabétique, avec une recherche ----
   const THEMES_PALETTE = [
-    ['✏️ Texte', ['etiquette', 'lien', 'motdepasse', 'zonetexte']],
-    ['🔘 Boutons et choix', ['bouton', 'boutonradio', 'casecocher', 'curseur', 'interrupteur', 'listederoulante', 'selecteurcouleur',
+    [T('✏️ Texte'), ['etiquette', 'lien', 'motdepasse', 'zonetexte']],
+    [T('🔘 Boutons et choix'), ['bouton', 'boutonradio', 'casecocher', 'curseur', 'interrupteur', 'listederoulante', 'selecteurcouleur',
       'date', 'heure', 'calendrier', 'selecteurnombre', 'zoneliste']],
-    ['📊 Données', ['arborescence', 'barreprogression', 'basedonnees', 'graphique', 'horloge', 'tableau']],
-    ['🖼️ Images et dessin', ['forme', 'image', 'sprite', 'zonedessin']],
-    ['🎬 Sons, vidéos et web', ['camera', 'navigateur', 'son', 'video']],
-    ['🧱 Mise en page', ['barreetat', 'barreoutils', 'cadre', 'menucontextuel', 'onglets', 'panneau']],
-    ['⚙️ Outils', ['fichier', 'minuteur']]
+    [T('📊 Données'), ['arborescence', 'barreprogression', 'basedonnees', 'graphique', 'horloge', 'tableau']],
+    [T('🖼️ Images et dessin'), ['forme', 'image', 'sprite', 'zonedessin']],
+    [T('🎬 Sons, vidéos et web'), ['camera', 'navigateur', 'son', 'video']],
+    [T('🧱 Mise en page'), ['barreetat', 'barreoutils', 'cadre', 'menucontextuel', 'onglets', 'panneau']],
+    [T('⚙️ Outils'), ['fichier', 'minuteur']]
   ];
   // Autres mots qui les font trouver, dont leur nom dans Visual Basic.
   const MOTS_PALETTE = {
@@ -3962,8 +3976,8 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     const nomOutil = o => o.lastChild.textContent.trim();
     const recherche = el('input', 'palette-recherche');
     recherche.type = 'search';
-    recherche.placeholder = '🔍 Chercher…';
-    recherche.title = 'Son nom, à quoi il sert, ou son nom dans Visual Basic (TextBox, Timer…). Entrée : l\'ajouter à la fenêtre.';
+    recherche.placeholder = T('🔍 Chercher…');
+    recherche.title = T('Son nom, à quoi il sert, ou son nom dans Visual Basic (TextBox, Timer…). Entrée : l\'ajouter à la fenêtre.');
     palette.querySelector('h3').after(recherche);
     const rangés = new Set();
     const sections = [];
@@ -3972,14 +3986,14 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     let replies = new Set();
     try { replies = new Set(JSON.parse(localStorage.getItem(CLE_REPLIES)) || []); } catch (e) { /* rien de mémorisé */ }
     const memoriserReplies = () => { try { localStorage.setItem(CLE_REPLIES, JSON.stringify([...replies])); } catch (e) { /* tant pis */ } };
-    for (const [nom, types] of [...THEMES_PALETTE, ['🧩 Autres', null]]) {
+    for (const [nom, types] of [...THEMES_PALETTE, [T('🧩 Autres'), null]]) {
       const liste = outils.filter(o => !rangés.has(o) && (!types || types.includes(o.dataset.type)))
         .sort((a, b) => nomOutil(a).localeCompare(nomOutil(b), 'fr', { sensitivity: 'base', ignorePunctuation: true })); // « d'heure » après « de date »
       if (!liste.length) continue;
       const titre = el('h3', 'palette-theme');
       titre.append(el('span', 'palette-fleche'), el('span', null, nom), el('small', 'palette-nombre', `(${liste.length})`));
       titre.tabIndex = 0;
-      titre.title = 'Cliquer pour replier ou déplier ce thème';
+      titre.title = T('Cliquer pour replier ou déplier ce thème');
       const basculer = () => {
         if (replies.has(nom)) replies.delete(nom); else replies.add(nom);
         memoriserReplies();
@@ -3993,13 +4007,13 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
         const type = VARIANTES[o.dataset.type]?.type || o.dataset.type;
         o.dataset.mots = sansAccents(`${nomOutil(o)} ${MOTS_PALETTE[o.dataset.type] || ''} ${nom}`);
         if (estInvisible({ type })) {
-          o.appendChild(el('small', null, 'invisible'));
-          o.title = (o.title ? o.title + '. ' : '') + 'Invisible : il ne se voit pas dans la fenêtre du programme, il travaille en coulisses.';
+          o.appendChild(el('small', null, T('invisible')));
+          o.title = (o.title ? o.title + '. ' : '') + T('Invisible : il ne se voit pas dans la fenêtre du programme, il travaille en coulisses.');
         }
       });
       sections.push({ nom, titre, liste });
     }
-    const rien = el('p', 'aide palette-rien', 'Aucun contrôle ne correspond.');
+    const rien = el('p', 'aide palette-rien', T('Aucun contrôle ne correspond.'));
     rien.hidden = true;
     aide.before(rien);
     // Pendant une recherche, on montre ce qui correspond, même dans un thème replié.
@@ -4032,8 +4046,8 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
   }
 
   // ---- Galerie des exemples : des cartes rangées par thème, avec une recherche ----
-  const THEMES_EXEMPLES = [['debut', '🌱 Pour débuter'], ['applications', '🗂️ Applications'], ['jeux', '🎮 Jeux'],
-    ['multimedia', '🎨 Images, sons et caméra']];
+  const THEMES_EXEMPLES = [['debut', T('🌱 Pour débuter')], ['applications', T('🗂️ Applications')], ['jeux', T('🎮 Jeux')],
+    ['multimedia', T('🎨 Images, sons et caméra')]];
   const sansAccents = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
   function ouvrirGalerie() {
@@ -4063,7 +4077,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       for (const ex of liste) {
         const [icone, ...titre] = ex.titre.split(' ');
         const carte = el('button', 'carte-exemple');
-        carte.title = 'Ouvrir l\'exemple « ' + titre.join(' ') + ' »';
+        carte.title = T('Ouvrir l\'exemple « {nom} »', { nom: titre.join(' ') });
         carte.append(el('span', 'carte-icone', icone), el('strong', null, titre.join(' ')), el('span', 'carte-desc', ex.description));
         carte.addEventListener('click', () => ouvrirExemple(ex));
         grille.appendChild(carte);
@@ -4071,19 +4085,38 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       contenu.appendChild(grille);
     }
     if (!contenu.children.length) {
-      contenu.appendChild(el('p', 'aide', `Aucun exemple ne correspond à « ${$('galerie-recherche').value.trim()} ».`));
+      contenu.appendChild(el('p', 'aide', T('Aucun exemple ne correspond à « {texte} ».', { texte: $('galerie-recherche').value.trim() })));
     }
   }
 
   function ouvrirExemple(ex) {
     fermerGalerie();
     const nom = ex.titre.replace(/^\S+\s/, '');
-    if (projet.controles.length && !confirm(`Ouvrir l'exemple « ${nom} » ? Il remplacera le projet actuel (pensez à l'enregistrer avant).`)) return;
+    if (projet.controles.length && !confirm(T('Ouvrir l\'exemple « {nom} » ? Il remplacera le projet actuel (pensez à l\'enregistrer avant).', { nom }))) return;
     chargerExemple(ex);
     afficherVue('vue-fenetre');
   }
 
+  // Le menu 🌐 : la langue de BlocStudio (la page se recharge, le projet en cours est gardé).
+  function brancherLangues() {
+    const bouton = $('btn-langue'), menu = $('menu-langue');
+    bouton.textContent = '🌐 ' + BlocLangues.LANGUES[BlocLangues.langue()];
+    for (const [code, nom] of Object.entries(BlocLangues.LANGUES)) {
+      const b = el('button', 'menu-item' + (code === BlocLangues.langue() ? ' actif' : ''), nom);
+      b.lang = code;
+      b.addEventListener('click', () => {
+        localStorage.setItem(CLE_STOCKAGE, JSON.stringify(etatProjet())); // gardé tel quel pour le rechargement
+        BlocLangues.changer(code);
+      });
+      menu.appendChild(b);
+    }
+    bouton.addEventListener('click', e => { e.stopPropagation(); menu.hidden = !menu.hidden; });
+    document.addEventListener('click', e => { if (!menu.hidden && !menu.contains(e.target)) menu.hidden = true; });
+  }
+
   function brancherInterface() {
+    BlocLangues.traduirePage();
+    brancherLangues();
     document.querySelectorAll('.onglet').forEach(o =>
       o.addEventListener('click', () => afficherVue(o.dataset.vue)));
 
@@ -4143,7 +4176,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     remplirGalerie();
 
     $('btn-nouveau').addEventListener('click', () => {
-      if (confirm('Commencer un nouveau projet ? Pensez à enregistrer le projet actuel avant.')) {
+      if (confirm(T('Commencer un nouveau projet ? Pensez à enregistrer le projet actuel avant.'))) {
         chargerProjet(projetVide());
         planifierSauvegarde();
       }
@@ -4181,7 +4214,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       const donnees = micro.donnees;
       const surAjout = micro.surAjout;
       fermerMicro();
-      const s = ajouterSon($('micro-nom').value, donnees, 'enregistré');
+      const s = ajouterSon($('micro-nom').value, donnees, T('enregistré'));
       if (surAjout) surAjout(s);
     });
     $('micro-nom').addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-micro-garder').click(); });
@@ -4194,7 +4227,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     const CLE_INFOBULLES = 'blocstudio.infobulles';
     const majInfobulles = sans => {
       document.body.classList.toggle('sans-infobulles', sans);
-      $('btn-infobulles').textContent = sans ? '💬 Infobulles : non' : '💬 Infobulles : oui';
+      $('btn-infobulles').textContent = sans ? T('💬 Infobulles : non') : T('💬 Infobulles : oui');
     };
     let sansInfobulles = false;
     try { sansInfobulles = localStorage.getItem(CLE_INFOBULLES) === 'non'; } catch (e) { /* rien de mémorisé */ }
@@ -4209,7 +4242,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       const p = $('panneau-js');
       p.hidden = !p.hidden;
       $('vue-code').classList.toggle('js-ouvert', !p.hidden);
-      $('btn-voir-js').textContent = p.hidden ? '</> Voir le code' : '✕ Masquer le code';
+      $('btn-voir-js').textContent = p.hidden ? T('</> Voir le code') : T('✕ Masquer le code');
       Blockly.svgResize(workspace);
       majCodeJs();
     });

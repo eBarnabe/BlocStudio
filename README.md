@@ -1,6 +1,8 @@
 # BlocStudio
 
-**Programmer en blocs, en français, pour fabriquer de vraies applications et des jeux Windows.**
+*[English version](README.en.md)*
+
+**Programmer en blocs, en français (ou en anglais), pour fabriquer de vraies applications et des jeux Windows.**
 
 BlocStudio mélange deux idées :
 - **dessiner sa fenêtre** comme dans Visual Basic : on pose des boutons, des zones de texte, des images, des sprites… ;
@@ -18,6 +20,8 @@ Rien à installer :
 - ou **`index.html`**, ouvert dans Edge ou Chrome.
 
 Puis **📚 Exemples** pour ouvrir un programme tout fait, ou **📄 Nouveau** pour partir d'une fenêtre vide.
+
+L'éditeur prend la langue de l'ordinateur ; le menu **🌐** passe du français à l'anglais. Un projet fait dans une langue marche dans l'autre.
 
 Le projet en cours est gardé automatiquement. **💾 Enregistrer** le met dans un fichier `.bstudio`, que **📂 Ouvrir** relit.
 
@@ -44,7 +48,7 @@ Un programme peut avoir **plusieurs fenêtres**, des **menus**, des fenêtres **
 - **Manette de jeu** : boutons et joysticks. La croix fait aussi les flèches du clavier, si bien que les jeux prévus pour le clavier se jouent à la manette.
 - **Sons** : sons et musiques 8 bits (avec un studio pour les composer), synthèse vocale, **micro**.
 - **Données** : listes, **dictionnaires**, mémoire qui reste d'un lancement à l'autre, fichiers **CSV et Excel (.xlsx)** à ouvrir et à enregistrer.
-- **Maths et texte** : hasard, nombres écrits à la française (« 1 234,50 »), conversions d'unités, **dates**.
+- **Maths et texte** : hasard, nombres écrits à la française (« 1 234,50 », ou « 1,234.50 » en anglais), conversions d'unités, **dates**.
 - **Internet et Windows** : météo, données d'un service web (JSON), transformées en listes ou en lignes de tableau d'un seul bloc ; notifications, presse-papiers, impression.
 
 Chaque bloc a une infobulle qui explique à quoi il sert. Le bouton **</> Voir le code** montre le JavaScript produit par les blocs.
@@ -75,6 +79,8 @@ Tous sont commentés avec des blocs « 💬 » qui expliquent comment ils marche
 - **Page web (.html)** : un seul fichier, qui s'ouvre dans n'importe quel navigateur.
 - **Application Windows (.exe)** : un seul fichier, à double-cliquer. Il utilise WebView2, le moteur d'Edge présent sur Windows 10 et 11 : rien d'autre à installer. Le fonctionnement du lanceur est décrit dans [`lanceur/LISEZMOI.md`](lanceur/LISEZMOI.md).
 
+Un programme exporté garde la langue de l'éditeur.
+
 ## Organisation du code
 
 | Fichier | Rôle |
@@ -85,6 +91,7 @@ Tous sont commentés avec des blocs « 💬 » qui expliquent comment ils marche
 | `js/runtime.js` | Le moteur qui fait tourner les programmes, dans l'éditeur comme dans les exports |
 | `js/exemples.js` | Les exemples de la galerie |
 | `js/editeur-sprite.js`, `js/studio-musique.js`, `js/emojis.js` | L'éditeur de sprites, le studio de musique 8 bits, le choix d'émojis |
+| `js/langues.js`, `js/langues/en.js` | Les langues : `T()`, le menu 🌐, et les traductions anglaises (chaque texte affiché passe par `T()`) |
 | `lanceur/` | `BlocStudio.exe` et le lanceur des applications exportées (C#, WebView2) |
 | `lib/blockly/` | [Blockly](https://developers.google.com/blockly), la bibliothèque de blocs de Google |
 | `tests/` | Les tests automatiques |
@@ -106,7 +113,8 @@ powershell -ExecutionPolicy Bypass -File tests\verifier.ps1
 Le script ouvre l'éditeur dans Chrome ou Edge, sans fenêtre, puis vérifie :
 - le moteur (gravité, score, dates, dictionnaires, manette…) ;
 - chaque exemple : il s'ouvre, ses blocs s'affichent et il s'exécute sans erreur ;
-- chaque projet `.bstudio` posé dans `tests\`.
+- chaque projet `.bstudio` posé dans `tests\` ;
+- l'éditeur en anglais, un programme exporté en anglais, et chaque exemple en anglais.
 
 Il répond « Tout est bon » (code de sortie 0) ou liste les échecs (code 1).
 

@@ -2,6 +2,9 @@
 // Ce code sert à la fois dans l'éditeur (bouton ▶ Exécuter) et dans les
 // programmes exportés : il est recopié tel quel via BlocRuntimeFactory.toString().
 function BlocRuntimeFactory() {
+  // La langue de l'éditeur (js/langues.js), avec T() pour les textes ; un programme exporté reçoit
+  // la même langue et les traductions du moteur (BlocLangues.pourExport).
+  const LANGUE = BlocLangues.langue(), LOCALE = BlocLangues.locale();
   const COULEURS = {
     rouge: '#e53935', vert: '#43a047', bleu: '#1e88e5', jaune: '#fdd835',
     orange: '#fb8c00', violet: '#8e24aa', rose: '#ec407a', noir: '#000000',
@@ -215,8 +218,8 @@ function BlocRuntimeFactory() {
   function enTexte(v) {
     if (Array.isArray(v)) return v.map(enTexte).join(', ');
     if (estDico(v)) return Object.entries(v).map(([cle, x]) => cle + ' : ' + enTexte(x)).join(', ');
-    if (v === true) return 'vrai';
-    if (v === false) return 'faux';
+    if (v === true) return T('vrai');
+    if (v === false) return T('faux');
     return v === undefined || v === null ? '' : String(v);
   }
 
@@ -413,7 +416,7 @@ function BlocRuntimeFactory() {
   const SENS_LIGNE = { horizontale: [0, 50, 100, 50], verticale: [50, 0, 50, 100], descendante: [0, 0, 100, 100], montante: [0, 100, 100, 0] };
   // ---- Calendrier : un mois en grille ; c.choisie (date choisie, aaaa-mm-jj), c.vu (mois affiché, aaaa-mm),
   // c.marques ({ aaaa-mm-jj: couleur }, posées par le bloc « marquer… ») ----
-  const NOMS_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+  const NOMS_MOIS = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'].map(m => T(m));
   function rendreCalendrier(el, c) {
     const choisie = c.choisie || dateIso(c.date) || aujourdhuiIso();
     const [a, m] = (c.vu || choisie.slice(0, 7)).split('-').map(Number);
@@ -431,7 +434,7 @@ function BlocRuntimeFactory() {
     tete.append(fleche('‹', -1), titre, fleche('›', 1));
     const grille = document.createElement('div');
     grille.className = 'bs-cal-grille';
-    for (const j of ['lu', 'ma', 'me', 'je', 've', 'sa', 'di']) grille.appendChild(document.createElement('b')).textContent = j;
+    for (const j of ['lu', 'ma', 'me', 'je', 've', 'sa', 'di'].map(j => T(j, 'jour'))) grille.appendChild(document.createElement('b')).textContent = j;
     const decalage = (new Date(a, m - 1, 1).getDay() + 6) % 7; // lundi en premier
     const nbJours = new Date(a, m, 0).getDate();
     const auj = aujourdhuiIso();
@@ -776,7 +779,7 @@ function BlocRuntimeFactory() {
     const v = new DataView(octets.buffer, octets.byteOffset, octets.byteLength);
     let fin = octets.length - 22; // fin du répertoire central, cherchée depuis la fin du fichier
     while (fin >= 0 && v.getUint32(fin, true) !== 0x06054b50) fin--;
-    if (fin < 0) throw new Error('Ce fichier n\'est pas un classeur Excel (.xlsx) : s\'il vient d\'un ancien Excel (.xls), réenregistrez-le en .xlsx.');
+    if (fin < 0) throw new Error(T('Ce fichier n\'est pas un classeur Excel (.xlsx) : s\'il vient d\'un ancien Excel (.xls), réenregistrez-le en .xlsx.'));
     const fichiers = {};
     let p = v.getUint32(fin + 16, true);
     for (let i = v.getUint16(fin + 10, true); i > 0 && v.getUint32(p, true) === 0x02014b50; i--) {
@@ -790,7 +793,7 @@ function BlocRuntimeFactory() {
       const f = fichiers[nom];
       if (!f) return null;
       if (f.methode === 0) return new TextDecoder().decode(f.donnees);
-      if (f.methode !== 8) throw new Error('Ce classeur est compressé d\'une façon que BlocStudio ne sait pas lire.');
+      if (f.methode !== 8) throw new Error(T('Ce classeur est compressé d\'une façon que BlocStudio ne sait pas lire.'));
       const flux = new Blob([f.donnees]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
       return new Response(flux).text();
     };
@@ -807,7 +810,7 @@ function BlocRuntimeFactory() {
     };
     const tous = (noeud, nom) => noeud ? [...noeud.getElementsByTagNameNS('*', nom)] : [];
     const classeur = await xml('xl/workbook.xml');
-    if (!classeur) throw new Error('Ce fichier n\'est pas un classeur Excel (.xlsx).');
+    if (!classeur) throw new Error(T('Ce fichier n\'est pas un classeur Excel (.xlsx).'));
     const cibles = {};
     for (const r of tous(await xml('xl/_rels/workbook.xml.rels'), 'Relationship')) cibles[r.getAttribute('Id')] = r.getAttribute('Target');
     const texteDe = n => tous(n, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join('');
@@ -830,7 +833,7 @@ function BlocRuntimeFactory() {
       const brut = v ? v.textContent : '';
       if (type === 's') return partages[Number(brut)] ?? '';
       if (type === 'inlineStr') return texteDe(tous(c, 'is')[0]);
-      if (type === 'b') return brut === '1' ? 'vrai' : 'faux';
+      if (type === 'b') return brut === '1' ? T('vrai') : T('faux');
       if (type === 'str' || type === 'e' || brut === '') return brut;
       const n = Number(brut);
       if (!isFinite(n)) return brut;
@@ -862,7 +865,7 @@ function BlocRuntimeFactory() {
       // Lignes et cases vides comblées ; les lignes entièrement vides retirées.
       const largeur = Math.max(0, ...lignes.map(l => l ? l.length : 0));
       feuilles.push({
-        nom: f.getAttribute('name') || 'Feuille' + (feuilles.length + 1),
+        nom: f.getAttribute('name') || T('Feuille') + (feuilles.length + 1),
         lignes: lignes.map(l => Array.from({ length: largeur }, (_, i) => (l && l[i]) ?? '')).filter(l => l.some(x => String(x).trim() !== ''))
       });
     }
@@ -948,7 +951,7 @@ function BlocRuntimeFactory() {
       return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xmlTexte(v)}</t></is></c>`;
     };
     const rangees = lignes.map((l, i) => `<row r="${i + 1}">` + l.map((v, j) => cellule(v, lettres(j) + (i + 1), i === 0)).join('') + '</row>');
-    const nom = xmlTexte(enTexte(nomFeuille || 'Feuille1').replace(/[[\]:*?/\\]/g, ' ').slice(0, 31).trim() || 'Feuille1');
+    const nom = xmlTexte(enTexte(nomFeuille || T('Feuille1')).replace(/[[\]:*?/\\]/g, ' ').slice(0, 31).trim() || T('Feuille1'));
     const entete = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
     const ns = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
     return zipper([
@@ -1000,7 +1003,7 @@ function BlocRuntimeFactory() {
     const [a, m, j] = iso.split('-').map(Number);
     const t = Date.UTC(a, m - 1, j);
     if (!iso || isNaN(t) || new Date(t).getUTCDate() !== j) {
-      throw new Error(`« ${enTexte(texte)} » n'est pas une date : écrivez-la comme 25/12/2026.`);
+      throw new Error(T('« {valeur} » n\'est pas une date : écrivez-la comme 25/12/2026.', { valeur: enTexte(texte) }));
     }
     return t / 86400000;
   }
@@ -1008,7 +1011,7 @@ function BlocRuntimeFactory() {
     const d = new Date(n * 86400000);
     return `${String(d.getUTCDate()).padStart(2, '0')}/${String(d.getUTCMonth() + 1).padStart(2, '0')}/${d.getUTCFullYear()}`;
   }
-  const JOURS_SEMAINE = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
+  const JOURS_SEMAINE = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'].map(j => T(j));
 
   function aujourdhuiIso() {
     const d = new Date();
@@ -1142,12 +1145,12 @@ function BlocRuntimeFactory() {
 
   // Contrôle Fichier : ce que montrent les boîtes « Ouvrir » et « Enregistrer sous ».
   const TYPES_FICHIER = {
-    texte: { accept: '.txt,text/plain', extension: '.txt', mime: 'text/plain', description: 'Texte' },
-    csv: { accept: '.csv,.tsv,.xlsx,text/csv', extension: '.csv', mime: 'text/csv', description: 'Tableur (CSV)' },
-    excel: { accept: '.xlsx,.csv', extension: '.xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', description: 'Classeur Excel' },
-    image: { accept: 'image/*', extension: '.png', mime: 'image/png', description: 'Image' },
-    son: { accept: 'audio/*,.mp3,.wav,.ogg,.m4a', extension: '.mp3', mime: 'audio/mpeg', description: 'Son' },
-    tous: { accept: '', extension: '.txt', mime: 'application/octet-stream', description: 'Fichier' }
+    texte: { accept: '.txt,text/plain', extension: '.txt', mime: 'text/plain', description: T('Texte') },
+    csv: { accept: '.csv,.tsv,.xlsx,text/csv', extension: '.csv', mime: 'text/csv', description: T('Tableur (CSV)') },
+    excel: { accept: '.xlsx,.csv', extension: '.xlsx', mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', description: T('Classeur Excel') },
+    image: { accept: 'image/*', extension: '.png', mime: 'image/png', description: T('Image') },
+    son: { accept: 'audio/*,.mp3,.wav,.ogg,.m4a', extension: '.mp3', mime: 'audio/mpeg', description: T('Son') },
+    tous: { accept: '', extension: '.txt', mime: 'application/octet-stream', description: T('Fichier') }
   };
 
   // Nom simple d'une touche du clavier (e.key) : 'gauche', 'entree', 'a', '7', 'f2'…
@@ -1296,7 +1299,7 @@ function BlocRuntimeFactory() {
       case 'navigateur':
         // Dans le concepteur : un simple aperçu (pas de chargement à chaque modification).
         if (prefixe === 'design') {
-          el = apercu('🌐', adresseWeb(c.adresse) || 'page vide');
+          el = apercu('🌐', adresseWeb(c.adresse) || T('page vide'));
           break;
         }
         el = document.createElement('iframe');
@@ -1338,7 +1341,7 @@ function BlocRuntimeFactory() {
         break;
       case 'video':
         if (prefixe === 'design') {
-          el = apercu('🎬', c.video ? (c.video.startsWith('data:') ? 'vidéo importée' : c.video) : 'aucune vidéo');
+          el = apercu('🎬', c.video ? (c.video.startsWith('data:') ? T('vidéo importée') : c.video) : T('aucune vidéo'));
           break;
         }
         el = document.createElement('video');
@@ -1352,7 +1355,7 @@ function BlocRuntimeFactory() {
       case 'camera':
         // Dans le concepteur : un aperçu (la caméra ne s'allume que pendant l'exécution).
         if (prefixe === 'design') {
-          el = apercu('📷', 'Caméra : image en direct quand le programme tourne');
+          el = apercu('📷', T('Caméra : image en direct quand le programme tourne'));
           break;
         }
         el = document.createElement('video');
@@ -1398,7 +1401,7 @@ function BlocRuntimeFactory() {
   // ---- Graphique : barres, courbe ou secteurs ----
   const COULEURS_SECTEURS = ['#4f46e5', '#16a34a', '#f59e0b', '#dc2626', '#0891b2', '#db2777',
     '#7c3aed', '#65a30d', '#ea580c', '#475569'];
-  const nombreLisible = v => (Math.round(v * 100) / 100).toLocaleString('fr-FR');
+  const nombreLisible = v => (Math.round(v * 100) / 100).toLocaleString(LOCALE);
 
   // Un pas « rond » pour les graduations : 1, 2, 5, 10, 20, 50…
   function pasRond(x) {
@@ -1437,7 +1440,7 @@ function BlocRuntimeFactory() {
     if (!valeurs.length) {
       ctx.fillStyle = '#94a3b8';
       ctx.textAlign = 'center';
-      ctx.fillText('(aucune valeur)', L / 2, (haut + H) / 2);
+      ctx.fillText(T('(aucune valeur)'), L / 2, (haut + H) / 2);
       return;
     }
     const nom = i => etiquettes[i] !== undefined && etiquettes[i] !== '' ? enTexte(etiquettes[i]) : String(i + 1);
@@ -1651,9 +1654,23 @@ function BlocRuntimeFactory() {
     if (c.type === 'image') el.style.objectFit = AJUSTEMENTS[c.ajustement] || 'contain';
   }
 
+  // Les valeurs tapées en anglais (left, none, stretched…) sont comprises aussi : elles redeviennent
+  // leur nom français, le seul que garde le programme (un projet marche ainsi dans les deux langues).
+  const EN_ANGLAIS = {
+    alignement: { left: 'gauche', center: 'centre', right: 'droite' },
+    bordure: { none: 'aucune', single: 'simple', sunken: 'creuse' },
+    ajustement: { whole: 'entiere', stretched: 'etiree', cropped: 'recadree' },
+    sens: { horizontal: 'horizontale', vertical: 'verticale', down: 'descendante', up: 'montante' },
+    forme: { rounded: 'arrondi', oval: 'ovale', circle: 'ovale', square: 'rectangle', line: 'ligne' },
+    defilement: { both: 'deux' },
+    graphique: { bars: 'barres', line: 'courbe', pie: 'secteurs' },
+    typeFichier: { text: 'texte', sound: 'son', all: 'tous' }
+  };
+  const depuisAnglais = (quoi, v) => EN_ANGLAIS[quoi][v] || v;
+
   // Valeur d'une propriété d'apparence, ramenée à ce qu'elle peut valoir.
   function valeurApparence(prop, valeur) {
-    const choix = v => enTexte(v).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const choix = v => depuisAnglais(prop, enTexte(v).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''));
     switch (prop) {
       case 'gras': case 'italique': return !!valeur;
       case 'infobulle': return enTexte(valeur);
@@ -1731,7 +1748,7 @@ function BlocRuntimeFactory() {
       const fermer = document.createElement('button');
       fermer.className = 'bs-fenetre-fermer';
       fermer.textContent = '✕';
-      fermer.title = 'Fermer';
+      fermer.title = T('Fermer');
       barre.append(titre, fermer);
       const s = document.createElement('div');
       s.className = 'bs-surface';
@@ -1832,7 +1849,7 @@ function BlocRuntimeFactory() {
     function ajouterPoignee(f) {
       const p = document.createElement('div');
       p.className = 'bs-poignee';
-      p.title = 'Tirer pour changer la taille de la fenêtre';
+      p.title = T('Tirer pour changer la taille de la fenêtre');
       f.surface.appendChild(p);
       p.addEventListener('pointerdown', e => {
         e.preventDefault();
@@ -1893,7 +1910,7 @@ function BlocRuntimeFactory() {
 
     function laFenetre(id) {
       if (id === '') return principale;
-      if (!fenetres[id]) throw new Error('Cette fenêtre n\'existe plus (elle a peut-être été supprimée).');
+      if (!fenetres[id]) throw new Error(T('Cette fenêtre n\'existe plus (elle a peut-être été supprimée).'));
       return fenetres[id];
     }
 
@@ -2044,7 +2061,7 @@ function BlocRuntimeFactory() {
     function numFiche(d, numero) {
       const n = Math.round(Number(numero));
       if (!(n >= 1 && n <= d.fiches.length)) {
-        throw new Error(`« ${d.nom} » n'a pas de fiche n° ${enTexte(numero)} (elle a ${d.fiches.length} fiche(s)).`);
+        throw new Error(T('« {nom} » n\'a pas de fiche n° {numero} (elle a {nombre} fiche(s)).', { nom: d.nom, numero: enTexte(numero), nombre: d.fiches.length }));
       }
       return n - 1;
     }
@@ -2056,7 +2073,7 @@ function BlocRuntimeFactory() {
       if (i >= 0) return i;
       const n = Math.round(Number(nom));
       if (/^\d+$/.test(nom) && n >= 1 && n <= d.champs.length) return n - 1;
-      throw new Error(`« ${d.nom} » n'a pas de champ « ${enTexte(champ)} » (ses champs : ${d.champs.join(', ') || 'aucun'}).`);
+      throw new Error(T('« {nom} » n\'a pas de champ « {champ} » (ses champs : {champs}).', { nom: d.nom, champ: enTexte(champ), champs: d.champs.join(', ') || T('aucun') }));
     }
 
     // Comparaison d'une valeur de fiche : en nombres si les deux en sont, sinon en texte
@@ -2091,7 +2108,7 @@ function BlocRuntimeFactory() {
     // Montre des fiches dans un tableau. `numeros` : les n° à montrer (null = toutes, et le
     // tableau suit alors la base). « n° de la fiche choisie » retrouve la fiche d'une ligne.
     function afficherBase(d, idTableau, numeros) {
-      const el = ctrlDeType(idTableau, 'tableau', 'un tableau');
+      const el = ctrlDeType(idTableau, 'tableau', T('un tableau'));
       const t = donnees[idTableau];
       const liste = numeros === null ? d.fiches.map((_, n) => n) : (Array.isArray(numeros) ? numeros : [numeros])
         .map(n => Math.round(Number(n)) - 1).filter(n => n >= 0 && n < d.fiches.length);
@@ -2164,7 +2181,7 @@ function BlocRuntimeFactory() {
     function signaler(e) {
       if (arrete) return; // programme arrêté : une réponse en retard (caméra, fichier…) ne s'affiche plus
       const msg = (e && e.message) ? e.message : String(e);
-      if (surErreur) surErreur(msg, suivi.bloc); else alert('Erreur : ' + msg);
+      if (surErreur) surErreur(msg, suivi.bloc); else alert(T('Erreur : ') + msg);
     }
 
     // Les événements sont asynchrones : ils peuvent attendre la réponse
@@ -2242,7 +2259,7 @@ function BlocRuntimeFactory() {
             setTimeout(termine, (duree - depuis) * 1000 + 250);
           }
         });
-      }, () => { throw new Error(`Le son « ${s.nom} » n'a pas pu être lu (fichier abîmé ou format inconnu).`); });
+      }, () => { throw new Error(T('Le son « {nom} » n\'a pas pu être lu (fichier abîmé ou format inconnu).', { nom: s.nom })); });
     }
 
     // Arrête la lecture sans déclencher « quand … se termine ».
@@ -2260,8 +2277,8 @@ function BlocRuntimeFactory() {
     const estAdresseSon = v => /^(https?:\/\/\S+|www\.\S+|([a-z0-9-]+\.)+[a-z]{2,}\/\S*)$/i.test(enTexte(v).trim());
     const adresseSon = v => { const a = enTexte(v).trim(); return /^https?:\/\//i.test(a) ? a : 'https://' + a; };
     function erreurFlux(d) {
-      return new Error(`Le son en ligne « ${d.flux} » ne peut pas être lu : adresse introuvable, pas de connexion à Internet, ` +
-        'ou format non pris en charge (MP3, AAC, OGG… fonctionnent).' + (/^http:/i.test(d.flux) ? ' Essayez la même adresse en « https:// ».' : ''));
+      const message = T('Le son en ligne « {adresse} » ne peut pas être lu : adresse introuvable, pas de connexion à Internet, ou format non pris en charge (MP3, AAC, OGG… fonctionnent).', { adresse: d.flux });
+      return new Error(message + (/^http:/i.test(d.flux) ? T(' Essayez la même adresse en « https:// ».') : ''));
     }
     function lecteurFlux(d) {
       if (d.lecteur) return d.lecteur;
@@ -2311,7 +2328,7 @@ function BlocRuntimeFactory() {
         if (e.name === 'AbortError' || arrete) return;
         d.etat = 'arrete';
         finirFlux(d);
-        signaler(e.name === 'NotAllowedError' ? new Error('Le navigateur bloque le son tant qu\'on n\'a pas cliqué dans la fenêtre.') : erreurFlux(d));
+        signaler(e.name === 'NotAllowedError' ? new Error(T('Le navigateur bloque le son tant qu\'on n\'a pas cliqué dans la fenêtre.')) : erreurFlux(d));
       });
       return fin;
     }
@@ -2341,7 +2358,7 @@ function BlocRuntimeFactory() {
     }
 
     function ctrlSon(id, action) {
-      ctrlDeType(id, 'son', 'un contrôle Son');
+      ctrlDeType(id, 'son', T('un contrôle Son'));
       const d = donnees[id];
       if (enFlux(d)) return ctrlFlux(d, action);
       switch (action) {
@@ -2372,7 +2389,7 @@ function BlocRuntimeFactory() {
     // Une vidéo se commande comme un contrôle Son (jouer, pause, reprendre, arrêter).
     function ctrlVideo(id, action) {
       const el = elements[id];
-      const jouer = () => el.play().catch(e => { if (e.name !== 'AbortError') signaler(new Error('Impossible de lire la vidéo de « ' + donnees[id].nom + ' ».')); });
+      const jouer = () => el.play().catch(e => { if (e.name !== 'AbortError') signaler(new Error(T('Impossible de lire la vidéo de « {nom} ».', { nom: donnees[id].nom }))); });
       switch (action) {
         case 'jouer': case 'reprendre': jouer(); break;
         case 'pause': el.pause(); break;
@@ -2390,14 +2407,14 @@ function BlocRuntimeFactory() {
       const texte = enTexte(valeur);
       const f = Object.values(donnees).find(x => x.type === 'fichier' && x.contenu && (x.contenu === texte || x.nomFichier === texte.trim()));
       if (f && f.luEnTexte) {
-        throw new Error(`« ${f.nom} » a lu « ${f.nomFichier} » comme du texte : il ne peut pas se jouer. ` +
-          `Dans les propriétés de ${f.nom}, choisissez « Type de fichier proposé : Son ».`);
+        throw new Error(T('« {nom} » a lu « {nomFichier} » comme du texte : il ne peut pas se jouer. ', { nom: f.nom, nomFichier: f.nomFichier }) +
+          T('Dans les propriétés de {nom}, choisissez « Type de fichier proposé : Son ».', { nom: f.nom }));
       }
       const adresse = f ? f.contenu : texte;
       if (!/^data:/.test(adresse)) return null;
       let s = [...sonsProjet.values()].find(x => x.donnees === adresse);
       if (!s) {
-        s = { id: 'fichier' + sonsProjet.size, nom: f ? f.nomFichier : 'son du fichier', donnees: adresse };
+        s = { id: 'fichier' + sonsProjet.size, nom: f ? f.nomFichier : T('son du fichier'), donnees: adresse };
         sonsProjet.set(s.id, s);
       }
       return s;
@@ -2458,7 +2475,7 @@ function BlocRuntimeFactory() {
             break;
           }
           const s = duProjet || sonDeFichier(valeur);
-          if (!s) throw new Error(`Il n'y a pas de son nommé « ${nom} » dans le projet (ni de fichier son ouvert avec ce nom, ni d'adresse web).`);
+          if (!s) throw new Error(T('Il n\'y a pas de son nommé « {nom} » dans le projet (ni de fichier son ouvert avec ce nom, ni d\'adresse web).', { nom }));
           if (enFlux(d)) viderFlux(d);
           d.flux = '';
           couperCtrlSon(d);
@@ -2514,7 +2531,7 @@ function BlocRuntimeFactory() {
     }
 
     function ctrlMinuteur(id, action) {
-      ctrlDeType(id, 'minuteur', 'un minuteur');
+      ctrlDeType(id, 'minuteur', T('un minuteur'));
       const d = donnees[id];
       if (action === 'demarrer') demarrerMinuteur(d);
       else arreterMinuteur(d);
@@ -2604,7 +2621,7 @@ function BlocRuntimeFactory() {
           // On désigne un sprite par son nom (celui du Sommaire).
           const nom = enTexte(valeur).trim();
           const s = [...spritesProjet.values()].find(x => x.nom === nom || x.id === nom);
-          if (!s) throw new Error(`Il n'y a pas de sprite nommé « ${nom} » dans le projet.`);
+          if (!s) throw new Error(T('Il n\'y a pas de sprite nommé « {nom} » dans le projet.', { nom }));
           d.sprite = s.id;
           d.costume = 0;
           if (d.animation) cadencer(d); // la vitesse du nouveau sprite compte tout de suite
@@ -2620,7 +2637,7 @@ function BlocRuntimeFactory() {
             d.costume = ((Math.round(n) - 1) % costumes.length + costumes.length) % costumes.length;
           } else {
             const i = costumes.findIndex(c => c.nom.toLowerCase() === texte.toLowerCase());
-            if (i < 0) throw new Error(`Le sprite « ${spriteDe(d).nom} » n'a pas de costume nommé « ${texte} ».`);
+            if (i < 0) throw new Error(T('Le sprite « {sprite} » n\'a pas de costume nommé « {texte} ».', { sprite: spriteDe(d).nom, texte }));
             d.costume = i;
           }
           break;
@@ -2639,7 +2656,7 @@ function BlocRuntimeFactory() {
     }
 
     function ctrlSprite(id, action, a) {
-      ctrlDeType(id, 'sprite', 'un sprite');
+      ctrlDeType(id, 'sprite', T('un sprite'));
       const d = donnees[id];
       switch (action) {
         case 'costume': ecrireSprite(d, 'costume', a); break;
@@ -2817,7 +2834,7 @@ function BlocRuntimeFactory() {
 
         const titre = document.createElement('div');
         titre.className = 'bs-dlg-titre';
-        titre.textContent = fenetre.titre || 'Message';
+        titre.textContent = fenetre.titre || T('Message');
         boite.appendChild(titre);
 
         const corps = document.createElement('div');
@@ -2855,7 +2872,7 @@ function BlocRuntimeFactory() {
           if (champ === 'nombre' && valeur !== annulation) {
             const brut = saisie.value.trim().replace(',', '.');
             if (brut === '' || isNaN(Number(brut))) {
-              aide.textContent = 'Merci d\'écrire un nombre, par exemple 12 ou 3,5.';
+              aide.textContent = T('Merci d\'écrire un nombre, par exemple 12 ou 3,5.');
               saisie.classList.add('bs-dlg-invalide');
               saisie.focus();
               return;
@@ -2910,22 +2927,22 @@ function BlocRuntimeFactory() {
     function ctrl(id) {
       if (elements[id]) return elements[id];
       if (id === undefined) {
-        throw new Error('« moi » ne s\'utilise que dans un événement d\'un contrôle, par exemple « quand un clone de … est créé » ou « quand … est cliqué ».');
+        throw new Error(T('« moi » ne s\'utilise que dans un événement d\'un contrôle, par exemple « quand un clone de … est créé » ou « quand … est cliqué ».'));
       }
       // Un clone supprimé : les scripts qui l'utilisaient s'arrêtent, simplement.
       if (clonesSupprimes.has(id)) throw Object.assign(new Error('clone supprimé'), { cloneSupprime: true });
-      throw new Error("Le contrôle n'existe plus (il a peut-être été supprimé).");
+      throw new Error(T('Le contrôle n\'existe plus (il a peut-être été supprimé).'));
     }
 
     function ctrlDeType(id, type, libelle) {
       const el = ctrl(id);
-      if (donnees[id].type !== type) throw new Error(`« ${donnees[id].nom} » n'est pas ${libelle}.`);
+      if (donnees[id].type !== type) throw new Error(T('« {nom} » n\'est pas {libelle}.', { nom: donnees[id].nom, libelle }));
       return el;
     }
 
     function ctrlListe(id) {
       const el = ctrl(id);
-      if (!estListe(donnees[id].type)) throw new Error(`« ${donnees[id].nom} » n'est pas une liste.`);
+      if (!estListe(donnees[id].type)) throw new Error(T('« {nom} » n\'est pas une liste.', { nom: donnees[id].nom }));
       return el;
     }
 
@@ -2937,7 +2954,7 @@ function BlocRuntimeFactory() {
     function numLigne(d, numero) {
       const n = Math.round(Number(numero));
       if (!(n >= 1 && n <= d.lignes.length)) {
-        throw new Error(`« ${d.nom} » n'a pas de ligne n° ${enTexte(numero)} (il a ${d.lignes.length} ligne(s)).`);
+        throw new Error(T('« {nom} » n\'a pas de ligne n° {numero} (il a {nombre} ligne(s)).', { nom: d.nom, numero: enTexte(numero), nombre: d.lignes.length }));
       }
       return n - 1;
     }
@@ -2950,7 +2967,7 @@ function BlocRuntimeFactory() {
       }
       const titre = enTexte(colonne).trim().toLowerCase();
       const i = d.colonnes.findIndex(c => c.trim().toLowerCase() === titre);
-      if (i < 0) throw new Error(`« ${d.nom} » n'a pas de colonne « ${enTexte(colonne)} ».`);
+      if (i < 0) throw new Error(T('« {nom} » n\'a pas de colonne « {colonne} ».', { nom: d.nom, colonne: enTexte(colonne) }));
       return i;
     }
 
@@ -3043,7 +3060,7 @@ function BlocRuntimeFactory() {
       if (micro.allumage) return;
       micro.allumage = true;
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        signaler(new Error('Le micro n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).'));
+        signaler(new Error(T('Le micro n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).')));
         return;
       }
       navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }).then(flux => {
@@ -3057,8 +3074,8 @@ function BlocRuntimeFactory() {
         ctx.createMediaStreamSource(flux).connect(micro.analyseur);
       }, e => {
         signaler(new Error(e && e.name === 'NotAllowedError'
-          ? 'Le micro a été refusé : autorisez-le pour que le programme entende les sons.'
-          : 'Aucun micro trouvé : branchez-en un (ou vérifiez qu\'il est activé dans Windows).'));
+          ? T('Le micro a été refusé : autorisez-le pour que le programme entende les sons.')
+          : T('Aucun micro trouvé : branchez-en un (ou vérifiez qu\'il est activé dans Windows).')));
       });
     }
     nettoyages.push(() => { if (micro.flux) micro.flux.getTracks().forEach(p => p.stop()); });
@@ -3090,13 +3107,13 @@ function BlocRuntimeFactory() {
         return;
       }
       if (document.fullscreenElement === hote || attentePleinEcran) return;
-      if (!hote.requestFullscreen) throw new Error('Le plein écran n\'est pas possible ici.');
+      if (!hote.requestFullscreen) throw new Error(T('Le plein écran n\'est pas possible ici.'));
       hote.requestFullscreen().catch(() => {
         // Sans clic ni touche juste avant (au démarrage, par exemple), le navigateur refuse : on propose un clic.
         if (attentePleinEcran || arrete) return;
         attentePleinEcran = document.createElement('div');
         attentePleinEcran.className = 'bs-plein-ecran-attente';
-        attentePleinEcran.textContent = '⛶ Cliquez ici pour passer en plein écran';
+        attentePleinEcran.textContent = T('⛶ Cliquez ici pour passer en plein écran');
         attentePleinEcran.addEventListener('click', () => {
           attentePleinEcran.remove();
           attentePleinEcran = null;
@@ -3170,13 +3187,13 @@ function BlocRuntimeFactory() {
 
     function dateDuCalendrier(valeur) {
       const iso = dateIso(valeur);
-      if (!iso) throw new Error(`« ${enTexte(valeur)} » n'est pas une date : écrivez-la comme 25/12/2026.`);
+      if (!iso) throw new Error(T('« {valeur} » n\'est pas une date : écrivez-la comme 25/12/2026.', { valeur: enTexte(valeur) }));
       return iso;
     }
 
     function verifierDico(dico) {
       if (!estDico(dico)) {
-        throw new Error(`« ${enTexte(dico) || 'rien'} » n'est pas un dictionnaire : mettez d'abord « dictionnaire vide » dans la variable.`);
+        throw new Error(T('« {valeur} » n\'est pas un dictionnaire : mettez d\'abord « dictionnaire vide » dans la variable.', { valeur: enTexte(dico) || T('rien') }));
       }
       return dico;
     }
@@ -3474,9 +3491,9 @@ function BlocRuntimeFactory() {
       ctrl(id);
       const source = donnees[id];
       const original = source.original || id;
-      if (!CLONABLES.includes(source.type)) throw new Error(`« ${source.nom} » ne peut pas être cloné : seuls les sprites, les images, les étiquettes et les formes le peuvent.`);
+      if (!CLONABLES.includes(source.type)) throw new Error(T('« {nom} » ne peut pas être cloné : seuls les sprites, les images, les étiquettes et les formes le peuvent.', { nom: source.nom }));
       if (app.nombreClones(original) >= MAX_CLONES) {
-        throw new Error(`Trop de clones de « ${source.nom} » (${MAX_CLONES} au maximum). Pensez à supprimer ceux qui ne servent plus (« supprimer ce clone »).`);
+        throw new Error(T('Trop de clones de « {nom} » ({max} au maximum). Pensez à supprimer ceux qui ne servent plus (« supprimer ce clone »).', { nom: source.nom, max: MAX_CLONES }));
       }
       const cid = original + '#' + (++numeroClone);
       const el = elements[id];
@@ -3759,7 +3776,7 @@ function BlocRuntimeFactory() {
       return new Promise((ok, erreur) => {
         const img = new Image();
         img.onload = () => ok(img);
-        img.onerror = () => erreur(new Error('Ce fichier n\'est pas une image lisible.'));
+        img.onerror = () => erreur(new Error(T('Ce fichier n\'est pas une image lisible.')));
         img.src = url;
       });
     }
@@ -3791,10 +3808,10 @@ function BlocRuntimeFactory() {
         source = await chargerImage(el.src);
         l = source.naturalWidth; h = source.naturalHeight;
       } else if (d.type === 'camera') {
-        if (!el.videoWidth) throw new Error(`« ${d.nom} » n'est pas allumée : utilisez d'abord le bloc « allumer ${d.nom} ».`);
+        if (!el.videoWidth) throw new Error(T('« {nom} » n\'est pas allumée : utilisez d\'abord le bloc « allumer {nom} ».', { nom: d.nom }));
         l = el.videoWidth; h = el.videoHeight;
       } else if (d.type !== 'zonedessin' && d.type !== 'graphique') {
-        throw new Error(`« ${d.nom} » ne montre pas d'image : choisissez une zone de dessin, une image, un graphique ou une caméra.`);
+        throw new Error(T('« {nom} » ne montre pas d\'image : choisissez une zone de dessin, une image, un graphique ou une caméra.', { nom: d.nom }));
       }
       const toile = document.createElement('canvas');
       toile.width = Math.max(1, Math.round(l));
@@ -3837,7 +3854,7 @@ function BlocRuntimeFactory() {
         } else if (o instanceof HTMLIFrameElement) {
           const p = document.createElement('div');
           p.style.cssText = c.style.cssText + ';border:1px solid #999;display:flex;align-items:center;justify-content:center';
-          p.textContent = '🌐 ' + (o.src || 'page web');
+          p.textContent = '🌐 ' + (o.src || T('page web'));
           c.replaceWith(p);
         }
       });
@@ -3848,7 +3865,7 @@ function BlocRuntimeFactory() {
     async function pageDeControle(id) {
       ctrl(id);
       const d = donnees[id], el = elements[id];
-      if (INVISIBLES.includes(d.type)) throw new Error(`« ${d.nom} » ne se voit pas dans la fenêtre : il n'y a rien à imprimer.`);
+      if (INVISIBLES.includes(d.type)) throw new Error(T('« {nom} » ne se voit pas dans la fenêtre : il n\'y a rien à imprimer.', { nom: d.nom }));
       if (d.type === 'zonetexte' && !d.motDePasse) return pageDeTexte(el.value);
       if (['zonedessin', 'graphique', 'image', 'camera'].includes(d.type)) {
         const img = document.createElement('img');
@@ -3939,36 +3956,36 @@ function BlocRuntimeFactory() {
     }
     const adresseDonnees = v => {
       const a = enTexte(v).trim();
-      if (!a) throw new Error('Il manque l\'adresse des données à lire.');
+      if (!a) throw new Error(T('Il manque l\'adresse des données à lire.'));
       return /^[a-z][a-z0-9+.-]*:/i.test(a) ? a : 'https://' + a;
     };
-    const echecWeb = (url, raison) => new Error(`Impossible de lire « ${url} » : ${raison}`);
-    const raisonCode = code => code === 404 ? 'cette adresse n\'existe pas (erreur 404).'
-      : code === 401 || code === 403 ? `le site refuse de répondre (erreur ${code} : il faut peut-être une clé ou un compte).`
-      : code === 429 ? 'trop de demandes à la suite : attendez un peu (erreur 429).'
-      : `le site a répondu par l'erreur ${code}.`;
+    const echecWeb = (url, raison) => new Error(T('Impossible de lire « {url} » : {raison}', { url, raison }));
+    const raisonCode = code => code === 404 ? T('cette adresse n\'existe pas (erreur 404).')
+      : code === 401 || code === 403 ? T('le site refuse de répondre (erreur {code} : il faut peut-être une clé ou un compte).', { code })
+      : code === 429 ? T('trop de demandes à la suite : attendez un peu (erreur 429).')
+      : T('le site a répondu par l\'erreur {code}.', { code });
     function demanderHoteWeb(url) {
       const id = String(++numeroWeb);
       return new Promise((ok, erreur) => {
-        const temps = setTimeout(() => { attentesWeb.delete(id); erreur(echecWeb(url, 'le site met trop de temps à répondre.')); }, 20000);
+        const temps = setTimeout(() => { attentesWeb.delete(id); erreur(echecWeb(url, T('le site met trop de temps à répondre.'))); }, 20000);
         attentesWeb.set(id, r => {
           clearTimeout(temps);
           if (r.code >= 200 && r.code < 300) ok(r.texte);
-          else erreur(echecWeb(url, r.code ? raisonCode(r.code) : 'pas de connexion à Internet, ou adresse introuvable.'));
+          else erreur(echecWeb(url, r.code ? raisonCode(r.code) : T('pas de connexion à Internet, ou adresse introuvable.')));
         });
         hoteWeb.postMessage(`web:${id}\n${url}`);
       });
     }
     async function lireWeb(adresse) {
       const url = adresseDonnees(adresse);
-      if (!/^https?:/i.test(url)) throw echecWeb(url, 'seules les adresses web (http ou https) se lisent.');
+      if (!/^https?:/i.test(url)) throw echecWeb(url, T('seules les adresses web (http ou https) se lisent.'));
       let reponse;
       try {
         reponse = await fetch(url);
       } catch (e) {
         // Refusé à une page web, ou pas de réseau : l'application Windows essaie à son tour.
         if (hoteWeb) return demanderHoteWeb(url);
-        throw echecWeb(url, 'pas de connexion à Internet, ou le site ne permet pas aux pages web de le lire.');
+        throw echecWeb(url, T('pas de connexion à Internet, ou le site ne permet pas aux pages web de le lire.'));
       }
       if (!reponse.ok) throw echecWeb(url, raisonCode(reponse.status));
       return reponse.text();
@@ -3982,7 +3999,7 @@ function BlocRuntimeFactory() {
       if (typeof donnees !== 'string') return donnees;
       if (donnees !== dernierJson.texte) {
         let v;
-        try { v = JSON.parse(donnees); } catch (e) { throw new Error('Ces données ne sont pas au format JSON : impossible d\'y chercher une valeur.'); }
+        try { v = JSON.parse(donnees); } catch (e) { throw new Error(T('Ces données ne sont pas au format JSON : impossible d\'y chercher une valeur.')); }
         dernierJson = { texte: donnees, valeur: v };
       }
       return dernierJson.valeur;
@@ -4024,7 +4041,7 @@ function BlocRuntimeFactory() {
         const liste = Object.values(v).find(Array.isArray);
         if (liste) return liste;
       }
-      throw new Error('Ces données ne contiennent pas de liste : impossible d\'en faire les lignes d\'un tableau.');
+      throw new Error(T('Ces données ne contiennent pas de liste : impossible d\'en faire les lignes d\'un tableau.'));
     }
 
     function valeurJson(donnees, chemin) {
@@ -4047,13 +4064,13 @@ function BlocRuntimeFactory() {
     // ---- Météo (Open-Meteo : gratuit, sans inscription) ----
     // Codes météo de l'OMM → [description, emoji].
     const TEMPS_QUIL_FAIT = {
-      0: ['Ciel dégagé', '☀️'], 1: ['Plutôt dégagé', '🌤️'], 2: ['Partiellement nuageux', '⛅'], 3: ['Couvert', '☁️'],
-      45: ['Brouillard', '🌫️'], 48: ['Brouillard givrant', '🌫️'],
-      51: ['Bruine légère', '🌦️'], 53: ['Bruine', '🌦️'], 55: ['Bruine forte', '🌧️'], 56: ['Bruine verglaçante', '🌧️'], 57: ['Bruine verglaçante', '🌧️'],
-      61: ['Pluie faible', '🌦️'], 63: ['Pluie', '🌧️'], 65: ['Forte pluie', '🌧️'], 66: ['Pluie verglaçante', '🌧️'], 67: ['Pluie verglaçante', '🌧️'],
-      71: ['Neige faible', '🌨️'], 73: ['Neige', '❄️'], 75: ['Forte neige', '❄️'], 77: ['Grains de neige', '🌨️'],
-      80: ['Averses', '🌦️'], 81: ['Averses', '🌧️'], 82: ['Fortes averses', '⛈️'], 85: ['Averses de neige', '🌨️'], 86: ['Fortes averses de neige', '❄️'],
-      95: ['Orage', '⛈️'], 96: ['Orage avec grêle', '⛈️'], 99: ['Orage avec grêle', '⛈️']
+      0: [T('Ciel dégagé'), '☀️'], 1: [T('Plutôt dégagé'), '🌤️'], 2: [T('Partiellement nuageux'), '⛅'], 3: [T('Couvert'), '☁️'],
+      45: [T('Brouillard'), '🌫️'], 48: [T('Brouillard givrant'), '🌫️'],
+      51: [T('Bruine légère'), '🌦️'], 53: [T('Bruine'), '🌦️'], 55: [T('Bruine forte'), '🌧️'], 56: [T('Bruine verglaçante'), '🌧️'], 57: [T('Bruine verglaçante'), '🌧️'],
+      61: [T('Pluie faible'), '🌦️'], 63: [T('Pluie'), '🌧️'], 65: [T('Forte pluie'), '🌧️'], 66: [T('Pluie verglaçante'), '🌧️'], 67: [T('Pluie verglaçante'), '🌧️'],
+      71: [T('Neige faible'), '🌨️'], 73: [T('Neige'), '❄️'], 75: [T('Forte neige'), '❄️'], 77: [T('Grains de neige'), '🌨️'],
+      80: [T('Averses'), '🌦️'], 81: [T('Averses'), '🌧️'], 82: [T('Fortes averses'), '⛈️'], 85: [T('Averses de neige'), '🌨️'], 86: [T('Fortes averses de neige'), '❄️'],
+      95: [T('Orage'), '⛈️'], 96: [T('Orage avec grêle'), '⛈️'], 99: [T('Orage avec grêle'), '⛈️']
     };
     const cacheMeteo = new Map(); // ville → { quand, valeurs } : plusieurs blocs à la suite ne redemandent pas tout
     async function meteo(ville, quoi) {
@@ -4062,19 +4079,19 @@ function BlocRuntimeFactory() {
         try { await meteo(ville, 'ville'); return true; } catch (e) { if (e.villeInconnue) return false; throw e; }
       }
       const nom = enTexte(ville).trim();
-      if (!nom) throw Object.assign(new Error('Il manque le nom de la ville pour la météo.'), { villeInconnue: true });
+      if (!nom) throw Object.assign(new Error(T('Il manque le nom de la ville pour la météo.')), { villeInconnue: true });
       const cle = nom.toLowerCase();
       let m = cacheMeteo.get(cle);
       if (!m || Date.now() - m.quand > 5 * 60 * 1000) {
-        const lieux = JSON.parse(await lireWeb('https://geocoding-api.open-meteo.com/v1/search?count=1&language=fr&format=json&name=' + encodeURIComponent(nom)));
+        const lieux = JSON.parse(await lireWeb('https://geocoding-api.open-meteo.com/v1/search?count=1&language=' + LANGUE + '&format=json&name=' + encodeURIComponent(nom)));
         const lieu = lieux.results && lieux.results[0];
-        if (!lieu) throw Object.assign(new Error(`Je ne trouve pas la ville « ${nom} » : vérifiez son orthographe.`), { villeInconnue: true });
+        if (!lieu) throw Object.assign(new Error(T('Je ne trouve pas la ville « {nom} » : vérifiez son orthographe.', { nom })), { villeInconnue: true });
         const p = JSON.parse(await lireWeb('https://api.open-meteo.com/v1/forecast?timezone=auto&forecast_days=1' +
           `&latitude=${lieu.latitude}&longitude=${lieu.longitude}` +
           '&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code,is_day' +
           '&daily=temperature_2m_max,temperature_2m_min'));
         const c = p.current || {}, j = p.daily || {};
-        const [description, emoji] = TEMPS_QUIL_FAIT[c.weather_code] || ['Temps inconnu', '🌡️'];
+        const [description, emoji] = TEMPS_QUIL_FAIT[c.weather_code] || [T('Temps inconnu'), '🌡️'];
         m = {
           quand: Date.now(),
           valeurs: {
@@ -4137,13 +4154,13 @@ function BlocRuntimeFactory() {
     function verifierImage(id, valeur) {
       const f = Object.values(donnees).find(x => x.type === 'fichier' && x.luEnTexte && x.contenu && x.contenu === valeur);
       if (f) {
-        throw new Error(`« ${f.nom} » a lu « ${f.nomFichier} » comme du texte : il ne peut pas s'afficher dans « ${donnees[id].nom} ». ` +
-          `Dans les propriétés de ${f.nom}, choisissez « Type de fichier proposé : Image ».`);
+        throw new Error(T('« {nom} » a lu « {nomFichier} » comme du texte : il ne peut pas s\'afficher dans « {cible} ». ', { nom: f.nom, nomFichier: f.nomFichier, cible: donnees[id].nom }) +
+          T('Dans les propriétés de {nom}, choisissez « Type de fichier proposé : Image ».', { nom: f.nom }));
       }
     }
 
     async function ctrlFichier(id, action, a, b) {
-      ctrlDeType(id, 'fichier', 'un contrôle Fichier');
+      ctrlDeType(id, 'fichier', T('un contrôle Fichier'));
       const d = donnees[id];
       const nomPropose = () => d.nomFichier || d.nomPropose || '';
       switch (action) {
@@ -4159,7 +4176,7 @@ function BlocRuntimeFactory() {
         }
         case 'enregistrer': {
           // Réglé sur Excel : le texte (CSV, par exemple « texte CSV de Tableau1 ») devient un classeur.
-          const contenu = d.typeFichier === 'excel' ? await ecrireClasseur(depuisCsv(enTexte(a)), 'Feuille1') : enTexte(a);
+          const contenu = d.typeFichier === 'excel' ? await ecrireClasseur(depuisCsv(enTexte(a)), T('Feuille1')) : enTexte(a);
           const nom = await enregistrerSous(contenu, nomPropose(), d.typeFichier);
           d.annule = !nom;
           if (nom) d.nomFichier = nom;
@@ -4171,7 +4188,7 @@ function BlocRuntimeFactory() {
           const cible = donnees[a];
           const enImage = AVEC_FICHIER_IMAGE.includes(cible.type), enSon = AVEC_FICHIER_SON.includes(cible.type);
           if (!enImage && !enSon && !AVEC_FICHIER_CSV.includes(cible.type)) {
-            throw new Error(`On ne peut pas ouvrir un fichier dans « ${cible.nom} » : choisissez un tableau, une base de données, une image, une zone de dessin ou un son.`);
+            throw new Error(T('On ne peut pas ouvrir un fichier dans « {nom} » : choisissez un tableau, une base de données, une image, une zone de dessin ou un son.', { nom: cible.nom }));
           }
           const f = await choisirFichierAOuvrir(enImage ? 'image' : enSon ? 'son' : d.typeFichier === 'excel' ? 'excel' : 'csv');
           d.annule = !f;
@@ -4204,10 +4221,10 @@ function BlocRuntimeFactory() {
           else if (cible.type === 'tableau') nom = await enregistrerSous(app.lireTableau(a, 'csv'), base + '.csv', 'csv');
           else if (cible.type === 'basedonnees') nom = await enregistrerSous(app.lireBase(a, 'csv'), base + '.csv', 'csv');
           else if (cible.type === 'camera') {
-            if (!cible.photo) throw new Error(`« ${cible.nom} » n'a pas encore pris de photo (bloc « prendre une photo avec… »).`);
+            if (!cible.photo) throw new Error(T('« {nom} » n\'a pas encore pris de photo (bloc « prendre une photo avec… »).', { nom: cible.nom }));
             nom = await enregistrerSous(octetsDataUrl(cible.photo), base + '.png', 'image');
           }
-          else throw new Error(`On ne peut pas enregistrer « ${cible.nom} » dans un fichier : choisissez un tableau, une base de données, une zone de dessin ou une caméra.`);
+          else throw new Error(T('On ne peut pas enregistrer « {nom} » dans un fichier : choisissez un tableau, une base de données, une zone de dessin ou une caméra.', { nom: cible.nom }));
           d.annule = !nom;
           if (nom) d.nomFichier = nom;
           return;
@@ -4293,7 +4310,7 @@ function BlocRuntimeFactory() {
 
     function noeudExistant(d, chemin) {
       const r = trouverNoeud(d, chemin);
-      if (!r) throw new Error(`Il n'y a pas d'élément « ${enTexte(chemin)} » dans « ${d.nom} ».`);
+      if (!r) throw new Error(T('Il n\'y a pas d\'élément « {chemin} » dans « {nom} ».', { chemin: enTexte(chemin), nom: d.nom }));
       return r;
     }
 
@@ -4344,13 +4361,13 @@ function BlocRuntimeFactory() {
     }
 
     function ctrlArbre(id, action, a, b) {
-      const el = ctrlDeType(id, 'arborescence', 'une arborescence');
+      const el = ctrlDeType(id, 'arborescence', T('une arborescence'));
       const d = donnees[id];
       switch (action) {
         // a : texte du nouvel élément ; b : chemin de l'élément qui le contient ('' = premier niveau).
         case 'ajouter': {
           const texte = enTexte(a).trim();
-          if (!texte) throw new Error('Il faut un texte pour le nouvel élément.');
+          if (!texte) throw new Error(T('Il faut un texte pour le nouvel élément.'));
           const dans = enTexte(b).trim() ? noeudExistant(d, b).noeud : null;
           (dans ? dans.enfants : d.noeuds).push({ texte, enfants: [], ouvert: d.deplie !== false });
           if (dans) dans.ouvert = true;
@@ -4371,7 +4388,7 @@ function BlocRuntimeFactory() {
 
     // Textes des éléments rangés dans `chemin` ('' = ceux du premier niveau).
     function enfantsArbre(id, chemin) {
-      ctrlDeType(id, 'arborescence', 'une arborescence');
+      ctrlDeType(id, 'arborescence', T('une arborescence'));
       const d = donnees[id];
       const liste = enTexte(chemin).trim() ? noeudExistant(d, chemin).noeud.enfants : d.noeuds;
       return liste.map(n => n.texte);
@@ -4401,9 +4418,9 @@ function BlocRuntimeFactory() {
 
     // ---- Barre d'état ----
     function caseBarre(id, numero) {
-      ctrlDeType(id, 'barreetat', 'une barre d\'état');
+      ctrlDeType(id, 'barreetat', T('une barre d\'état'));
       const n = Math.round(Number(numero));
-      if (!(n >= 1 && n <= 10)) throw new Error('Une barre d\'état a des cases numérotées de 1 à 10.');
+      if (!(n >= 1 && n <= 10)) throw new Error(T('Une barre d\'état a des cases numérotées de 1 à 10.'));
       return n - 1;
     }
 
@@ -4411,11 +4428,11 @@ function BlocRuntimeFactory() {
     function erreurCamera(e, nom) {
       switch (e && e.name) {
         case 'NotAllowedError': case 'SecurityError':
-          return new Error(`La caméra de « ${nom} » n'est pas autorisée : acceptez son utilisation quand Windows (ou le navigateur) le demande.`);
+          return new Error(T('La caméra de « {nom} » n\'est pas autorisée : acceptez son utilisation quand Windows (ou le navigateur) le demande.', { nom }));
         case 'NotFoundError': case 'OverconstrainedError':
-          return new Error('Aucune caméra n\'a été trouvée sur cet ordinateur.');
+          return new Error(T('Aucune caméra n\'a été trouvée sur cet ordinateur.'));
         case 'NotReadableError': case 'AbortError':
-          return new Error('La caméra est déjà utilisée par un autre logiciel (Teams, Zoom, l\'appli Caméra…). Fermez-le, puis réessayez.');
+          return new Error(T('La caméra est déjà utilisée par un autre logiciel (Teams, Zoom, l\'appli Caméra…). Fermez-le, puis réessayez.'));
       }
       return e instanceof Error ? e : new Error(String(e));
     }
@@ -4426,7 +4443,7 @@ function BlocRuntimeFactory() {
       if (!d.allumage) {
         d.allumage = (async () => {
           if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            throw new Error('La caméra n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).');
+            throw new Error(T('La caméra n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).'));
           }
           let flux;
           try {
@@ -4499,7 +4516,7 @@ function BlocRuntimeFactory() {
     }
 
     async function ctrlCamera(id, action, a) {
-      ctrlDeType(id, 'camera', 'une caméra');
+      ctrlDeType(id, 'camera', T('une caméra'));
       const d = donnees[id];
       switch (action) {
         case 'allumer': return allumerCamera(id);
@@ -4510,9 +4527,9 @@ function BlocRuntimeFactory() {
           ctrl(a);
           const cible = donnees[a];
           if (cible.type !== 'image' && cible.type !== 'zonedessin') {
-            throw new Error(`On ne peut pas mettre une photo dans « ${cible.nom} » : choisissez une image ou une zone de dessin.`);
+            throw new Error(T('On ne peut pas mettre une photo dans « {nom} » : choisissez une image ou une zone de dessin.', { nom: cible.nom }));
           }
-          if (!d.photo) throw new Error(`« ${d.nom} » n'a pas encore pris de photo (bloc « prendre une photo avec… »).`);
+          if (!d.photo) throw new Error(T('« {nom} » n\'a pas encore pris de photo (bloc « prendre une photo avec… »).', { nom: d.nom }));
           if (cible.type === 'image') app.ecrire(a, 'image', d.photo);
           else await dessinerImage(a, d.photo);
         }
@@ -4668,7 +4685,7 @@ function BlocRuntimeFactory() {
         app.ecrire(id, 'texte', texte.slice(0, m.index) + nouveau + texte.slice(m.index + m[0].length));
       },
       defilerImage(id, dx, dy) {
-        ctrlDeType(id, 'image', 'une image');
+        ctrlDeType(id, 'image', T('une image'));
         const d = donnees[id];
         d.decalage = d.decalage || { x: 0, y: 0 };
         d.decalage.x += Number(dx) || 0;
@@ -4842,7 +4859,7 @@ function BlocRuntimeFactory() {
           if (prop === 'defilementX') el.scrollLeft = Number(valeur) || 0;
           else if (prop === 'defilementY') el.scrollTop = Number(valeur) || 0;
           else if (prop === 'defilement') {
-            const sens = enTexte(valeur).trim().toLowerCase().replace('les deux', 'deux');
+            const sens = depuisAnglais('defilement', enTexte(valeur).trim().toLowerCase().replace('les deux', 'deux'));
             d.defilement = SENS_DEFILEMENT[sens] ? sens : 'vertical';
             sensDefilement(el, d.defilement);
           } else {
@@ -4859,8 +4876,14 @@ function BlocRuntimeFactory() {
         }
         if (d.type === 'forme' && ['genre', 'sens', 'epaisseur', 'couleurBordure'].includes(prop)) {
           const choix = enTexte(valeur).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-          if (prop === 'genre') d.genre = { cercle: 'ovale', rond: 'ovale', ellipse: 'ovale', carre: 'rectangle' }[choix] || (GENRES_FORME.includes(choix) ? choix : 'rectangle');
-          if (prop === 'sens') d.sens = SENS_LIGNE[choix] ? choix : 'horizontale';
+          if (prop === 'genre') {
+            const g = depuisAnglais('forme', choix);
+            d.genre = { cercle: 'ovale', rond: 'ovale', ellipse: 'ovale', carre: 'rectangle' }[g] || (GENRES_FORME.includes(g) ? g : 'rectangle');
+          }
+          if (prop === 'sens') {
+            const s = depuisAnglais('sens', choix);
+            d.sens = SENS_LIGNE[s] ? s : 'horizontale';
+          }
           if (prop === 'epaisseur') d.epaisseur = Math.max(0, Number(valeur) || 0);
           if (prop === 'couleurBordure') d.couleurBordure = enTexte(valeur);
           return rendreForme(el, d);
@@ -4896,7 +4919,10 @@ function BlocRuntimeFactory() {
         }
         if (d.type === 'fichier') {
           if (prop === 'nomPropose') d.nomPropose = enTexte(valeur);
-          if (prop === 'typeFichier') d.typeFichier = TYPES_FICHIER[enTexte(valeur).trim().toLowerCase()] ? enTexte(valeur).trim().toLowerCase() : 'tous';
+          if (prop === 'typeFichier') {
+            const t = depuisAnglais('typeFichier', enTexte(valeur).trim().toLowerCase());
+            d.typeFichier = TYPES_FICHIER[t] ? t : 'tous';
+          }
           return;
         }
         if (d.type === 'basedonnees') {
@@ -4920,7 +4946,7 @@ function BlocRuntimeFactory() {
           return rendreCalendrier(el, d);
         }
         if (d.type === 'horloge' && ['genre', 'secondes', 'decalageHeures', 'couleurBarre', 'couleurTexte', 'couleurFond'].includes(prop)) {
-          if (prop === 'genre') d.genre = /chiffre|num/i.test(enTexte(valeur)) ? 'chiffres' : 'aiguilles';
+          if (prop === 'genre') d.genre = /chiffre|num|digit/i.test(enTexte(valeur)) ? 'chiffres' : 'aiguilles';
           else if (prop === 'secondes') d.secondes = !!valeur;
           else if (prop === 'decalageHeures') d.decalageHeures = Number(valeur) || 0;
           else d[prop] = valeur;
@@ -4941,7 +4967,10 @@ function BlocRuntimeFactory() {
           const liste = Array.isArray(valeur) ? valeur : enTexte(valeur).split(/[\n;]/).map(e => e.trim()).filter(e => e);
           if (prop === 'valeurs') d.valeurs = liste.map(v => app.nombre(v));
           else if (prop === 'etiquettes') d.etiquettes = liste.map(enTexte);
-          else if (prop === 'genre') d.genre = ['barres', 'courbe', 'secteurs'].includes(enTexte(valeur).trim()) ? enTexte(valeur).trim() : 'barres';
+          else if (prop === 'genre') {
+            const g = depuisAnglais('graphique', enTexte(valeur).trim().toLowerCase());
+            d.genre = ['barres', 'courbe', 'secteurs'].includes(g) ? g : 'barres';
+          }
           else d[prop] = valeur;
           return dessinerGraphique(el, d);
         }
@@ -4958,7 +4987,7 @@ function BlocRuntimeFactory() {
             else if (d.type === 'date') el.value = dateIso(valeur);
             else if (d.type === 'heure') {
               const h = heureNormale(valeur);
-              if (!h) throw new Error(`« ${enTexte(valeur)} » n'est pas une heure : écrivez-la comme 14:30.`);
+              if (!h) throw new Error(T('« {valeur} » n\'est pas une heure : écrivez-la comme 14:30.', { valeur: enTexte(valeur) }));
               el.value = h;
             }
             else if (d.type === 'selecteurcouleur') {
@@ -5058,7 +5087,7 @@ function BlocRuntimeFactory() {
         }
       },
       graphique(id, action, valeur, etiquette) {
-        const el = ctrlDeType(id, 'graphique', 'un graphique');
+        const el = ctrlDeType(id, 'graphique', T('un graphique'));
         const d = donnees[id];
         if (action === 'vider') {
           d.valeurs = [];
@@ -5085,7 +5114,7 @@ function BlocRuntimeFactory() {
           icone: 'question', texte: enTexte(question), champ: mode === 'nombre' ? 'nombre' : 'texte',
           annulation: mode === 'nombre' ? 0 : '',
           boutons: [
-            { libelle: 'Annuler', valeur: mode === 'nombre' ? 0 : '' },
+            { libelle: T('Annuler'), valeur: mode === 'nombre' ? 0 : '' },
             { libelle: 'OK', valeur: true, principal: true }
           ]
         });
@@ -5094,8 +5123,8 @@ function BlocRuntimeFactory() {
         return dialogue({
           icone: 'question', texte: enTexte(question), annulation: false,
           boutons: [
-            { libelle: 'Non', valeur: false },
-            { libelle: 'Oui', valeur: true, principal: true }
+            { libelle: T('Non'), valeur: false },
+            { libelle: T('Oui'), valeur: true, principal: true }
           ]
         });
       },
@@ -5103,18 +5132,22 @@ function BlocRuntimeFactory() {
         const liste = (Array.isArray(options) ? options : [options]).map(enTexte);
         return dialogue({
           icone: 'question', texte: enTexte(question), choix: liste, annulation: '',
-          boutons: [{ libelle: 'Annuler', valeur: '' }]
+          boutons: [{ libelle: T('Annuler'), valeur: '' }]
         });
       },
       // Les espaces sont retirés : « 1 234,5 » (écrit par « … avec 1 chiffre après la virgule ») redonne 1234.5.
+      // À l'anglaise (« 1,234,567.5 », ou « 1,234 » en anglais), les virgules séparent les milliers ;
+      // sinon la virgule est celle des décimales (« 3,5 »).
       nombre(v) {
-        const n = parseFloat(String(v).replace(/[\s  ]/g, '').replace(',', '.'));
+        const s = String(v).replace(/[\s  ]/g, '');
+        const milliers = s.includes('.') || (LANGUE === 'en' && /^-?\d{1,3}(,\d{3})+$/.test(s));
+        const n = parseFloat(milliers ? s.replace(/,/g, '') : s.replace(',', '.'));
         return isNaN(n) ? 0 : n;
       },
-      // À la française : virgule, et les milliers séparés (12,50 · 1 234 567).
+      // Dans la langue de l'éditeur : à la française (12,50 · 1 234 567) ou à l'anglaise (12.50 · 1,234,567).
       formatNombre(v, decimales) {
         const d = Math.min(10, Math.max(0, Math.round(Number(decimales) || 0)));
-        return (typeof v === 'number' ? v : app.nombre(v)).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d });
+        return (typeof v === 'number' ? v : app.nombre(v)).toLocaleString(LOCALE, { minimumFractionDigits: d, maximumFractionDigits: d });
       },
 
       // ---- Hasard ----
@@ -5195,7 +5228,7 @@ function BlocRuntimeFactory() {
 
       // ---- Zones de dessin ----
       dessin(id, action, a, b, c, e, f) {
-        const el = ctrlDeType(id, 'zonedessin', 'une zone de dessin');
+        const el = ctrlDeType(id, 'zonedessin', T('une zone de dessin'));
         const d = donnees[id];
         const crayon = d.crayon || (d.crayon = { couleur: '#000000', epaisseur: 2 });
         const ctx = el.getContext('2d');
@@ -5234,7 +5267,7 @@ function BlocRuntimeFactory() {
         }
       },
       souris(id, quoi) {
-        ctrlDeType(id, 'zonedessin', 'une zone de dessin');
+        ctrlDeType(id, 'zonedessin', T('une zone de dessin'));
         return donnees[id].souris[quoi] ?? 0;
       },
 
@@ -5248,38 +5281,38 @@ function BlocRuntimeFactory() {
         });
       },
       quandMenuContextuel(id, cle, fn) {
-        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        ctrlDeType(id, 'menucontextuel', T('un menu contextuel'));
         const m = donnees[id];
         (m.actions[cle] = m.actions[cle] || []).push(proteger(fn));
       },
       activerMenuContextuel(id, cle, actif) {
-        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        ctrlDeType(id, 'menucontextuel', T('un menu contextuel'));
         if (actif) donnees[id].inactifs.delete(cle); else donnees[id].inactifs.add(cle);
       },
       // Nom du contrôle (ou de la fenêtre) sur lequel le menu a été ouvert ; '' s'il a été ouvert par un bloc.
       sourceMenuContextuel(id) {
-        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        ctrlDeType(id, 'menucontextuel', T('un menu contextuel'));
         return donnees[id].source;
       },
       montrerMenuContextuel(id) {
-        ctrlDeType(id, 'menucontextuel', 'un menu contextuel');
+        ctrlDeType(id, 'menucontextuel', T('un menu contextuel'));
         ouvrirMenuContextuel(id, '', pointeur.x, pointeur.y);
       },
 
       // ---- Barres d'outils ----
       quandOutil(id, cle, fn) {
-        ctrlDeType(id, 'barreoutils', 'une barre d\'outils');
+        ctrlDeType(id, 'barreoutils', T('une barre d\'outils'));
         const d = donnees[id];
         (d.surOutil[cle] = d.surOutil[cle] || []).push(proteger(fn));
       },
       activerOutil(id, cle, actif) {
-        const el = ctrlDeType(id, 'barreoutils', 'une barre d\'outils');
+        const el = ctrlDeType(id, 'barreoutils', T('une barre d\'outils'));
         el.querySelectorAll('.bs-outil').forEach(b => { if (b.dataset.cle === cle) b.disabled = !actif; });
       },
 
       // ---- Tableaux ----
       tableau(id, action, a, b, c) {
-        const el = ctrlDeType(id, 'tableau', 'un tableau');
+        const el = ctrlDeType(id, 'tableau', T('un tableau'));
         const d = donnees[id];
         d.lienBase = null;
         switch (action) {
@@ -5337,7 +5370,7 @@ function BlocRuntimeFactory() {
         if (d.memoriser) stockage.ecrire(d.cleMemoire, d.lignes);
       },
       lireTableau(id, quoi, a, b) {
-        ctrlDeType(id, 'tableau', 'un tableau');
+        ctrlDeType(id, 'tableau', T('un tableau'));
         const d = donnees[id];
         switch (quoi) {
           case 'cellule': return valeurCellule(d.lignes[numLigne(d, a)][numColonne(d, b)] ?? '');
@@ -5358,7 +5391,7 @@ function BlocRuntimeFactory() {
 
       // ---- Base de données ----
       base(id, action, a, b, c) {
-        ctrlDeType(id, 'basedonnees', 'une base de données');
+        ctrlDeType(id, 'basedonnees', T('une base de données'));
         const d = donnees[id];
         switch (action) {
           case 'ajouter': {
@@ -5396,12 +5429,12 @@ function BlocRuntimeFactory() {
       lireBase(id, quoi, a, b, c) {
         if (quoi === 'choisie') {
           // n° de la fiche montrée sur la ligne choisie d'un tableau (0 : aucune).
-          ctrlDeType(id, 'tableau', 'un tableau');
+          ctrlDeType(id, 'tableau', T('un tableau'));
           const t = donnees[id];
           if (t.choisie < 0) return 0;
           return t.lienBase ? (t.lienBase.numeros[t.choisie] ?? -1) + 1 : t.choisie + 1;
         }
-        ctrlDeType(id, 'basedonnees', 'une base de données');
+        ctrlDeType(id, 'basedonnees', T('une base de données'));
         const d = donnees[id];
         switch (quoi) {
           case 'champ': return valeurCellule(d.fiches[numFiche(d, a)][numChamp(d, b)]);
@@ -5483,7 +5516,7 @@ function BlocRuntimeFactory() {
             // Si le navigateur bloque le son (aucun clic encore), on n'attend pas indéfiniment.
             if (!source.loop) setTimeout(termine, (fin - debut) * 1000 + 250);
           });
-        }, () => { throw new Error(`Le son « ${importe.nom} » n'a pas pu être lu (fichier abîmé ou format inconnu).`); });
+        }, () => { throw new Error(T('Le son « {nom} » n\'a pas pu être lu (fichier abîmé ou format inconnu).', { nom: importe.nom })); });
         if (mode === 'attendre') return lecture.then(() => arrete ? JAMAIS : undefined);
         lecture.catch(signaler);
       },
@@ -5493,9 +5526,9 @@ function BlocRuntimeFactory() {
         const synthese = window.speechSynthesis;
         if (!synthese || arrete) return;
         const phrase = new SpeechSynthesisUtterance(enTexte(texte));
-        phrase.lang = 'fr-FR';
-        const voix = synthese.getVoices().filter(v => /^fr/i.test(v.lang));
-        phrase.voice = voix.find(v => /^fr-FR/i.test(v.lang)) || voix[0] || null;
+        phrase.lang = LOCALE;
+        const voix = synthese.getVoices().filter(v => v.lang.slice(0, 2).toLowerCase() === LANGUE);
+        phrase.voice = voix.find(v => v.lang.toLowerCase() === LOCALE.toLowerCase()) || voix[0] || null;
         phrase.rate = reglageVoix.vitesse;
         phrase.pitch = reglageVoix.hauteur;
         phrase.volume = volumeGeneral;
@@ -5518,7 +5551,7 @@ function BlocRuntimeFactory() {
       // ---- Panneau défilant ----
       // quoi : 'haut', 'bas', 'gauche', 'droite', ou 'controle' (cible : un contrôle posé dans le panneau).
       defilerPanneau(id, quoi, cible) {
-        ctrlDeType(id, 'panneau', 'un panneau défilant');
+        ctrlDeType(id, 'panneau', T('un panneau défilant'));
         const el = elements[id];
         let x = el.scrollLeft, y = el.scrollTop;
         if (quoi === 'haut') y = 0;
@@ -5534,7 +5567,7 @@ function BlocRuntimeFactory() {
             cx += o.x; cy += o.y;
             o = estPanneau(o.panneau) ? donnees[o.panneau] : null;
           }
-          if (!o) throw new Error(`« ${donnees[cible].nom} » n'est pas posé dans « ${donnees[id].nom} ».`);
+          if (!o) throw new Error(T('« {controle} » n\'est pas posé dans « {panneau} ».', { controle: donnees[cible].nom, panneau: donnees[id].nom }));
           cx += o.x; cy += o.y;
           // On fait défiler juste ce qu'il faut pour le voir en entier.
           if (cy < el.scrollTop) y = cy - MARGE_PANNEAU;
@@ -5560,13 +5593,13 @@ function BlocRuntimeFactory() {
         const ok = document.execCommand('copy');
         zone.remove();
         if (actif && actif.focus) actif.focus();
-        if (!ok) throw new Error('Windows n\'a pas permis de copier le texte dans le presse-papiers.');
+        if (!ok) throw new Error(T('Windows n\'a pas permis de copier le texte dans le presse-papiers.'));
       },
       async lirePressePapiers() {
         try {
           return await navigator.clipboard.readText();
         } catch (e) {
-          throw new Error('Windows n\'a pas permis de lire le presse-papiers (la fenêtre du programme doit être active).');
+          throw new Error(T('Windows n\'a pas permis de lire le presse-papiers (la fenêtre du programme doit être active).'));
         }
       },
       async copierImage(id) {
@@ -5575,13 +5608,13 @@ function BlocRuntimeFactory() {
         try {
           await navigator.clipboard.write([new ClipboardItem({ 'image/png': png })]);
         } catch (e) {
-          throw new Error('Windows n\'a pas permis de copier l\'image dans le presse-papiers.');
+          throw new Error(T('Windows n\'a pas permis de copier l\'image dans le presse-papiers.'));
         }
       },
       // quoi : 'texte' (a = le texte), 'controle' (a = son id) ou 'fenetre' (a = son id, '' = principale).
       async imprimer(quoi, a) {
         if (arrete) return;
-        let titre = principale.def.titre || 'Programme', page;
+        let titre = principale.def.titre || T('Programme'), page;
         if (quoi === 'texte') page = pageDeTexte(a);
         else if (quoi === 'controle') { page = await pageDeControle(a); titre = donnees[a].nom; }
         else {
@@ -5598,13 +5631,13 @@ function BlocRuntimeFactory() {
       ouvrirNavigateur(adresse) {
         if (arrete) return;
         const url = adresseDonnees(adresse);
-        if (!/^https?:/i.test(url)) throw new Error(`« ${url} » n'est pas une adresse web (http ou https).`);
+        if (!/^https?:/i.test(url)) throw new Error(T('« {url} » n\'est pas une adresse web (http ou https).', { url }));
         window.open(url, '_blank', 'noopener');
       },
       meteo,
       notifier(titre, texte, icone) {
         if (arrete) return;
-        const t = enTexte(titre).trim() || principale.def.titre || 'Programme', m = enTexte(texte);
+        const t = enTexte(titre).trim() || principale.def.titre || T('Programme'), m = enTexte(texte);
         const genre = ICONES_NOTIFICATION[icone] ? icone : 'aucune';
         const webview = window.chrome && window.chrome.webview;
         // Dans BlocStudio ou dans une application exportée : une vraie notification de Windows.
@@ -5696,7 +5729,7 @@ function BlocRuntimeFactory() {
       // ---- Calendrier ----
       // action : 'marquer' (avec une couleur), 'effacer' (une date) ou 'vider' (toutes les marques).
       calendrier(id, action, date, teinte) {
-        const el = ctrlDeType(id, 'calendrier', 'un calendrier');
+        const el = ctrlDeType(id, 'calendrier', T('un calendrier'));
         const d = donnees[id];
         if (action === 'vider') d.marques = {};
         else if (action === 'marquer') d.marques[dateDuCalendrier(date)] = enTexte(teinte) || 'rouge';

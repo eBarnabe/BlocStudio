@@ -14,27 +14,27 @@
     '#065f46', '#008751', '#00e436', '#1d2b53', '#1e40af', '#29adff', '#7c3aed', '#83769c'
   ];
   const OUTILS = [
-    ['crayon', '✏️', 'Crayon (clic droit : gomme)'],
-    ['gomme', '🧽', 'Gomme'],
-    ['remplir', '🪣', 'Pot de peinture : remplit une zone de la même couleur'],
-    ['pipette', '💧', 'Pipette : reprend la couleur d\'un pixel'],
-    ['ligne', '╱', 'Ligne droite'],
-    ['rect', '▭', 'Rectangle'],
-    ['rectPlein', '■', 'Rectangle plein'],
-    ['ellipse', '◯', 'Ellipse'],
-    ['ellipsePleine', '⬤', 'Ellipse pleine'],
-    ['zone', '🎯', 'Zone de collision : tracez le rectangle qui compte pour les blocs « touche… » (clic droit : toute l\'image)']
+    ['crayon', '✏️', T('Crayon (clic droit : gomme)')],
+    ['gomme', '🧽', T('Gomme')],
+    ['remplir', '🪣', T('Pot de peinture : remplit une zone de la même couleur')],
+    ['pipette', '💧', T('Pipette : reprend la couleur d\'un pixel')],
+    ['ligne', '╱', T('Ligne droite')],
+    ['rect', '▭', T('Rectangle')],
+    ['rectPlein', '■', T('Rectangle plein')],
+    ['ellipse', '◯', T('Ellipse')],
+    ['ellipsePleine', '⬤', T('Ellipse pleine')],
+    ['zone', '🎯', T('Zone de collision : tracez le rectangle qui compte pour les blocs « touche… » (clic droit : toute l\'image)')]
   ];
   const ACTIONS = [
-    ['annuler', '↶', 'Annuler (Ctrl+Z)'],
-    ['retablir', '↷', 'Rétablir (Ctrl+Y)'],
-    ['miroirH', '⇋', 'Retourner le costume (gauche ↔ droite)'],
-    ['miroirV', '⇵', 'Retourner le costume (haut ↔ bas)'],
-    ['gauche', '←', 'Décaler le dessin d\'un pixel vers la gauche'],
-    ['droite', '→', 'Décaler le dessin d\'un pixel vers la droite'],
-    ['haut', '↑', 'Décaler le dessin d\'un pixel vers le haut'],
-    ['bas', '↓', 'Décaler le dessin d\'un pixel vers le bas'],
-    ['vider', '🗑️', 'Effacer tout le costume']
+    ['annuler', '↶', T('Annuler (Ctrl+Z)')],
+    ['retablir', '↷', T('Rétablir (Ctrl+Y)')],
+    ['miroirH', '⇋', T('Retourner le costume (gauche ↔ droite)')],
+    ['miroirV', '⇵', T('Retourner le costume (haut ↔ bas)')],
+    ['gauche', '←', T('Décaler le dessin d\'un pixel vers la gauche')],
+    ['droite', '→', T('Décaler le dessin d\'un pixel vers la droite')],
+    ['haut', '↑', T('Décaler le dessin d\'un pixel vers le haut')],
+    ['bas', '↓', T('Décaler le dessin d\'un pixel vers le bas')],
+    ['vider', '🗑️', T('Effacer tout le costume')]
   ];
 
   const $ = id => document.getElementById(id);
@@ -250,7 +250,7 @@
   async function importer(fichier) {
     let image;
     try { image = await lireImage(fichier); } catch (err) {
-      alert(`« ${fichier.name} » n'est pas une image lisible. Essayez un fichier PNG, JPG ou GIF.`);
+      alert(T('« {nom} » n\'est pas une image lisible. Essayez un fichier PNG, JPG ou GIF.', { nom: fichier.name }));
       return;
     }
     memoriser();
@@ -317,7 +317,7 @@
 
   function actionCostume(action) {
     if (action === 'nouveau' || action === 'dupliquer') {
-      if (e.costumes.length >= MAX_COSTUMES) return alert(`${MAX_COSTUMES} costumes au maximum.`);
+      if (e.costumes.length >= MAX_COSTUMES) return alert(T('{max} costumes au maximum.', { max: MAX_COSTUMES }));
       memoriser();
       e.costumes.splice(e.courant + 1, 0, {
         nom: nomCostumeLibre(),
@@ -436,7 +436,7 @@
     }));
     $('es-liste-costumes').children[e.courant]?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     $('es-nom-costume').value = courant().nom;
-    $('es-costume-numero').textContent = `Costume ${e.courant + 1} sur ${e.costumes.length}`;
+    $('es-costume-numero').textContent = T('Costume {numero} sur {nombre}', { numero: e.courant + 1, nombre: e.costumes.length });
     $('es-c-supprimer').disabled = e.costumes.length < 2;
     $('es-c-avant').disabled = e.courant === 0;
     $('es-c-apres').disabled = e.courant === e.costumes.length - 1;
@@ -456,8 +456,8 @@
   function majZone() {
     const z = e.zone, N = e.N;
     $('es-zone-texte').textContent = z
-      ? `Pixels ${Math.round(z.x0 * N)} à ${Math.round(z.x1 * N) - 1} en x, ${Math.round(z.y0 * N)} à ${Math.round(z.y1 * N) - 1} en y.`
-      : 'Toute l\'image. Avec l\'outil 🎯, tracez un rectangle pour la réduire.';
+      ? T('Pixels {x0} à {x1} en x, {y0} à {y1} en y.', { x0: Math.round(z.x0 * N), x1: Math.round(z.x1 * N) - 1, y0: Math.round(z.y0 * N), y1: Math.round(z.y1 * N) - 1 })
+      : T('Toute l\'image. Avec l\'outil 🎯, tracez un rectangle pour la réduire.');
     $('es-zone-tout').disabled = !z;
   }
 
@@ -511,7 +511,7 @@
       dessinerApercu();
     }, 1000 / e.vitesse);
     $('es-lecture').textContent = e.lecture ? '⏸' : '▶';
-    $('es-lecture').title = e.lecture ? 'Arrêter l\'aperçu' : 'Voir l\'animation';
+    $('es-lecture').title = e.lecture ? T('Arrêter l\'aperçu') : T('Voir l\'animation');
     dessinerApercu();
   }
 
@@ -691,7 +691,7 @@
       if (fichier) importer(fichier);
     });
     $('es-annuler').addEventListener('click', () => {
-      if (e.histo.length && !confirm('Abandonner les modifications de ce sprite ?')) return;
+      if (e.histo.length && !confirm(T('Abandonner les modifications de ce sprite ?'))) return;
       fermer(null);
     });
     $('es-valider').addEventListener('click', valider);
@@ -722,7 +722,7 @@
       try { e.costumes.push({ nom: c.nom, px: await chargerCostume(c.donnees, N) }); } catch (err) { /* image abîmée */ }
     }
     if (!e.costumes.length) e.costumes = [{ nom: 'costume1', px: vide(N) }];
-    $('es-titre').textContent = sprite ? '🎨 Modifier un sprite' : '🎨 Nouveau sprite';
+    $('es-titre').textContent = sprite ? T('🎨 Modifier un sprite') : T('🎨 Nouveau sprite');
     $('es-nom').value = (sprite && sprite.nom) || options.nom || 'sprite';
     $('es-erreur').textContent = '';
     $('editeur-sprite').hidden = false;
@@ -742,9 +742,9 @@
 
   function valider() {
     const nom = $('es-nom').value.trim();
-    if (!nom) { $('es-erreur').textContent = 'Donnez un nom à ce sprite.'; return $('es-nom').focus(); }
+    if (!nom) { $('es-erreur').textContent = T('Donnez un nom à ce sprite.'); return $('es-nom').focus(); }
     if (e.nomsPris.includes(nom)) {
-      $('es-erreur').textContent = `Il y a déjà un sprite nommé « ${nom} ».`;
+      $('es-erreur').textContent = T('Il y a déjà un sprite nommé « {nom} ».', { nom });
       return $('es-nom').focus();
     }
     fermer({
