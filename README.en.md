@@ -4,6 +4,8 @@
 
 **Block programming, in English or French, to build real Windows applications and games.**
 
+Try BlocStudio online: **https://ebarnabe.github.io/BlocStudio/**
+
 BlocStudio mixes two ideas:
 - **draw your window** as in Visual Basic: put down buttons, text boxes, images, sprites…;
 - **write what it does with blocks** that snap together, as in Scratch: “when Button1 is clicked”, “make Hero jump”…

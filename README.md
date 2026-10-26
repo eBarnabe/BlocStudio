@@ -4,6 +4,8 @@
 
 **Programmer en blocs, en français (ou en anglais), pour fabriquer de vraies applications et des jeux Windows.**
 
+Essayer BlocStudio en ligne : **https://ebarnabe.github.io/BlocStudio/**
+
 BlocStudio mélange deux idées :
 - **dessiner sa fenêtre** comme dans Visual Basic : on pose des boutons, des zones de texte, des images, des sprites… ;
 - **écrire ce qu'elle fait avec des blocs** à emboîter, comme dans Scratch : « quand Bouton1 est cliqué », « faire sauter Héros »…
