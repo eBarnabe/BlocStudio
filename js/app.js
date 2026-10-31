@@ -1211,6 +1211,7 @@
       ]);
       champCouleur(liste, T('Couleur de fond'), f.couleurFond, v => { f.couleurFond = v; afficherConcepteur(); });
       champsRedimensionnement(liste, f, true);
+      champsTelephone(liste, f);
       champMenuContextuel(liste, f);
       champTexte(liste, T('Menus — un par ligne ; leurs éléments en dessous, décalés d\'un espace ; « - » pour un trait'),
         f.menus, v => { f.menus = v; blocsAPerimes = true; afficherConcepteur(); }, true,
@@ -1592,6 +1593,34 @@
       liste.appendChild(el('p', 'aide',
         T('Quand la fenêtre change de taille, chaque contrôle suit les bords choisis dans sa propriété « Ancrage » ' +
         '(par défaut, il reste en haut à gauche). Pendant l\'essai dans BlocStudio, on la tire par la poignée ◢ de son coin.')));
+    }
+  }
+
+  // Programme pour téléphone ou tablette : la page web remplit l'écran, et une manette tactile peut s'afficher.
+  function champsTelephone(liste, f) {
+    champCase(liste, T('📱 Programme pour téléphone : la page web remplit l\'écran'), f.telephone, v => {
+      f.telephone = v;
+      afficherProprietes();
+    });
+    if (f.telephone) {
+      const sens = f.largeur === 360 && f.hauteur === 640 ? 'debout' : f.largeur === 640 && f.hauteur === 360 ? 'couche' : '';
+      champChoix(liste, T('Taille conseillée'), [['debout', T('▯ Debout 360×640')], ['couche', T('▭ Couché 640×360')]], sens, v => {
+        [f.largeur, f.hauteur] = v === 'debout' ? [360, 640] : [640, 360];
+        afficherConcepteur();
+        afficherProprietes();
+      });
+      liste.appendChild(el('p', 'aide',
+        T('Sur le téléphone, la fenêtre est agrandie ou réduite pour remplir l\'écran, sans changer ses proportions. ' +
+        'Si elle est redimensionnable, elle prend toute la taille de l\'écran et ses contrôles suivent leur ancrage.')));
+    }
+    champCase(liste, T('🎮 Manette tactile à l\'écran (croix, boutons A et B)'), f.manetteTactile, v => {
+      f.manetteTactile = v;
+      afficherProprietes();
+    });
+    if (f.manetteTactile) {
+      liste.appendChild(el('p', 'aide',
+        T('Elle s\'affiche sur les écrans tactiles (et toujours pendant l\'essai dans BlocStudio). Elle fait comme une ' +
+        'manette branchée : la croix fait aussi les flèches du clavier et A la touche Espace.')));
     }
   }
 
@@ -3544,6 +3573,7 @@
     $('execution').hidden = false;
     execution = BlocRuntime.lancer(projet, code, $('hote-exec'), signalerErreur, {
       modeSuivi,
+      essai: true,
       titre: texte => { $('titre-exec').textContent = texte; },
       // Dans BlocStudio.exe, les fichiers du programme passent par la boîte « Enregistrer sous » de Windows.
       enregistrer: hote ? (nom, texte) => telecharger(nom, texte, 'text/plain') : null
@@ -3788,15 +3818,22 @@
     const donnees = { id: projet.id, fenetre: projet.fenetre, fenetres: projet.fenetres, controles: projet.controles, sons, sprites };
     const json = s => JSON.stringify(s).replace(/</g, '\\u003c');
     const titre = projet.fenetre.titre.replace(/[<&]/g, ch => ch === '<' ? '&lt;' : '&amp;');
+    // Programme pour téléphone (page web seulement) : la fenêtre remplit l'écran, sans zoom ni défilement de la page.
+    const telephone = !pourExe && !!projet.fenetre.telephone;
+    const fond = BlocRuntime.couleur(projet.fenetre.couleurFond || '#f0f0f0');
     const style = pourExe
-      ? `html, body { margin: 0; height: 100%; overflow: hidden; background: ${BlocRuntime.couleur(projet.fenetre.couleurFond || '#f0f0f0')}; }`
+      ? `html, body { margin: 0; height: 100%; overflow: hidden; background: ${fond}; }`
+      : telephone
+      ? `html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; touch-action: manipulation;
+    -webkit-text-size-adjust: 100%; background: ${fond}; }`
       : `html, body { margin: 0; height: 100%; }
   body { display: flex; align-items: center; justify-content: center; background: #dfe3ea; }
   #app { box-shadow: 0 10px 30px rgba(0,0,0,.2); }`;
     return `<!doctype html>
 <html lang="${BlocLangues.langue()}">
 <head>
-<meta charset="utf-8">
+<meta charset="utf-8">${telephone ? `
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">` : ''}
 <title>${titre}</title>
 <style>
   ${style}
@@ -3815,7 +3852,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
   const e = document.getElementById('erreur');
   e.textContent = ${JSON.stringify(T('Erreur : '))} + msg;
   e.style.display = 'block';
-}, { remplir: ${!!pourExe} });
+}, { remplir: ${!!pourExe}, ajuster: ${telephone} });
 </script>
 </body>
 </html>

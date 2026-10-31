@@ -2299,5 +2299,12 @@ BlocLangues.ajouter('en', {
   "Réglages": "Settings",
   "« ouvrir » sans attendre : la fenêtre À propos ne bloque rien.": "“open” without waiting: the About window doesn't block anything.",
   "Paramètres": "Settings",
-  "À propos": "About"
+  "À propos": "About",
+  "📱 Programme pour téléphone : la page web remplit l'écran": "📱 Program for phones: the web page fills the screen",
+  "Taille conseillée": "Recommended size",
+  "▯ Debout 360×640": "▯ Portrait 360×640",
+  "▭ Couché 640×360": "▭ Landscape 640×360",
+  "Sur le téléphone, la fenêtre est agrandie ou réduite pour remplir l'écran, sans changer ses proportions. Si elle est redimensionnable, elle prend toute la taille de l'écran et ses contrôles suivent leur ancrage.": "On the phone, the window is enlarged or reduced to fill the screen, keeping its proportions. If it is resizable, it takes the whole screen and its controls follow their anchoring.",
+  "🎮 Manette tactile à l'écran (croix, boutons A et B)": "🎮 On-screen touch gamepad (D-pad, A and B buttons)",
+  "Elle s'affiche sur les écrans tactiles (et toujours pendant l'essai dans BlocStudio). Elle fait comme une manette branchée : la croix fait aussi les flèches du clavier et A la touche Espace.": "It appears on touch screens (and always while testing in BlocStudio). It works like a connected gamepad: the D-pad also acts as the arrow keys and A as the Space key."
 });

@@ -137,7 +137,7 @@
   // ---------------------------------------------------------------- Moteur d'exécution
   // Un petit programme lancé à part : « app » donne accès aux fonctions appelées par les blocs.
   // `moteur` : un autre moteur que celui de l'éditeur (celui d'un programme exporté).
-  function lancer(controles, fenetre, moteur = BlocRuntime) {
+  function lancer(controles, fenetre, moteur = BlocRuntime, options) {
     const C = c => Object.assign({ texte: '', visible: true, couleurFond: '', taillePolice: 14 }, c, { nom: c.nom || c.id });
     const projet = {
       id: 'tests', sons: [], sprites: [], fenetres: [],
@@ -148,7 +148,7 @@
     hote.style.cssText = 'position:absolute;left:-5000px;top:0';
     document.body.appendChild(hote);
     let erreur = null;
-    const exec = moteur.lancer(projet, 'window.__app = app;', hote, m => { erreur = m; });
+    const exec = moteur.lancer(projet, 'window.__app = app;', hote, m => { erreur = m; }, options);
     const app = window.__app;
     return { app, hote, erreur: () => erreur, fin: () => { exec.arreter(); hote.remove(); } };
   }
@@ -358,6 +358,46 @@
     await dort(100);
     t.fin();
     navigator.getGamepads = ancien;
+  });
+
+  await essayer('moteur : téléphone et manette tactile', async () => {
+    // Page web « pour téléphone » : la fenêtre (360×640) est réduite pour tenir dans la page, sans déformation.
+    const t = lancer([], { largeur: 360, hauteur: 640, manetteTactile: true }, BlocRuntime, { ajuster: true, essai: true });
+    const { app, hote } = t;
+    const echelle = Math.min(innerWidth / 360, innerHeight / 640);
+    const r = hote.querySelector('.bs-surface').getBoundingClientRect();
+    egal('téléphone : fenêtre à l\'échelle de la page', [Math.round(r.width), Math.round(r.height)],
+      [Math.round(360 * echelle), Math.round(640 * echelle)]);
+    const surface = hote.querySelector('.bs-surface');
+    surface.dispatchEvent(new PointerEvent('pointermove', { clientX: r.left + 100 * echelle, clientY: r.top + 200 * echelle, bubbles: true }));
+    egal('téléphone : position du doigt à la taille de la fenêtre', [app.sourisFenetre('x'), app.sourisFenetre('y')], [100, 200]);
+
+    const tactile = document.querySelector('body > .bs-tactile');
+    vrai('manette tactile : affichée sur l\'écran', !!tactile, 'introuvable');
+    const appuis = [];
+    app.quandTouche('espace', () => appuis.push('espace'));
+    app.quandManette('b', () => appuis.push('b'));
+    const appuyer = (el, type, x, y, id) => el.dispatchEvent(new PointerEvent(type, { clientX: x, clientY: y, pointerId: id, bubbles: true }));
+    const croix = tactile.querySelector('.bs-croix'), c = croix.getBoundingClientRect();
+    appuyer(croix, 'pointerdown', c.right - 8, c.top + c.height / 2, 1);
+    await dort(100);
+    egal('manette tactile : croix à droite = flèche droite', [app.toucheEnfoncee('droite'), app.boutonManette('droite'), app.joystickManette('gx') > 50],
+      [true, true, true]);
+    appuyer(croix, 'pointermove', c.right - 8, c.top + 8, 1); // le doigt glisse en diagonale, vers le haut
+    await dort(100);
+    egal('manette tactile : diagonale', [app.toucheEnfoncee('droite'), app.toucheEnfoncee('haut')], [true, true]);
+    appuyer(croix, 'pointerup', 0, 0, 1);
+    const a = tactile.querySelector('.bs-tactile-a'), b = tactile.querySelector('.bs-tactile-b');
+    appuyer(a, 'pointerdown', 0, 0, 2);
+    appuyer(b, 'pointerdown', 0, 0, 3);
+    await dort(100);
+    egal('manette tactile : A = Espace, B', [app.toucheEnfoncee('espace'), app.boutonManette('b'), appuis.sort()], [true, true, ['b', 'espace']]);
+    appuyer(a, 'pointerup', 0, 0, 2);
+    appuyer(b, 'pointerup', 0, 0, 3);
+    await dort(100);
+    egal('manette tactile : relâchée', [app.toucheEnfoncee('droite'), app.toucheEnfoncee('espace'), app.boutonManette('b')], [false, false, false]);
+    t.fin();
+    vrai('manette tactile : retirée à l\'arrêt', !document.querySelector('body > .bs-tactile'), 'encore là');
   });
 
   // ---------------------------------------------------------------- Boîte à outils et exemples

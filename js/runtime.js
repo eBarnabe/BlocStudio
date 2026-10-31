@@ -125,6 +125,19 @@ function BlocRuntimeFactory() {
     .bs-plein-ecran-attente { position: absolute; z-index: 100002; left: 50%; top: 10px; transform: translateX(-50%);
       padding: 6px 14px; border-radius: 999px; background: #1e293b; color: #fff; font: 13px "Segoe UI", sans-serif;
       box-shadow: 0 2px 10px rgba(0,0,0,.3); cursor: pointer; }
+    .bs-tactile { position: absolute; inset: 0; z-index: 100000; pointer-events: none; user-select: none; -webkit-user-select: none; }
+    .bs-tactile.bs-tactile-ecran { position: fixed; }
+    .bs-croix, .bs-tactile-bouton { position: absolute; pointer-events: auto; touch-action: none; -webkit-tap-highlight-color: transparent; }
+    .bs-croix { left: 16px; bottom: 16px; width: 132px; height: 132px; border-radius: 50%; background: rgba(15,23,42,.18); }
+    .bs-croix span, .bs-tactile-bouton { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.55);
+      box-shadow: 0 0 0 1px rgba(15,23,42,.25); color: rgba(15,23,42,.7); font: 600 18px "Segoe UI", sans-serif; }
+    .bs-croix span { position: absolute; width: 44px; height: 44px; border-radius: 8px; }
+    .bs-croix .bs-haut { left: 44px; top: 0; } .bs-croix .bs-bas { left: 44px; bottom: 0; }
+    .bs-croix .bs-gauche { left: 0; top: 44px; } .bs-croix .bs-droite { right: 0; top: 44px; }
+    .bs-tactile-bouton { width: 64px; height: 64px; border-radius: 50%; font-size: 22px; }
+    .bs-tactile-a { right: 16px; bottom: 44px; }
+    .bs-tactile-b { right: 92px; bottom: 16px; width: 52px; height: 52px; font-size: 18px; }
+    .bs-croix span.bs-appui, .bs-tactile-bouton.bs-appui { background: rgba(255,255,255,.95); }
     .bs-notifications { position: absolute; right: 10px; bottom: 10px; z-index: 100001; display: flex; flex-direction: column; gap: 8px;
       align-items: flex-end; pointer-events: none; }
     .bs-notification { display: flex; gap: 10px; width: 260px; max-width: calc(100vw - 40px); padding: 10px 12px; border-radius: 8px;
@@ -680,8 +693,9 @@ function BlocRuntimeFactory() {
     const tr = el.querySelector(`tr[data-n="${d.choisie}"]`);
     if (!tr) return;
     const r = tr.getBoundingClientRect(), cadre = el.getBoundingClientRect();
-    if (r.top < cadre.top + entete) el.scrollTop -= cadre.top + entete - r.top;
-    else if (r.bottom > cadre.bottom) el.scrollTop += r.bottom - cadre.bottom;
+    const ech = cadre.height / (el.offsetHeight || 1) || 1; // programme pour téléphone : fenêtre agrandie ou réduite
+    if (r.top < cadre.top + entete * ech) el.scrollTop -= (cadre.top - r.top) / ech + entete;
+    else if (r.bottom > cadre.bottom) el.scrollTop += (r.bottom - cadre.bottom) / ech;
   }
 
   function ligneTableau(d, n, nbColonnes) {
@@ -716,7 +730,9 @@ function BlocRuntimeFactory() {
     for (let n = debut; n < fin; n++) rangees.push(ligneTableau(d, n, v.nbColonnes));
     if (fin < total) rangees.push(vide(total - fin));
     v.corps.replaceChildren(...rangees);
-    const mesure = fin > debut && rangees[debut ? 1 : 0].getBoundingClientRect().height;
+    // (À l'échelle de la fenêtre, si elle est agrandie ou réduite pour un téléphone.)
+    const ech = el.getBoundingClientRect().height / (el.offsetHeight || 1) || 1;
+    const mesure = fin > debut && rangees[debut ? 1 : 0].getBoundingClientRect().height / ech;
     if (mesure && Math.abs(mesure - h) > 0.5 && !remesure) {
       v.hauteur = mesure; // la vraie hauteur : on redessine avec elle
       dessinerLignesVisibles(el, defilement, true);
@@ -1857,7 +1873,7 @@ function BlocRuntimeFactory() {
         const t = tailles[f === principale ? '' : f.def.id];
         const depart = { x: e.clientX, y: e.clientY, l: t.largeur, h: t.hauteur };
         try { p.setPointerCapture(e.pointerId); } catch (err) { /* pas grave */ }
-        const bouger = ev => redimensionner(f, depart.l + ev.clientX - depart.x, depart.h + ev.clientY - depart.y);
+        const bouger = ev => redimensionner(f, depart.l + (ev.clientX - depart.x) / echelle, depart.h + (ev.clientY - depart.y) / echelle);
         const lacher = () => { p.removeEventListener('pointermove', bouger); p.removeEventListener('pointerup', lacher); };
         p.addEventListener('pointermove', bouger);
         p.addEventListener('pointerup', lacher);
@@ -1872,6 +1888,22 @@ function BlocRuntimeFactory() {
       }
     }
 
+    // Programme pour téléphone (page web) : la fenêtre remplit l'écran. Redimensionnable, elle prend sa taille
+    // (ses contrôles suivent leur ancrage) ; sinon elle est agrandie ou réduite sans changer ses proportions.
+    // `echelle` sert à remettre la position du doigt (ou de la souris) à la taille de la fenêtre.
+    const ajuste = !!options.ajuster;
+    let echelle = 1;
+    function ajusterEcran() {
+      if (fenetre.redimensionnable) return remplirFenetreWindows();
+      const l = tailles[''].largeur, h = tailles[''].hauteur + (barreMenus ? HAUTEUR_MENUS : 0);
+      if (!(window.innerWidth > 0 && window.innerHeight > 0)) return;
+      echelle = Math.min(window.innerWidth / l, window.innerHeight / h);
+      Object.assign(hote.style, {
+        position: 'fixed', transformOrigin: '0 0', transform: `scale(${echelle})`,
+        left: (window.innerWidth - l * echelle) / 2 + 'px', top: (window.innerHeight - h * echelle) / 2 + 'px'
+      });
+    }
+
     function ouvrirFenetre(f, attendre) {
       if (arrete) return JAMAIS;
       if (!f.ouverte) {
@@ -1880,8 +1912,11 @@ function BlocRuntimeFactory() {
         const r = surface.getBoundingClientRect();
         const decalage = 24 * Object.values(fenetres).filter(x => x.ouverte && x !== f).length;
         const t = tailles[f.def.id];
-        f.el.style.left = Math.max(0, r.left + (r.width - t.largeur) / 2 + decalage) + 'px';
-        f.el.style.top = Math.max(0, r.top + (r.height - t.hauteur - 30) / 2 + decalage) + 'px';
+        // Programme pour téléphone : à la même échelle que la fenêtre principale.
+        f.el.style.transformOrigin = '0 0';
+        f.el.style.transform = echelle === 1 ? '' : `scale(${echelle})`;
+        f.el.style.left = Math.max(0, r.left + (r.width - t.largeur * echelle) / 2 + decalage) + 'px';
+        f.el.style.top = Math.max(0, r.top + (r.height - (t.hauteur + 30) * echelle) / 2 + decalage) + 'px';
         f.el.style.display = '';
         f.surOuverture.forEach(h => h());
       }
@@ -3010,13 +3045,15 @@ function BlocRuntimeFactory() {
     const manette = { branchee: false, boutons: new Set(), axes: [0, 0, 0, 0] };
     const actionsManette = {};       // nom de bouton (ou 'toutes') → fonctions
     const touchesManette = new Map(); // touche imitée → moment de la prochaine répétition
+    const appuisTactiles = new Set(), axesTactiles = [0, 0]; // manette tactile (voir plus bas)
+    let manetteTactile = null;
     let lectureManette = 0;
     function lireManette() {
       lectureManette = 0;
       if (arrete) return;
       const pads = [...(navigator.getGamepads ? navigator.getGamepads() : [])].filter(p => p && p.connected);
-      manette.branchee = pads.length > 0;
-      const avant = manette.boutons, boutons = new Set(), axes = [0, 0, 0, 0];
+      manette.branchee = pads.length > 0 || !!manetteTactile;
+      const avant = manette.boutons, boutons = new Set(appuisTactiles), axes = [axesTactiles[0], axesTactiles[1], 0, 0];
       for (const p of pads) {
         for (const [nom, i] of Object.entries(BOUTONS_MANETTE)) if (p.buttons[i] && p.buttons[i].pressed) boutons.add(nom);
         // Joysticks de -100 à 100, avec une petite zone morte au repos.
@@ -3052,6 +3089,81 @@ function BlocRuntimeFactory() {
     ecouter(window, 'gamepadconnected', suivreManette);
     nettoyages.push(() => cancelAnimationFrame(lectureManette));
     suivreManette(); // déjà branchée (et déjà utilisée) avant le lancement
+
+    // ---- Manette tactile ----
+    // Une croix et deux boutons (A, B) dessinés sur l'écran tactile, qui font comme la manette : la croix fait
+    // aussi les flèches du clavier et A la touche Espace. Dans BlocStudio, ils s'affichent toujours pour l'essai.
+    const ecranTactile = navigator.maxTouchPoints > 0 || (window.matchMedia && matchMedia('(any-pointer: coarse)').matches);
+    if (fenetre.manetteTactile && (ecranTactile || options.essai)) {
+      manetteTactile = document.createElement('div');
+      manetteTactile.className = 'bs-tactile' + (ajuste ? ' bs-tactile-ecran' : '');
+      // Le doigt posé sur la manette ne « clique » pas la fenêtre en dessous.
+      const isoler = el => {
+        ['pointerdown', 'pointerup', 'click', 'dblclick'].forEach(t => el.addEventListener(t, e => e.stopPropagation()));
+        el.addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); });
+      };
+      // La croix : la direction dépend de l'endroit où est le doigt (en diagonale, deux à la fois) ; on peut glisser.
+      const croix = document.createElement('div');
+      croix.className = 'bs-croix';
+      const fleches = {};
+      for (const [sens, signe] of [['haut', '▲'], ['bas', '▼'], ['gauche', '◀'], ['droite', '▶']]) {
+        fleches[sens] = croix.appendChild(document.createElement('span'));
+        fleches[sens].className = 'bs-' + sens;
+        fleches[sens].textContent = signe;
+      }
+      let doigtCroix = null;
+      const viserCroix = e => {
+        const r = croix.getBoundingClientRect(), rayon = r.width / 2 || 1;
+        const x = Math.max(-1, Math.min(1, (e.clientX - r.left - rayon) / rayon));
+        const y = Math.max(-1, Math.min(1, (e.clientY - r.top - rayon) / rayon));
+        const horizontal = Math.abs(x) > 0.3 && Math.abs(x) > Math.abs(y) / 2;
+        const vertical = Math.abs(y) > 0.3 && Math.abs(y) > Math.abs(x) / 2;
+        const actifs = { gauche: horizontal && x < 0, droite: horizontal && x > 0, haut: vertical && y < 0, bas: vertical && y > 0 };
+        for (const sens in fleches) {
+          if (actifs[sens]) appuisTactiles.add(sens); else appuisTactiles.delete(sens);
+          fleches[sens].classList.toggle('bs-appui', actifs[sens]);
+        }
+        axesTactiles[0] = Math.abs(x) > 0.15 ? Math.round(x * 100) : 0;
+        axesTactiles[1] = Math.abs(y) > 0.15 ? Math.round(y * 100) : 0;
+        suivreManette();
+      };
+      const lacherCroix = e => {
+        if (e.pointerId !== doigtCroix) return;
+        doigtCroix = null;
+        for (const sens in fleches) { appuisTactiles.delete(sens); fleches[sens].classList.remove('bs-appui'); }
+        axesTactiles[0] = axesTactiles[1] = 0;
+      };
+      croix.addEventListener('pointerdown', e => {
+        e.preventDefault();
+        if (doigtCroix !== null) return;
+        doigtCroix = e.pointerId;
+        try { croix.setPointerCapture(e.pointerId); } catch (err) { /* pas grave */ }
+        viserCroix(e);
+      });
+      croix.addEventListener('pointermove', e => { if (e.pointerId === doigtCroix) viserCroix(e); });
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => croix.addEventListener(t, lacherCroix));
+      isoler(croix);
+      manetteTactile.appendChild(croix);
+      for (const nom of ['a', 'b']) {
+        const b = document.createElement('div');
+        b.className = 'bs-tactile-bouton bs-tactile-' + nom;
+        b.textContent = nom.toUpperCase();
+        b.addEventListener('pointerdown', e => {
+          e.preventDefault();
+          try { b.setPointerCapture(e.pointerId); } catch (err) { /* pas grave */ }
+          appuisTactiles.add(nom);
+          b.classList.add('bs-appui');
+          suivreManette();
+        });
+        const lacher = () => { appuisTactiles.delete(nom); b.classList.remove('bs-appui'); };
+        ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => b.addEventListener(t, lacher));
+        isoler(b);
+        manetteTactile.appendChild(b);
+      }
+      (ajuste ? document.body : surface).appendChild(manetteTactile);
+      nettoyages.push(() => manetteTactile.remove());
+      suivreManette();
+    }
 
     // ---- Micro ----
     // Allumé au premier « volume du micro » (ou « quand le micro entend… ») ; 0 tant qu'il démarre.
@@ -3093,8 +3205,10 @@ function BlocRuntimeFactory() {
     // Dans l'application Windows, c'est la fenêtre qui passe en plein écran, sans bord (F11 aussi) ; le programme
     // la remplit comme d'habitude. Ailleurs (éditeur, page web), le programme occupe tout l'écran : agrandi s'il
     // est redimensionnable (ses contrôles suivent leur ancrage), sinon centré sur sa couleur de fond.
+    // Programme pour téléphone : c'est toute la page qui passe en plein écran, et la fenêtre s'y ajuste.
     let pleinEcranExe = false, tailleAvantPleinEcran = null, attentePleinEcran = null;
-    const estPleinEcran = () => dansExe ? pleinEcranExe : document.fullscreenElement === hote;
+    const cible = ajuste ? document.documentElement : hote;
+    const estPleinEcran = () => dansExe ? pleinEcranExe : document.fullscreenElement === cible;
     function pleinEcran(oui) {
       if (dansExe) {
         const webview = window.chrome && window.chrome.webview;
@@ -3103,12 +3217,12 @@ function BlocRuntimeFactory() {
         return;
       }
       if (!oui) {
-        if (document.fullscreenElement === hote) document.exitFullscreen().catch(() => {});
+        if (estPleinEcran()) document.exitFullscreen().catch(() => {});
         return;
       }
-      if (document.fullscreenElement === hote || attentePleinEcran) return;
-      if (!hote.requestFullscreen) throw new Error(T('Le plein écran n\'est pas possible ici.'));
-      hote.requestFullscreen().catch(() => {
+      if (estPleinEcran() || attentePleinEcran) return;
+      if (!cible.requestFullscreen) throw new Error(T('Le plein écran n\'est pas possible ici.'));
+      cible.requestFullscreen().catch(() => {
         // Sans clic ni touche juste avant (au démarrage, par exemple), le navigateur refuse : on propose un clic.
         if (attentePleinEcran || arrete) return;
         attentePleinEcran = document.createElement('div');
@@ -3117,7 +3231,7 @@ function BlocRuntimeFactory() {
         attentePleinEcran.addEventListener('click', () => {
           attentePleinEcran.remove();
           attentePleinEcran = null;
-          hote.requestFullscreen().catch(() => {});
+          cible.requestFullscreen().catch(() => {});
         });
         hote.appendChild(attentePleinEcran);
       });
@@ -3128,6 +3242,8 @@ function BlocRuntimeFactory() {
         e.preventDefault();
         pleinEcran(!pleinEcranExe);
       }, true);
+    } else if (ajuste) {
+      nettoyages.push(() => { if (estPleinEcran()) document.exitFullscreen().catch(() => {}); });
     } else {
       ecouter(document, 'fullscreenchange', () => {
         const actif = document.fullscreenElement === hote;
@@ -3203,8 +3319,8 @@ function BlocRuntimeFactory() {
     const actionsSouris = { bouge: [], clic: [] };
     const positionSouris = e => {
       const r = surface.getBoundingClientRect();
-      souris.x = Math.round(e.clientX - r.left);
-      souris.y = Math.round(e.clientY - r.top);
+      souris.x = Math.round((e.clientX - r.left) / echelle);
+      souris.y = Math.round((e.clientY - r.top) / echelle);
     };
     ecouter(surface, 'pointermove', e => { positionSouris(e); actionsSouris.bouge.forEach(f => f()); });
     ecouter(surface, 'pointerdown', e => { positionSouris(e); souris.enfonce = true; });
@@ -3292,15 +3408,15 @@ function BlocRuntimeFactory() {
       let prise = null;
       ecouter(el, 'pointerdown', e => {
         if (!d.deplacable || arrete) return;
-        prise = { x: e.clientX - d.x, y: e.clientY - d.y, bouge: false };
+        prise = { x: e.clientX / echelle - d.x, y: e.clientY / echelle - d.y, bouge: false };
         try { el.setPointerCapture(e.pointerId); } catch (err) { /* pas grave */ }
       });
       ecouter(el, 'pointermove', e => {
         if (!prise) return;
         prise.bouge = true;
         const f = fenetreDe(d);
-        d.x = Math.round(Math.min(Math.max(e.clientX - prise.x, -d.largeur + 10), f.largeur - 10));
-        d.y = Math.round(Math.min(Math.max(e.clientY - prise.y, -d.hauteur + 10), f.hauteur - 10));
+        d.x = Math.round(Math.min(Math.max(e.clientX / echelle - prise.x, -d.largeur + 10), f.largeur - 10));
+        d.y = Math.round(Math.min(Math.max(e.clientY / echelle - prise.y, -d.hauteur + 10), f.hauteur - 10));
         el.style.left = d.x + 'px';
         el.style.top = d.y + 'px';
       });
@@ -5793,9 +5909,12 @@ function BlocRuntimeFactory() {
       for (const id in donnees) brancherMenuContextuel(id);
       brancherMenuFenetre(fenetre, surface, 'fenêtre');
       Object.values(fenetres).forEach(f => brancherMenuFenetre(f.def, f.surface, f.def.nom));
-      if (dansExe) {
-        ecouter(window, 'resize', remplirFenetreWindows);
-        remplirFenetreWindows(); // fenêtre déjà agrandie au démarrage
+      if (dansExe || ajuste) {
+        const remplir = dansExe ? remplirFenetreWindows : ajusterEcran;
+        ecouter(window, 'resize', remplir);
+        remplir(); // fenêtre déjà agrandie au démarrage
+        // Le programme change lui-même la taille de sa fenêtre : elle est réajustée à l'écran.
+        if (ajuste && !fenetre.redimensionnable) principale.surTaille.push(ajusterEcran);
       } else if (fenetre.redimensionnable) ajouterPoignee(principale);
       Object.values(fenetres).forEach(f => { if (f.def.redimensionnable) ajouterPoignee(f); });
       auDemarrage.forEach(f => f());

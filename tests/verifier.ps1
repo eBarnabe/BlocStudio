@@ -7,7 +7,7 @@
 # et tests\verifier.js (après : les tests). Il vérifie :
 #   - que la page se charge sans erreur ;
 #   - le moteur d'exécution (gravité, score, nombres, hasard, dates, dictionnaires, calendrier,
-#     horloge, fond qui défile, manette) ;
+#     horloge, fond qui défile, manette, programme pour téléphone et manette tactile) ;
 #   - chaque exemple de la galerie : il s'ouvre, toutes ses catégories de blocs s'affichent,
 #     il s'exécute (avec un appui sur Espace) sans erreur ;
 #   - chaque projet .bstudio posé dans ce dossier tests\ : même chose ;
