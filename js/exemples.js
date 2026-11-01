@@ -1261,6 +1261,78 @@
       }
     },
     {
+      titre: T('🛒 Caisse enregistreuse'),
+      theme: 'applications',
+      description: T('On scanne les vrais produits de la maison : la caisse demande le nom et le prix d\'un article inconnu, s\'en souvient, et fait le ticket et le total.'),
+      creer: () => {
+        // c1 Lecteur · c2 Article · c3 Ticket · c4 Total · c5 EncoreUn · c6 NouveauClient · c7 Aide
+        // c8 Produits (Base de données)
+        const champ = nom => bloc('bs_base_champ', 'c8', { N: v('v_fiche') }, { CHAMP: nom });
+        const euros = x => joindre(bloc('bs_format_nombre', null, { VAL: x, DEC: n(2) }), t(' €'));
+        const afficherTotal = () => ecrire('c4', 'texte', joindre(t(T('Total : ')), euros(v('v_total'))));
+        return projet(
+          { titre: T('Caisse enregistreuse'), largeur: 680, hauteur: 360, couleurFond: '#f8fafc' },
+          [
+            { type: 'lecteurcodes', nom: 'Lecteur', x: 10, y: 10, largeur: 320, hauteur: 240, allumerAuDemarrage: true, bip: true },
+            { type: 'etiquette', nom: 'Article', texte: T('Scannez un article…'), x: 10, y: 258, largeur: 320, hauteur: 40, taillePolice: 16 },
+            { type: 'zoneliste', nom: 'Ticket', x: 345, y: 10, largeur: 325, hauteur: 240, elements: [], taillePolice: 15 },
+            { type: 'etiquette', nom: 'Total', texte: '', x: 345, y: 258, largeur: 325, hauteur: 40,
+              taillePolice: 24, couleurTexte: '#15803d', gras: true },
+            { type: 'bouton', nom: 'EncoreUn', texte: T('➕ Encore un'), x: 10, y: 306, largeur: 150, hauteur: 40 },
+            { type: 'bouton', nom: 'NouveauClient', texte: T('🧾 Nouveau client'), x: 170, y: 306, largeur: 160, hauteur: 40 },
+            { type: 'etiquette', nom: 'Aide', texte: T('Article inconnu ? La caisse demande son nom et son prix, puis s\'en souvient.'),
+              x: 345, y: 306, largeur: 325, hauteur: 40, taillePolice: 12, couleurTexte: '#64748b' },
+            { type: 'basedonnees', nom: 'Produits', largeur: 0, hauteur: 0, memoriser: true, champs: [T('Code'), T('Nom'), T('Prix')], fiches: [] }
+          ],
+          ['total', 'fiche', 'nom', 'prix'],
+          () => [
+            presentation(T('Chaque produit connu est une fiche de la base de données Produits (code, nom, prix), gardée d\'une fois sur l\'autre. Un code lu est cherché dans la base ; s\'il n\'y est pas, on demande le nom et le prix, et on ajoute la fiche.')),
+            evt('bs_quand_demarre', null, [fixer('v_total', n(0)), fixer('v_fiche', n(0)), afficherTotal()]),
+            evt('bs_quand_code_lu', 'c1', [
+              note(T('« n° de la première fiche » : 0 si aucun produit n\'a ce code.')),
+              fixer('v_fiche', bloc('bs_base_premiere', 'c8', { VAL: lire('code', 'c1') }, { CHAMP: T('Code'), OP: 'egal' })),
+              si(compare('EQ', v('v_fiche'), n(0)), [
+                note(T('Article inconnu : on demande son nom (vide = annulé), puis son prix, et on l\'ajoute à la base.')),
+                fixer('v_nom', { type: 'bs_demander', inputs: { VAL: I(joindre(t(T('Nouvel article (code ')), lire('code', 'c1'), t(T(') : quel est son nom ?')))) } }),
+                si(estVide(v('v_nom')),
+                  [ecrire('c2', 'texte', t(T('Article annulé.')))],
+                  [
+                    fixer('v_prix', demanderNombre(joindre(t(T('Prix de « ')), v('v_nom'), t(T(' » en euros ?'))))),
+                    {
+                      type: 'bs_base_ajouter', fields: { CTRL: 'c8' }, extraState: { champs: [T('Code'), T('Nom'), T('Prix')] },
+                      inputs: { V0: I(lire('code', 'c1')), V1: I(v('v_nom')), V2: I(v('v_prix')) }
+                    },
+                    fixer('v_fiche', bloc('bs_base_nombre', 'c8'))
+                  ])
+              ]),
+              si(compare('GT', v('v_fiche'), n(0)), [appeler('ajouterAuTicket')])
+            ]),
+            fonction('ajouterAuTicket', [
+              note(T('Une ligne de plus sur le ticket (le produit de la fiche n° « fiche »), et le total augmente.')),
+              listeAjouter('c3', joindre(champ(T('Nom')), t(' — '), euros(champ(T('Prix'))))),
+              ajouter('v_total', champ(T('Prix'))),
+              afficherTotal(),
+              ecrire('c2', 'texte', joindre(t('✅ '), champ(T('Nom'))))
+            ]),
+            evt('bs_quand_clic', 'c5', [
+              note(T('Le même article encore une fois, sans le rescanner.')),
+              si(compare('EQ', v('v_fiche'), n(0)),
+                [message(t(T('Scannez d\'abord un article.')), 'info')],
+                [appeler('ajouterAuTicket')])
+            ]),
+            evt('bs_quand_clic', 'c6', [
+              note(T('Nouveau ticket. « oublier » : le premier article du client suivant sera lu, même si c\'est le même que le dernier.')),
+              listeVider('c3'),
+              fixer('v_total', n(0)),
+              fixer('v_fiche', n(0)),
+              afficherTotal(),
+              ecrire('c2', 'texte', t(T('Scannez un article…'))),
+              bloc('bs_lecteur_codes_ctrl', 'c1', null, { ACTION: 'oublier' })
+            ])
+          ]);
+      }
+    },
+    {
       titre: T('🪙 Attrape la pièce'),
       theme: 'jeux',
       description: T('Un vrai petit jeu : sprites animés, clavier ou souris, minuteur, musique de fond et record.'),
