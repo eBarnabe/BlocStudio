@@ -868,6 +868,10 @@
     T('le lecteur de codes'), { ctrl: ['lecteurcodes'] }
   ], COULEUR_CONTROLES, T('Allume ou éteint la caméra du lecteur (celle de derrière sur un téléphone). Par défaut, le lecteur s\'allume tout seul au démarrage (voir ses propriétés).'));
 
+  Blockly.Blocks['bs_qr_code'] = instruction(() => [
+    { nom: 'VAL', libelle: T('🔳 mettre le QR code de') }, T('dans'), { ctrl: ['image', 'zonedessin'] }
+  ], COULEUR_CONTROLES, T('Fabrique le QR code de ce texte (une adresse web, un message…) et le montre dans une image ou une zone de dessin. On peut ensuite le scanner avec un téléphone, l\'imprimer ou l\'enregistrer.'));
+
   Blockly.Blocks['bs_fichier_contenu'] = valeur(() => [T('contenu du fichier de'), FICHIER], null, COULEUR_FICHIERS,
     T('Le texte du dernier fichier ouvert ou déposé (pour le type « Image » : l\'image, à mettre dans un contrôle Image).'));
 
@@ -2430,6 +2434,7 @@
   gen.forBlock['bs_camera_ctrl'] = b => `await app.camera(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
   gen.forBlock['bs_quand_code_lu'] = b =>
     `app.quand(${id(b)}, 'code', async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_qr_code'] = b => `await app.qrCode(${id(b)}, ${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_lecteur_codes_ctrl'] = b => `await app.lecteurCodes(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
   gen.forBlock['bs_camera_photo'] = b => `await app.camera(${id(b)}, 'photo');\n`;
   gen.forBlock['bs_camera_photo_dans'] = b => `await app.camera(${id(b)}, 'photoDans', ${codeCtrl(b.getFieldValue('CIBLE'))});\n`;
@@ -2836,7 +2841,9 @@
         { kind: 'block', type: 'bs_web_lire', inputs: { VAL: texte('https://geo.api.gouv.fr/communes?nom=saint-ma&fields=nom,codesPostaux,departement&boost=population&limit=10') } },
         { kind: 'block', type: 'bs_json_liste', inputs: { CHEMIN: texte('nom') } },
         etiquette(T('Pages web')),
-        { kind: 'block', type: 'bs_web_ouvrir', inputs: { VAL: texte(T('www.google.fr')) } }
+        { kind: 'block', type: 'bs_web_ouvrir', inputs: { VAL: texte(T('www.google.fr')) } },
+        etiquette(T('QR code (à scanner avec un téléphone ; pour les lire : contrôle Lecteur de codes)')),
+        { kind: 'block', type: 'bs_qr_code', inputs: { VAL: texte(T('https://fr.wikipedia.org')) } }
       ]
     },
     {
@@ -3042,7 +3049,8 @@
           ...mouvement(), ...clones());
         break;
       case 'image':
-        actions.push(etiquette(T('Fond qui défile')), b('bs_image_defiler', { DX: nombre(-2), DY: nombre(0) }), ...mouvement(), ...clones());
+        actions.push(b('bs_qr_code', { VAL: texte(T('https://fr.wikipedia.org')) }),
+          etiquette(T('Fond qui défile')), b('bs_image_defiler', { DX: nombre(-2), DY: nombre(0) }), ...mouvement(), ...clones());
         break;
       case 'forme':
         actions.push(...mouvement(), ...clones());
@@ -3064,6 +3072,7 @@
           b('bs_dessin_point', { X: nombre(50), Y: nombre(50) }),
           b('bs_dessin_texte', { TXT: texte(T('Bonjour')), X: nombre(10), Y: nombre(10), T: nombre(20) }),
           b('bs_dessin_effacer'),
+          b('bs_qr_code', { VAL: texte(T('https://fr.wikipedia.org')) }),
           etiquette(T('Souris')),
           b('bs_souris'), b('bs_souris', null, { QUOI: 'y' }));
         break;

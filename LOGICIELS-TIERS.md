@@ -26,11 +26,11 @@ Le moteur WebView2 lui-même (« Microsoft Edge WebView2 Runtime ») n'est pas l
 
 ### ZXing pour JavaScript 0.21.3
 
-La bibliothèque qui lit les QR codes et les codes-barres pour le contrôle **Lecteur de codes** (quand le moteur web n'a pas son propre lecteur, comme sous Windows).
+La bibliothèque qui lit les QR codes et les codes-barres pour le contrôle **Lecteur de codes** (quand le moteur web n'a pas son propre lecteur, comme sous Windows), et qui fabrique les QR codes du bloc « mettre le QR code de … ».
 
 - Auteurs : les contributeurs de ZXing et de zxing-js
 - Licence : Apache 2.0 (texte complet dans [`lib/zxing/LICENSE`](lib/zxing/LICENSE))
-- Fichiers : `lib/zxing/zxing.js` (fichier `umd/index.min.js` du paquet npm `@zxing/library`, sans modification, enveloppé dans une fonction). Elle est recopiée dans les programmes exportés qui ont un lecteur de codes.
+- Fichiers : `lib/zxing/zxing.js` (fichier `umd/index.min.js` du paquet npm `@zxing/library`, sans modification, enveloppé dans une fonction). Elle est recopiée dans les programmes exportés qui ont un lecteur de codes ou qui créent des QR codes.
 - Site : https://github.com/zxing-js/library
 
 ## Services utilisés par les programmes

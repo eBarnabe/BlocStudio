@@ -52,7 +52,7 @@ A program can have **several windows**, **menus**, **resizable** windows whose c
 - **Sounds**: 8-bit sounds and music (with a studio to compose them), speech, **microphone**.
 - **Data**: lists, **dictionaries**, memory that is kept from one run to the next, **CSV and Excel (.xlsx)** files to open and save.
 - **Maths and text**: random numbers, numbers written in the language of the editor (“1,234.50”), unit conversions, **dates**.
-- **Internet and system**: weather (in a town, or where you are), data from a web service (JSON), turned into lists or table rows with a single block; notifications, clipboard, **GPS location**; a **Printing** category (text, control or window, on paper or as PDF).
+- **Internet and system**: weather (in a town, or where you are), data from a web service (JSON), turned into lists or table rows with a single block; notifications, clipboard, **GPS location**, **QR codes** to create (and to read with the Code reader control); a **Printing** category (text, control or window, on paper or as PDF).
 
 Every block has a tooltip that explains what it is for. The **</> Show the code** button shows the JavaScript produced by the blocks.
 

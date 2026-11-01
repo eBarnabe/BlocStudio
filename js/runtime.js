@@ -4770,9 +4770,50 @@ function BlocRuntimeFactory() {
       }
     }
 
-    // ---- Lecteur de codes ----
-    // Le lecteur du moteur web s'il en a un (Android, Mac), sinon la bibliothèque ZXing (lib/zxing, recopiée
-    // dans les programmes exportés qui ont un lecteur). Chacun renvoie { texte, format } ou null.
+    // ---- Lecteur de codes et QR codes ----
+    // La bibliothèque ZXing (lib/zxing, recopiée dans les programmes exportés qui lisent ou créent des codes),
+    // préparée au premier usage.
+    let zxing = null;
+    function bibliothequeZXing() {
+      if (!zxing) {
+        if (typeof BlocStudioZXing !== 'function') throw new Error(T('Le lecteur de codes n\'est pas disponible ici.'));
+        zxing = BlocStudioZXing();
+      }
+      return zxing;
+    }
+
+    // Une image PNG du QR code (avec la marge blanche qu'il lui faut), d'environ 500 points de côté.
+    function imageQrCode(texte) {
+      const Z = bibliothequeZXing();
+      const t = enTexte(texte);
+      if (!t) throw new Error(T('Il manque le texte du QR code.'));
+      let m;
+      try {
+        m = new Z.QRCodeWriter().encode(t, Z.BarcodeFormat.QR_CODE, 0, 0,
+          new Map([[Z.EncodeHintType.CHARACTER_SET, 'UTF-8'], [Z.EncodeHintType.ERROR_CORRECTION, 'M']]));
+      } catch (e) {
+        throw new Error(T('Ce texte est trop long pour un QR code (2 000 caractères environ au plus).'));
+      }
+      const k = Math.max(1, Math.floor(500 / m.getWidth()));
+      const toile = document.createElement('canvas');
+      toile.width = toile.height = m.getWidth() * k;
+      const g = toile.getContext('2d');
+      g.fillStyle = '#fff';
+      g.fillRect(0, 0, toile.width, toile.height);
+      g.fillStyle = '#000';
+      for (let y = 0; y < m.getHeight(); y++) for (let x = 0; x < m.getWidth(); x++) if (m.get(x, y)) g.fillRect(x * k, y * k, k, k);
+      return toile.toDataURL('image/png');
+    }
+
+    async function qrCode(id, texte) {
+      ctrl(id);
+      const d = donnees[id], image = imageQrCode(texte);
+      if (d.type === 'image') app.ecrire(id, 'image', image);
+      else if (d.type === 'zonedessin') await dessinerImage(id, image);
+      else throw new Error(T('On ne peut pas mettre un QR code dans « {nom} » : choisissez une image ou une zone de dessin.', { nom: d.nom }));
+    }
+
+    // Lecteur : celui du moteur web s'il en a un (Android, Mac), sinon ZXing. Chacun renvoie { texte, format } ou null.
     const NOMS_FORMATS = { QR_CODE: 'QR code', EAN_13: 'EAN-13', EAN_8: 'EAN-8', UPC_A: 'UPC-A', UPC_E: 'UPC-E',
       CODE_128: 'Code 128', CODE_39: 'Code 39', CODE_93: 'Code 93', ITF: 'ITF', CODABAR: 'Codabar', DATA_MATRIX: 'Data Matrix',
       PDF_417: 'PDF417', PDF417: 'PDF417', AZTEC: 'Aztec', RSS_14: 'GS1 DataBar', RSS_EXPANDED: 'GS1 DataBar', MAXICODE: 'MaxiCode' };
@@ -4791,8 +4832,7 @@ function BlocRuntimeFactory() {
         } catch (e) { /* ZXing prend le relais */ }
       }
       if (!decodeurZXing) {
-        if (typeof BlocStudioZXing !== 'function') throw new Error(T('Le lecteur de codes n\'est pas disponible ici.'));
-        const Z = BlocStudioZXing();
+        const Z = bibliothequeZXing();
         const lecteur = new Z.MultiFormatReader();
         lecteur.setHints(new Map([[Z.DecodeHintType.TRY_HARDER, true]]));
         decodeurZXing = toile => {
@@ -5983,6 +6023,7 @@ function BlocRuntimeFactory() {
       fichier: ctrlFichier,
       camera: ctrlCamera,
       lecteurCodes: ctrlLecteurCodes,
+      qrCode,
       arbre: ctrlArbre,
       enfantsArbre,
       // Barre d'état : écrire dans la case n° (1, 2, 3…) ; les cases manquantes sont ajoutées.

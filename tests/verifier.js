@@ -433,6 +433,33 @@
     navigator.mediaDevices.getUserMedia = ancien;
   });
 
+  await essayer('moteur : créer un QR code', async () => {
+    const t = lancer([
+      { id: 'i', type: 'image', x: 0, y: 0, largeur: 200, hauteur: 200 },
+      { id: 'z', type: 'zonedessin', x: 210, y: 0, largeur: 180, hauteur: 180 },
+      { id: 'b', type: 'bouton', x: 0, y: 220, largeur: 80, hauteur: 30 }
+    ]);
+    const { app, hote } = t;
+    const texte = 'https://exemple.fr/?é=🎉 BlocStudio';
+    // On relit le QR code avec ZXing, depuis l'image puis depuis la zone de dessin.
+    const Z = BlocStudioZXing();
+    const relire = toile => new Z.MultiFormatReader().decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(toile)))).getText();
+    await app.qrCode('i', texte);
+    const img = hote.querySelector('img.bs-image');
+    await img.decode();
+    const toile = document.createElement('canvas');
+    toile.width = img.naturalWidth;
+    toile.height = img.naturalHeight;
+    toile.getContext('2d').drawImage(img, 0, 0);
+    await app.qrCode('z', texte);
+    egal('QR code : relu dans l\'image et dans la zone de dessin', [relire(toile), relire(hote.querySelector('canvas.bs-zonedessin'))], [texte, texte]);
+    const erreur = async f => { try { await f(); return ''; } catch (e) { return e.message; } };
+    egal('QR code : erreurs', [await erreur(() => app.qrCode('i', 'x'.repeat(3000))), await erreur(() => app.qrCode('b', 'x'))],
+      ['Ce texte est trop long pour un QR code (2 000 caractères environ au plus).',
+        'On ne peut pas mettre un QR code dans « b » : choisissez une image ou une zone de dessin.']);
+    t.fin();
+  });
+
   await essayer('moteur : téléphone (inclinaison, vibration, position)', async () => {
     const t = lancer([]);
     const { app } = t;
@@ -465,7 +492,12 @@
   });
 
   await essayer('export Android : sauvegarde de la clé', async () => {
+    // Une clé d'essai toute faite (elle ne sert qu'ici) : en créer une prend du temps, et l'horloge
+    // virtuelle des tests filerait jusqu'au bout pendant ce temps-là.
+    const CLE_ESSAI = {"format":"BlocStudio-cle-android","version":1,"privee":"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDo6PEOtrbe2WhSQcWwdWk3QALxr+TVca/vZ3hn17Ch/rN46sC/XYBbGSruRBTQQgZxiGHclw7KifvdIWhI2nqa0ZhFVgXQi7XC7efBM1gNIxqB1JDZXMuZ7dsgGjquVtiPM/y0RZDhiti5UOsdsDinmO5wYQ2wzXhHArgD/pnKRgzCRHW+JcMpZtNlebwK9+r3ToQq59jGmL7zEGIAPkZDeexW8wQS0dT4oF7D0r6LKD/MiRNi8Z4EOsER+ckY4q0tdu/AkDifaOPcc8IhHuNuT+AjUn/Pzv2c6QyVq1f89DcEJ69SDeYveEldQ/CIphAbGH7BUj+ZdcCG6/yHogErAgMBAAECggEACvAvAKplvIyIS4ipkJ0gU7HEEaFZmrPr988rsUYeFlWLDIw11iboKXRtTDhSo+nd5JoWQnuuUaZuTNcjTydCPSAdHxsoSxWB8/AkA1z2byjYDK3fdEiD4AGdhLdGoeZpOuci9ee9zfctMMgolUHalKBoM6CTOduZy6Kd4sN5FIM5D0cBmbM2DX7qKdtnu/yrPbUsA6y4Amvp1a5OtPOP+/oNYt0Np3Yf50GUoi0yIi+tLbs16BNbwcV4L17zz9QHN+49tCnCIC8AJfuNcUjBSN80f26CEw1jSqeIIyWiUFIQOYXr9kVEl130MsYegfUod3VoUFZCXkzWqLxypqgyAQKBgQD+iQHXdNBMqJQzBAdvV0l6a18SM7Rkm1odwD0K4TRA3UXQ143kyL9gd6rL/+IVnOHVhUvw4tgujoFxBTYRlKDZmXZCBqSnTbomnD9qtL5W4mlevigCLeTYQ85ruv+yjVNFYG/A4G4YN/AUuvay96NJw0Nte2GOIPEiHBzXlL7zKwKBgQDqQBM7fBKYuf6kCBi2TVB86I7xeO9qNDTOuq5EbUVbtE1cz6oPLghcS7bo6ej0SJsAfKH8wazLZkMcN5aibBSMJdOLd0k2hitrVpqAP5IdpjZg52Bm2ewrP//uuB3EIa0DsfwYSvTOtEt7bM6xhTpM93TTInzQFpbruPik9foqAQKBgGxl4JjnMIZVDLglMR1jqPEvpM9Voa9u0ZP1+IkXm288TK1B/zW9oHLuw5gZIyldJHgQSmUN1k8NdWayd3JJP68rwccgmSJ+4ZXr2L4StzS9O26TwOocrWbEibYrbxWVRi83gKA9c+VwfRf2/3T8LVgOhjqr3sHumYKTQl01BZT9AoGAQhiqVJKBvM5eZ3JRZr8SAuyryL7S7yij7eEG4w/iDiol2hZOadIXUdObXMUDkkoaUlzYaDVNyGamcQPOYS4V7iWON0AFTHk3LyZUmfNWCz+nAFjI/rxmwx1f3b/dxkWqR+yksUYVJW4CDmV5POXWuXjpYdnNVfnJw+GBZypw2AECgYEAmZBlUTlek35zUsfxB/h33rZto6OdhttCTEqMRPvcGqUJOBShEUG5L8JtjzB/+F6sEThFK31dvNUcnjUK9McMHtYt8afjyaOjot2YL8zSTxC/KBqCZdoVNqbZ0KvOiyeUyYRtRBe/FRiCX/OKTIRaY5CgF2VnVVPP3SGyoRQqrFo=","publique":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA6OjxDra23tloUkHFsHVpN0AC8a/k1XGv72d4Z9ewof6zeOrAv12AWxkq7kQU0EIGcYhh3JcOyon73SFoSNp6mtGYRVYF0Iu1wu3nwTNYDSMagdSQ2VzLme3bIBo6rlbYjzP8tEWQ4YrYuVDrHbA4p5jucGENsM14RwK4A/6ZykYMwkR1viXDKWbTZXm8Cvfq906EKufYxpi+8xBiAD5GQ3nsVvMEEtHU+KBew9K+iyg/zIkTYvGeBDrBEfnJGOKtLXbvwJA4n2jj3HPCIR7jbk/gI1J/z879nOkMlatX/PQ3BCevUg3mL3hJXUPwiKYQGxh+wVI/mXXAhuv8h6IBKwIDAQAB","certificat":"MIICrDCCAZSgAwIBAgIIESUQrvvKj4YwDQYJKoZIhvcNAQELBQAwFTETMBEGA1UEAwwKQmxvY1N0dWRpbzAgFw0yNjExMDExNzAwMTlaGA8yMTI2MTEwMTE3MDAxOVowFTETMBEGA1UEAwwKQmxvY1N0dWRpbzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOjo8Q62tt7ZaFJBxbB1aTdAAvGv5NVxr+9neGfXsKH+s3jqwL9dgFsZKu5EFNBCBnGIYdyXDsqJ+90haEjaeprRmEVWBdCLtcLt58EzWA0jGoHUkNlcy5nt2yAaOq5W2I8z/LRFkOGK2LlQ6x2wOKeY7nBhDbDNeEcCuAP+mcpGDMJEdb4lwylm02V5vAr36vdOhCrn2MaYvvMQYgA+RkN57FbzBBLR1PigXsPSvosoP8yJE2LxngQ6wRH5yRjirS1278CQOJ9o49xzwiEe425P4CNSf8/O/ZzpDJWrV/z0NwQnr1IN5i94SV1D8IimEBsYfsFSP5l1wIbr/IeiASsCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAet7KGkUAP2pRU+w/HsgT3n/50kV0krSu9WVZmjvntFfjflU+d7RosNGbIwZLHLZvet6/RAGsOqr/IOV0gLd3TwoOUr7JahyOYz8Q75GPkWaJFQ3iULUG5/dFcMFjeAnieARin/yWvreEnQXdDG8CBnUjopJddxbQZPCt9IstS6l2XQ4QjK7eEpt8r8omX7ixHxAsB/ULRwalog87mKtjT2wFW6a/CbYf5Hgecj9YLlVco4cW2Hr56EvBkRYPZrUk3T5+B85t01GYrNThAPLjAVUeqFrn2Td+HXALwPBpzcP96g52bWWMvdBkjBe3VqJ+RA2r2ZvoAYdYjE+sJE0Vzw=="};
+    localStorage.setItem('blocstudio.cleAndroid', JSON.stringify({ privee: CLE_ESSAI.privee, publique: CLE_ESSAI.publique, certificat: CLE_ESSAI.certificat }));
     const fichier = await BlocAndroid.sauvegarderCle();
+    egal('clé : sauvegardée telle quelle', JSON.parse(fichier), CLE_ESSAI);
     egal('clé : la même clé est reconnue', await BlocAndroid.restaurerCle(fichier, () => true), 'identique');
     const cle = JSON.parse(fichier);
     let message = '';
