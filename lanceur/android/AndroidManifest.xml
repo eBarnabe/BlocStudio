@@ -6,6 +6,12 @@
     package="fr.blocstudio.lanceur">
 
   <uses-permission android:name="android.permission.INTERNET" />
+  <!-- Demandées seulement quand le programme s'en sert (micro, contrôle Caméra). -->
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-feature android:name="android.hardware.camera" android:required="false" />
+  <uses-feature android:name="android.hardware.microphone" android:required="false" />
 
   <application
       android:label="BlocStudio Lanceur"

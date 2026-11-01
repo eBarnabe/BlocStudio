@@ -3837,6 +3837,7 @@ function BlocRuntimeFactory() {
       // Un fichier .csv commence par une marque « UTF-8 » pour qu'Excel affiche bien les accents.
       if (typeof contenu === 'string' && /\.csv$/i.test(nom)) contenu = '\ufeff' + contenu;
       if (options.enregistrer) return (await options.enregistrer(nom, contenu)) === null ? '' : nom;
+      if (window.BlocStudioAndroid) return enregistrerSurAndroid(contenu, nom, t.mime);
       if (window.showSaveFilePicker) {
         try {
           const extension = (nom.match(/\.[a-z0-9]+$/i) || [t.extension])[0].toLowerCase();
@@ -3860,6 +3861,26 @@ function BlocRuntimeFactory() {
       a.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
       return nom;
+    }
+
+    // Application Android : le moteur web ne sait pas télécharger, c'est le lanceur qui ouvre la boîte
+    // « Enregistrer » du téléphone (voir Principale.java) et répond par window.BlocStudioEnregistre(numéro, nom).
+    let numeroEnregistrement = 0;
+    const attentesEnregistrement = new Map();
+    window.BlocStudioEnregistre = (numero, nomChoisi) => {
+      const ok = attentesEnregistrement.get(numero);
+      attentesEnregistrement.delete(numero);
+      if (ok) ok(nomChoisi || '');
+    };
+    async function enregistrerSurAndroid(contenu, nom, mime) {
+      const octets = new Uint8Array(await new Blob([contenu]).arrayBuffer());
+      let binaire = '';
+      for (let i = 0; i < octets.length; i += 0x8000) binaire += String.fromCharCode.apply(null, octets.subarray(i, i + 0x8000));
+      const numero = ++numeroEnregistrement;
+      return new Promise(ok => {
+        attentesEnregistrement.set(numero, ok);
+        window.BlocStudioAndroid.enregistrer(numero, nom, mime, btoa(binaire));
+      });
     }
 
     // Boîte « Ouvrir » : le fichier choisi, ou null si l'utilisateur annule.
@@ -4550,7 +4571,7 @@ function BlocRuntimeFactory() {
     function erreurCamera(e, nom) {
       switch (e && e.name) {
         case 'NotAllowedError': case 'SecurityError':
-          return new Error(T('La caméra de « {nom} » n\'est pas autorisée : acceptez son utilisation quand Windows (ou le navigateur) le demande.', { nom }));
+          return new Error(T('La caméra de « {nom} » n\'est pas autorisée : acceptez son utilisation quand l\'ordinateur, le téléphone ou le navigateur le demande.', { nom }));
         case 'NotFoundError': case 'OverconstrainedError':
           return new Error(T('Aucune caméra n\'a été trouvée sur cet ordinateur.'));
         case 'NotReadableError': case 'AbortError':

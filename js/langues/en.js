@@ -1829,7 +1829,7 @@ BlocLangues.ajouter('en', {
   "Il faut un texte pour le nouvel élément.": "The new item needs a text.",
   "une barre d'état": "a status bar",
   "Une barre d'état a des cases numérotées de 1 à 10.": "A status bar has boxes numbered from 1 to 10.",
-  "La caméra de « {nom} » n'est pas autorisée : acceptez son utilisation quand Windows (ou le navigateur) le demande.": "The camera of “{nom}” is not allowed: accept its use when Windows (or the browser) asks.",
+  "La caméra de « {nom} » n'est pas autorisée : acceptez son utilisation quand l'ordinateur, le téléphone ou le navigateur le demande.": "The camera of “{nom}” is not allowed: accept its use when the computer, the phone or the browser asks.",
   "Aucune caméra n'a été trouvée sur cet ordinateur.": "No camera was found on this computer.",
   "La caméra est déjà utilisée par un autre logiciel (Teams, Zoom, l'appli Caméra…). Fermez-le, puis réessayez.": "The camera is already used by another program (Teams, Zoom, the Camera app…). Close it, then try again.",
   "La caméra n'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).": "The camera isn't available here (open the program in Edge, or export it as a Windows application).",

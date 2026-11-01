@@ -33,6 +33,17 @@ fait revenir un instant), et la page passe sous l'encoche de la caméra, sur la
 couleur de fond de la fenêtre. Le bloc « plein écran » (désactivé) les remontre
 (objet `BlocStudioAndroid`).
 
+Le moteur web d'Android ne fait pas tout seul ce qu'un navigateur fait ; le
+lanceur s'en charge :
+- **micro et caméra** : la première fois que le programme s'en sert, Android
+  demande l'autorisation à l'utilisateur (les autorisations sont dans le
+  manifeste, mais rien n'est demandé tant que le programme ne s'en sert pas) ;
+- **ouvrir un fichier** : la boîte « Ouvrir » du téléphone ;
+- **enregistrer un fichier** : la page passe le contenu au lanceur
+  (`BlocStudioAndroid.enregistrer`), qui ouvre la boîte « Enregistrer » du
+  téléphone et répond par `window.BlocStudioEnregistre(numéro, nom)` ;
+- la taille des polices du téléphone n'agrandit pas le texte de la fenêtre.
+
 À l'export, si le programme utilise des touches du clavier sans manette tactile,
 BlocStudio propose de l'ajouter : un téléphone n'a pas de clavier.
 
