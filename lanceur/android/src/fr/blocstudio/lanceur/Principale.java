@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
+import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -32,7 +34,7 @@ public class Principale extends Activity {
     static final String HOTE = "programme.blocstudio.example";
 
     WebView vue;
-    boolean pleinEcran = false;
+    boolean pleinEcran = true; // les barres du téléphone sont cachées dès le démarrage
 
     @Override
     protected void onCreate(Bundle etat) {
@@ -47,6 +49,13 @@ public class Principale extends Activity {
         try { fond = Color.parseColor(reglages.optString("fond", "#ffffff")); } catch (IllegalArgumentException e) { }
         getWindow().setStatusBarColor(fond);
         getWindow().setNavigationBarColor(fond);
+        // L'encoche de la caméra : la page passe dessous, et ce qui en dépasse a la couleur de fond.
+        getWindow().setBackgroundDrawable(new ColorDrawable(fond));
+        if (Build.VERSION.SDK_INT >= 28) {
+            WindowManager.LayoutParams attributs = getWindow().getAttributes();
+            attributs.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
+            getWindow().setAttributes(attributs);
+        }
 
         vue = new WebView(this);
         vue.setBackgroundColor(fond);
@@ -81,6 +90,7 @@ public class Principale extends Activity {
             }
         });
         setContentView(vue);
+        appliquerPleinEcran(true);
         vue.loadUrl("https://" + HOTE + "/index.html");
     }
 

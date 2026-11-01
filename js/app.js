@@ -1619,7 +1619,7 @@
     });
     if (f.manetteTactile) {
       liste.appendChild(el('p', 'aide',
-        T('Elle s\'affiche sur les écrans tactiles (et toujours pendant l\'essai dans BlocStudio). Elle fait comme une ' +
+        T('Elle s\'affiche sur les écrans tactiles (et pendant l\'essai dans BlocStudio d\'un programme pour téléphone). Elle fait comme une ' +
         'manette branchée : la croix fait aussi les flèches du clavier et A la touche Espace.')));
     }
   }
@@ -3958,6 +3958,15 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
   }
 
   async function exporterApk() {
+    // Un téléphone n'a pas de clavier : un programme qui attend des touches se joue avec la manette tactile.
+    const f = projet.fenetre;
+    if (!f.manetteTactile && /app\.(quandTouche|toucheEnfoncee|derniereTouche)\(/.test(genererCode()) &&
+        confirm(T('Ce programme utilise les touches du clavier, mais un téléphone n\'en a pas. ' +
+          'Ajouter la manette tactile à l\'écran (la croix fait les flèches, A la touche Espace) ?'))) {
+      f.manetteTactile = true;
+      afficherProprietes();
+      planifierSauvegarde();
+    }
     try {
       const { apk, nouvelleCle } = await construireApk();
       const chemin = await telecharger(nomFichier() + '.apk', apk, 'application/vnd.android.package-archive');

@@ -362,7 +362,7 @@
 
   await essayer('moteur : téléphone et manette tactile', async () => {
     // Page web « pour téléphone » : la fenêtre (360×640) est réduite pour tenir dans la page, sans déformation.
-    const t = lancer([], { largeur: 360, hauteur: 640, manetteTactile: true }, BlocRuntime, { ajuster: true, essai: true });
+    const t = lancer([], { largeur: 360, hauteur: 640, telephone: true, manetteTactile: true }, BlocRuntime, { ajuster: true, essai: true });
     const { app, hote } = t;
     const echelle = Math.min(innerWidth / 360, innerHeight / 640);
     const r = hote.querySelector('.bs-surface').getBoundingClientRect();

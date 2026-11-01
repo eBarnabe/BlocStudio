@@ -1224,7 +1224,7 @@
         const record = () => bloc('bs_nombre', null, { VAL: bloc('bs_memoire', null, { NOM: t('record') }) });
         const touche = nom => ({ type: 'bs_touche_enfoncee', fields: { TOUCHE: nom } });
         const p = projet(
-          { titre: T('Attrape la pièce'), largeur: 480, hauteur: 360, couleurFond: '#bae6fd' },
+          { titre: T('Attrape la pièce'), largeur: 480, hauteur: 360, couleurFond: '#bae6fd', manetteTactile: true },
           [
             { type: 'etiquette', nom: 'Score', texte: T('Score : 0'), x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#0c4a6e' },
             { type: 'etiquette', nom: 'Vies', texte: T('Vies : 3'), x: 360, y: 8, largeur: 110, hauteur: 30, taillePolice: 20, couleurTexte: '#be123c' },
@@ -1317,7 +1317,7 @@
           ])
         ];
         const p = projet(
-          { titre: T('Pluie de météorites'), largeur: 480, hauteur: 360, couleurFond: '#0b1026' },
+          { titre: T('Pluie de météorites'), largeur: 480, hauteur: 360, couleurFond: '#0b1026', manetteTactile: true },
           [
             { id: 'c0', type: 'image', nom: 'Etoiles', image: imageEtoiles(), ajustement: 'etiree', x: 0, y: 0, largeur: 480, hauteur: 360 },
             { type: 'etiquette', nom: 'Score', texte: T('Score : 0'), x: 12, y: 8, largeur: 200, hauteur: 30, taillePolice: 20, couleurTexte: '#fde68a' },
@@ -1531,7 +1531,7 @@
           ecrire('c6', 'visible', vrai(true))
         ];
         const p = projet(
-          { titre: T('Casse-briques'), largeur: 480, hauteur: 360, couleurFond: '#0f172a' },
+          { titre: T('Casse-briques'), largeur: 480, hauteur: 360, couleurFond: '#0f172a', manetteTactile: true },
           [
             { type: 'etiquette', nom: 'Score', texte: T('Score : 0'), x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, couleurTexte: '#fde68a' },
             { type: 'etiquette', nom: 'Vies', texte: T('Vies : 3'), x: 370, y: 6, largeur: 100, hauteur: 28, taillePolice: 18, couleurTexte: '#f9a8d4' },
@@ -1644,7 +1644,7 @@
         const solide = (nom, x, y, l, h, genre, fond, trait) =>
           ({ type: 'forme', nom, genre, x, y, largeur: l, hauteur: h, couleurFond: fond, couleurBordure: trait, epaisseur: 2, solide: true });
         const p = projet(
-          { titre: T('Plateformes'), largeur: 480, hauteur: 360, couleurFond: '#7dd3fc' },
+          { titre: T('Plateformes'), largeur: 480, hauteur: 360, couleurFond: '#7dd3fc', manetteTactile: true },
           [
             { type: 'etiquette', nom: 'Score', texte: T('Pièces : 0'), x: 12, y: 6, largeur: 200, hauteur: 28, taillePolice: 18, gras: true, couleurTexte: '#713f12' },
             { type: 'etiquette', nom: 'Vies', texte: '❤️❤️❤️', x: 360, y: 6, largeur: 110, hauteur: 28, taillePolice: 18, alignement: 'droite' },

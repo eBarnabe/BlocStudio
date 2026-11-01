@@ -3092,9 +3092,10 @@ function BlocRuntimeFactory() {
 
     // ---- Manette tactile ----
     // Une croix et deux boutons (A, B) dessinés sur l'écran tactile, qui font comme la manette : la croix fait
-    // aussi les flèches du clavier et A la touche Espace. Dans BlocStudio, ils s'affichent toujours pour l'essai.
+    // aussi les flèches du clavier et A la touche Espace. Dans BlocStudio, ils s'affichent aussi pour l'essai
+    // d'un programme pour téléphone (les jeux de la galerie, joués à l'ordinateur, n'en ont pas besoin).
     const ecranTactile = navigator.maxTouchPoints > 0 || (window.matchMedia && matchMedia('(any-pointer: coarse)').matches);
-    if (fenetre.manetteTactile && (ecranTactile || options.essai)) {
+    if (fenetre.manetteTactile && (ecranTactile || (options.essai && fenetre.telephone))) {
       manetteTactile = document.createElement('div');
       manetteTactile.className = 'bs-tactile' + (ajuste ? ' bs-tactile-ecran' : '');
       // Le doigt posé sur la manette ne « clique » pas la fenêtre en dessous.
@@ -3206,10 +3207,12 @@ function BlocRuntimeFactory() {
     // la remplit comme d'habitude. Ailleurs (éditeur, page web), le programme occupe tout l'écran : agrandi s'il
     // est redimensionnable (ses contrôles suivent leur ancrage), sinon centré sur sa couleur de fond.
     // Programme pour téléphone : c'est toute la page qui passe en plein écran, et la fenêtre s'y ajuste.
-    // Dans l'application Android, le lanceur cache les barres du téléphone (BlocStudioAndroid, voir Principale.java).
+    // Dans l'application Android, le lanceur cache ou remontre les barres du téléphone (BlocStudioAndroid, voir
+    // Principale.java) ; elles sont cachées dès le démarrage.
     let pleinEcranExe = false, tailleAvantPleinEcran = null, attentePleinEcran = null;
     const cible = ajuste ? document.documentElement : hote;
     const android = window.BlocStudioAndroid;
+    if (android) pleinEcranExe = true; // l'application Android démarre sans les barres du téléphone
     const estPleinEcran = () => dansExe || android ? pleinEcranExe : document.fullscreenElement === cible;
     function pleinEcran(oui) {
       if (dansExe || android) {

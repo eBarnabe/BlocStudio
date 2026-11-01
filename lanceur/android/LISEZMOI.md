@@ -27,8 +27,14 @@ l'application du téléphone.
 Sur le téléphone, `Principale.java` affiche la page dans le moteur web
 d'Android, sous l'adresse fictive `https://programme.blocstudio.example/`
 (comme le lanceur Windows : certains sites refusent les pages locales). Les
-liens vers d'autres sites s'ouvrent dans le navigateur du téléphone. Le bloc
-« plein écran » cache les barres du téléphone (objet `BlocStudioAndroid`).
+liens vers d'autres sites s'ouvrent dans le navigateur du téléphone. Les
+barres du téléphone sont cachées dès le démarrage (un glissement du bord les
+fait revenir un instant), et la page passe sous l'encoche de la caméra, sur la
+couleur de fond de la fenêtre. Le bloc « plein écran » (désactivé) les remontre
+(objet `BlocStudioAndroid`).
+
+À l'export, si le programme utilise des touches du clavier sans manette tactile,
+BlocStudio propose de l'ajouter : un téléphone n'a pas de clavier.
 
 ## Reconstruire
 
