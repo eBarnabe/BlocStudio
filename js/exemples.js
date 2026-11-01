@@ -637,6 +637,54 @@
       }
     },
     {
+      titre: T('🏷️ Scanner de codes'),
+      theme: 'multimedia',
+      description: T('Un lecteur de QR codes et de codes-barres : le code lu, son format, un lien à ouvrir s\'il contient une adresse web, et l\'historique.'),
+      creer: () => {
+        // c1 Lecteur · c2 LibelleCode · c3 Code · c4 Format · c5 OuvrirLien · c6 Historique
+        // c7 bouton Copier · c8 bouton Vider · c9 Compteur
+        const code = () => lire('code', 'c1');
+        const compteur = () => ecrire('c9', 'texte', joindre(v('v_nombre'), t(T(' code(s) lu(s)'))));
+        return projet(
+          { titre: T('Scanner de codes'), largeur: 660, hauteur: 310, couleurFond: '#1e293b' },
+          [
+            { type: 'lecteurcodes', nom: 'Lecteur', x: 10, y: 10, largeur: 320, hauteur: 240, allumerAuDemarrage: true, bip: true },
+            { type: 'etiquette', nom: 'LibelleCode', texte: T('Dernier code lu :'), x: 345, y: 10, largeur: 305, hauteur: 20, couleurTexte: '#94a3b8' },
+            { type: 'etiquette', nom: 'Code', texte: T('Montrez un QR code ou un code-barres à la caméra.'), x: 345, y: 32, largeur: 305, hauteur: 70,
+              taillePolice: 18, couleurTexte: '#ffffff' },
+            { type: 'etiquette', nom: 'Format', x: 345, y: 104, largeur: 305, hauteur: 20, couleurTexte: '#fbbf24' },
+            { type: 'lien', nom: 'OuvrirLien', texte: T('🌐 Ouvrir le lien'), x: 345, y: 128, largeur: 200, hauteur: 24, couleurTexte: '#7dd3fc', visible: false },
+            { type: 'zoneliste', nom: 'Historique', x: 345, y: 158, largeur: 305, hauteur: 92, elements: [] },
+            { type: 'bouton', nom: 'Copier', texte: T('📋 Copier le code'), x: 10, y: 262, largeur: 160, hauteur: 36 },
+            { type: 'bouton', nom: 'Vider', texte: T('🗑️ Vider l\'historique'), x: 180, y: 262, largeur: 150, hauteur: 36 },
+            { type: 'etiquette', nom: 'Compteur', x: 345, y: 270, largeur: 305, hauteur: 22, couleurTexte: '#94a3b8' }
+          ],
+          ['nombre'],
+          () => [
+            presentation(T('Le lecteur filme avec la caméra (celle de derrière sur un téléphone) et reconnaît les QR codes et les codes-barres des produits. Chaque code lu s\'affiche et s\'ajoute à l\'historique.')),
+            evt('bs_quand_demarre', null, [fixer('v_nombre', n(0))]),
+            evt('bs_quand_code_lu', 'c1', [
+              note(T('Le code est dans « dernier code lu » ; « format » dit si c\'est un QR code, un EAN-13 (les produits du magasin)…')),
+              ecrire('c3', 'texte', code()),
+              ecrire('c4', 'texte', joindre(t(T('Format : ')), lire('format', 'c1'))),
+              note(T('Un QR code contient souvent une adresse web : si le code commence par « http », le lien apparaît.')),
+              si(compare('EQ', { type: 'text_indexOf', fields: { END: 'FIRST' }, inputs: { VALUE: I(code()), FIND: I(t('http')) } }, n(1)),
+                [ecrire('c5', 'adresse', code()), ecrire('c5', 'visible', vrai(true))],
+                [ecrire('c5', 'visible', vrai(false))]),
+              listeAjouter('c6', joindre(bloc('bs_maintenant', null, null, { QUOI: 'heure' }), t(' · '), code())),
+              ajouter('v_nombre', n(1)),
+              compteur()
+            ]),
+            evt('bs_quand_clic', 'c7', [
+              si(estVide(code()),
+                [message(t(T('Aucun code lu pour l\'instant.')), 'info')],
+                [bloc('bs_copier', null, { VAL: code() }), ecrire('c4', 'texte', t(T('📋 Copié : collez-le où vous voulez (Ctrl+V).')))])
+            ]),
+            evt('bs_quand_clic', 'c8', [listeVider('c6'), fixer('v_nombre', n(0)), compteur()])
+          ]);
+      }
+    },
+    {
       titre: T('📝 Bloc-notes'),
       theme: 'applications',
       description: T('Un petit traitement de texte : menus Fichier, barre d\'outils, menu au clic droit sur le texte, glisser-déposer d\'un fichier. On peut agrandir la fenêtre : le texte suit (ancrage).'),
