@@ -3581,16 +3581,75 @@
     const code = genererCode(true);
     $('titre-exec').textContent = projet.fenetre.titre;
     $('erreur-exec').hidden = true;
+    // Un programme pour téléphone (inclinaison, vibration, position) : le panneau « Téléphone simulé » s'ouvre.
+    const telephone = /app\.(inclinaison|vibrer|position)\(/.test(code);
+    $('btn-telephone').hidden = $('panneau-telephone').hidden = !telephone;
+    $('btn-telephone').classList.toggle('actif', telephone);
+    pencher(0, 0);
     $('execution').hidden = false;
     execution = BlocRuntime.lancer(projet, code, $('hote-exec'), signalerErreur, {
       modeSuivi,
       essai: true,
+      simulation,
       titre: texte => { $('titre-exec').textContent = texte; },
       // Dans BlocStudio.exe, les fichiers du programme passent par la boîte « Enregistrer sous » de Windows.
       enregistrer: hote ? (nom, texte) => telecharger(nom, texte, 'text/plain') : null
     });
     majBarreSuivi();
     requestAnimationFrame(suivreExecution);
+  }
+
+  // ---- Téléphone simulé ----
+  // Sur l'ordinateur, le moteur prend l'inclinaison et la position de ce panneau, et lui montre les vibrations.
+  const INCLINAISON_MAX = 45; // degrés, bille au bord du plateau
+  const simulation = {
+    inclinaison: { x: 0, y: 0 },
+    position: { active: true, latitude: 48.8566, longitude: 2.3522 },
+    vibrer(ms) {
+      const temoin = $('vibration-simulee'), fenetre = $('fenetre-exec');
+      temoin.classList.add('actif');
+      fenetre.classList.add('vibre');
+      clearTimeout(simulation.finVibration);
+      simulation.finVibration = setTimeout(() => { temoin.classList.remove('actif'); fenetre.classList.remove('vibre'); }, ms);
+    }
+  };
+
+  function pencher(x, y) {
+    const borne = v => Math.round(Math.max(-INCLINAISON_MAX, Math.min(INCLINAISON_MAX, v)));
+    simulation.inclinaison.x = borne(x);
+    simulation.inclinaison.y = borne(y);
+    const bord = ($('plateau-inclinaison').clientWidth || 140) / 2 - 11;
+    $('bille-inclinaison').style.translate = `${simulation.inclinaison.x / INCLINAISON_MAX * bord}px ${simulation.inclinaison.y / INCLINAISON_MAX * bord}px`;
+    $('valeurs-inclinaison').textContent = `↔ ${simulation.inclinaison.x}°   ↕ ${simulation.inclinaison.y}°`;
+  }
+
+  function brancherTelephoneSimule() {
+    const plateau = $('plateau-inclinaison');
+    const suivre = e => {
+      const r = plateau.getBoundingClientRect(), bord = r.width / 2 - 11;
+      pencher((e.clientX - r.left - r.width / 2) / bord * INCLINAISON_MAX, (e.clientY - r.top - r.height / 2) / bord * INCLINAISON_MAX);
+    };
+    plateau.addEventListener('pointerdown', e => { plateau.setPointerCapture(e.pointerId); suivre(e); });
+    plateau.addEventListener('pointermove', e => { if (plateau.hasPointerCapture(e.pointerId)) suivre(e); });
+    plateau.addEventListener('pointerup', () => pencher(0, 0)); // lâchée, la bille revient à plat
+    // Flèches : 5° de plus à chaque appui (le programme ne les reçoit pas) ; Espace ou 0 : à plat.
+    plateau.addEventListener('keydown', e => {
+      const pas = { ArrowLeft: [-5, 0], ArrowRight: [5, 0], ArrowUp: [0, -5], ArrowDown: [0, 5] }[e.key];
+      if (pas) pencher(simulation.inclinaison.x + pas[0], simulation.inclinaison.y + pas[1]);
+      else if (e.key === ' ' || e.key === '0') pencher(0, 0);
+      else return;
+      e.preventDefault();
+      e.stopPropagation();
+    });
+    $('position-simulee').addEventListener('change', e => { simulation.position.active = e.target.checked; });
+    $('latitude-simulee').addEventListener('input', e => { simulation.position.latitude = Number(e.target.value); });
+    $('longitude-simulee').addEventListener('input', e => { simulation.position.longitude = Number(e.target.value); });
+    $('btn-telephone').addEventListener('click', () => {
+      const p = $('panneau-telephone');
+      p.hidden = !p.hidden;
+      $('btn-telephone').classList.toggle('actif', !p.hidden);
+    });
+    pencher(0, 0);
   }
 
   function fermerExecution() {
@@ -3739,6 +3798,7 @@
     $('btn-cote-a-cote').addEventListener('click', () =>
       coteACote(!$('execution').classList.contains('cote-a-cote')));
     $('btn-erreur-bloc').addEventListener('click', voirBlocErreur);
+    brancherTelephoneSimule();
   }
 
   // ---------------------------------------------------------------- Fichiers

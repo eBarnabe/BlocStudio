@@ -14,7 +14,12 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.CancellationSignal;
+import android.os.SystemClock;
 import android.os.ParcelFileDescriptor;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -75,6 +80,10 @@ public class Principale extends Activity {
     final List<String[]> notificationsEnAttente = new ArrayList<String[]>(); // en attendant l'autorisation
     int numeroNotification = 0;
     boolean pleinEcran = true; // les barres du téléphone sont cachées dès le démarrage
+    SensorManager capteurs;
+    Sensor capteurPesanteur;
+    boolean inclinaisonDemandee;          // le programme lit l'inclinaison
+    long derniereMesure;
 
     @Override
     protected void onCreate(Bundle etat) {
@@ -343,6 +352,38 @@ public class Principale extends Activity {
         impression.loadDataWithBaseURL("https://" + HOTE + "/", page, "text/html", "utf-8", null);
     }
 
+    // Bloc « inclinaison » : le moteur web n'envoie les mesures du téléphone qu'après un toucher de l'écran.
+    // Le lanceur lit donc lui-même la pesanteur et la passe à la page (window.BlocStudioPesanteur), 30 fois par seconde.
+    final SensorEventListener ecouteurPesanteur = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent mesure) {
+            long maintenant = SystemClock.uptimeMillis();
+            if (maintenant - derniereMesure < 33) return;
+            derniereMesure = maintenant;
+            vue.evaluateJavascript("window.BlocStudioPesanteur && window.BlocStudioPesanteur("
+                + mesure.values[0] + ", " + mesure.values[1] + ")", null);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor capteur, int precision) { }
+    };
+
+    void inclinaison(boolean oui) {
+        inclinaisonDemandee = oui;
+        if (oui) brancherPesanteur();
+        else if (capteurs != null) capteurs.unregisterListener(ecouteurPesanteur);
+    }
+
+    void brancherPesanteur() {
+        if (capteurs == null) {
+            capteurs = (SensorManager) getSystemService(SENSOR_SERVICE);
+            if (capteurs == null) return;
+            capteurPesanteur = capteurs.getDefaultSensor(Sensor.TYPE_GRAVITY);
+            if (capteurPesanteur == null) capteurPesanteur = capteurs.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        }
+        if (capteurPesanteur != null) capteurs.registerListener(ecouteurPesanteur, capteurPesanteur, SensorManager.SENSOR_DELAY_GAME);
+    }
+
     // Bloc « vibrer » (le moteur web ne fait vibrer qu'après un toucher de l'écran).
     @SuppressWarnings("deprecation")
     void vibrer(long ms) {
@@ -356,6 +397,13 @@ public class Principale extends Activity {
     // « enregistrer » ouvre la boîte « Enregistrer » du téléphone (le moteur web ne sait pas télécharger),
     // et les blocs « notification », « imprimer » et « vibrer » passent par Android.
     class Pont {
+        @JavascriptInterface
+        public void inclinaison(final boolean oui) {
+            runOnUiThread(new Runnable() {
+                public void run() { Principale.this.inclinaison(oui); }
+            });
+        }
+
         @JavascriptInterface
         public void vibrer(final int ms) {
             runOnUiThread(new Runnable() {
@@ -440,6 +488,7 @@ public class Principale extends Activity {
         super.onPause();
         vue.onPause();
         vue.pauseTimers();
+        if (capteurs != null) capteurs.unregisterListener(ecouteurPesanteur);
     }
 
     @Override
@@ -447,6 +496,7 @@ public class Principale extends Activity {
         super.onResume();
         vue.onResume();
         vue.resumeTimers();
+        if (inclinaisonDemandee) brancherPesanteur();
     }
 
     @Override

@@ -626,6 +626,27 @@ body.dans-hote .si-navigateur, body:not(.dans-hote) .si-hote { display: none; }
 .panneau-variables table { width: 100%; border-collapse: collapse; }
 .panneau-variables th { padding: 3px 6px 3px 0; text-align: left; font-weight: 600; color: #be185d; vertical-align: top; }
 .panneau-variables td { padding: 3px 0; word-break: break-word; font-variant-numeric: tabular-nums; }
+/* Téléphone simulé : un plateau où l'on penche le téléphone en glissant la bille */
+.panneau-telephone { width: 170px; display: flex; flex-direction: column; gap: 6px; }
+.panneau-telephone[hidden] { display: none; }
+.plateau-inclinaison {
+  position: relative; width: 140px; height: 140px; align-self: center;
+  border: 1px solid #cbd5e1; border-radius: 12px; background: radial-gradient(circle, #fff 0 18%, #e2e8f0 19% 20%, #f1f5f9 21%);
+  touch-action: none; cursor: grab;
+}
+.plateau-inclinaison:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#bille-inclinaison {
+  position: absolute; left: 50%; top: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px;
+  border-radius: 50%; background: #ef4444; box-shadow: inset -3px -3px 5px rgba(0, 0, 0, .25); pointer-events: none;
+}
+.valeurs-inclinaison { text-align: center; font-variant-numeric: tabular-nums; }
+.vibration-simulee { text-align: center; padding: 2px; border-radius: 6px; color: #cbd5e1; }
+.vibration-simulee.actif { background: #fef3c7; color: #92400e; font-weight: 600; }
+.panneau-telephone label { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.panneau-telephone input[type=number] { width: 84px; padding: 2px 4px; border: 1px solid #cbd5e1; border-radius: 4px; font: inherit; }
+.panneau-telephone .ligne-case { justify-content: flex-start; margin-top: 4px; }
+.fenetre-exec.vibre { animation: vibre .08s linear infinite; }
+@keyframes vibre { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 .erreur { display: flex; align-items: center; gap: 10px; }
 .erreur[hidden] { display: none; }
 .erreur span { flex: 1; }

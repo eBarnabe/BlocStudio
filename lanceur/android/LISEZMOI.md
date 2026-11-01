@@ -42,6 +42,11 @@ lanceur s'en charge :
   le manifeste, mais rien n'est demandé tant que le programme ne s'en sert pas) ;
 - **vibration** : `BlocStudioAndroid.vibrer(ms)` (le moteur web ne fait vibrer
   qu'après un toucher de l'écran) ;
+- **inclinaison** : le moteur web n'envoie les mesures du capteur qu'après un
+  toucher de l'écran ; dès que le programme lit l'inclinaison,
+  `BlocStudioAndroid.inclinaison(true)` fait lire la pesanteur au lanceur, qui
+  la passe 30 fois par seconde à `window.BlocStudioPesanteur(x, y)` (arrêté
+  quand on quitte l'application) ;
 - **ouvrir un fichier** : la boîte « Ouvrir » du téléphone ;
 - **enregistrer un fichier** : la page passe le contenu au lanceur
   (`BlocStudioAndroid.enregistrer`), qui ouvre la boîte « Enregistrer » du

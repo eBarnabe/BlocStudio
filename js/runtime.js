@@ -3753,6 +3753,7 @@ function BlocRuntimeFactory() {
           break;
         }
         case 'gravite': gravite(id, n(a), b); break;
+        case 'deplacerMurs': deplacerSansTraverser(id, n(a), n(b)); break;
         // On ne saute que posé sur quelque chose (pas de saut en plein vol).
         case 'sauter':
           if (d.auSol) { d.vitesseY = -Math.abs(n(a)); d.auSol = false; }
@@ -3834,6 +3835,41 @@ function BlocRuntimeFactory() {
           poser(id, d.x, d.y + f.hauteur - za.y - za.h);
           d.vitesseY = 0;
           d.auSol = true;
+        }
+      }
+    }
+
+    // Jeux vus de dessus (labyrinthe…) : « déplacer … sans traverser les murs » avance par petits pas, d'abord
+    // de côté puis en hauteur, et s'arrête contre ce qui est solide et contre les bords de la fenêtre.
+    // d.cogne : vrai si ce déplacement s'est arrêté contre un mur.
+    function deplacerSansTraverser(id, dx, dy) {
+      const d = donnees[id];
+      d.cogne = false;
+      if (!zoneDe(id)) return;
+      const solides = solidesAutourDe(id), f = fenetreDe(d);
+      const bloque = () => {
+        const za = zoneDe(id);
+        return za.x < -0.05 || za.y < -0.05 || za.x + za.l > f.largeur + 0.05 || za.y + za.h > f.hauteur + 0.05 ||
+          solides.some(s => { const zb = zoneDe(s); return zb && recouvrement(za, zb); });
+      };
+      const placer = (axe, v) => poser(id, axe === 'x' ? v : d.x, axe === 'y' ? v : d.y);
+      for (const [axe, total] of [['x', dx], ['y', dy]]) {
+        const depart = d[axe], pas = Math.ceil(Math.abs(total) / 2);
+        for (let i = 1; i <= pas; i++) {
+          const avant = d[axe];
+          placer(axe, depart + total * i / pas);
+          if (!bloque()) continue;
+          // Contre le mur : on s'en approche par moitiés, puis on se pose sur un nombre entier de points.
+          let libre = avant, pris = d[axe];
+          for (let k = 0; k < 8; k++) {
+            const milieu = (libre + pris) / 2;
+            placer(axe, milieu);
+            if (bloque()) pris = milieu; else libre = milieu;
+          }
+          placer(axe, total > 0 ? Math.floor(libre + 0.06) : Math.ceil(libre - 0.06));
+          if (bloque()) placer(axe, libre);
+          d.cogne = true;
+          break;
         }
       }
     }
@@ -4275,12 +4311,16 @@ function BlocRuntimeFactory() {
 
     // ---- Position (GPS) ----
     // Gardée 10 secondes : « latitude » puis « longitude » à la suite ne redemandent pas.
+    // Essai dans BlocStudio : le panneau « Téléphone simulé » (options.simulation) peut donner une position choisie.
     let positionConnue = null;
     async function position(quoi) {
       if (quoi === 'trouvee') {
         try { await position('latitude'); return true; } catch (e) { return false; }
       }
-      if (!positionConnue || Date.now() - positionConnue.quand > 10000) {
+      const simulee = options.simulation && options.simulation.position;
+      if (simulee && simulee.active) {
+        positionConnue = { quand: 0, c: { latitude: Number(simulee.latitude) || 0, longitude: Number(simulee.longitude) || 0, accuracy: 10 } };
+      } else if (!positionConnue || Date.now() - positionConnue.quand > 10000) {
         if (!navigator.geolocation) throw new Error(T('La position n\'est pas disponible ici.'));
         const p = await new Promise((ok, ko) => navigator.geolocation.getCurrentPosition(ok, ko,
           { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 })).catch(e => {
@@ -4306,20 +4346,38 @@ function BlocRuntimeFactory() {
     // ---- Téléphone : inclinaison et vibration ----
     // La pesanteur vue par le téléphone, tournée dans le sens de l'écran (portrait ou paysage) :
     // l'inclinaison va de -90 à 90 degrés, positive quand il penche à droite (x) ou vers le bas de l'écran (y).
-    const inclinaison = { x: 0, y: 0 };
-    ecouter(window, 'devicemotion', e => {
-      const g = e.accelerationIncludingGravity;
-      if (!g || g.x === null || g.y === null) return;
+    // Sans capteur (un ordinateur), l'essai dans BlocStudio prend l'inclinaison du panneau « Téléphone simulé ».
+    const inclinaison = { x: 0, y: 0, capteur: false };
+    // (gx, gy) : la pesanteur vue par le téléphone, en m/s² (9,81 quand un côté est tout en bas).
+    function pesanteur(gx, gy) {
+      inclinaison.capteur = true;
       const a = ((screen.orientation && screen.orientation.angle) || 0) * Math.PI / 180;
-      const x = g.x * Math.cos(a) - g.y * Math.sin(a), y = g.x * Math.sin(a) + g.y * Math.cos(a);
+      const x = gx * Math.cos(a) - gy * Math.sin(a), y = gx * Math.sin(a) + gy * Math.cos(a);
       const degres = v => Math.round(Math.asin(Math.max(-1, Math.min(1, v / 9.81))) * 180 / Math.PI);
       inclinaison.x = degres(-x);
       inclinaison.y = degres(y);
+    }
+    ecouter(window, 'devicemotion', e => {
+      const g = e.accelerationIncludingGravity;
+      if (g && g.x !== null && g.y !== null) pesanteur(g.x, g.y);
     });
+    // Application Android : son moteur web n'envoie les mesures qu'après un premier toucher de l'écran ;
+    // le lanceur lit donc lui-même le capteur, dès que le programme demande l'inclinaison, et jusqu'à l'arrêt.
+    let capteurAndroid = false;
+    function lireInclinaison(quoi) {
+      if (!capteurAndroid && window.BlocStudioAndroid && window.BlocStudioAndroid.inclinaison) {
+        capteurAndroid = true;
+        window.BlocStudioPesanteur = pesanteur;
+        window.BlocStudioAndroid.inclinaison(true);
+        nettoyages.push(() => window.BlocStudioAndroid.inclinaison(false));
+      }
+      return (inclinaison.capteur || !options.simulation ? inclinaison : options.simulation.inclinaison)[quoi] || 0;
+    }
 
     function vibrer(secondes) {
       const ms = Math.round(Math.min(10, Math.max(0, Number(secondes) || 0)) * 1000);
       if (!ms || arrete) return;
+      if (options.simulation) options.simulation.vibrer(ms); // l'essai dans BlocStudio la montre
       // Application Android : c'est le lanceur qui fait vibrer (le moteur web ne le fait qu'après un toucher).
       if (window.BlocStudioAndroid && window.BlocStudioAndroid.vibrer) window.BlocStudioAndroid.vibrer(ms);
       else if (navigator.vibrate) navigator.vibrate(ms);
@@ -5032,7 +5090,7 @@ function BlocRuntimeFactory() {
       joystickManette(quoi) { return manette.axes[{ gx: 0, gy: 1, dx: 2, dy: 3 }[quoi]] || 0; },
       manetteBranchee() { return manette.branchee; },
       // quoi : 'x' (gauche ↔ droite) ou 'y' (haut ↕ bas), en degrés.
-      inclinaison(quoi) { return inclinaison[quoi] || 0; },
+      inclinaison: lireInclinaison,
       vibrer,
 
       // ---- Score, vies… : le nombre écrit dans un contrôle (« Score : 12 »), ou sa valeur ----
@@ -5189,6 +5247,7 @@ function BlocRuntimeFactory() {
           case 'solide': return !!d.solide;
           case 'vitesseY': return Number(d.vitesseY) || 0;
           case 'auSol': return !!d.auSol;
+          case 'cogne': return !!d.cogne;
           case 'adresse': return adresseWeb(d.adresse);
           case 'enLecture': return d.type === 'video' ? !el.paused && !el.ended : false;
           case 'position': return d.type === 'video' ? Math.round(el.currentTime * 10) / 10 : 0;

@@ -330,11 +330,24 @@
         </div>
         <button id="btn-pas-suivant" class="suivi-principal" title="Exécuter le bloc allumé (F10)" hidden>⏭ Bloc suivant</button>
         <span class="suivi-espace"></span>
+        <button id="btn-telephone" title="Pencher le téléphone, choisir sa position, voir quand il vibre : pour essayer sur l'ordinateur" hidden>📱 Téléphone</button>
         <button id="btn-variables" title="Voir la valeur des variables pendant que le programme tourne">🔍 Variables</button>
         <button id="btn-cote-a-cote" title="Garder le programme dans un coin et voir les blocs derrière">🧩 Voir les blocs</button>
       </div>
       <div class="exec-corps">
         <div id="hote-exec"></div>
+        <div id="panneau-telephone" class="panneau-variables panneau-telephone" hidden>
+          <h4>Téléphone simulé</h4>
+          <div id="plateau-inclinaison" class="plateau-inclinaison" tabindex="0"
+            title="Glissez la bille pour pencher le téléphone (ou les flèches, quand le plateau est sélectionné). Lâchée, elle revient à plat.">
+            <div id="bille-inclinaison"></div>
+          </div>
+          <div id="valeurs-inclinaison" class="valeurs-inclinaison"></div>
+          <div id="vibration-simulee" class="vibration-simulee">📳 Vibration</div>
+          <label class="ligne-case"><input type="checkbox" id="position-simulee" checked> Position simulée</label>
+          <label>Latitude <input type="number" id="latitude-simulee" step="0.0001" value="48.8566"></label>
+          <label>Longitude <input type="number" id="longitude-simulee" step="0.0001" value="2.3522"></label>
+        </div>
         <div id="panneau-variables" class="panneau-variables" hidden>
           <h4>Variables</h4>
           <table id="table-variables"></table>

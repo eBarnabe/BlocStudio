@@ -437,6 +437,22 @@
     navigator.mediaDevices.getUserMedia = ancien;
   });
 
+  await essayer('moteur : déplacer sans traverser les murs', async () => {
+    const t = lancer([
+      { id: 'b', type: 'forme', genre: 'ovale', x: 10, y: 10, largeur: 20, hauteur: 20 },
+      { id: 'm', type: 'forme', genre: 'rectangle', x: 100, y: 0, largeur: 10, hauteur: 200, solide: true }
+    ]);
+    const { app } = t;
+    const pos = () => [app.lire('b', 'x'), app.lire('b', 'y'), app.lire('b', 'cogne')];
+    app.mouvement('b', 'deplacerMurs', 30, 5);
+    egal('sans traverser : déplacement libre', pos(), [40, 15, false]);
+    app.mouvement('b', 'deplacerMurs', 100, 20);
+    egal('sans traverser : arrêtée contre le mur, mais glisse vers le bas', pos(), [80, 35, true]);
+    app.mouvement('b', 'deplacerMurs', -200, -200);
+    egal('sans traverser : arrêtée par les bords de la fenêtre', pos(), [0, 0, true]);
+    t.fin();
+  });
+
   await essayer('moteur : créer un QR code', async () => {
     const t = lancer([
       { id: 'i', type: 'image', x: 0, y: 0, largeur: 200, hauteur: 200 },
@@ -513,6 +529,21 @@
     try { await t2.app.position('latitude'); } catch (e) { message = e.message; }
     egal('position refusée : message et « trouvée ? »', [message.startsWith('La position n\'est pas autorisée'), await t2.app.position('trouvee')], [true, false]);
     t2.fin();
+
+    // Essai dans BlocStudio, sur un ordinateur : le panneau « Téléphone simulé » donne l'inclinaison et la position.
+    const vibre = [];
+    const simulation = { inclinaison: { x: -20, y: 35 }, position: { active: true, latitude: 43.6047, longitude: 1.4442 }, vibrer: ms => vibre.push(ms) };
+    const t3 = lancer([], {}, BlocRuntime, { essai: true, simulation });
+    navigator.vibrate = () => {};
+    t3.app.vibrer(0.3);
+    navigator.vibrate = vibrateur;
+    egal('téléphone simulé : inclinaison, position, vibration', [t3.app.inclinaison('x'), t3.app.inclinaison('y'),
+      await t3.app.position('position'), vibre], [-20, 35, '43.6047, 1.4442', [300]]);
+    simulation.position.active = false; // case décochée : la vraie position (ici refusée)
+    egal('téléphone simulé : position non simulée', await t3.app.position('trouvee'), false);
+    window.dispatchEvent(new DeviceMotionEvent('devicemotion', { accelerationIncludingGravity: { x: 0, y: 0, z: 9.81 } }));
+    egal('téléphone simulé : un vrai capteur passe avant', t3.app.inclinaison('y'), 0);
+    t3.fin();
     navigator.geolocation.getCurrentPosition = gps;
   });
 

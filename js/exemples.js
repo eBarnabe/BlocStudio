@@ -1877,6 +1877,68 @@
       }
     },
     {
+      titre: T('🌀 Bille dans un labyrinthe'),
+      theme: 'jeux',
+      description: T('Un jeu pour téléphone : on le penche pour faire rouler la bille jusqu\'au trou, et il vibre quand elle cogne un mur. Dans BlocStudio, le panneau 📱 Téléphone fait pencher.'),
+      creer: () => {
+        // c1 Bille · c2 Trou · c3 Consigne · c4 Chrono · c5-c8 Cadre · c9-c13 Murs (tous solides)
+        const mur = (nom, x, y, largeur, hauteur) =>
+          ({ type: 'forme', nom, genre: 'rectangle', x, y, largeur, hauteur, couleurFond: '#92400e', couleurBordure: '#78350f', epaisseur: 1, solide: true });
+        const inclinaison = quoi => calc('DIVIDE', bloc('bs_inclinaison', null, null, { QUOI: quoi }), n(6));
+        // « toutes les 1 secondes » : un événement qui a aussi une entrée (le nombre de secondes).
+        const toutesLesSecondes = blocs => {
+          const b = evt('bs_toutes_les', null, blocs);
+          b.inputs.SEC = I(n(1));
+          return b;
+        };
+        return projet(
+          { titre: T('Bille dans un labyrinthe'), largeur: 640, hauteur: 360, couleurFond: '#fde68a', telephone: true },
+          [
+            { type: 'forme', nom: 'Bille', genre: 'ovale', x: 40, y: 40, largeur: 22, hauteur: 22, couleurFond: '#dc2626', couleurBordure: '#7f1d1d', epaisseur: 2 },
+            { type: 'forme', nom: 'Trou', genre: 'ovale', x: 570, y: 28, largeur: 34, hauteur: 34, couleurFond: '#1c1917', couleurBordure: '#44403c', epaisseur: 3 },
+            { type: 'etiquette', nom: 'Consigne', texte: T('Penchez le téléphone !'), x: 380, y: 324, largeur: 140, hauteur: 22, taillePolice: 13, couleurTexte: '#78350f' },
+            { type: 'etiquette', nom: 'Chrono', texte: '', x: 555, y: 322, largeur: 65, hauteur: 24, taillePolice: 15, couleurTexte: '#78350f', alignement: 'droite' },
+            mur('CadreHaut', 0, 0, 640, 8),
+            mur('CadreBas', 0, 352, 640, 8),
+            mur('CadreGauche', 0, 0, 8, 360),
+            mur('CadreDroit', 632, 0, 8, 360),
+            mur('Mur1', 107, 0, 12, 260),
+            mur('Mur2', 227, 100, 12, 260),
+            mur('Mur3', 347, 0, 12, 220),
+            mur('Mur4', 347, 210, 173, 12),
+            mur('Mur5', 413, 90, 227, 12)
+          ],
+          ['contre', 'secondes'],
+          () => [
+            presentation(T('La bille roule du côté où l\'on penche le téléphone : « inclinaison » donne l\'angle en degrés (0 à plat). Les murs sont des formes « solides » : « déplacer … sans traverser les murs » s\'arrête contre eux.')),
+            evt('bs_quand_demarre', null, [
+              fixer('v_contre', vrai(false)),
+              fixer('v_secondes', n(0)),
+              toujours([
+                note(T('Plus le téléphone penche, plus la bille va vite (45° : 7 points à chaque tour).')),
+                bloc('bs_deplacer_murs', 'c1', { DX: inclinaison('x'), DY: inclinaison('y') }),
+                note(T('Une petite vibration quand la bille arrive contre un mur (pas tant qu\'elle reste appuyée dessus).')),
+                si(et(bloc('bs_a_cogne', 'c1'), non(v('v_contre'))), [bloc('bs_vibrer', null, { SEC: n(0.05) })]),
+                fixer('v_contre', bloc('bs_a_cogne', 'c1')),
+                si({ type: 'bs_se_touchent', fields: { CTRL: 'c1', CTRL2: 'c2' } }, [
+                  bloc('bs_son', null, null, { SON: 'succes' }),
+                  bloc('bs_vibrer', null, { SEC: n(0.4) }),
+                  message(joindre(t(T('🎉 Dans le trou en ')), v('v_secondes'), t(T(' secondes !'))), 'info'),
+                  bloc('bs_placer', 'c1', { X: n(40), Y: n(40) }),
+                  fixer('v_secondes', n(0))
+                ]),
+                attendre(0.02)
+              ])
+            ]),
+            toutesLesSecondes([
+              note(T('Le chronomètre : une seconde de plus, chaque seconde.')),
+              ajouter('v_secondes', n(1)),
+              ecrire('c4', 'texte', joindre(t('⏱️ '), v('v_secondes'), t(' s')))
+            ])
+          ]);
+      }
+    },
+    {
       titre: T('🪟 Plusieurs fenêtres'),
       theme: 'debut',
       description: T('Une fenêtre de réglages (OK / Annuler) et une fenêtre « À propos » : comment ouvrir d\'autres fenêtres et récupérer ce qu\'on y a saisi.'),

@@ -664,6 +664,11 @@
   Blockly.Blocks['bs_sauter'] = instruction(() => [T('faire sauter'), BOUGE, NB('FORCE', T('avec une force de'))],
     COULEUR_MOUVEMENT, T('Le contrôle s\'élance vers le haut, puis « faire tomber » le fait redescendre. Seulement s\'il est posé sur le sol (pas de saut en plein vol). ') +
     T('Force 12 : un saut moyen ; plus grand = plus haut.'));
+  Blockly.Blocks['bs_deplacer_murs'] = instruction(() => [T('déplacer'), BOUGE, NB('DX', T('de x :')), NB('DY', T('y :')), T('sans traverser les murs')],
+    COULEUR_MOUVEMENT, T('Pour les jeux vus de dessus (labyrinthe…) : le contrôle s\'arrête contre ce qui est solide et contre les bords de la fenêtre, ') +
+    T('et glisse le long des murs. ') + SOLIDE);
+  Blockly.Blocks['bs_a_cogne'] = valeur(() => [BOUGE, T('a cogné un mur ?')], 'Boolean',
+    COULEUR_MOUVEMENT, T('Vrai si le dernier « déplacer … sans traverser les murs » s\'est arrêté contre un mur ou un bord. Pratique pour un bruit ou une vibration.'));
   Blockly.Blocks['bs_au_sol'] = valeur(() => [BOUGE, T('est posé sur le sol ?')], 'Boolean',
     COULEUR_MOUVEMENT, T('Vrai si, au dernier « faire tomber », le contrôle s\'est posé sur quelque chose de solide (ou sur le bas de la fenêtre). ') +
     T('Pratique pour changer de costume : en l\'air, il saute ; au sol, il marche.'));
@@ -2501,6 +2506,8 @@
   gen.forBlock['bs_gravite'] = b => mv(b, 'gravite', val(b, 'FORCE', '1'), q(b.getFieldValue('FOND') || 'bas'));
   gen.forBlock['bs_sauter'] = b => mv(b, 'sauter', val(b, 'FORCE', '12'));
   gen.forBlock['bs_au_sol'] = b => [`app.lire(${id(b)}, 'auSol')`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_deplacer_murs'] = b => mv(b, 'deplacerMurs', val(b, 'DX', '0'), val(b, 'DY', '0'));
+  gen.forBlock['bs_a_cogne'] = b => [`app.lire(${id(b)}, 'cogne')`, Order.FUNCTION_CALL];
   gen.forBlock['bs_image_defiler'] = b => `app.defilerImage(${id(b)}, ${val(b, 'DX', '0')}, ${val(b, 'DY', '0')});\n`;
   gen.forBlock['bs_compteur_ajouter'] = b => `app.ajouterAuNombre(${id(b)}, ${val(b, 'VAL', '1')});\n`;
   gen.forBlock['bs_compteur_valeur'] = b => [`app.nombreAffiche(${id(b)})`, Order.FUNCTION_CALL];
@@ -2942,6 +2949,8 @@
       { kind: 'block', type: 'bs_gravite', inputs: { FORCE: nombre(1) } },
       { kind: 'block', type: 'bs_sauter', inputs: { FORCE: nombre(12) } },
       { kind: 'block', type: 'bs_au_sol' },
+      { kind: 'block', type: 'bs_deplacer_murs', inputs: { DX: nombre(5), DY: nombre(0) } },
+      { kind: 'block', type: 'bs_a_cogne' },
       { kind: 'block', type: 'bs_compteur_ajouter', inputs: { VAL: nombre(1) } },
       { kind: 'block', type: 'bs_compteur_valeur' },
       { kind: 'block', type: 'bs_placer', inputs: { X: nombre(0), Y: nombre(0) } },
@@ -3032,7 +3041,10 @@
       etiquette(T('Gravité et saut (jeux de plateforme)')),
       b('bs_gravite', { FORCE: nombre(1) }),
       b('bs_sauter', { FORCE: nombre(12) }),
-      b('bs_au_sol')
+      b('bs_au_sol'),
+      etiquette(T('Jeux vus de dessus (labyrinthe…)')),
+      b('bs_deplacer_murs', { DX: nombre(5), DY: nombre(0) }),
+      b('bs_a_cogne')
     ];
     const clones = () => [
       etiquette(T('Clones')),
