@@ -864,9 +864,11 @@
   ], COULEUR_CONTROLES, T('Affiche la dernière photo dans un contrôle Image, ou la dessine dans une zone de dessin (on peut ensuite dessiner par-dessus).'));
 
   Blockly.Blocks['bs_lecteur_codes_ctrl'] = instruction(() => [
-    { champ: new Blockly.FieldDropdown([[T('allumer'), 'allumer'], [T('éteindre'), 'eteindre']]), nom: 'ACTION' },
+    { champ: new Blockly.FieldDropdown([[T('allumer'), 'allumer'], [T('éteindre'), 'eteindre'],
+      [T('oublier le dernier code lu par'), 'oublier']]), nom: 'ACTION' },
     T('le lecteur de codes'), { ctrl: ['lecteurcodes'] }
-  ], COULEUR_CONTROLES, T('Allume ou éteint la caméra du lecteur (celle de derrière sur un téléphone). Par défaut, le lecteur s\'allume tout seul au démarrage (voir ses propriétés).'));
+  ], COULEUR_CONTROLES, T('Allume ou éteint la caméra du lecteur (celle de derrière sur un téléphone) ; par défaut, il s\'allume tout seul au démarrage. ') +
+    T('« Oublier » : le même code pourra être relu tout de suite (sinon, il faut l\'écarter 2 secondes de la caméra). S\'il est encore devant la caméra, il est relu aussitôt.'));
 
   Blockly.Blocks['bs_qr_code'] = instruction(() => [
     { nom: 'VAL', libelle: T('🔳 mettre le QR code de') }, T('dans'), { ctrl: ['image', 'zonedessin'] }
@@ -3134,7 +3136,8 @@
         actions.push(b('bs_camera_ctrl'), b('bs_camera_ctrl', null, { ACTION: 'eteindre' }), b('bs_camera_photo'), b('bs_camera_photo_dans'), b('bs_code_dans'));
         break;
       case 'lecteurcodes':
-        actions.push(b('bs_lecteur_codes_ctrl'), b('bs_lecteur_codes_ctrl', null, { ACTION: 'eteindre' }));
+        actions.push(b('bs_lecteur_codes_ctrl'), b('bs_lecteur_codes_ctrl', null, { ACTION: 'eteindre' }),
+          b('bs_lecteur_codes_ctrl', null, { ACTION: 'oublier' }));
         break;
       case 'son': case 'video':
         actions.push(b('bs_sonctrl'), b('bs_sonctrl', null, { ACTION: 'arreter' }));

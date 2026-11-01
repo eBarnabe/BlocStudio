@@ -426,6 +426,10 @@
     egal('lecteur de codes : QR code lu', [lus[0], app.lire('l', 'format'), app.lire('l', 'allumee')], ['BlocStudio 🏷️ 2026', 'QR code', true]);
     await dort(800);
     egal('lecteur de codes : un même code n\'est signalé qu\'une fois', lus.length, 1);
+    await app.lecteurCodes('l', 'oublier');
+    const oublie = app.lire('l', 'code');
+    for (let i = 0; i < 20 && lus.length < 2; i++) await dort(100);
+    egal('lecteur de codes : après « oublier », le même code est relu', [oublie, lus.length, app.lire('l', 'code')], ['', 2, 'BlocStudio 🏷️ 2026']);
     await app.lecteurCodes('l', 'eteindre');
     egal('lecteur de codes : éteint', app.lire('l', 'allumee'), false);
     t.fin();

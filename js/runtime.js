@@ -4899,8 +4899,11 @@ function BlocRuntimeFactory() {
 
     function ctrlLecteurCodes(id, action) {
       ctrlDeType(id, 'lecteurcodes', T('un lecteur de codes'));
+      const d = donnees[id];
       if (action === 'allumer') return allumerCamera(id);
-      eteindreCamera(donnees[id], elements[id]);
+      // Le même code pourra être relu dès que la caméra le verra (deux paquets identiques à la suite…).
+      if (action === 'oublier') { d.code = d.format = ''; d.vuA = 0; return; }
+      eteindreCamera(d, elements[id]);
     }
 
     function lireLecteurCodes(d, prop) {

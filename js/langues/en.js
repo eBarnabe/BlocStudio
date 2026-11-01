@@ -2394,7 +2394,9 @@ BlocLangues.ajouter('en', {
   "quand {nom} lit un code": "when {nom} reads a code",
   "Exécuté quand le lecteur voit un QR code ou un code-barres. Le code lu est dans sa propriété « dernier code lu ». Un même code n'est signalé qu'une fois tant qu'il reste devant la caméra.": "Runs when the reader sees a QR code or a barcode. The code is in its “last code read” property. The same code is reported only once while it stays in front of the camera.",
   "le lecteur de codes": "the code reader",
-  "Allume ou éteint la caméra du lecteur (celle de derrière sur un téléphone). Par défaut, le lecteur s'allume tout seul au démarrage (voir ses propriétés).": "Turns the reader's camera on or off (the back one on a phone). By default, the reader turns on by itself at startup (see its properties).",
+  "oublier le dernier code lu par": "forget the last code read by",
+  "Allume ou éteint la caméra du lecteur (celle de derrière sur un téléphone) ; par défaut, il s'allume tout seul au démarrage. ": "Turns the reader's camera on or off (the back one on a phone); by default, it turns on by itself at startup. ",
+  "« Oublier » : le même code pourra être relu tout de suite (sinon, il faut l'écarter 2 secondes de la caméra). S'il est encore devant la caméra, il est relu aussitôt.": "“Forget”: the same code can be read again right away (otherwise, it must be kept away from the camera for 2 seconds). If it is still in front of the camera, it is read again at once.",
   "S'allume tout seul au démarrage": "Turns on by itself at startup",
   "Bip quand un code est lu": "Beep when a code is read",
   "Montrez un QR code ou un code-barres (EAN d'un produit, Code 128…) à la caméra, celle de derrière sur un téléphone. Double-cliquez sur le lecteur pour écrire ce qui se passe quand il lit un code ; le code est dans sa propriété « dernier code lu ».": "Show a QR code or a barcode (a product's EAN, Code 128…) to the camera, the back one on a phone. Double-click the reader to write what happens when it reads a code; the code is in its “last code read” property."
