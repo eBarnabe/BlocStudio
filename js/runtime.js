@@ -4057,12 +4057,16 @@ function BlocRuntimeFactory() {
       doc.body.appendChild(doc.adoptNode(contenu));
       await Promise.all([...doc.images].map(i => i.decode().catch(() => {})));
       // Application Windows : sa fenêtre peut être petite, l'aperçu s'ouvre dans une fenêtre « Impression » à part.
+      // Application Android : son moteur web ne sait pas imprimer, c'est le lanceur qui ouvre l'impression du téléphone.
       const webview = window.chrome && window.chrome.webview;
-      if (dansExe && webview) {
-        const page = '<!doctype html>' + doc.documentElement.outerHTML;
+      if ((dansExe && webview) || window.BlocStudioAndroid) {
+        let page = '<!doctype html>' + doc.documentElement.outerHTML;
+        // Android n'ajoute pas de marges (aucune en PDF) : la page les demande elle-même.
+        if (window.BlocStudioAndroid) page = page.replace('</style>', ' @page { margin: 12mm; }</style>');
         cadre.remove();
         const fini = new Promise(ok => attentesImpression.push(ok));
-        webview.postMessage('imprimer:' + page);
+        if (window.BlocStudioAndroid) window.BlocStudioAndroid.imprimer(doc.title, page);
+        else webview.postMessage('imprimer:' + page);
         return fini;
       }
       try {
@@ -4080,6 +4084,8 @@ function BlocRuntimeFactory() {
         if (e.data === 'imprime') attentesImpression.splice(0).forEach(ok => ok());
       });
     }
+    // L'application Android appelle window.BlocStudioImprime() quand on revient de l'impression.
+    if (window.BlocStudioAndroid) window.BlocStudioImprime = () => attentesImpression.splice(0).forEach(ok => ok());
 
     // ---- Données d'Internet ----
     // D'abord directement ; si le site ne le permet pas à une page web (ou en cas d'échec), BlocStudio et les
@@ -5783,8 +5789,9 @@ function BlocRuntimeFactory() {
         const t = enTexte(titre).trim() || principale.def.titre || T('Programme'), m = enTexte(texte);
         const genre = ICONES_NOTIFICATION[icone] ? icone : 'aucune';
         const webview = window.chrome && window.chrome.webview;
-        // Dans BlocStudio ou dans une application exportée : une vraie notification de Windows.
+        // Dans BlocStudio ou dans une application exportée : une vraie notification de Windows (ou d'Android).
         if (webview) webview.postMessage(`notification:${genre}\n${t.replace(/\n/g, ' ')}\n${m}`);
+        else if (window.BlocStudioAndroid) window.BlocStudioAndroid.notifier(genre, t, m);
         else bulleNotification(t, m, genre);
       },
       arreterSons() {

@@ -42,6 +42,13 @@ lanceur s'en charge :
 - **enregistrer un fichier** : la page passe le contenu au lanceur
   (`BlocStudioAndroid.enregistrer`), qui ouvre la boîte « Enregistrer » du
   téléphone et répond par `window.BlocStudioEnregistre(numéro, nom)` ;
+- **notifications** : `BlocStudioAndroid.notifier` affiche une vraie
+  notification du téléphone (Android 13 et plus récent demande l'autorisation
+  la première fois ; la notification attend la réponse) ;
+- **impression** : `BlocStudioAndroid.imprimer` charge la page à imprimer dans
+  un moteur web caché et ouvre l'impression du téléphone (imprimante ou
+  « Enregistrer au format PDF ») ; au retour, il appelle
+  `window.BlocStudioImprime()` et le programme continue ;
 - la taille des polices du téléphone n'agrandit pas le texte de la fenêtre.
 
 À l'export, si le programme utilise des touches du clavier sans manette tactile,

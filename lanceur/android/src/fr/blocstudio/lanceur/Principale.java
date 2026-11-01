@@ -1,6 +1,10 @@
 package fr.blocstudio.lanceur;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
@@ -10,6 +14,12 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CancellationSignal;
+import android.os.ParcelFileDescriptor;
+import android.print.PageRange;
+import android.print.PrintAttributes;
+import android.print.PrintDocumentAdapter;
+import android.print.PrintManager;
 import android.provider.OpenableColumns;
 import android.util.Base64;
 import android.view.View;
@@ -33,6 +43,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 // Le lanceur des applications Android exportées par BlocStudio : une seule fenêtre, qui affiche la page
 // du programme (assets/programme.html) dans le moteur web d'Android. Les réglages de la fenêtre
@@ -45,12 +56,17 @@ public class Principale extends Activity {
     static final int DEMANDE_MEDIAS = 1;
     static final int CHOIX_FICHIER = 2;
     static final int ENREGISTRER_FICHIER = 3;
+    static final int DEMANDE_NOTIFICATIONS = 4;
+    static final String CANAL = "programme";
 
     WebView vue;
     PermissionRequest demandeEnAttente; // la page attend la réponse de l'utilisateur (micro, caméra)
     ValueCallback<Uri[]> fichierAttendu;  // la page attend le fichier choisi dans la boîte « Ouvrir »
     byte[] contenuAEnregistrer;           // le fichier que la page enregistre, en attendant la boîte « Enregistrer »
     int numeroEnregistrement;
+    WebView impression;                   // la page à imprimer, le temps de l'impression
+    final List<String[]> notificationsEnAttente = new ArrayList<String[]>(); // en attendant l'autorisation
+    int numeroNotification = 0;
     boolean pleinEcran = true; // les barres du téléphone sont cachées dès le démarrage
 
     @Override
@@ -146,6 +162,12 @@ public class Principale extends Activity {
 
     @Override
     public void onRequestPermissionsResult(int code, String[] autorisations, int[] reponses) {
+        if (code == DEMANDE_NOTIFICATIONS) {
+            boolean accordee = reponses.length > 0 && reponses[0] == PackageManager.PERMISSION_GRANTED;
+            if (accordee) for (String[] n : notificationsEnAttente) afficherNotification(n[0], n[1], n[2]);
+            notificationsEnAttente.clear();
+            return;
+        }
         if (code != DEMANDE_MEDIAS || demandeEnAttente == null) return;
         PermissionRequest demande = demandeEnAttente;
         demandeEnAttente = null;
@@ -211,9 +233,102 @@ public class Principale extends Activity {
         return "fichier";
     }
 
-    // Appelé par la page : le bloc « plein écran » cache ou remontre les barres du téléphone, et
-    // « enregistrer » ouvre la boîte « Enregistrer » du téléphone (le moteur web ne sait pas télécharger).
+    // Bloc « notification » : une vraie notification d'Android. Depuis Android 13, il faut d'abord
+    // l'autorisation de l'utilisateur (demandée à la première notification).
+    void notifier(String genre, String titre, String texte) {
+        if (Build.VERSION.SDK_INT >= 33
+                && checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            notificationsEnAttente.add(new String[] { genre, titre, texte });
+            if (notificationsEnAttente.size() == 1)
+                requestPermissions(new String[] { android.Manifest.permission.POST_NOTIFICATIONS }, DEMANDE_NOTIFICATIONS);
+            return;
+        }
+        afficherNotification(genre, titre, texte);
+    }
+
+    @SuppressWarnings("deprecation")
+    void afficherNotification(String genre, String titre, String texte) {
+        NotificationManager gestionnaire = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        Notification.Builder n;
+        if (Build.VERSION.SDK_INT >= 26) {
+            String nom = Locale.getDefault().getLanguage().equals("fr") ? "Notifications du programme" : "Program notifications";
+            gestionnaire.createNotificationChannel(new NotificationChannel(CANAL, nom, NotificationManager.IMPORTANCE_HIGH));
+            n = new Notification.Builder(this, CANAL);
+        } else {
+            n = new Notification.Builder(this).setPriority(Notification.PRIORITY_HIGH).setDefaults(Notification.DEFAULT_ALL);
+        }
+        int icone = genre.equals("erreur") ? android.R.drawable.stat_notify_error
+            : genre.equals("avertissement") ? android.R.drawable.ic_dialog_alert
+            : genre.equals("info") ? android.R.drawable.ic_dialog_info
+            : android.R.drawable.ic_popup_reminder;
+        // Toucher la notification ramène dans l'application.
+        Intent retour = getPackageManager().getLaunchIntentForPackage(getPackageName());
+        n.setSmallIcon(icone).setContentTitle(titre).setContentText(texte)
+            .setStyle(new Notification.BigTextStyle().bigText(texte))
+            .setAutoCancel(true)
+            .setContentIntent(PendingIntent.getActivity(this, 0, retour, PendingIntent.FLAG_IMMUTABLE));
+        gestionnaire.notify(++numeroNotification, n.build());
+    }
+
+    // Blocs « imprimer » : la page préparée par le programme est chargée dans un moteur web caché, puis
+    // passe à l'impression d'Android (imprimante, ou « Enregistrer au format PDF »). La page reprend
+    // (window.BlocStudioImprime) quand l'impression est fermée.
+    void imprimer(final String titre, String page) {
+        if (impression != null) impression.destroy();
+        impression = new WebView(this);
+        impression.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView v, String adresse) {
+                if (v != impression) return;
+                final PrintDocumentAdapter adaptateur = v.createPrintDocumentAdapter(titre);
+                PrintManager imprimantes = (PrintManager) getSystemService(PRINT_SERVICE);
+                // Le même adaptateur, qui prévient la page à la fin.
+                imprimantes.print(titre.isEmpty() ? "BlocStudio" : titre, new PrintDocumentAdapter() {
+                    @Override
+                    public void onStart() { adaptateur.onStart(); }
+
+                    @Override
+                    public void onLayout(PrintAttributes avant, PrintAttributes apres, CancellationSignal annulation,
+                                         LayoutResultCallback rappel, Bundle options) {
+                        adaptateur.onLayout(avant, apres, annulation, rappel, options);
+                    }
+
+                    @Override
+                    public void onWrite(PageRange[] pages, ParcelFileDescriptor destination, CancellationSignal annulation,
+                                        WriteResultCallback rappel) {
+                        adaptateur.onWrite(pages, destination, annulation, rappel);
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        adaptateur.onFinish();
+                        if (impression != null) { impression.destroy(); impression = null; }
+                        vue.evaluateJavascript("window.BlocStudioImprime && window.BlocStudioImprime()", null);
+                    }
+                }, null);
+            }
+        });
+        impression.loadDataWithBaseURL("https://" + HOTE + "/", page, "text/html", "utf-8", null);
+    }
+
+    // Appelé par la page : le bloc « plein écran » cache ou remontre les barres du téléphone,
+    // « enregistrer » ouvre la boîte « Enregistrer » du téléphone (le moteur web ne sait pas télécharger),
+    // et les blocs « notification » et « imprimer » passent par Android.
     class Pont {
+        @JavascriptInterface
+        public void notifier(final String genre, final String titre, final String texte) {
+            runOnUiThread(new Runnable() {
+                public void run() { Principale.this.notifier(genre, titre, texte); }
+            });
+        }
+
+        @JavascriptInterface
+        public void imprimer(final String titre, final String page) {
+            runOnUiThread(new Runnable() {
+                public void run() { Principale.this.imprimer(titre, page); }
+            });
+        }
+
         @JavascriptInterface
         public void enregistrer(final int numero, final String nom, final String type, final String base64) {
             runOnUiThread(new Runnable() {
