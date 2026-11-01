@@ -1387,12 +1387,13 @@
   Blockly.Blocks['bs_presse_papiers'] = valeur(() => [T('📋 texte du presse-papiers')], 'String',
     COULEUR_WINDOWS, T('Le texte copié en dernier (Ctrl+C), dans ce programme ou dans un autre logiciel. Vide s\'il n\'y a pas de texte.'));
 
+  const COULEUR_IMPRESSION = '#4338ca';
   Blockly.Blocks['bs_imprimer_texte'] = instruction(() => [{ nom: 'VAL', libelle: T('🖨️ imprimer le texte') }],
-    COULEUR_WINDOWS, T('Ouvre la boîte « Imprimer » de Windows avec ce texte. On peut aussi y choisir « Enregistrer au format PDF ».'));
+    COULEUR_IMPRESSION, T('Ouvre la boîte « Imprimer » (de Windows ou du téléphone) avec ce texte. On peut aussi y choisir « Enregistrer au format PDF ».'));
   Blockly.Blocks['bs_imprimer'] = instruction(() => [T('🖨️ imprimer'), { ctrl: null }],
-    COULEUR_WINDOWS, T('Imprime un contrôle : tout le texte d\'une zone de texte, tout un tableau, un dessin, une image, un graphique… Le programme attend que la boîte « Imprimer » soit fermée.'));
+    COULEUR_IMPRESSION, T('Imprime un contrôle : tout le texte d\'une zone de texte, tout un tableau, un dessin, une image, un graphique… Le programme attend que la boîte « Imprimer » soit fermée.'));
   Blockly.Blocks['bs_imprimer_fenetre'] = instruction(() => [T('🖨️ imprimer la fenêtre'), { champ: new ChampFenetre(true), nom: 'FENETRE' }],
-    COULEUR_WINDOWS, T('Imprime la fenêtre telle qu\'on la voit (réduite si elle est plus large que la feuille).'));
+    COULEUR_IMPRESSION, T('Imprime la fenêtre telle qu\'on la voit (réduite si elle est plus large que la feuille).'));
 
   Blockly.Blocks['bs_notification'] = instruction(() => [
     { nom: 'TITRE', libelle: T('🔔 notification') },
@@ -2689,8 +2690,11 @@
         etiquette(T('Presse-papiers')),
         { kind: 'block', type: 'bs_copier', inputs: { VAL: texte(T('Bonjour !')) } },
         { kind: 'block', type: 'bs_presse_papiers' },
-        { kind: 'block', type: 'bs_copier_image' },
-        etiquette(T('Impression')),
+        { kind: 'block', type: 'bs_copier_image' }
+      ]
+    },
+    {
+      kind: 'category', name: T('Impression'), colour: COULEUR_IMPRESSION, contents: [
         { kind: 'block', type: 'bs_imprimer_texte', inputs: { VAL: texte(T('Ma liste de courses')) } },
         { kind: 'block', type: 'bs_imprimer' },
         { kind: 'block', type: 'bs_imprimer_fenetre', fields: { FENETRE: '' } }

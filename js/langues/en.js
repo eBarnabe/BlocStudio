@@ -1286,7 +1286,7 @@ BlocLangues.ajouter('en', {
   "📋 texte du presse-papiers": "📋 clipboard text",
   "Le texte copié en dernier (Ctrl+C), dans ce programme ou dans un autre logiciel. Vide s'il n'y a pas de texte.": "The text copied last (Ctrl+C), in this program or in other software. Empty if there is no text.",
   "🖨️ imprimer le texte": "🖨️ print the text",
-  "Ouvre la boîte « Imprimer » de Windows avec ce texte. On peut aussi y choisir « Enregistrer au format PDF ».": "Opens the Windows “Print” dialog with this text. You can also choose “Save as PDF” there.",
+  "Ouvre la boîte « Imprimer » (de Windows ou du téléphone) avec ce texte. On peut aussi y choisir « Enregistrer au format PDF ».": "Opens the “Print” dialog (of Windows or the phone) with this text. You can also choose “Save as PDF” there.",
   "🖨️ imprimer": "🖨️ print",
   "Imprime un contrôle : tout le texte d'une zone de texte, tout un tableau, un dessin, une image, un graphique… Le programme attend que la boîte « Imprimer » soit fermée.": "Prints a control: all the text of a text box, a whole table, a drawing, an image, a chart… The program waits until the “Print” dialog is closed.",
   "🖨️ imprimer la fenêtre": "🖨️ print the window",
