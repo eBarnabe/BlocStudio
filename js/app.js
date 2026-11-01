@@ -1315,6 +1315,14 @@
     if (c.type === 'camera') {
       champCase(liste, T('S\'allume toute seule au démarrage'), c.allumerAuDemarrage !== false, v => { c.allumerAuDemarrage = v; maj(); });
       champCase(liste, T('En miroir (comme dans une glace)'), c.miroir !== false, v => { c.miroir = v; maj(); });
+      // La caméra de derrière ne se regarde pas comme dans une glace : le miroir est décoché avec.
+      champCase(liste, T('Caméra de derrière (téléphone, tablette)'), c.cameraArriere === true, v => {
+        c.cameraArriere = v;
+        if (v) c.miroir = false;
+        maj();
+        afficherProprietes();
+      });
+      champCase(liste, T('Lampe allumée (téléphone : pour filmer dans le noir)'), c.lampe === true, v => { c.lampe = v; maj(); });
       champNombre(liste, T('Seuil de mouvement (%) : plus petit = plus sensible'), c.seuilMouvement ?? 10,
         v => { c.seuilMouvement = Math.min(100, Math.max(1, v)); maj(); });
       liste.appendChild(el('p', 'aide',
@@ -1325,6 +1333,8 @@
     if (c.type === 'lecteurcodes') {
       champCase(liste, T('S\'allume tout seul au démarrage'), c.allumerAuDemarrage !== false, v => { c.allumerAuDemarrage = v; maj(); });
       champCase(liste, T('Bip quand un code est lu'), c.bip !== false, v => { c.bip = v; maj(); });
+      champCase(liste, T('Caméra de derrière (téléphone, tablette)'), c.cameraArriere !== false, v => { c.cameraArriere = v; maj(); });
+      champCase(liste, T('Lampe allumée (téléphone : pour lire dans le noir)'), c.lampe === true, v => { c.lampe = v; maj(); });
       liste.appendChild(el('p', 'aide',
         T('Montrez un QR code ou un code-barres (EAN d\'un produit, Code 128…) à la caméra, celle de derrière sur un téléphone. ' +
         'Double-cliquez sur le lecteur pour écrire ce qui se passe quand il lit un code ; le code est dans sa propriété « dernier code lu ».')));

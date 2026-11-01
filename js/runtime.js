@@ -1375,9 +1375,7 @@ function BlocRuntimeFactory() {
           el = apercu('📷', T('Caméra : image en direct quand le programme tourne'));
           break;
         }
-        el = document.createElement('video');
-        el.playsInline = true;
-        el.muted = true;
+        el = videoCamera();
         if (c.miroir !== false) el.classList.add('bs-miroir');
         break;
       case 'lecteurcodes':
@@ -1385,9 +1383,7 @@ function BlocRuntimeFactory() {
           el = apercu('🏷️', T('Lecteur de codes : image de la caméra quand le programme tourne'));
           break;
         }
-        el = document.createElement('video');
-        el.playsInline = true;
-        el.muted = true;
+        el = videoCamera();
         break;
       case 'barreoutils':
         el = document.createElement('div');
@@ -1555,6 +1551,16 @@ function BlocRuntimeFactory() {
     const plusLarge = Math.max(...valeurs.map((v, i) => ctx.measureText(nom(i)).width));
     const k = Math.max(1, Math.ceil((Math.min(plusLarge, 80) + 6) / case_));
     for (let i = 0; i < n; i += k) ctx.fillText(couper(ctx, nom(i), case_ * k - 4), centre(i), bas + taille / 2 + 5);
+  }
+
+  // L'image d'une caméra. L'image d'attente transparente remplace la grosse icône « lecture » que le
+  // moteur web d'Android montre sur une vidéo arrêtée (caméra éteinte).
+  function videoCamera() {
+    const el = document.createElement('video');
+    el.playsInline = true;
+    el.muted = true;
+    el.poster = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+    return el;
   }
 
   // Aperçu dans le concepteur des contrôles lourds (page web, vidéo) : une barre de titre et une icône.
@@ -4723,9 +4729,9 @@ function BlocRuntimeFactory() {
           if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error(T('La caméra n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).'));
           }
-          // Un lecteur de codes prend la caméra de derrière s'il y en a une (téléphone, tablette).
-          const video = { width: { ideal: 1280 }, height: { ideal: 720 } };
-          if (d.type === 'lecteurcodes') video.facingMode = { ideal: 'environment' };
+          // Téléphone, tablette : la caméra de devant ou de derrière (par défaut : devant pour une Caméra,
+          // derrière pour un lecteur de codes). Un ordinateur n'en a souvent qu'une : c'est elle qui sert.
+          const video = { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: { ideal: cameraArriere(d) ? 'environment' : 'user' } };
           let flux;
           try {
             flux = await navigator.mediaDevices.getUserMedia({ video, audio: false });
@@ -4735,11 +4741,26 @@ function BlocRuntimeFactory() {
           el.srcObject = flux;
           await el.play().catch(() => {});
           if (!el.videoWidth) await new Promise(ok => el.addEventListener('loadeddata', ok, { once: true }));
+          if (d.lampe) await reglerLampe(d);
           if (d.type === 'lecteurcodes') await surveillerCodes(d, el);
           else surveillerMouvement(d, el);
         })().finally(() => { d.allumage = null; });
       }
       return d.allumage;
+    }
+
+    const cameraArriere = d => d.cameraArriere ?? d.type === 'lecteurcodes';
+
+    // La lampe (le flash du téléphone, à côté de la caméra de derrière) : seulement si la caméra en a une.
+    // « lampe allumée » vaut vrai dès qu'elle est demandée (le téléphone met un moment à l'allumer).
+    const pisteAvecLampe = d => {
+      const piste = d.flux && d.flux.getVideoTracks()[0];
+      return piste && piste.getCapabilities && piste.getCapabilities().torch ? piste : null;
+    };
+    const lampeAllumee = d => !!d.lampe && !!pisteAvecLampe(d);
+    async function reglerLampe(d) {
+      const piste = pisteAvecLampe(d);
+      if (piste) await piste.applyConstraints({ advanced: [{ torch: !!d.lampe }] }).catch(() => {});
     }
 
     function eteindreCamera(d, el) {
@@ -5156,6 +5177,8 @@ function BlocRuntimeFactory() {
         if (d.type === 'fichier') return lireFichierCtrl(d, prop);
         if (d.type === 'camera' && ['allumee', 'photo', 'mouvement', 'miroir', 'seuilMouvement'].includes(prop)) return lireCamera(d, prop);
         if (d.type === 'lecteurcodes' && ['code', 'format', 'allumee', 'bip'].includes(prop)) return lireLecteurCodes(d, prop);
+        if ((d.type === 'camera' || d.type === 'lecteurcodes') && prop === 'lampe') return lampeAllumee(d);
+        if ((d.type === 'camera' || d.type === 'lecteurcodes') && prop === 'cameraArriere') return cameraArriere(d);
         if (d.type === 'arborescence' && ['texte', 'chemin', 'elements'].includes(prop)) return lireArbreCtrl(d, prop);
         if (d.type === 'barreetat' && prop === 'texte') return d.cases.join('|');
         if (prop === 'motDePasse') return !!d.motDePasse;
@@ -5352,6 +5375,15 @@ function BlocRuntimeFactory() {
         if (d.type === 'lecteurcodes') {
           if (prop === 'allumee') { (valeur ? allumerCamera(id) : Promise.resolve(eteindreCamera(d, el))).catch(signaler); return; }
           if (prop === 'bip') { d.bip = !!valeur; return; }
+        }
+        if (d.type === 'camera' || d.type === 'lecteurcodes') {
+          if (prop === 'lampe') { d.lampe = !!valeur; if (d.flux) reglerLampe(d).catch(signaler); return; }
+          // Changer de caméra pendant qu'elle filme : on la rallume de l'autre côté.
+          if (prop === 'cameraArriere') {
+            d.cameraArriere = !!valeur;
+            if (d.flux) { eteindreCamera(d, el); allumerCamera(id).catch(signaler); }
+            return;
+          }
         }
         if (d.type === 'fichier') {
           if (prop === 'nomPropose') d.nomPropose = enTexte(valeur);

@@ -415,9 +415,9 @@
     };
     dessiner();
     const image = setInterval(dessiner, 100); // la toile ne filme que ce qui change
-    const flux = toile.captureStream(10);
     const ancien = navigator.mediaDevices.getUserMedia;
-    navigator.mediaDevices.getUserMedia = async () => flux;
+    const cotes = []; // la caméra demandée à chaque allumage : 'user' (devant) ou 'environment' (derrière)
+    navigator.mediaDevices.getUserMedia = async c => { cotes.push(c.video.facingMode.ideal); return toile.captureStream(10); };
     const t = lancer([{ id: 'l', type: 'lecteurcodes', x: 0, y: 0, largeur: 320, hauteur: 240, bip: false }]);
     const { app } = t;
     const lus = [];
@@ -430,9 +430,22 @@
     const oublie = app.lire('l', 'code');
     for (let i = 0; i < 20 && lus.length < 2; i++) await dort(100);
     egal('lecteur de codes : après « oublier », le même code est relu', [oublie, lus.length, app.lire('l', 'code')], ['', 2, 'BlocStudio 🏷️ 2026']);
+    // La lampe : demandée, mais une caméra d'ordinateur n'en a pas.
+    app.ecrire('l', 'lampe', true);
+    await dort(100);
+    egal('lecteur de codes : pas de lampe sur un ordinateur', app.lire('l', 'lampe'), false);
     await app.lecteurCodes('l', 'eteindre');
     egal('lecteur de codes : éteint', app.lire('l', 'allumee'), false);
     t.fin();
+
+    // Caméra de devant (par défaut) ou de derrière ; changée pendant qu'elle filme, elle se rallume de l'autre côté.
+    const t2 = lancer([{ id: 'c', type: 'camera', x: 0, y: 0, largeur: 320, hauteur: 240 }]);
+    for (let i = 0; i < 20 && !t2.app.lire('c', 'allumee'); i++) await dort(100);
+    t2.app.ecrire('c', 'cameraArriere', true);
+    for (let i = 0; i < 20 && (cotes.length < 3 || !t2.app.lire('c', 'allumee')); i++) await dort(100);
+    egal('caméra de devant ou de derrière', [cotes, t2.app.lire('c', 'cameraArriere'), t2.app.lire('c', 'allumee')],
+      [['environment', 'user', 'environment'], true, true]);
+    t2.fin();
     clearInterval(image);
     navigator.mediaDevices.getUserMedia = ancien;
   });

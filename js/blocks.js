@@ -29,6 +29,7 @@
     allumee: T('allumée'), photo: T('dernière photo (image)'), mouvement: T('mouvement vu (%)'),
     seuilMouvement: T('seuil de mouvement (%)'),
     code: T('dernier code lu'), format: T('format du code (QR code, EAN-13…)'), bip: T('bip quand un code est lu'),
+    cameraArriere: T('caméra de derrière (téléphone, tablette)'), lampe: T('lampe allumée (téléphone)'),
     contenu: T('contenu du fichier'), nomFichier: T('nom du fichier'), annule: T('annulé par l\'utilisateur'),
     nomPropose: T('nom proposé pour enregistrer'), typeFichier: T('type de fichier (texte, csv, excel, image, son ou tous)'),
     nombreFiches: T('nombre de fiches'), champs: T('champs (liste)'), memoriser: T('garder les fiches d\'une fois à l\'autre'),
@@ -86,8 +87,8 @@
     minuteur: ['intervalle', 'active'],
     basedonnees: ['nombreFiches', 'champs', 'memoriser'],
     fichier: ['contenu', 'nomFichier', 'annule', 'nomPropose', 'typeFichier'],
-    camera: ['allumee', 'mouvement', 'photo', 'miroir', 'seuilMouvement', ...POSITION],
-    lecteurcodes: ['code', 'format', 'allumee', 'bip', ...POSITION],
+    camera: ['allumee', 'mouvement', 'photo', 'miroir', 'seuilMouvement', 'cameraArriere', 'lampe', ...POSITION],
+    lecteurcodes: ['code', 'format', 'allumee', 'bip', 'cameraArriere', 'lampe', ...POSITION],
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', 'collision', ...POSITION, 'direction', 'vitesseY']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
@@ -2967,7 +2968,7 @@
   const PROPS_COULEUR = ['couleurTexte', 'couleurFond', 'couleurBarre', 'couleurBordure'];
   const PROPS_LISTE = ['elements', 'colonnes', 'valeurs', 'etiquettes', 'champs', 'suggestions'];
   const PROPS_OUI_NON = ['visible', 'active', 'coche', 'deplacable', 'boucle', 'miroir', 'memoriser', 'motDePasse', 'allumee', 'cliquable',
-    'gras', 'italique', 'lectureSeule', 'trie', 'solide', 'secondes'];
+    'gras', 'italique', 'lectureSeule', 'trie', 'solide', 'secondes', 'bip', 'lampe', 'cameraArriere'];
   // Propriétés à choix : la valeur proposée est un autre choix que celui par défaut.
   const CHOIX_PROPOSE = { alignement: 'centre', bordure: 'simple', ajustement: 'recadree', defilement: 'vertical', orientation: 'verticale', collision: 'rectangle' };
 
