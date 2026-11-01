@@ -16,6 +16,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.ParcelFileDescriptor;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.print.PageRange;
 import android.print.PrintAttributes;
 import android.print.PrintDocumentAdapter;
@@ -26,6 +28,7 @@ import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.view.WindowManager;
+import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
@@ -57,10 +60,14 @@ public class Principale extends Activity {
     static final int CHOIX_FICHIER = 2;
     static final int ENREGISTRER_FICHIER = 3;
     static final int DEMANDE_NOTIFICATIONS = 4;
+    static final int DEMANDE_POSITION = 5;
     static final String CANAL = "programme";
+    static final String[] POSITION = { android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION };
 
     WebView vue;
     PermissionRequest demandeEnAttente; // la page attend la réponse de l'utilisateur (micro, caméra)
+    String origineEnAttente;            // … ou pour la position
+    GeolocationPermissions.Callback positionEnAttente;
     ValueCallback<Uri[]> fichierAttendu;  // la page attend le fichier choisi dans la boîte « Ouvrir »
     byte[] contenuAEnregistrer;           // le fichier que la page enregistre, en attendant la boîte « Enregistrer »
     int numeroEnregistrement;
@@ -102,6 +109,11 @@ public class Principale extends Activity {
         vue.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onPermissionRequest(PermissionRequest demande) { demanderMedias(demande); }
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origine, GeolocationPermissions.Callback rappel) {
+                demanderPosition(origine, rappel);
+            }
 
             // Boîte « Ouvrir » (contrôle Ouvrir un fichier, blocs « ouvrir un fichier », importer…).
             @Override
@@ -160,8 +172,28 @@ public class Principale extends Activity {
         requestPermissions(manquantes.toArray(new String[0]), DEMANDE_MEDIAS);
     }
 
+    // Bloc « ma position » : comme pour la caméra, Android demande l'autorisation une fois pour toutes
+    // (position précise ou approximative, au choix de l'utilisateur).
+    boolean positionAutorisee() {
+        for (String p : POSITION) if (checkSelfPermission(p) == PackageManager.PERMISSION_GRANTED) return true;
+        return false;
+    }
+
+    void demanderPosition(String origine, GeolocationPermissions.Callback rappel) {
+        if (positionAutorisee()) { rappel.invoke(origine, true, false); return; }
+        if (positionEnAttente != null) positionEnAttente.invoke(origineEnAttente, false, false);
+        origineEnAttente = origine;
+        positionEnAttente = rappel;
+        requestPermissions(POSITION, DEMANDE_POSITION);
+    }
+
     @Override
     public void onRequestPermissionsResult(int code, String[] autorisations, int[] reponses) {
+        if (code == DEMANDE_POSITION) {
+            if (positionEnAttente != null) positionEnAttente.invoke(origineEnAttente, positionAutorisee(), false);
+            positionEnAttente = null;
+            return;
+        }
         if (code == DEMANDE_NOTIFICATIONS) {
             boolean accordee = reponses.length > 0 && reponses[0] == PackageManager.PERMISSION_GRANTED;
             if (accordee) for (String[] n : notificationsEnAttente) afficherNotification(n[0], n[1], n[2]);
@@ -311,10 +343,26 @@ public class Principale extends Activity {
         impression.loadDataWithBaseURL("https://" + HOTE + "/", page, "text/html", "utf-8", null);
     }
 
+    // Bloc « vibrer » (le moteur web ne fait vibrer qu'après un toucher de l'écran).
+    @SuppressWarnings("deprecation")
+    void vibrer(long ms) {
+        Vibrator vibreur = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        if (vibreur == null || !vibreur.hasVibrator()) return;
+        if (Build.VERSION.SDK_INT >= 26) vibreur.vibrate(VibrationEffect.createOneShot(ms, VibrationEffect.DEFAULT_AMPLITUDE));
+        else vibreur.vibrate(ms);
+    }
+
     // Appelé par la page : le bloc « plein écran » cache ou remontre les barres du téléphone,
     // « enregistrer » ouvre la boîte « Enregistrer » du téléphone (le moteur web ne sait pas télécharger),
-    // et les blocs « notification » et « imprimer » passent par Android.
+    // et les blocs « notification », « imprimer » et « vibrer » passent par Android.
     class Pont {
+        @JavascriptInterface
+        public void vibrer(final int ms) {
+            runOnUiThread(new Runnable() {
+                public void run() { Principale.this.vibrer(Math.max(1, Math.min(10000, ms))); }
+            });
+        }
+
         @JavascriptInterface
         public void notifier(final String genre, final String titre, final String texte) {
             runOnUiThread(new Runnable() {

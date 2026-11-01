@@ -23,6 +23,9 @@
             <span>S'ouvre dans le navigateur, sur n'importe quel ordinateur (Windows, Mac, Linux…).</span></button>
           <button class="menu-item" id="export-apk"><strong>🤖 Application Android (.apk)</strong>
             <span>S'installe sur un téléphone ou une tablette Android, avec son icône.</span></button>
+          <hr class="menu-separateur">
+          <button class="menu-item menu-petit" id="cle-sauvegarder" title="Sans elle, une nouvelle version de vos applications Android ne s'installe pas par-dessus l'ancienne">🔑 Sauvegarder la clé Android…</button>
+          <button class="menu-item menu-petit" id="cle-restaurer" title="Reprendre la clé sauvegardée, dans un autre navigateur ou sur un autre ordinateur">🔑 Restaurer la clé Android…</button>
         </div>
       </div>
       <button id="btn-executer" class="executer" title="Lancer le programme (F5)">▶ Exécuter</button>
@@ -152,9 +155,12 @@
       <div id="info-apk-cle" class="info-note">
         <b>🔑 Clé de signature créée.</b> BlocStudio l'a gardée pour vos prochains exports : une nouvelle version de
         cette application s'installera par-dessus l'ancienne, sans perdre ses données.
+        <b>Sauvegardez-la</b> (bouton ci-dessous, ou menu Exporter) : si ce navigateur l'oublie, les mises à jour
+        ne s'installeront plus.
       </div>
       <p class="info-petit">Fonctionne sur Android 7 et plus récent. L'application n'est pas destinée au Play Store.</p>
       <div class="info-actions">
+        <button id="btn-sauver-cle-apk" class="secondaire">🔑 Sauvegarder la clé…</button>
         <button id="btn-fermer-info-apk">J'ai compris</button>
       </div>
     </div>

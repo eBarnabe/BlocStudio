@@ -4242,8 +4242,14 @@ function BlocRuntimeFactory() {
       const cle = nom.toLowerCase();
       let m = cacheMeteo.get(cle);
       if (!m || Date.now() - m.quand > 5 * 60 * 1000) {
-        const lieux = JSON.parse(await lireWeb('https://geocoding-api.open-meteo.com/v1/search?count=1&language=' + LANGUE + '&format=json&name=' + encodeURIComponent(nom)));
-        const lieu = lieux.results && lieux.results[0];
+        // « 48.8566, 2.3522 » (bloc « ma position ») : la météo à cet endroit, sans chercher de ville.
+        const coordonnees = /^(-?\d+(?:\.\d+)?)\s*[,;]\s*(-?\d+(?:\.\d+)?)$/.exec(nom);
+        let lieu;
+        if (coordonnees) lieu = { latitude: Number(coordonnees[1]), longitude: Number(coordonnees[2]), name: nom };
+        else {
+          const lieux = JSON.parse(await lireWeb('https://geocoding-api.open-meteo.com/v1/search?count=1&language=' + LANGUE + '&format=json&name=' + encodeURIComponent(nom)));
+          lieu = lieux.results && lieux.results[0];
+        }
         if (!lieu) throw Object.assign(new Error(T('Je ne trouve pas la ville « {nom} » : vérifiez son orthographe.', { nom })), { villeInconnue: true });
         const p = JSON.parse(await lireWeb('https://api.open-meteo.com/v1/forecast?timezone=auto&forecast_days=1' +
           `&latitude=${lieu.latitude}&longitude=${lieu.longitude}` +
@@ -4265,6 +4271,61 @@ function BlocRuntimeFactory() {
       }
       const v = m.valeurs[quoi];
       return v === undefined || v === null ? '' : v;
+    }
+
+    // ---- Position (GPS) ----
+    // Gardée 10 secondes : « latitude » puis « longitude » à la suite ne redemandent pas.
+    let positionConnue = null;
+    async function position(quoi) {
+      if (quoi === 'trouvee') {
+        try { await position('latitude'); return true; } catch (e) { return false; }
+      }
+      if (!positionConnue || Date.now() - positionConnue.quand > 10000) {
+        if (!navigator.geolocation) throw new Error(T('La position n\'est pas disponible ici.'));
+        const p = await new Promise((ok, ko) => navigator.geolocation.getCurrentPosition(ok, ko,
+          { enableHighAccuracy: true, timeout: 30000, maximumAge: 10000 })).catch(e => {
+          throw new Error(e.code === 1
+            ? T('La position n\'est pas autorisée : acceptez quand le téléphone, l\'ordinateur ou le navigateur le demande.')
+            : e.code === 3
+            ? T('La position met trop de temps à arriver : réessayez, de préférence près d\'une fenêtre ou dehors.')
+            : T('Position introuvable : activez la localisation de l\'appareil.'));
+        });
+        positionConnue = { quand: Date.now(), c: p.coords };
+      }
+      const c = positionConnue.c;
+      const arrondi = (x, chiffres) => Math.round(x * 10 ** chiffres) / 10 ** chiffres;
+      switch (quoi) {
+        case 'latitude': return arrondi(c.latitude, 6);
+        case 'longitude': return arrondi(c.longitude, 6);
+        case 'precision': return Math.round(c.accuracy);
+        case 'position': return arrondi(c.latitude, 4) + ', ' + arrondi(c.longitude, 4);
+      }
+      return '';
+    }
+
+    // ---- Téléphone : inclinaison et vibration ----
+    // La pesanteur vue par le téléphone, tournée dans le sens de l'écran (portrait ou paysage) :
+    // l'inclinaison va de -90 à 90 degrés, positive quand il penche à droite (x) ou vers le bas de l'écran (y).
+    const inclinaison = { x: 0, y: 0 };
+    ecouter(window, 'devicemotion', e => {
+      const g = e.accelerationIncludingGravity;
+      if (!g || g.x === null || g.y === null) return;
+      const a = ((screen.orientation && screen.orientation.angle) || 0) * Math.PI / 180;
+      const x = g.x * Math.cos(a) - g.y * Math.sin(a), y = g.x * Math.sin(a) + g.y * Math.cos(a);
+      const degres = v => Math.round(Math.asin(Math.max(-1, Math.min(1, v / 9.81))) * 180 / Math.PI);
+      inclinaison.x = degres(-x);
+      inclinaison.y = degres(y);
+    });
+
+    function vibrer(secondes) {
+      const ms = Math.round(Math.min(10, Math.max(0, Number(secondes) || 0)) * 1000);
+      if (!ms || arrete) return;
+      // Application Android : c'est le lanceur qui fait vibrer (le moteur web ne le fait qu'après un toucher).
+      if (window.BlocStudioAndroid && window.BlocStudioAndroid.vibrer) window.BlocStudioAndroid.vibrer(ms);
+      else if (navigator.vibrate) navigator.vibrate(ms);
+      for (const p of navigator.getGamepads ? navigator.getGamepads() : []) {
+        if (p && p.vibrationActuator) p.vibrationActuator.playEffect('dual-rumble', { duration: ms, strongMagnitude: 1, weakMagnitude: 1 }).catch(() => {});
+      }
     }
 
     // Bulle de notification dans un coin de la fenêtre (quand on n'est pas dans une application Windows).
@@ -4906,6 +4967,9 @@ function BlocRuntimeFactory() {
       // quoi : 'gx', 'gy' (joystick gauche), 'dx', 'dy' (droit) ; de -100 à 100 (y : vers le bas).
       joystickManette(quoi) { return manette.axes[{ gx: 0, gy: 1, dx: 2, dy: 3 }[quoi]] || 0; },
       manetteBranchee() { return manette.branchee; },
+      // quoi : 'x' (gauche ↔ droite) ou 'y' (haut ↕ bas), en degrés.
+      inclinaison(quoi) { return inclinaison[quoi] || 0; },
+      vibrer,
 
       // ---- Score, vies… : le nombre écrit dans un contrôle (« Score : 12 »), ou sa valeur ----
       nombreAffiche(id) {
@@ -5884,6 +5948,7 @@ function BlocRuntimeFactory() {
         window.open(url, '_blank', 'noopener');
       },
       meteo,
+      position,
       notifier(titre, texte, icone) {
         if (arrete) return;
         const t = enTexte(titre).trim() || principale.def.titre || T('Programme'), m = enTexte(texte);

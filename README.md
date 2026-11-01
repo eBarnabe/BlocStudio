@@ -48,10 +48,11 @@ Un programme peut avoir **plusieurs fenêtres**, des **menus**, des fenêtres **
 - **Événements** : clics, touches, souris, manette, minuteurs, messages entre les scripts.
 - **Mouvement et jeux** : avancer, rebondir, collisions au pixel près, **gravité et saut** avec sols et murs « solides », clones, costumes et animations, **fond qui défile**, score et vies.
 - **Manette de jeu** : boutons et joysticks. La croix fait aussi les flèches du clavier, si bien que les jeux prévus pour le clavier se jouent à la manette.
+- **Téléphone** : inclinaison (pour les jeux où l'on penche le téléphone) et vibration.
 - **Sons** : sons et musiques 8 bits (avec un studio pour les composer), synthèse vocale, **micro**.
 - **Données** : listes, **dictionnaires**, mémoire qui reste d'un lancement à l'autre, fichiers **CSV et Excel (.xlsx)** à ouvrir et à enregistrer.
 - **Maths et texte** : hasard, nombres écrits à la française (« 1 234,50 », ou « 1,234.50 » en anglais), conversions d'unités, **dates**.
-- **Internet et Windows** : météo, données d'un service web (JSON), transformées en listes ou en lignes de tableau d'un seul bloc ; notifications, presse-papiers ; une catégorie **Impression** (texte, contrôle ou fenêtre, sur papier ou en PDF).
+- **Internet et système** : météo (d'une ville, ou là où l'on se trouve), données d'un service web (JSON), transformées en listes ou en lignes de tableau d'un seul bloc ; notifications, presse-papiers, **position GPS** ; une catégorie **Impression** (texte, contrôle ou fenêtre, sur papier ou en PDF).
 
 Chaque bloc a une infobulle qui explique à quoi il sert. Le bouton **</> Voir le code** montre le JavaScript produit par les blocs.
 
@@ -80,7 +81,7 @@ Tous sont commentés avec des blocs « 💬 » qui expliquent comment ils marche
 
 - **Page web (.html)** : un seul fichier, qui s'ouvre dans n'importe quel navigateur.
 - **Application Windows (.exe)** : un seul fichier, à double-cliquer. Il utilise WebView2, le moteur d'Edge présent sur Windows 10 et 11 : rien d'autre à installer. Le fonctionnement du lanceur est décrit dans [`lanceur/LISEZMOI.md`](lanceur/LISEZMOI.md).
-- **Application Android (.apk)** : s'installe sur un téléphone ou une tablette (Android 7 et plus récent), avec son nom et son icône. BlocStudio la fabrique et la signe lui-même : rien à installer. Voir [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md).
+- **Application Android (.apk)** : s'installe sur un téléphone ou une tablette (Android 7 et plus récent), avec son nom et son icône. BlocStudio la fabrique et la signe lui-même : rien à installer. Pensez à **sauvegarder la clé de signature** (menu Exporter) : sans elle, une nouvelle version ne s'installe plus par-dessus l'ancienne. Voir [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md).
 
 Pour un téléphone, cochez dans les propriétés de la fenêtre **📱 Programme pour téléphone** (la page web remplit l'écran, sans déformer la fenêtre) et **🎮 Manette tactile** (une croix et des boutons A, B à l'écran, qui font les flèches et Espace). L'application Android remplit toujours l'écran.
 

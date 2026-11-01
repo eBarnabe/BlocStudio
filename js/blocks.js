@@ -443,6 +443,13 @@
   Blockly.Blocks['bs_manette_branchee'] = valeur(() => [T('une manette est branchée ?')], 'Boolean', COULEUR_ENTREES,
     T('Vrai si une manette de jeu est branchée (et qu\'on a déjà appuyé sur l\'un de ses boutons).'));
 
+  Blockly.Blocks['bs_inclinaison'] = valeur(() => [
+    T('📱 inclinaison'), { champ: new Blockly.FieldDropdown([[T('gauche ↔ droite'), 'x'], [T('haut ↕ bas'), 'y']]), nom: 'QUOI' }, T('du téléphone')
+  ], 'Number', COULEUR_ENTREES, T('De combien le téléphone (ou la tablette) penche, de -90 à 90 degrés ; 0 à plat. ↔ : positif quand il penche à droite ; ') +
+    T('↕ : positif quand le bas de l\'écran descend. Une bille roule donc vers « x : inclinaison ↔ ÷ 10, y : inclinaison ↕ ÷ 10 ». Toujours 0 sur un ordinateur.'));
+  Blockly.Blocks['bs_vibrer'] = instruction(() => [{ nom: 'SEC', libelle: T('📳 vibrer pendant') }, T('secondes')],
+    COULEUR_ENTREES, T('Fait vibrer le téléphone, et la manette de jeu si elle sait vibrer. Le programme continue sans attendre. Rien ne se passe sur un ordinateur sans manette.'));
+
   Blockly.Blocks['bs_se_touchent'] = valeur(() => [
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL' }, T('touche'),
     { champ: new Blockly.FieldDropdown(optionsControles(null, false, true)), nom: 'CTRL2' }, '?'
@@ -1390,17 +1397,17 @@
   Blockly.Blocks['bs_panneau_montrer'] = instruction(() => [T('📜 faire défiler'), PANNEAU, T('pour montrer'), { ctrl: null, nom: 'CIBLE' }],
     COULEUR_CONTROLES, T('Fait défiler le panneau juste ce qu\'il faut pour qu\'on voie ce contrôle en entier (il doit être posé dans le panneau).'));
 
-  // ---------- Windows : presse-papiers, impression, notifications ----------
+  // ---------- Système : presse-papiers, notifications, position ; impression ----------
 
-  const COULEUR_WINDOWS = '#475569';
+  const COULEUR_SYSTEME = '#475569';
   const AVEC_IMAGE = ['zonedessin', 'image', 'graphique', 'camera'];
 
   Blockly.Blocks['bs_copier'] = instruction(() => [{ nom: 'VAL', libelle: T('📋 copier') }, T('dans le presse-papiers')],
-    COULEUR_WINDOWS, T('Comme Ctrl+C : le texte peut ensuite être collé (Ctrl+V) dans n\'importe quel logiciel.'));
+    COULEUR_SYSTEME, T('Comme Ctrl+C : le texte peut ensuite être collé (Ctrl+V) dans n\'importe quel logiciel.'));
   Blockly.Blocks['bs_copier_image'] = instruction(() => [T('📋 copier l\'image de'), { ctrl: AVEC_IMAGE }, T('dans le presse-papiers')],
-    COULEUR_WINDOWS, T('Copie le dessin, l\'image, le graphique ou l\'image de la caméra : on peut ensuite la coller dans Paint, Word, un e-mail…'));
+    COULEUR_SYSTEME, T('Copie le dessin, l\'image, le graphique ou l\'image de la caméra : on peut ensuite la coller dans Paint, Word, un e-mail…'));
   Blockly.Blocks['bs_presse_papiers'] = valeur(() => [T('📋 texte du presse-papiers')], 'String',
-    COULEUR_WINDOWS, T('Le texte copié en dernier (Ctrl+C), dans ce programme ou dans un autre logiciel. Vide s\'il n\'y a pas de texte.'));
+    COULEUR_SYSTEME, T('Le texte copié en dernier (Ctrl+C), dans ce programme ou dans un autre logiciel. Vide s\'il n\'y a pas de texte.'));
 
   const COULEUR_IMPRESSION = '#4338ca';
   Blockly.Blocks['bs_imprimer_texte'] = instruction(() => [{ nom: 'VAL', libelle: T('🖨️ imprimer le texte') }],
@@ -1414,7 +1421,14 @@
     { nom: 'TITRE', libelle: T('🔔 notification') },
     { nom: 'VAL', libelle: T('message') },
     { champ: new Blockly.FieldDropdown([[T('ℹ️ information'), 'info'], [T('⚠️ avertissement'), 'avertissement'], [T('❌ erreur'), 'erreur'], [T('sans icône'), 'aucune']]), nom: 'ICONE' }
-  ], COULEUR_WINDOWS, T('Affiche une notification de Windows en bas à droite de l\'écran, même si la fenêtre du programme est cachée ou réduite. Un clic dessus ramène le programme devant.'));
+  ], COULEUR_SYSTEME, T('Affiche une notification de Windows (en bas à droite de l\'écran) ou du téléphone, même si la fenêtre du programme est cachée ou réduite. Un clic dessus ramène le programme devant.'));
+
+  Blockly.Blocks['bs_position'] = valeur(() => [
+    T('📍 ma position :'),
+    { champ: new Blockly.FieldDropdown([[T('latitude'), 'latitude'], [T('longitude'), 'longitude'],
+      [T('latitude, longitude (pour la météo)'), 'position'], [T('précision (mètres)'), 'precision'],
+      [T('position trouvée ? (vrai ou faux)'), 'trouvee']]), nom: 'QUOI' }
+  ], null, COULEUR_SYSTEME, T('Où se trouve le téléphone ou l\'ordinateur (GPS, Wi-Fi…). La première fois, il demande la permission ; le programme attend la réponse. « latitude, longitude » se donne au bloc « météo à ».'));
 
   // ---------- Internet ----------
 
@@ -2483,6 +2497,9 @@
   gen.forBlock['bs_manette_bouton'] = b => [`app.boutonManette(${q(b.getFieldValue('BOUTON'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_manette_joystick'] = b => [`app.joystickManette(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
   gen.forBlock['bs_manette_branchee'] = () => ['app.manetteBranchee()', Order.FUNCTION_CALL];
+  gen.forBlock['bs_inclinaison'] = b => [`app.inclinaison(${q(b.getFieldValue('QUOI'))})`, Order.FUNCTION_CALL];
+  gen.forBlock['bs_vibrer'] = b => `app.vibrer(${val(b, 'SEC', '0.2')});\n`;
+  gen.forBlock['bs_position'] = b => [`(await app.position(${q(b.getFieldValue('QUOI'))}))`, Order.ATOMIC];
 
   const fen = b => q(b.getFieldValue('FENETRE'));
   gen.forBlock['bs_quand_fenetre'] = b =>
@@ -2685,7 +2702,11 @@
         { kind: 'block', type: 'bs_quand_manette', fields: { BOUTON: 'a' } },
         { kind: 'block', type: 'bs_manette_bouton', fields: { BOUTON: 'a' } },
         { kind: 'block', type: 'bs_manette_joystick' },
-        { kind: 'block', type: 'bs_manette_branchee' }
+        { kind: 'block', type: 'bs_manette_branchee' },
+        etiquette(T('Téléphone ou tablette')),
+        { kind: 'block', type: 'bs_inclinaison' },
+        { kind: 'block', type: 'bs_inclinaison', fields: { QUOI: 'y' } },
+        { kind: 'block', type: 'bs_vibrer', inputs: { SEC: nombre(0.2) } }
       ]
     },
     {
@@ -2702,13 +2723,17 @@
       ]
     },
     {
-      kind: 'category', name: T('Windows'), colour: COULEUR_WINDOWS, contents: [
+      kind: 'category', name: T('Système'), colour: COULEUR_SYSTEME, contents: [
         etiquette(T('Notifications')),
         { kind: 'block', type: 'bs_notification', inputs: { TITRE: texte(T('Rappel')), VAL: texte(T('C\'est l\'heure de la pause !')) }, fields: { ICONE: 'info' } },
         etiquette(T('Presse-papiers')),
         { kind: 'block', type: 'bs_copier', inputs: { VAL: texte(T('Bonjour !')) } },
         { kind: 'block', type: 'bs_presse_papiers' },
-        { kind: 'block', type: 'bs_copier_image' }
+        { kind: 'block', type: 'bs_copier_image' },
+        etiquette(T('Position (GPS)')),
+        { kind: 'block', type: 'bs_position' },
+        { kind: 'block', type: 'bs_position', fields: { QUOI: 'longitude' } },
+        { kind: 'block', type: 'bs_meteo', inputs: { VAL: { block: { type: 'bs_position', fields: { QUOI: 'position' } } } } }
       ]
     },
     {

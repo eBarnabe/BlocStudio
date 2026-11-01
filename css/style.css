@@ -305,6 +305,8 @@ body.sans-infobulles .blocklyTooltipDiv { display: none !important; }
 }
 .actions .menu-item:hover { background: #eef2ff; }
 .menu-item strong { display: block; font-size: 15px; }
+.actions .menu-item.menu-petit { padding: 6px 10px; font-size: 13.5px; }
+.menu-separateur { margin: 6px 4px; border: 0; border-top: 1px solid var(--bord); }
 
 /* ---------- Galerie des exemples ---------- */
 .galerie-boite {

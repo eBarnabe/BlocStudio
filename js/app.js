@@ -3985,11 +3985,43 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       if (chemin === null) return; // enregistrement annulé
       $('info-apk-nom').textContent = nomFichier() + '.apk';
       $('info-apk-chemin').textContent = chemin;
-      $('info-apk-cle').hidden = !nouvelleCle;
+      $('info-apk-cle').hidden = $('btn-sauver-cle-apk').hidden = !nouvelleCle;
       $('info-apk').hidden = false;
     } catch (e) {
       alert(T('L\'export en application Android a échoué : {erreur}', { erreur: e.message }));
     }
+  }
+
+  // La clé de signature des applications Android, dans un fichier à garder en lieu sûr.
+  async function sauvegarderCleAndroid() {
+    try {
+      const chemin = await telecharger('cle-android-blocstudio.json', await BlocAndroid.sauvegarderCle(), 'application/json');
+      if (chemin === null) return;
+      alert(T('🔑 Clé sauvegardée{ou}.\n\nGardez ce fichier en lieu sûr (clé USB, cloud…) et ne le donnez à personne : ' +
+        'avec lui, on peut fabriquer des mises à jour de vos applications. Pour le reprendre ailleurs : menu Exporter → « Restaurer la clé Android ».',
+        { ou: chemin ? ' : ' + chemin : T(' dans votre dossier Téléchargements') }));
+    } catch (e) {
+      alert(T('Impossible d\'enregistrer le fichier : {erreur}', { erreur: e.message }));
+    }
+  }
+
+  function restaurerCleAndroid() {
+    const choix = document.createElement('input');
+    choix.type = 'file';
+    choix.accept = '.json';
+    choix.addEventListener('change', async () => {
+      if (!choix.files[0]) return;
+      try {
+        const resultat = await BlocAndroid.restaurerCle(await choix.files[0].text(), () => confirm(
+          T('BlocStudio a déjà une autre clé. La remplacer par celle du fichier ?\n\n' +
+            'Les applications exportées avec la clé actuelle ne pourront plus être mises à jour (sauvegardez-la d\'abord si besoin).')));
+        if (resultat === 'identique') alert(T('🔑 C\'est déjà la clé de BlocStudio : rien à changer.'));
+        else if (resultat === 'restauree') alert(T('🔑 Clé restaurée : les prochains exports pourront mettre à jour les applications signées avec elle.'));
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+    choix.click();
   }
 
   window.BlocStudio.construireApk = construireApk;
@@ -4303,6 +4335,9 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     $('export-exe').addEventListener('click', () => { menuExport.hidden = true; exporterExe(); });
     $('export-html').addEventListener('click', () => { menuExport.hidden = true; exporterHtml(); });
     $('export-apk').addEventListener('click', () => { menuExport.hidden = true; exporterApk(); });
+    $('cle-sauvegarder').addEventListener('click', () => { menuExport.hidden = true; sauvegarderCleAndroid(); });
+    $('cle-restaurer').addEventListener('click', () => { menuExport.hidden = true; restaurerCleAndroid(); });
+    $('btn-sauver-cle-apk').addEventListener('click', sauvegarderCleAndroid);
     $('btn-fermer-info-apk').addEventListener('click', () => { $('info-apk').hidden = true; });
     $('btn-fermer-info-exe').addEventListener('click', () => { $('info-exe').hidden = true; });
     $('btn-lancer-exe').addEventListener('click', () => {

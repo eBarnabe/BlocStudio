@@ -433,6 +433,51 @@
     navigator.mediaDevices.getUserMedia = ancien;
   });
 
+  await essayer('moteur : téléphone (inclinaison, vibration, position)', async () => {
+    const t = lancer([]);
+    const { app } = t;
+    // Penché de 30° à droite et de 30° vers le bas de l'écran (la pesanteur vue par le téléphone).
+    window.dispatchEvent(new DeviceMotionEvent('devicemotion', { accelerationIncludingGravity: { x: -4.905, y: 4.905, z: 7 } }));
+    egal('inclinaison : gauche ↔ droite et haut ↕ bas', [app.inclinaison('x'), app.inclinaison('y')], [30, 30]);
+
+    const vibrations = [], vibrateur = navigator.vibrate;
+    navigator.vibrate = ms => vibrations.push(ms);
+    app.vibrer(0.25);
+    navigator.vibrate = vibrateur;
+    egal('vibration : durée en millisecondes', vibrations, [250]);
+
+    const gps = navigator.geolocation.getCurrentPosition;
+    let refus = false;
+    navigator.geolocation.getCurrentPosition = (ok, ko) => refus
+      ? ko({ code: 1 })
+      : ok({ coords: { latitude: 48.8566123, longitude: 2.3522219, accuracy: 12.4 } });
+    egal('position : latitude, longitude, précision', [await app.position('latitude'), await app.position('longitude'),
+      await app.position('precision'), await app.position('position'), await app.position('trouvee')],
+      [48.856612, 2.352222, 12, '48.8566, 2.3522', true]);
+    t.fin();
+    refus = true;
+    const t2 = lancer([]);
+    let message = '';
+    try { await t2.app.position('latitude'); } catch (e) { message = e.message; }
+    egal('position refusée : message et « trouvée ? »', [message.startsWith('La position n\'est pas autorisée'), await t2.app.position('trouvee')], [true, false]);
+    t2.fin();
+    navigator.geolocation.getCurrentPosition = gps;
+  });
+
+  await essayer('export Android : sauvegarde de la clé', async () => {
+    const fichier = await BlocAndroid.sauvegarderCle();
+    egal('clé : la même clé est reconnue', await BlocAndroid.restaurerCle(fichier, () => true), 'identique');
+    const cle = JSON.parse(fichier);
+    let message = '';
+    try { await BlocAndroid.restaurerCle(JSON.stringify(Object.assign({}, cle, { publique: cle.publique.replace(/A/g, 'B') })), () => true); }
+    catch (e) { message = e.message; }
+    egal('clé : un fichier abîmé est refusé', message, 'Ce fichier n\'est pas une clé Android de BlocStudio.');
+    const ancienne = localStorage.getItem('blocstudio.cleAndroid');
+    localStorage.removeItem('blocstudio.cleAndroid');
+    egal('clé : restaurée dans un navigateur sans clé', await BlocAndroid.restaurerCle(fichier, () => true), 'restauree');
+    egal('clé : la même qu\'avant', JSON.parse(localStorage.getItem('blocstudio.cleAndroid')).certificat, JSON.parse(ancienne).certificat);
+  });
+
   // ---------------------------------------------------------------- Boîte à outils et exemples
   await verifierExemples();
   ecrire(`RÉSULTAT : ${reussis} réussi(s), ${echecs} échec(s)`);

@@ -22,7 +22,9 @@ créée au premier export et gardée dans le stockage du navigateur
 nouveau avec la même clé s'installe par-dessus l'ancienne version sans perdre
 ses données. La clé est propre à chaque navigateur (BlocStudio.exe, Chrome,
 le site en ligne…) : avec une autre clé, il faut d'abord désinstaller
-l'application du téléphone.
+l'application du téléphone. Le menu Exporter la **sauvegarde** dans un fichier
+(`cle-android-blocstudio.json` : clé privée, clé publique et certificat, en
+base64) et la **restaure** dans un autre navigateur ou sur un autre ordinateur.
 
 Sur le téléphone, `Principale.java` affiche la page dans le moteur web
 d'Android, sous l'adresse fictive `https://programme.blocstudio.example/`
@@ -35,9 +37,11 @@ couleur de fond de la fenêtre. Le bloc « plein écran » (désactivé) les rem
 
 Le moteur web d'Android ne fait pas tout seul ce qu'un navigateur fait ; le
 lanceur s'en charge :
-- **micro et caméra** : la première fois que le programme s'en sert, Android
-  demande l'autorisation à l'utilisateur (les autorisations sont dans le
-  manifeste, mais rien n'est demandé tant que le programme ne s'en sert pas) ;
+- **micro, caméra et position** : la première fois que le programme s'en sert,
+  Android demande l'autorisation à l'utilisateur (les autorisations sont dans
+  le manifeste, mais rien n'est demandé tant que le programme ne s'en sert pas) ;
+- **vibration** : `BlocStudioAndroid.vibrer(ms)` (le moteur web ne fait vibrer
+  qu'après un toucher de l'écran) ;
 - **ouvrir un fichier** : la boîte « Ouvrir » du téléphone ;
 - **enregistrer un fichier** : la page passe le contenu au lanceur
   (`BlocStudioAndroid.enregistrer`), qui ouvre la boîte « Enregistrer » du

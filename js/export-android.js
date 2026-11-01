@@ -210,6 +210,41 @@ const BlocAndroid = (function () {
     };
   }
 
+  // ---- Sauvegarde de la clé ----
+  // Sans la même clé, une nouvelle version d'une application ne s'installe pas par-dessus l'ancienne : on la
+  // garde dans un fichier, pour la retrouver dans un autre navigateur, sur un autre ordinateur, ou après un nettoyage.
+  const FORMAT_CLE = 'BlocStudio-cle-android';
+
+  async function sauvegarderCle() {
+    await cleDeSignature(); // la crée si aucun export n'a encore été fait
+    let cle = null;
+    try { cle = JSON.parse(localStorage.getItem(CLE_STOCKAGE)); } catch (e) { /* stockage interdit */ }
+    if (!cle) throw new Error(T('Ce navigateur ne garde pas la clé (stockage bloqué).'));
+    return JSON.stringify({ format: FORMAT_CLE, version: 1, privee: cle.privee, publique: cle.publique, certificat: cle.certificat }, null, 2);
+  }
+
+  // `remplacer()` est appelée (et doit renvoyer vrai) avant de remplacer une autre clé.
+  // Renvoie 'identique', 'restauree' ou 'annulee'.
+  async function restaurerCle(contenuFichier, remplacer) {
+    let cle = null;
+    try { cle = JSON.parse(contenuFichier); } catch (e) { /* pas du JSON */ }
+    const invalide = () => new Error(T('Ce fichier n\'est pas une clé Android de BlocStudio.'));
+    if (!cle || cle.format !== FORMAT_CLE || !cle.privee || !cle.publique || !cle.certificat) throw invalide();
+    // La clé privée doit aller avec la clé publique du certificat : on signe un essai, puis on le vérifie.
+    try {
+      const privee = await crypto.subtle.importKey('pkcs8', depuisBase64(cle.privee), ALGO, false, ['sign']);
+      const publique = await crypto.subtle.importKey('spki', depuisBase64(cle.publique), ALGO, false, ['verify']);
+      const essai = texte('BlocStudio');
+      if (!await crypto.subtle.verify(ALGO, publique, await crypto.subtle.sign(ALGO, privee, essai), essai)) throw invalide();
+    } catch (e) { throw invalide(); }
+    let actuelle = null;
+    try { actuelle = JSON.parse(localStorage.getItem(CLE_STOCKAGE)); } catch (e) { /* aucune */ }
+    if (actuelle && actuelle.certificat === cle.certificat) return 'identique';
+    if (actuelle && actuelle.certificat && !remplacer()) return 'annulee';
+    localStorage.setItem(CLE_STOCKAGE, JSON.stringify({ privee: cle.privee, publique: cle.publique, certificat: cle.certificat }));
+    return 'restauree';
+  }
+
   // ---- Signature v2 (« APK Signature Scheme v2 ») ----
   // Empreinte SHA-256 du zip par morceaux de 1 Mo, signée, puis rangée dans un « APK Signing Block »
   // glissé entre les fichiers et le répertoire central du zip.
@@ -269,5 +304,5 @@ const BlocAndroid = (function () {
     return { apk: await signer(ecrireZip(fichiers), cle), nouvelleCle: cle.nouvelle };
   }
 
-  return { construire, nomPaquet };
+  return { construire, nomPaquet, sauvegarderCle, restaurerCle };
 })();

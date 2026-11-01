@@ -48,10 +48,11 @@ A program can have **several windows**, **menus**, **resizable** windows whose c
 - **Events**: clicks, keys, mouse, gamepad, timers, messages between scripts.
 - **Movement and games**: move, bounce, pixel-perfect collisions, **gravity and jumping** with “solid” floors and walls, clones, costumes and animations, **scrolling background**, score and lives.
 - **Gamepad**: buttons and sticks. The D-pad also acts as the keyboard arrows, so games made for the keyboard can be played with a gamepad.
+- **Phone**: tilt (for games where you lean the phone) and vibration.
 - **Sounds**: 8-bit sounds and music (with a studio to compose them), speech, **microphone**.
 - **Data**: lists, **dictionaries**, memory that is kept from one run to the next, **CSV and Excel (.xlsx)** files to open and save.
 - **Maths and text**: random numbers, numbers written in the language of the editor (“1,234.50”), unit conversions, **dates**.
-- **Internet and Windows**: weather, data from a web service (JSON), turned into lists or table rows with a single block; notifications, clipboard; a **Printing** category (text, control or window, on paper or as PDF).
+- **Internet and system**: weather (in a town, or where you are), data from a web service (JSON), turned into lists or table rows with a single block; notifications, clipboard, **GPS location**; a **Printing** category (text, control or window, on paper or as PDF).
 
 Every block has a tooltip that explains what it is for. The **</> Show the code** button shows the JavaScript produced by the blocks.
 
@@ -80,7 +81,7 @@ They are all commented with “💬” blocks that explain how they work. Their 
 
 - **Web page (.html)**: a single file, which opens in any browser.
 - **Windows application (.exe)**: a single file, to double-click. It uses WebView2, the Edge engine that comes with Windows 10 and 11: nothing else to install. How the launcher works is described (in French) in [`lanceur/LISEZMOI.md`](lanceur/LISEZMOI.md).
-- **Android app (.apk)**: installs on a phone or tablet (Android 7 and later), with its own name and icon. BlocStudio builds and signs it by itself: nothing to install. See (in French) [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md).
+- **Android app (.apk)**: installs on a phone or tablet (Android 7 and later), with its own name and icon. BlocStudio builds and signs it by itself: nothing to install. Remember to **back up the signing key** (Export menu): without it, a new version no longer installs over the old one. See (in French) [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md).
 
 For a phone, tick in the window's properties **📱 Program for phones** (the web page fills the screen, without distorting the window) and **🎮 On-screen touch gamepad** (a D-pad and A, B buttons on the screen, acting as the arrows and Space). The Android app always fills the screen.
 
