@@ -453,6 +453,27 @@
     toile.getContext('2d').drawImage(img, 0, 0);
     await app.qrCode('z', texte);
     egal('QR code : relu dans l\'image et dans la zone de dessin', [relire(toile), relire(hote.querySelector('canvas.bs-zonedessin'))], [texte, texte]);
+    egal('code lu dans une image et une zone de dessin', [await app.codeDans('i', 'texte'), await app.codeDans('i', 'format'),
+      await app.codeDans('z', 'texte')], [texte, 'QR code', texte]);
+    await app.dessin('z', 'effacer');
+    egal('code lu : rien dans une zone vide', await app.codeDans('z', 'texte'), '');
+    // Un code-barres EAN-13 (celui des produits), dessiné d'après ses tables : premier chiffre = parité de la moitié gauche.
+    const ean = '4006381333931';
+    const L = ['0001101', '0011001', '0010011', '0111101', '0100011', '0110001', '0101111', '0111011', '0110111', '0001011'];
+    const R = L.map(c => c.replace(/./g, b => b === '0' ? '1' : '0')), G = R.map(c => [...c].reverse().join(''));
+    const parites = ['LLLLLL', 'LLGLGG', 'LLGGLG', 'LLGGGL', 'LGLLGG', 'LGGLLG', 'LGGGLL', 'LGLGLG', 'LGLGGL', 'LGGLGL'][ean[0]];
+    const barres = '101' + [...ean.slice(1, 7)].map((c, i) => (parites[i] === 'L' ? L : G)[c]).join('') + '01010' +
+      [...ean.slice(7)].map(c => R[c]).join('') + '101';
+    const code = document.createElement('canvas');
+    code.width = (barres.length + 20) * 3;
+    code.height = 120;
+    const gc = code.getContext('2d');
+    gc.fillStyle = '#fff';
+    gc.fillRect(0, 0, code.width, code.height);
+    gc.fillStyle = '#000';
+    [...barres].forEach((b, i) => { if (b === '1') gc.fillRect((i + 10) * 3, 10, 3, 100); });
+    app.ecrire('i', 'image', code.toDataURL('image/png'));
+    egal('code-barres EAN-13 lu dans une image', [await app.codeDans('i', 'texte'), await app.codeDans('i', 'format')], [ean, 'EAN-13']);
     const erreur = async f => { try { await f(); return ''; } catch (e) { return e.message; } };
     egal('QR code : erreurs', [await erreur(() => app.qrCode('i', 'x'.repeat(3000))), await erreur(() => app.qrCode('b', 'x'))],
       ['Ce texte est trop long pour un QR code (2 000 caractères environ au plus).',

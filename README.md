@@ -52,7 +52,7 @@ Un programme peut avoir **plusieurs fenêtres**, des **menus**, des fenêtres **
 - **Sons** : sons et musiques 8 bits (avec un studio pour les composer), synthèse vocale, **micro**.
 - **Données** : listes, **dictionnaires**, mémoire qui reste d'un lancement à l'autre, fichiers **CSV et Excel (.xlsx)** à ouvrir et à enregistrer.
 - **Maths et texte** : hasard, nombres écrits à la française (« 1 234,50 », ou « 1,234.50 » en anglais), conversions d'unités, **dates**.
-- **Internet et système** : météo (d'une ville, ou là où l'on se trouve), données d'un service web (JSON), transformées en listes ou en lignes de tableau d'un seul bloc ; notifications, presse-papiers, **position GPS**, **QR codes** à créer (et à lire avec le contrôle Lecteur de codes) ; une catégorie **Impression** (texte, contrôle ou fenêtre, sur papier ou en PDF).
+- **Internet et système** : météo (d'une ville, ou là où l'on se trouve), données d'un service web (JSON), transformées en listes ou en lignes de tableau d'un seul bloc ; notifications, presse-papiers, **position GPS**, **QR codes** à créer, et codes-barres à lire dans une image ou une photo (ou en direct avec le contrôle Lecteur de codes) ; une catégorie **Impression** (texte, contrôle ou fenêtre, sur papier ou en PDF).
 
 Chaque bloc a une infobulle qui explique à quoi il sert. Le bouton **</> Voir le code** montre le JavaScript produit par les blocs.
 

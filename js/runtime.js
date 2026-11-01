@@ -4866,7 +4866,7 @@ function BlocRuntimeFactory() {
           d.vuA = Date.now();
           if (!nouveau) return;
           d.code = r.texte;
-          d.format = NOMS_FORMATS[String(r.format).toUpperCase()] || String(r.format);
+          d.format = nomFormat(r.format);
           if (d.bip !== false) try { bip(1760, 0, 0.12, 'square', sortieAudio()); } catch (e) { /* pas de carte son */ }
           el.classList.add('bs-code-lu');
           setTimeout(() => el.classList.remove('bs-code-lu'), 300);
@@ -4874,6 +4874,27 @@ function BlocRuntimeFactory() {
         } catch (e) { /* image illisible : on essaie la suivante */ } finally { occupe = false; }
       }, 200);
       minuteurs.push(d.guet);
+    }
+
+    const nomFormat = f => NOMS_FORMATS[String(f).toUpperCase()] || String(f);
+
+    // Le code (QR code, code-barres) visible dans une image, une zone de dessin, un graphique ou l'image d'une
+    // caméra : son texte ou son format, '' s'il n'y en a pas. Une grande photo est d'abord réduite (2 000 points au plus).
+    async function codeDans(id, quoi) {
+      ctrl(id);
+      if (donnees[id].type === 'image' && !elements[id].getAttribute('src')) return '';
+      let toile = await toileDe(id);
+      const k = Math.min(1, 2000 / Math.max(toile.width, toile.height));
+      if (k < 1) {
+        const petite = document.createElement('canvas');
+        petite.width = Math.round(toile.width * k);
+        petite.height = Math.round(toile.height * k);
+        petite.getContext('2d').drawImage(toile, 0, 0, petite.width, petite.height);
+        toile = petite;
+      }
+      const r = await (await preparerDecodeur())(toile);
+      if (!r) return '';
+      return quoi === 'format' ? nomFormat(r.format) : r.texte;
     }
 
     function ctrlLecteurCodes(id, action) {
@@ -6024,6 +6045,7 @@ function BlocRuntimeFactory() {
       camera: ctrlCamera,
       lecteurCodes: ctrlLecteurCodes,
       qrCode,
+      codeDans,
       arbre: ctrlArbre,
       enfantsArbre,
       // Barre d'état : écrire dans la case n° (1, 2, 3…) ; les cases manquantes sont ajoutées.

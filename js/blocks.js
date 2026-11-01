@@ -872,6 +872,11 @@
     { nom: 'VAL', libelle: T('🔳 mettre le QR code de') }, T('dans'), { ctrl: ['image', 'zonedessin'] }
   ], COULEUR_CONTROLES, T('Fabrique le QR code de ce texte (une adresse web, un message…) et le montre dans une image ou une zone de dessin. On peut ensuite le scanner avec un téléphone, l\'imprimer ou l\'enregistrer.'));
 
+  Blockly.Blocks['bs_code_dans'] = valeur(() => [
+    { champ: new Blockly.FieldDropdown([[T('🏷️ code lu'), 'texte'], [T('🏷️ format du code lu'), 'format']]), nom: 'QUOI' },
+    T('dans'), { ctrl: ['image', 'zonedessin', 'graphique', 'camera'] }
+  ], 'String', COULEUR_CONTROLES, T('Le QR code ou le code-barres qui se trouve dans l\'image (une photo ouverte avec un contrôle Fichier, la photo d\'une caméra…), ou rien s\'il n\'y en a pas. Pour lire en direct avec la caméra : contrôle Lecteur de codes.'));
+
   Blockly.Blocks['bs_fichier_contenu'] = valeur(() => [T('contenu du fichier de'), FICHIER], null, COULEUR_FICHIERS,
     T('Le texte du dernier fichier ouvert ou déposé (pour le type « Image » : l\'image, à mettre dans un contrôle Image).'));
 
@@ -2434,6 +2439,7 @@
   gen.forBlock['bs_camera_ctrl'] = b => `await app.camera(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
   gen.forBlock['bs_quand_code_lu'] = b =>
     `app.quand(${id(b)}, 'code', async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_code_dans'] = b => [`(await app.codeDans(${id(b)}, ${q(b.getFieldValue('QUOI'))}))`, Order.ATOMIC];
   gen.forBlock['bs_qr_code'] = b => `await app.qrCode(${id(b)}, ${val(b, 'VAL', "''")});\n`;
   gen.forBlock['bs_lecteur_codes_ctrl'] = b => `await app.lecteurCodes(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
   gen.forBlock['bs_camera_photo'] = b => `await app.camera(${id(b)}, 'photo');\n`;
@@ -2842,8 +2848,9 @@
         { kind: 'block', type: 'bs_json_liste', inputs: { CHEMIN: texte('nom') } },
         etiquette(T('Pages web')),
         { kind: 'block', type: 'bs_web_ouvrir', inputs: { VAL: texte(T('www.google.fr')) } },
-        etiquette(T('QR code (à scanner avec un téléphone ; pour les lire : contrôle Lecteur de codes)')),
-        { kind: 'block', type: 'bs_qr_code', inputs: { VAL: texte(T('https://fr.wikipedia.org')) } }
+        etiquette(T('QR codes et codes-barres (pour lire en direct avec la caméra : contrôle Lecteur de codes)')),
+        { kind: 'block', type: 'bs_qr_code', inputs: { VAL: texte(T('https://fr.wikipedia.org')) } },
+        { kind: 'block', type: 'bs_code_dans' }
       ]
     },
     {
@@ -3049,7 +3056,7 @@
           ...mouvement(), ...clones());
         break;
       case 'image':
-        actions.push(b('bs_qr_code', { VAL: texte(T('https://fr.wikipedia.org')) }),
+        actions.push(b('bs_qr_code', { VAL: texte(T('https://fr.wikipedia.org')) }), b('bs_code_dans'),
           etiquette(T('Fond qui défile')), b('bs_image_defiler', { DX: nombre(-2), DY: nombre(0) }), ...mouvement(), ...clones());
         break;
       case 'forme':
@@ -3072,7 +3079,7 @@
           b('bs_dessin_point', { X: nombre(50), Y: nombre(50) }),
           b('bs_dessin_texte', { TXT: texte(T('Bonjour')), X: nombre(10), Y: nombre(10), T: nombre(20) }),
           b('bs_dessin_effacer'),
-          b('bs_qr_code', { VAL: texte(T('https://fr.wikipedia.org')) }),
+          b('bs_qr_code', { VAL: texte(T('https://fr.wikipedia.org')) }), b('bs_code_dans'),
           etiquette(T('Souris')),
           b('bs_souris'), b('bs_souris', null, { QUOI: 'y' }));
         break;
@@ -3124,7 +3131,7 @@
         actions.push(b('bs_barreetat_ecrire', { VAL: texte(T('Prêt')), NUM: nombre(1) }), b('bs_barreetat_case', { NUM: nombre(1) }));
         break;
       case 'camera':
-        actions.push(b('bs_camera_ctrl'), b('bs_camera_ctrl', null, { ACTION: 'eteindre' }), b('bs_camera_photo'), b('bs_camera_photo_dans'));
+        actions.push(b('bs_camera_ctrl'), b('bs_camera_ctrl', null, { ACTION: 'eteindre' }), b('bs_camera_photo'), b('bs_camera_photo_dans'), b('bs_code_dans'));
         break;
       case 'lecteurcodes':
         actions.push(b('bs_lecteur_codes_ctrl'), b('bs_lecteur_codes_ctrl', null, { ACTION: 'eteindre' }));

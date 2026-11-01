@@ -3857,7 +3857,7 @@
 <div id="erreur"></div>
 <script>
 // Programme créé avec BlocStudio
-${projet.controles.some(c => c.type === 'lecteurcodes') || code.includes('app.qrCode(') ? '// ZXing (licence Apache 2.0) : QR codes et codes-barres\n' + BlocStudioZXing.toString() : ''}
+${projet.controles.some(c => c.type === 'lecteurcodes') || /app\.(qrCode|codeDans)\(/.test(code) ? '// ZXing (licence Apache 2.0) : QR codes et codes-barres\n' + BlocStudioZXing.toString() : ''}
 ${BlocLangues.pourExport(BlocRuntimeFactory.toString())}
 ${BlocRuntimeFactory.toString()}
 const BlocRuntime = BlocRuntimeFactory();
