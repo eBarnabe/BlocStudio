@@ -53,6 +53,8 @@
       defauts: { video: '', barreVideo: true, boucle: false, volume: 100 } },
     camera: { prefixe: T('Camera'), texte: '', largeur: 320, hauteur: 240,
       defauts: { miroir: true, allumerAuDemarrage: true, seuilMouvement: 10 } },
+    lecteurcodes: { prefixe: T('LecteurCodes'), texte: '', largeur: 320, hauteur: 240,
+      defauts: { allumerAuDemarrage: true, bip: true } },
     arborescence: { prefixe: T('Arbre'), texte: '', largeur: 200, hauteur: 180,
       defauts: { arbre: T('Animaux\n  Chats\n  Chiens\nPlantes\n  Fleurs\n  Arbres'), deplie: true } },
     // Toujours collée en bas de sa fenêtre, sur toute la largeur (voir amarrerBarresEtat).
@@ -96,7 +98,7 @@
     boutonradio: T('Bouton radio'), cadre: T('Cadre'), panneau: T('Panneau défilant'), zoneliste: T('Zone de liste'),
     selecteurnombre: T('Sélecteur de nombre'), tableau: T('Tableau'), date: T('Sélecteur de date'),
     selecteurcouleur: T('Sélecteur de couleur'), navigateur: T('Navigateur web'), interrupteur: T('Interrupteur'), lien: T('Lien'),
-    video: T('Vidéo'), camera: T('Caméra'), arborescence: T('Arborescence'), barreetat: T('Barre d\'état'), barreoutils: T('Barre d\'outils'),
+    video: T('Vidéo'), camera: T('Caméra'), lecteurcodes: T('Lecteur de codes'), arborescence: T('Arborescence'), barreetat: T('Barre d\'état'), barreoutils: T('Barre d\'outils'),
     menucontextuel: T('Menu contextuel'), heure: T('Sélecteur d\'heure'), calendrier: T('Calendrier'), horloge: T('Horloge'), forme: T('Forme'),
     graphique: T('Graphique'), onglets: T('Onglets'), son: T('Son'), minuteur: T('Minuteur'), basedonnees: T('Base de données'),
     fichier: T('Fichier'), sprite: T('Sprite')
@@ -1147,6 +1149,7 @@
       : c.type === 'minuteur' ? 'bs_quand_minuteur'
       : c.type === 'fichier' ? 'bs_quand_fichier_depose'
       : c.type === 'camera' ? 'bs_quand_camera_mouvement'
+      : c.type === 'lecteurcodes' ? 'bs_quand_code_lu'
       : c.type === 'menucontextuel' ? 'bs_quand_menu_contextuel'
       : c.type === 'barreoutils' ? 'bs_quand_outil' : 'bs_quand_clic';
     afficherVue('vue-code');
@@ -1318,6 +1321,13 @@
         T('La webcam s\'affiche quand le programme tourne ; la première fois, Windows demande la permission. ' +
         'Ses blocs (bouton 🧰 ci-dessus) : « prendre une photo avec… », « mettre la photo de… dans… » (une image ou une zone de dessin), ' +
         '« enregistrer … dans un fichier » avec un contrôle Fichier. Double-cliquez sur la caméra pour réagir quand elle voit bouger.')));
+    }
+    if (c.type === 'lecteurcodes') {
+      champCase(liste, T('S\'allume tout seul au démarrage'), c.allumerAuDemarrage !== false, v => { c.allumerAuDemarrage = v; maj(); });
+      champCase(liste, T('Bip quand un code est lu'), c.bip !== false, v => { c.bip = v; maj(); });
+      liste.appendChild(el('p', 'aide',
+        T('Montrez un QR code ou un code-barres (EAN d\'un produit, Code 128…) à la caméra, celle de derrière sur un téléphone. ' +
+        'Double-cliquez sur le lecteur pour écrire ce qui se passe quand il lit un code ; le code est dans sa propriété « dernier code lu ».')));
     }
     if (c.type === 'graphique') proprietesGraphique(liste, c, maj);
     if (c.type === 'onglets') proprietesOnglets(liste, c, maj);
@@ -3162,12 +3172,12 @@
     bouton: '🔘', etiquette: '🔤', zonetexte: '✏️', casecocher: '☑️', boutonradio: '◉',
     selecteurnombre: '🔢', image: '🖼️', listederoulante: '📋', zoneliste: '📃', cadre: '🔲', panneau: '📜',
     curseur: '🎚️', barreprogression: '📊', zonedessin: '🎨', tableau: '🗂️', date: '📅',
-    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', heure: '🕒', calendrier: '🗓️', horloge: '🕰️', forme: '🔷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
+    selecteurcouleur: '🌈', navigateur: '🌐', interrupteur: '🔛', lien: '🔗', video: '🎬', camera: '📷', lecteurcodes: '🏷️', arborescence: '🌳', barreetat: '▂', barreoutils: '🛠️', menucontextuel: '🖱️', heure: '🕒', calendrier: '🗓️', horloge: '🕰️', forme: '🔷', graphique: '📈', onglets: '📑', son: '🔊', minuteur: '⏱️', basedonnees: '🗃️', fichier: '📁', sprite: '🎭'
   };
 
   const EVENEMENTS = { bs_quand_clic: T('clic'), bs_quand_change: T('change'), bs_quand_glisse: T('glisser'),
     bs_quand_son_fin: T('se termine'), bs_quand_minuteur: T('sonne'), bs_quand_fichier_depose: T('fichier déposé'),
-    bs_quand_camera_mouvement: T('voit bouger'), bs_quand_souris_ctrl: T('souris'), bs_quand_clone: T('cloné') };
+    bs_quand_camera_mouvement: T('voit bouger'), bs_quand_code_lu: T('lit un code'), bs_quand_souris_ctrl: T('souris'), bs_quand_clone: T('cloné') };
 
   // Libellé court d'un événement de contrôle, pour le Sommaire.
   const libelleEvenement = b => b.type === 'bs_quand_souris_ctrl'
@@ -3192,6 +3202,7 @@
       case 'bs_quand_minuteur': return T('quand {nom} sonne', { nom: ctrl() });
       case 'bs_quand_fichier_depose': return T('quand on dépose un fichier ({nom})', { nom: ctrl() });
       case 'bs_quand_camera_mouvement': return T('quand {nom} voit bouger', { nom: ctrl() });
+      case 'bs_quand_code_lu': return T('quand {nom} lit un code', { nom: ctrl() });
       case 'bs_quand_clone': return T('quand un clone de {nom} est créé', { nom: ctrl() });
       case 'bs_quand_fenetre': return T('quand la fenêtre {nom} {quoi}', { nom: nomFenetre(r.getFieldValue('FENETRE')), quoi: r.getField('QUOI').getText() });
       case 'bs_quand_fenetre_taille': return T('quand la fenêtre {nom} change de taille', { nom: nomFenetre(r.getFieldValue('FENETRE')) });
@@ -3846,6 +3857,7 @@
 <div id="erreur"></div>
 <script>
 // Programme créé avec BlocStudio
+${projet.controles.some(c => c.type === 'lecteurcodes') ? '// ZXing (licence Apache 2.0) : lecture des QR codes et codes-barres\n' + BlocStudioZXing.toString() : ''}
 ${BlocLangues.pourExport(BlocRuntimeFactory.toString())}
 ${BlocRuntimeFactory.toString()}
 const BlocRuntime = BlocRuntimeFactory();
@@ -4042,7 +4054,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
       'date', 'heure', 'calendrier', 'selecteurnombre', 'zoneliste']],
     [T('📊 Données'), ['arborescence', 'barreprogression', 'basedonnees', 'graphique', 'horloge', 'tableau']],
     [T('🖼️ Images et dessin'), ['forme', 'image', 'sprite', 'zonedessin']],
-    [T('🎬 Sons, vidéos et web'), ['camera', 'navigateur', 'son', 'video']],
+    [T('🎬 Sons, vidéos et web'), ['camera', 'lecteurcodes', 'navigateur', 'son', 'video']],
     [T('🧱 Mise en page'), ['barreetat', 'barreoutils', 'cadre', 'menucontextuel', 'onglets', 'panneau']],
     [T('⚙️ Outils'), ['fichier', 'minuteur']]
   ];
@@ -4057,7 +4069,7 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     graphique: 'Chart courbe histogramme', date: 'DateTimePicker calendrier', heure: 'DateTimePicker horloge',
     calendrier: 'MonthCalendar agenda mois date', horloge: 'heure montre pendule aiguilles réveil',
     selecteurcouleur: 'ColorDialog', navigateur: 'WebBrowser internet page', interrupteur: 'switch',
-    lien: 'LinkLabel internet', video: 'MediaPlayer film', camera: 'webcam photo', barreetat: 'StatusStrip',
+    lien: 'LinkLabel internet', video: 'MediaPlayer film', camera: 'webcam photo', lecteurcodes: 'QR code barre scanner EAN produit caisse', barreetat: 'StatusStrip',
     barreoutils: 'ToolStrip', son: 'musique mp3 bruit', minuteur: 'Timer chronomètre', menucontextuel: 'ContextMenuStrip clic droit',
     basedonnees: 'fiches enregistrer', fichier: 'OpenFileDialog SaveFileDialog ouvrir enregistrer'
   };

@@ -28,6 +28,7 @@
     motDePasse: T('caché (mot de passe)'), chemin: T('chemin de l\'élément choisi'),
     allumee: T('allumée'), photo: T('dernière photo (image)'), mouvement: T('mouvement vu (%)'),
     seuilMouvement: T('seuil de mouvement (%)'),
+    code: T('dernier code lu'), format: T('format du code (QR code, EAN-13…)'), bip: T('bip quand un code est lu'),
     contenu: T('contenu du fichier'), nomFichier: T('nom du fichier'), annule: T('annulé par l\'utilisateur'),
     nomPropose: T('nom proposé pour enregistrer'), typeFichier: T('type de fichier (texte, csv, excel, image, son ou tous)'),
     nombreFiches: T('nombre de fiches'), champs: T('champs (liste)'), memoriser: T('garder les fiches d\'une fois à l\'autre'),
@@ -86,10 +87,11 @@
     basedonnees: ['nombreFiches', 'champs', 'memoriser'],
     fichier: ['contenu', 'nomFichier', 'annule', 'nomPropose', 'typeFichier'],
     camera: ['allumee', 'mouvement', 'photo', 'miroir', 'seuilMouvement', ...POSITION],
+    lecteurcodes: ['code', 'format', 'allumee', 'bip', ...POSITION],
     sprite: ['costume', 'nomCostume', 'sprite', 'vitesse', 'enAnimation', 'miroir', 'rotation', 'taille', 'transparence', 'collision', ...POSITION, 'direction', 'vitesseY']
   };
   // Propriétés que l'on peut lire mais pas modifier (absentes du bloc « mettre »).
-  const LECTURE_SEULE = { horloge: ['texte'], arborescence: ['texte'], camera: ['photo', 'mouvement'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
+  const LECTURE_SEULE = { horloge: ['texte'], arborescence: ['texte'], camera: ['photo', 'mouvement'], lecteurcodes: ['code', 'format'], fichier: ['contenu', 'nomFichier', 'annule'], basedonnees: ['nombreFiches', 'champs'], onglets: ['texte'], tableau: ['texte', 'nombreLignes'], son: ['enLecture', 'duree'], video: ['enLecture', 'duree'], sprite: ['nomCostume', 'enAnimation'] };
   const LIBELLES_SPECIAUX = {
     listederoulante: { texte: T('élément choisi') },
     zoneliste: { texte: T('élément choisi') },
@@ -108,6 +110,7 @@
     selecteurcouleur: { texte: T('couleur choisie') },
     minuteur: { active: T('en marche') },
     camera: { miroir: T('en miroir (comme dans une glace)') },
+    lecteurcodes: { allumee: T('allumé') },
     arborescence: { texte: T('élément choisi'), elements: T('tous les éléments (liste de chemins)') },
     barreetat: { texte: T('texte (cases séparées par |)') }
   };
@@ -245,6 +248,13 @@
     init() {
       evenement(this, T('quand'), ['camera'], T('voit bouger'));
       this.setTooltip(T('Exécuté quand quelque chose bouge devant la caméra (au plus deux fois par seconde). Le « seuil de mouvement » (propriétés) règle la sensibilité : plus il est petit, plus la caméra réagit.'));
+    }
+  };
+
+  Blockly.Blocks['bs_quand_code_lu'] = {
+    init() {
+      evenement(this, T('quand'), ['lecteurcodes'], T('lit un code'));
+      this.setTooltip(T('Exécuté quand le lecteur voit un QR code ou un code-barres. Le code lu est dans sa propriété « dernier code lu ». Un même code n\'est signalé qu\'une fois tant qu\'il reste devant la caméra.'));
     }
   };
 
@@ -845,6 +855,11 @@
   Blockly.Blocks['bs_camera_photo_dans'] = instruction(() => [
     T('mettre la photo de'), CAMERA, T('dans'), { ctrl: ['image', 'zonedessin'], nom: 'CIBLE' }
   ], COULEUR_CONTROLES, T('Affiche la dernière photo dans un contrôle Image, ou la dessine dans une zone de dessin (on peut ensuite dessiner par-dessus).'));
+
+  Blockly.Blocks['bs_lecteur_codes_ctrl'] = instruction(() => [
+    { champ: new Blockly.FieldDropdown([[T('allumer'), 'allumer'], [T('éteindre'), 'eteindre']]), nom: 'ACTION' },
+    T('le lecteur de codes'), { ctrl: ['lecteurcodes'] }
+  ], COULEUR_CONTROLES, T('Allume ou éteint la caméra du lecteur (celle de derrière sur un téléphone). Par défaut, le lecteur s\'allume tout seul au démarrage (voir ses propriétés).'));
 
   Blockly.Blocks['bs_fichier_contenu'] = valeur(() => [T('contenu du fichier de'), FICHIER], null, COULEUR_FICHIERS,
     T('Le texte du dernier fichier ouvert ou déposé (pour le type « Image » : l\'image, à mettre dans un contrôle Image).'));
@@ -2399,6 +2414,9 @@
   gen.forBlock['bs_quand_camera_mouvement'] = b =>
     `app.quand(${id(b)}, 'mouvement', async function (moi) {\n${corps(b)}});\n`;
   gen.forBlock['bs_camera_ctrl'] = b => `await app.camera(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
+  gen.forBlock['bs_quand_code_lu'] = b =>
+    `app.quand(${id(b)}, 'code', async function (moi) {\n${corps(b)}});\n`;
+  gen.forBlock['bs_lecteur_codes_ctrl'] = b => `await app.lecteurCodes(${id(b)}, ${q(b.getFieldValue('ACTION'))});\n`;
   gen.forBlock['bs_camera_photo'] = b => `await app.camera(${id(b)}, 'photo');\n`;
   gen.forBlock['bs_camera_photo_dans'] = b => `await app.camera(${id(b)}, 'photoDans', ${codeCtrl(b.getFieldValue('CIBLE'))});\n`;
   gen.forBlock['bs_quand_fichier_depose'] = b =>
@@ -2942,6 +2960,7 @@
     if (TYPES_CHANGE.includes(t)) evenements.push(b('bs_quand_change'));
     if (t === 'zonedessin') evenements.push(b('bs_quand_glisse'));
     if (t === 'camera') evenements.push(b('bs_quand_camera_mouvement'));
+    if (t === 'lecteurcodes') evenements.push(b('bs_quand_code_lu'));
     if (t === 'son' || t === 'video') evenements.push(b('bs_quand_son_fin'));
     if (t === 'minuteur') evenements.push(b('bs_quand_minuteur'));
     if (t === 'fichier') evenements.push(b('bs_quand_fichier_depose'));
@@ -3072,6 +3091,9 @@
         break;
       case 'camera':
         actions.push(b('bs_camera_ctrl'), b('bs_camera_ctrl', null, { ACTION: 'eteindre' }), b('bs_camera_photo'), b('bs_camera_photo_dans'));
+        break;
+      case 'lecteurcodes':
+        actions.push(b('bs_lecteur_codes_ctrl'), b('bs_lecteur_codes_ctrl', null, { ACTION: 'eteindre' }));
         break;
       case 'son': case 'video':
         actions.push(b('bs_sonctrl'), b('bs_sonctrl', null, { ACTION: 'arreter' }));

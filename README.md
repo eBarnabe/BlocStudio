@@ -37,7 +37,7 @@ Le projet en cours est gardé automatiquement. **💾 Enregistrer** le met dans 
 | 🔘 Boutons et choix | Bouton, Bouton radio, Calendrier, Case à cocher, Curseur, Interrupteur, Liste déroulante, Sélecteurs de couleur, de date, d'heure et de nombre, Zone de liste |
 | 📊 Données | Arborescence, Barre de progression, Base de données, Graphique, Horloge, Tableau |
 | 🖼️ Images et dessin | Forme, Image, Sprite (avec son éditeur de dessin en pixels), Zone de dessin |
-| 🎬 Sons, vidéos et web | Caméra, Navigateur web, Son, Vidéo |
+| 🎬 Sons, vidéos et web | Caméra, Lecteur de codes (QR codes et codes-barres), Navigateur web, Son, Vidéo |
 | 🧱 Mise en page | Barre d'état, Barre d'outils, Cadre, Menu contextuel, Onglets, Panneau défilant |
 | ⚙️ Outils | Ouvrir / Enregistrer un fichier, Minuteur |
 

@@ -2321,5 +2321,22 @@ BlocLangues.ajouter('en', {
   "Fonctionne sur Android 7 et plus récent. L'application n'est pas destinée au Play Store.": "Works on Android 7 and later. The app is not meant for the Play Store.",
   "Fichier js/lanceur-android-data.js introuvable.": "File js/lanceur-android-data.js not found.",
   "L'export en application Android a échoué : {erreur}": "Exporting as an Android app failed: {erreur}",
-  "Ce programme utilise les touches du clavier, mais un téléphone n'en a pas. Ajouter la manette tactile à l'écran (la croix fait les flèches, A la touche Espace) ?": "This program uses keyboard keys, but a phone has none. Add the on-screen touch gamepad (the D-pad acts as the arrows, A as the Space key)?"
+  "Ce programme utilise les touches du clavier, mais un téléphone n'en a pas. Ajouter la manette tactile à l'écran (la croix fait les flèches, A la touche Espace) ?": "This program uses keyboard keys, but a phone has none. Add the on-screen touch gamepad (the D-pad acts as the arrows, A as the Space key)?",
+  "LecteurCodes": "CodeReader",
+  "Lecteur de codes": "Code reader",
+  "Lit les QR codes et les codes-barres montrés à la caméra": "Reads QR codes and barcodes shown to the camera",
+  "Lecteur de codes : image de la caméra quand le programme tourne": "Code reader: camera picture while the program runs",
+  "Le lecteur de codes n'est pas disponible ici.": "The code reader is not available here.",
+  "un lecteur de codes": "a code reader",
+  "dernier code lu": "last code read",
+  "format du code (QR code, EAN-13…)": "code format (QR code, EAN-13…)",
+  "bip quand un code est lu": "beep when a code is read",
+  "lit un code": "reads a code",
+  "quand {nom} lit un code": "when {nom} reads a code",
+  "Exécuté quand le lecteur voit un QR code ou un code-barres. Le code lu est dans sa propriété « dernier code lu ». Un même code n'est signalé qu'une fois tant qu'il reste devant la caméra.": "Runs when the reader sees a QR code or a barcode. The code is in its “last code read” property. The same code is reported only once while it stays in front of the camera.",
+  "le lecteur de codes": "the code reader",
+  "Allume ou éteint la caméra du lecteur (celle de derrière sur un téléphone). Par défaut, le lecteur s'allume tout seul au démarrage (voir ses propriétés).": "Turns the reader's camera on or off (the back one on a phone). By default, the reader turns on by itself at startup (see its properties).",
+  "S'allume tout seul au démarrage": "Turns on by itself at startup",
+  "Bip quand un code est lu": "Beep when a code is read",
+  "Montrez un QR code ou un code-barres (EAN d'un produit, Code 128…) à la caméra, celle de derrière sur un téléphone. Double-cliquez sur le lecteur pour écrire ce qui se passe quand il lit un code ; le code est dans sa propriété « dernier code lu ».": "Show a QR code or a barcode (a product's EAN, Code 128…) to the camera, the back one on a phone. Double-click the reader to write what happens when it reads a code; the code is in its “last code read” property."
 });

@@ -25,7 +25,8 @@ function BlocRuntimeFactory() {
     .bs-listederoulante { border: 1px solid #7a7a7a; padding: 2px 4px; background: #fff; }
     .bs-navigateur { border: 1px solid #94a3b8; background: #fff; }
     video.bs-video { background: #000; object-fit: contain; }
-    video.bs-camera { background: #1e293b; object-fit: cover; }
+    video.bs-camera, video.bs-lecteurcodes { background: #1e293b; object-fit: cover; }
+    video.bs-lecteurcodes.bs-code-lu { outline: 5px solid #22c55e; outline-offset: -5px; }
     .bs-barreetat { display: flex; background: #f0f0f0; border-top: 1px solid #c8c8c8; color: #333; }
     .bs-barreetat > span { flex: 1; min-width: 0; display: flex; align-items: center; padding: 0 8px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-left: 1px solid #d4d4d4; }
@@ -1379,6 +1380,15 @@ function BlocRuntimeFactory() {
         el.muted = true;
         if (c.miroir !== false) el.classList.add('bs-miroir');
         break;
+      case 'lecteurcodes':
+        if (prefixe === 'design') {
+          el = apercu('🏷️', T('Lecteur de codes : image de la caméra quand le programme tourne'));
+          break;
+        }
+        el = document.createElement('video');
+        el.playsInline = true;
+        el.muted = true;
+        break;
       case 'barreoutils':
         el = document.createElement('div');
         rendreBarreOutils(el, c);
@@ -1969,7 +1979,7 @@ function BlocRuntimeFactory() {
       if (c.type === 'tableau') preparerTableau(el, d);
       if (c.type === 'calendrier') preparerCalendrier(el, d);
       if (c.type === 'zonetexte' && (c.suggestions || []).length) majSuggestions(c.id);
-      if (c.type === 'camera') d.surEvenement = [];
+      if (c.type === 'camera' || c.type === 'lecteurcodes') d.surEvenement = [];
       if (c.type === 'barreetat') d.cases = String(c.texte ?? '').split('|');
       if (c.type === 'barreoutils') {
         d.surOutil = {};
@@ -4594,16 +4604,20 @@ function BlocRuntimeFactory() {
           if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             throw new Error(T('La caméra n\'est pas disponible ici (ouvrez le programme dans Edge, ou exportez-le en application Windows).'));
           }
+          // Un lecteur de codes prend la caméra de derrière s'il y en a une (téléphone, tablette).
+          const video = { width: { ideal: 1280 }, height: { ideal: 720 } };
+          if (d.type === 'lecteurcodes') video.facingMode = { ideal: 'environment' };
           let flux;
           try {
-            flux = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+            flux = await navigator.mediaDevices.getUserMedia({ video, audio: false });
           } catch (e) { throw erreurCamera(e, d.nom); }
           if (arrete) { flux.getTracks().forEach(p => p.stop()); return; }
           d.flux = flux;
           el.srcObject = flux;
           await el.play().catch(() => {});
           if (!el.videoWidth) await new Promise(ok => el.addEventListener('loadeddata', ok, { once: true }));
-          surveillerMouvement(d, el);
+          if (d.type === 'lecteurcodes') await surveillerCodes(d, el);
+          else surveillerMouvement(d, el);
         })().finally(() => { d.allumage = null; });
       }
       return d.allumage;
@@ -4695,6 +4709,87 @@ function BlocRuntimeFactory() {
       }
     }
 
+    // ---- Lecteur de codes ----
+    // Le lecteur du moteur web s'il en a un (Android, Mac), sinon la bibliothèque ZXing (lib/zxing, recopiée
+    // dans les programmes exportés qui ont un lecteur). Chacun renvoie { texte, format } ou null.
+    const NOMS_FORMATS = { QR_CODE: 'QR code', EAN_13: 'EAN-13', EAN_8: 'EAN-8', UPC_A: 'UPC-A', UPC_E: 'UPC-E',
+      CODE_128: 'Code 128', CODE_39: 'Code 39', CODE_93: 'Code 93', ITF: 'ITF', CODABAR: 'Codabar', DATA_MATRIX: 'Data Matrix',
+      PDF_417: 'PDF417', PDF417: 'PDF417', AZTEC: 'Aztec', RSS_14: 'GS1 DataBar', RSS_EXPANDED: 'GS1 DataBar', MAXICODE: 'MaxiCode' };
+    let decodeurZXing = null;
+    async function preparerDecodeur() {
+      if ('BarcodeDetector' in window) {
+        try {
+          const formats = await BarcodeDetector.getSupportedFormats();
+          if (formats.length) {
+            const detecteur = new BarcodeDetector({ formats });
+            return async toile => {
+              const [r] = await detecteur.detect(toile);
+              return r ? { texte: r.rawValue, format: r.format } : null;
+            };
+          }
+        } catch (e) { /* ZXing prend le relais */ }
+      }
+      if (!decodeurZXing) {
+        if (typeof BlocStudioZXing !== 'function') throw new Error(T('Le lecteur de codes n\'est pas disponible ici.'));
+        const Z = BlocStudioZXing();
+        const lecteur = new Z.MultiFormatReader();
+        lecteur.setHints(new Map([[Z.DecodeHintType.TRY_HARDER, true]]));
+        decodeurZXing = toile => {
+          try {
+            const r = lecteur.decodeWithState(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(toile))));
+            return { texte: r.getText(), format: Z.BarcodeFormat[r.getBarcodeFormat()] };
+          } catch (e) { return null; } // pas de code dans l'image
+        };
+      }
+      return decodeurZXing;
+    }
+
+    // 5 fois par seconde, l'image de la caméra (800 points de large au plus) passe au décodeur.
+    // Un même code n'est signalé qu'une fois tant qu'il reste devant la caméra (puis après 2 secondes sans le voir).
+    async function surveillerCodes(d, el) {
+      const decodeur = await preparerDecodeur();
+      const toile = document.createElement('canvas');
+      const g = toile.getContext('2d', { willReadFrequently: true });
+      let occupe = false;
+      d.guet = setInterval(async () => {
+        if (occupe || !d.flux || !el.videoWidth) return;
+        occupe = true;
+        try {
+          const k = Math.min(1, 800 / el.videoWidth);
+          toile.width = Math.round(el.videoWidth * k);
+          toile.height = Math.round(el.videoHeight * k);
+          g.drawImage(el, 0, 0, toile.width, toile.height);
+          const r = await decodeur(toile);
+          if (!r || !d.flux) return;
+          const nouveau = r.texte !== d.code || Date.now() - d.vuA > 2000;
+          d.vuA = Date.now();
+          if (!nouveau) return;
+          d.code = r.texte;
+          d.format = NOMS_FORMATS[String(r.format).toUpperCase()] || String(r.format);
+          if (d.bip !== false) try { bip(1760, 0, 0.12, 'square', sortieAudio()); } catch (e) { /* pas de carte son */ }
+          el.classList.add('bs-code-lu');
+          setTimeout(() => el.classList.remove('bs-code-lu'), 300);
+          d.surEvenement.forEach(h => h());
+        } catch (e) { /* image illisible : on essaie la suivante */ } finally { occupe = false; }
+      }, 200);
+      minuteurs.push(d.guet);
+    }
+
+    function ctrlLecteurCodes(id, action) {
+      ctrlDeType(id, 'lecteurcodes', T('un lecteur de codes'));
+      if (action === 'allumer') return allumerCamera(id);
+      eteindreCamera(donnees[id], elements[id]);
+    }
+
+    function lireLecteurCodes(d, prop) {
+      switch (prop) {
+        case 'code': return d.code || '';
+        case 'format': return d.format || '';
+        case 'allumee': return !!d.flux;
+        case 'bip': return d.bip !== false;
+      }
+    }
+
     // Glisse en douceur jusqu'à (x, y) ; le programme attend la fin du trajet.
     function glisser(id, x, y, secondes) {
       const d = donnees[id];
@@ -4719,7 +4814,7 @@ function BlocRuntimeFactory() {
         const h = proteger(fn);
         // « quand Son1 se termine », « quand Minuteur1 sonne »
         if (evenement === 'fin' && donnees[id].type === 'video') return elements[id].addEventListener('ended', () => h(id));
-        if (evenement === 'fin' || evenement === 'tic' || evenement === 'depose' || evenement === 'mouvement') return donnees[id].surEvenement.push(() => h(id));
+        if (evenement === 'fin' || evenement === 'tic' || evenement === 'depose' || evenement === 'mouvement' || evenement === 'code') return donnees[id].surEvenement.push(() => h(id));
         (evenementsCtrl[id] = evenementsCtrl[id] || []).push({ evenement, h });
         brancher(id, evenement, h);
       },
@@ -4874,6 +4969,7 @@ function BlocRuntimeFactory() {
         if (d.type === 'minuteur') return lireMinuteur(d, prop);
         if (d.type === 'fichier') return lireFichierCtrl(d, prop);
         if (d.type === 'camera' && ['allumee', 'photo', 'mouvement', 'miroir', 'seuilMouvement'].includes(prop)) return lireCamera(d, prop);
+        if (d.type === 'lecteurcodes' && ['code', 'format', 'allumee', 'bip'].includes(prop)) return lireLecteurCodes(d, prop);
         if (d.type === 'arborescence' && ['texte', 'chemin', 'elements'].includes(prop)) return lireArbreCtrl(d, prop);
         if (d.type === 'barreetat' && prop === 'texte') return d.cases.join('|');
         if (prop === 'motDePasse') return !!d.motDePasse;
@@ -5065,6 +5161,10 @@ function BlocRuntimeFactory() {
           if (prop === 'allumee') { (valeur ? allumerCamera(id) : Promise.resolve(eteindreCamera(d, el))).catch(signaler); return; }
           if (prop === 'miroir') { d.miroir = !!valeur; el.classList.toggle('bs-miroir', d.miroir); return; }
           if (prop === 'seuilMouvement') { d.seuilMouvement = Math.min(100, Math.max(1, Number(valeur) || 10)); return; }
+        }
+        if (d.type === 'lecteurcodes') {
+          if (prop === 'allumee') { (valeur ? allumerCamera(id) : Promise.resolve(eteindreCamera(d, el))).catch(signaler); return; }
+          if (prop === 'bip') { d.bip = !!valeur; return; }
         }
         if (d.type === 'fichier') {
           if (prop === 'nomPropose') d.nomPropose = enTexte(valeur);
@@ -5817,6 +5917,7 @@ function BlocRuntimeFactory() {
       minuteur: ctrlMinuteur,
       fichier: ctrlFichier,
       camera: ctrlCamera,
+      lecteurCodes: ctrlLecteurCodes,
       arbre: ctrlArbre,
       enfantsArbre,
       // Barre d'état : écrire dans la case n° (1, 2, 3…) ; les cases manquantes sont ajoutées.
@@ -5927,7 +6028,7 @@ function BlocRuntimeFactory() {
         if (d.type === 'son') preparerDuree(d);
         if (d.type === 'son' && d.autoDemarrage) ctrlSon(id, 'jouer');
         if (d.type === 'minuteur' && d.active !== false) demarrerMinuteur(d);
-        if (d.type === 'camera' && d.allumerAuDemarrage !== false) allumerCamera(id).catch(signaler);
+        if ((d.type === 'camera' || d.type === 'lecteurcodes') && d.allumerAuDemarrage !== false) allumerCamera(id).catch(signaler);
         if (d.type === 'sprite' && d.anime) animerSprite(d, 'boucle');
       }
       // Les horloges sont redessinées à chaque nouvelle seconde.
@@ -5988,7 +6089,7 @@ function BlocRuntimeFactory() {
         animations.forEach(a => clearInterval(a.horloge));
         voiles.forEach(v => v.remove());
         fermerMenuContextuel();
-        Object.values(donnees).forEach(d => { if (d.type === 'camera') eteindreCamera(d); });
+        Object.values(donnees).forEach(d => { if (d.type === 'camera' || d.type === 'lecteurcodes') eteindreCamera(d); });
         Object.values(fenetres).forEach(f => { f.el.remove(); if (f.voile) f.voile.remove(); });
         hote.innerHTML = '';
       }

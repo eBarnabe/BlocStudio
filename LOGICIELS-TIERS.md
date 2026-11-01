@@ -24,6 +24,15 @@ Il permet à `BlocStudio.exe` et aux applications exportées en .exe d'afficher 
 
 Le moteur WebView2 lui-même (« Microsoft Edge WebView2 Runtime ») n'est pas livré : il fait partie de Windows 10 et 11.
 
+### ZXing pour JavaScript 0.21.3
+
+La bibliothèque qui lit les QR codes et les codes-barres pour le contrôle **Lecteur de codes** (quand le moteur web n'a pas son propre lecteur, comme sous Windows).
+
+- Auteurs : les contributeurs de ZXing et de zxing-js
+- Licence : Apache 2.0 (texte complet dans [`lib/zxing/LICENSE`](lib/zxing/LICENSE))
+- Fichiers : `lib/zxing/zxing.js` (fichier `umd/index.min.js` du paquet npm `@zxing/library`, sans modification, enveloppé dans une fonction). Elle est recopiée dans les programmes exportés qui ont un lecteur de codes.
+- Site : https://github.com/zxing-js/library
+
 ## Services utilisés par les programmes
 
 ### Open-Meteo

@@ -400,6 +400,39 @@
     vrai('manette tactile : retirée à l\'arrêt', !document.querySelector('body > .bs-tactile'), 'encore là');
   });
 
+  await essayer('moteur : lecteur de codes', async () => {
+    // La caméra est remplacée par une toile où est dessiné un QR code (fabriqué par ZXing).
+    const Z = BlocStudioZXing();
+    const m = new Z.QRCodeWriter().encode('BlocStudio 🏷️ 2026', Z.BarcodeFormat.QR_CODE, 0, 0, new Map());
+    const toile = document.createElement('canvas');
+    toile.width = toile.height = (m.getWidth() + 8) * 6;
+    const g = toile.getContext('2d');
+    const dessiner = () => {
+      g.fillStyle = '#fff';
+      g.fillRect(0, 0, toile.width, toile.height);
+      g.fillStyle = '#000';
+      for (let y = 0; y < m.getHeight(); y++) for (let x = 0; x < m.getWidth(); x++) if (m.get(x, y)) g.fillRect((x + 4) * 6, (y + 4) * 6, 6, 6);
+    };
+    dessiner();
+    const image = setInterval(dessiner, 100); // la toile ne filme que ce qui change
+    const flux = toile.captureStream(10);
+    const ancien = navigator.mediaDevices.getUserMedia;
+    navigator.mediaDevices.getUserMedia = async () => flux;
+    const t = lancer([{ id: 'l', type: 'lecteurcodes', x: 0, y: 0, largeur: 320, hauteur: 240, bip: false }]);
+    const { app } = t;
+    const lus = [];
+    app.quand('l', 'code', () => lus.push(app.lire('l', 'code')));
+    for (let i = 0; i < 40 && !lus.length; i++) await dort(100);
+    egal('lecteur de codes : QR code lu', [lus[0], app.lire('l', 'format'), app.lire('l', 'allumee')], ['BlocStudio 🏷️ 2026', 'QR code', true]);
+    await dort(800);
+    egal('lecteur de codes : un même code n\'est signalé qu\'une fois', lus.length, 1);
+    await app.lecteurCodes('l', 'eteindre');
+    egal('lecteur de codes : éteint', app.lire('l', 'allumee'), false);
+    t.fin();
+    clearInterval(image);
+    navigator.mediaDevices.getUserMedia = ancien;
+  });
+
   // ---------------------------------------------------------------- Boîte à outils et exemples
   await verifierExemples();
   ecrire(`RÉSULTAT : ${reussis} réussi(s), ${echecs} échec(s)`);

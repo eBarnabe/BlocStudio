@@ -37,7 +37,7 @@ The current project is kept automatically. **💾 Save** puts it in a `.bstudio`
 | 🔘 Buttons and choices | Button, Radio button, Calendar, Check box, Slider, Switch, Drop-down list, Color, date, time and number pickers, List box |
 | 📊 Data | Tree view, Progress bar, Database, Chart, Clock, Table |
 | 🖼️ Images and drawing | Shape, Image, Sprite (with its pixel drawing editor), Drawing area |
-| 🎬 Sounds, videos and web | Camera, Web browser, Sound, Video |
+| 🎬 Sounds, videos and web | Camera, Code reader (QR codes and barcodes), Web browser, Sound, Video |
 | 🧱 Layout | Status bar, Toolbar, Frame, Context menu, Tabs, Scrolling panel |
 | ⚙️ Tools | Open / Save a file, Timer |
 
