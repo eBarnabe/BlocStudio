@@ -8,6 +8,9 @@
 # Projets d'essai personnels : tests\verifier.ps1 les teste s'ils sont là, mais ils restent hors du dépôt
 tests/*.bstudio
 
+# Construction du lanceur Android (lanceur\android\construire.ps1)
+lanceur/android/obj/
+
 # Windows
 Thumbs.db
 desktop.ini

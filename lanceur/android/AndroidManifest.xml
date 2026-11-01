@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lanceur des applications Android exportées par BlocStudio (voir LISEZMOI.md).
+     À l'export, BlocStudio remplace le nom du paquet et le nom de l'application : le nom de
+     l'activité est donc écrit en entier (un nom court « .Principale » suivrait le nouveau paquet). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="fr.blocstudio.lanceur">
+
+  <uses-permission android:name="android.permission.INTERNET" />
+
+  <application
+      android:label="BlocStudio Lanceur"
+      android:icon="@mipmap/ic_launcher"
+      android:allowBackup="false"
+      android:usesCleartextTraffic="true"
+      android:hardwareAccelerated="true"
+      android:theme="@android:style/Theme.Material.Light.NoActionBar">
+    <activity
+        android:name="fr.blocstudio.lanceur.Principale"
+        android:exported="true"
+        android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboard|keyboardHidden|navigation|uiMode">
+      <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+      </intent-filter>
+    </activity>
+  </application>
+</manifest>

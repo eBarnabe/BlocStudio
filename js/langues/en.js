@@ -2306,5 +2306,19 @@ BlocLangues.ajouter('en', {
   "▭ Couché 640×360": "▭ Landscape 640×360",
   "Sur le téléphone, la fenêtre est agrandie ou réduite pour remplir l'écran, sans changer ses proportions. Si elle est redimensionnable, elle prend toute la taille de l'écran et ses contrôles suivent leur ancrage.": "On the phone, the window is enlarged or reduced to fill the screen, keeping its proportions. If it is resizable, it takes the whole screen and its controls follow their anchoring.",
   "🎮 Manette tactile à l'écran (croix, boutons A et B)": "🎮 On-screen touch gamepad (D-pad, A and B buttons)",
-  "Elle s'affiche sur les écrans tactiles (et toujours pendant l'essai dans BlocStudio). Elle fait comme une manette branchée : la croix fait aussi les flèches du clavier et A la touche Espace.": "It appears on touch screens (and always while testing in BlocStudio). It works like a connected gamepad: the D-pad also acts as the arrow keys and A as the Space key."
+  "Elle s'affiche sur les écrans tactiles (et toujours pendant l'essai dans BlocStudio). Elle fait comme une manette branchée : la croix fait aussi les flèches du clavier et A la touche Espace.": "It appears on touch screens (and always while testing in BlocStudio). It works like a connected gamepad: the D-pad also acts as the arrow keys and A as the Space key.",
+  "🤖 Application Android (.apk)": "🤖 Android app (.apk)",
+  "S'installe sur un téléphone ou une tablette Android, avec son icône.": "Installs on an Android phone or tablet, with its own icon.",
+  "🤖 Votre application Android est prête !": "🤖 Your Android app is ready!",
+  "Votre application est enregistrée ici :": "Your app is saved here:",
+  "Pour l'installer, copiez-la sur le téléphone (câble USB, e-mail, Google Drive…), puis touchez le fichier sur le téléphone.": "To install it, copy it to the phone (USB cable, e-mail, Google Drive…), then tap the file on the phone.",
+  "⚠️ La première fois": "⚠️ The first time",
+  ", Android demande d'autoriser l'installation d'applications de cette source (le gestionnaire de fichiers, Gmail…) : touchez": ", Android asks you to allow installing apps from this source (the file manager, Gmail…): tap",
+  ", activez l'autorisation, puis revenez. Play Protect peut aussi prévenir que l'application est inconnue : touchez": ", turn the permission on, then go back. Play Protect may also warn that the app is unknown: tap",
+  "Installer quand même": "Install anyway",
+  "🔑 Clé de signature créée.": "🔑 Signing key created.",
+  "BlocStudio l'a gardée pour vos prochains exports : une nouvelle version de cette application s'installera par-dessus l'ancienne, sans perdre ses données.": "BlocStudio kept it for your next exports: a new version of this app will install over the old one, without losing its data.",
+  "Fonctionne sur Android 7 et plus récent. L'application n'est pas destinée au Play Store.": "Works on Android 7 and later. The app is not meant for the Play Store.",
+  "Fichier js/lanceur-android-data.js introuvable.": "File js/lanceur-android-data.js not found.",
+  "L'export en application Android a échoué : {erreur}": "Exporting as an Android app failed: {erreur}"
 });

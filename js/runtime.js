@@ -3206,13 +3206,16 @@ function BlocRuntimeFactory() {
     // la remplit comme d'habitude. Ailleurs (éditeur, page web), le programme occupe tout l'écran : agrandi s'il
     // est redimensionnable (ses contrôles suivent leur ancrage), sinon centré sur sa couleur de fond.
     // Programme pour téléphone : c'est toute la page qui passe en plein écran, et la fenêtre s'y ajuste.
+    // Dans l'application Android, le lanceur cache les barres du téléphone (BlocStudioAndroid, voir Principale.java).
     let pleinEcranExe = false, tailleAvantPleinEcran = null, attentePleinEcran = null;
     const cible = ajuste ? document.documentElement : hote;
-    const estPleinEcran = () => dansExe ? pleinEcranExe : document.fullscreenElement === cible;
+    const android = window.BlocStudioAndroid;
+    const estPleinEcran = () => dansExe || android ? pleinEcranExe : document.fullscreenElement === cible;
     function pleinEcran(oui) {
-      if (dansExe) {
+      if (dansExe || android) {
         const webview = window.chrome && window.chrome.webview;
-        if (webview) webview.postMessage(oui ? 'pleinecran:1' : 'pleinecran:0');
+        if (android) android.pleinEcran(!!oui);
+        else if (webview) webview.postMessage(oui ? 'pleinecran:1' : 'pleinecran:0');
         pleinEcranExe = oui;
         return;
       }
@@ -3243,7 +3246,7 @@ function BlocRuntimeFactory() {
         pleinEcran(!pleinEcranExe);
       }, true);
     } else if (ajuste) {
-      nettoyages.push(() => { if (estPleinEcran()) document.exitFullscreen().catch(() => {}); });
+      if (!android) nettoyages.push(() => { if (estPleinEcran()) document.exitFullscreen().catch(() => {}); });
     } else {
       ecouter(document, 'fullscreenchange', () => {
         const actif = document.fullscreenElement === hote;
@@ -5965,7 +5968,8 @@ function BlocRuntimeFactory() {
     elementsMenuContextuel, elementsBarreOutils, decoderSon, extraitSon, contexteAudio, INVISIBLES,
     tailleContenuPanneau, sensDefilement,
     // Fichiers de tableur, aussi utilisés par l'éditeur (importer / exporter des données).
-    lireTableur, lireClasseur, ecrireClasseur, depuisCsv, versCsv, estClasseur };
+    lireTableur, lireClasseur, ecrireClasseur, depuisCsv, versCsv, estClasseur,
+    crc32 }; // (aussi pour l'export en application Android)
 }
 
 const BlocRuntime = BlocRuntimeFactory();

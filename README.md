@@ -10,7 +10,7 @@ BlocStudio mélange deux idées :
 - **dessiner sa fenêtre** comme dans Visual Basic : on pose des boutons, des zones de texte, des images, des sprites… ;
 - **écrire ce qu'elle fait avec des blocs** à emboîter, comme dans Scratch : « quand Bouton1 est cliqué », « faire sauter Héros »…
 
-Le résultat s'exporte en **page web** ou en **application Windows (.exe)**, qu'on peut donner à quelqu'un d'autre.
+Le résultat s'exporte en **page web**, en **application Windows (.exe)** ou en **application Android (.apk)**, qu'on peut donner à quelqu'un d'autre.
 
 ![L'exemple « Plateformes » en train de tourner, par-dessus ses blocs](docs/capture.png)
 
@@ -80,6 +80,9 @@ Tous sont commentés avec des blocs « 💬 » qui expliquent comment ils marche
 
 - **Page web (.html)** : un seul fichier, qui s'ouvre dans n'importe quel navigateur.
 - **Application Windows (.exe)** : un seul fichier, à double-cliquer. Il utilise WebView2, le moteur d'Edge présent sur Windows 10 et 11 : rien d'autre à installer. Le fonctionnement du lanceur est décrit dans [`lanceur/LISEZMOI.md`](lanceur/LISEZMOI.md).
+- **Application Android (.apk)** : s'installe sur un téléphone ou une tablette (Android 7 et plus récent), avec son nom et son icône. BlocStudio la fabrique et la signe lui-même : rien à installer. Voir [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md).
+
+Pour un téléphone, cochez dans les propriétés de la fenêtre **📱 Programme pour téléphone** (la page web remplit l'écran, sans déformer la fenêtre) et **🎮 Manette tactile** (une croix et des boutons A, B à l'écran, qui font les flèches et Espace). L'application Android remplit toujours l'écran.
 
 Un programme exporté garde la langue de l'éditeur.
 
@@ -95,6 +98,7 @@ Un programme exporté garde la langue de l'éditeur.
 | `js/editeur-sprite.js`, `js/studio-musique.js`, `js/emojis.js` | L'éditeur de sprites, le studio de musique 8 bits, le choix d'émojis |
 | `js/langues.js`, `js/langues/en.js` | Les langues : `T()`, le menu 🌐, et les traductions anglaises (chaque texte affiché passe par `T()`) |
 | `lanceur/` | `BlocStudio.exe` et le lanceur des applications exportées (C#, WebView2) |
+| `lanceur/android/`, `js/export-android.js` | Le lanceur des applications Android (Java) et l'export en .apk (signature comprise) |
 | `lib/blockly/` | [Blockly](https://developers.google.com/blockly), la bibliothèque de blocs de Google |
 | `tests/` | Les tests automatiques |
 
@@ -104,7 +108,7 @@ Il n'y a pas d'étape de construction : les fichiers sont utilisés tels quels. 
 powershell -ExecutionPolicy Bypass -File lanceur\construire.ps1
 ```
 
-Le compilateur C# utilisé fait partie de Windows.
+Le compilateur C# utilisé fait partie de Windows. Le lanceur Android se reconstruit avec `lanceur\android\construire.ps1` (il faut alors un JDK et le SDK Android, voir [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md)).
 
 ## Tests
 

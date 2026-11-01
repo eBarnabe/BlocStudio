@@ -3808,7 +3808,8 @@
 
   // Page HTML autonome contenant le programme et son moteur d'exécution.
   // `pourExe` : la page remplit exactement la fenêtre Windows du lanceur.
-  function genererPageAutonome(pourExe) {
+  // `pourAndroid` : dans l'application Android, la fenêtre remplit toujours l'écran (comme « pour téléphone »).
+  function genererPageAutonome(pourExe, pourAndroid) {
     const code = genererCode();
     // Seuls les sons réellement utilisés (par les blocs ou par un contrôle Son) sont emportés.
     const sons = projet.sons.filter(s => code.includes(JSON.stringify(s.id)) ||
@@ -3818,8 +3819,8 @@
     const donnees = { id: projet.id, fenetre: projet.fenetre, fenetres: projet.fenetres, controles: projet.controles, sons, sprites };
     const json = s => JSON.stringify(s).replace(/</g, '\\u003c');
     const titre = projet.fenetre.titre.replace(/[<&]/g, ch => ch === '<' ? '&lt;' : '&amp;');
-    // Programme pour téléphone (page web seulement) : la fenêtre remplit l'écran, sans zoom ni défilement de la page.
-    const telephone = !pourExe && !!projet.fenetre.telephone;
+    // Programme pour téléphone (page web, application Android) : la fenêtre remplit l'écran, sans zoom ni défilement de la page.
+    const telephone = !!pourAndroid || (!pourExe && !!projet.fenetre.telephone);
     const fond = BlocRuntime.couleur(projet.fenetre.couleurFond || '#f0f0f0');
     const style = pourExe
       ? `html, body { margin: 0; height: 100%; overflow: hidden; background: ${fond}; }`
@@ -3925,6 +3926,52 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
   }
 
   window.BlocStudio.construireExe = construireExe;
+
+  // Application Android : voir js/export-android.js. L'icône : le premier émoji du titre (ou sa première
+  // lettre) sur le fond de la fenêtre.
+  async function construireApk() {
+    const f = projet.fenetre;
+    const titre = (f.titre || T('Mon programme')).replace(/[\r\n]+/g, ' ').trim() || T('Mon programme');
+    const toile = document.createElement('canvas');
+    toile.width = toile.height = 192;
+    const g = toile.getContext('2d');
+    g.fillStyle = BlocRuntime.couleur(f.couleurFond || '#f0f0f0');
+    const fond = /^#[0-9a-f]{6}$/i.test(g.fillStyle) ? g.fillStyle : '#f0f0f0';
+    g.fillStyle = fond;
+    g.fillRect(0, 0, 192, 192);
+    const morceaux = window.Intl && Intl.Segmenter ? [...new Intl.Segmenter().segment(titre)].map(s => s.segment) : [...titre];
+    const emoji = morceaux.find(s => /\p{Extended_Pictographic}/u.test(s));
+    const signe = emoji || (morceaux.find(s => /\p{L}|\p{N}/u.test(s)) || '?').toUpperCase();
+    const [r, v, b] = [1, 3, 5].map(i => parseInt(fond.slice(i, i + 2), 16));
+    g.fillStyle = r * 0.3 + v * 0.59 + b * 0.11 > 150 ? '#1e1b4b' : '#ffffff'; // lisible sur fond clair ou foncé
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.font = `${emoji ? 120 : 110}px "Segoe UI Emoji", "Segoe UI", sans-serif`;
+    g.fillText(signe, 96, 104);
+    const icone = new Uint8Array(await (await new Promise(ok => toile.toBlob(ok, 'image/png'))).arrayBuffer());
+    // Le sens de l'écran suit la forme de la fenêtre (libre si elle est redimensionnable).
+    const orientation = f.redimensionnable ? 'libre' : f.largeur > f.hauteur ? 'paysage' : 'portrait';
+    return BlocAndroid.construire({
+      page: genererPageAutonome(false, true), titre, id: projet.id, icone,
+      reglages: { orientation, fond }
+    });
+  }
+
+  async function exporterApk() {
+    try {
+      const { apk, nouvelleCle } = await construireApk();
+      const chemin = await telecharger(nomFichier() + '.apk', apk, 'application/vnd.android.package-archive');
+      if (chemin === null) return; // enregistrement annulé
+      $('info-apk-nom').textContent = nomFichier() + '.apk';
+      $('info-apk-chemin').textContent = chemin;
+      $('info-apk-cle').hidden = !nouvelleCle;
+      $('info-apk').hidden = false;
+    } catch (e) {
+      alert(T('L\'export en application Android a échoué : {erreur}', { erreur: e.message }));
+    }
+  }
+
+  window.BlocStudio.construireApk = construireApk;
 
   // ---------------------------------------------------------------- Démarrage
 
@@ -4234,6 +4281,8 @@ BlocRuntime.lancer(${json(donnees)}, ${json(code)}, document.getElementById('app
     });
     $('export-exe').addEventListener('click', () => { menuExport.hidden = true; exporterExe(); });
     $('export-html').addEventListener('click', () => { menuExport.hidden = true; exporterHtml(); });
+    $('export-apk').addEventListener('click', () => { menuExport.hidden = true; exporterApk(); });
+    $('btn-fermer-info-apk').addEventListener('click', () => { $('info-apk').hidden = true; });
     $('btn-fermer-info-exe').addEventListener('click', () => { $('info-exe').hidden = true; });
     $('btn-lancer-exe').addEventListener('click', () => {
       $('info-exe').hidden = true;

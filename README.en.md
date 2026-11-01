@@ -10,7 +10,7 @@ BlocStudio mixes two ideas:
 - **draw your window** as in Visual Basic: put down buttons, text boxes, images, sprites…;
 - **write what it does with blocks** that snap together, as in Scratch: “when Button1 is clicked”, “make Hero jump”…
 
-The result can be exported as a **web page** or a **Windows application (.exe)** that you can give to someone else.
+The result can be exported as a **web page**, a **Windows application (.exe)** or an **Android app (.apk)** that you can give to someone else.
 
 ![The “Platforms” example running, on top of its blocks](docs/capture.png)
 
@@ -80,6 +80,9 @@ They are all commented with “💬” blocks that explain how they work. Their 
 
 - **Web page (.html)**: a single file, which opens in any browser.
 - **Windows application (.exe)**: a single file, to double-click. It uses WebView2, the Edge engine that comes with Windows 10 and 11: nothing else to install. How the launcher works is described (in French) in [`lanceur/LISEZMOI.md`](lanceur/LISEZMOI.md).
+- **Android app (.apk)**: installs on a phone or tablet (Android 7 and later), with its own name and icon. BlocStudio builds and signs it by itself: nothing to install. See (in French) [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md).
+
+For a phone, tick in the window's properties **📱 Program for phones** (the web page fills the screen, without distorting the window) and **🎮 On-screen touch gamepad** (a D-pad and A, B buttons on the screen, acting as the arrows and Space). The Android app always fills the screen.
 
 An exported program keeps the language of the editor it was exported from.
 
@@ -97,6 +100,7 @@ The code is written in French (names, comments); every text shown on screen goes
 | `js/editeur-sprite.js`, `js/studio-musique.js`, `js/emojis.js` | The sprite editor, the 8-bit music studio, the emoji picker |
 | `js/langues.js`, `js/langues/en.js` | Languages: `T()`, the 🌐 menu, and the English translations |
 | `lanceur/` | `BlocStudio.exe` and the launcher of exported applications (C#, WebView2) |
+| `lanceur/android/`, `js/export-android.js` | The launcher of Android apps (Java) and the .apk export (signing included) |
 | `lib/blockly/` | [Blockly](https://developers.google.com/blockly), Google's block library |
 | `tests/` | The automated tests |
 
@@ -106,7 +110,7 @@ There is no build step: the files are used as they are. Only `BlocStudio.exe` an
 powershell -ExecutionPolicy Bypass -File lanceur\construire.ps1
 ```
 
-The C# compiler it uses is part of Windows.
+The C# compiler it uses is part of Windows. The Android launcher is rebuilt with `lanceur\android\construire.ps1` (this needs a JDK and the Android SDK, see [`lanceur/android/LISEZMOI.md`](lanceur/android/LISEZMOI.md)).
 
 ## Tests
 

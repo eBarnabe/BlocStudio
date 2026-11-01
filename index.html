@@ -21,6 +21,8 @@
             <span>Un vrai logiciel : double-clic pour le lancer, dans sa propre fenêtre.</span></button>
           <button class="menu-item" id="export-html"><strong>🌐 Page web (.html)</strong>
             <span>S'ouvre dans le navigateur, sur n'importe quel ordinateur (Windows, Mac, Linux…).</span></button>
+          <button class="menu-item" id="export-apk"><strong>🤖 Application Android (.apk)</strong>
+            <span>S'installe sur un téléphone ou une tablette Android, avec son icône.</span></button>
         </div>
       </div>
       <button id="btn-executer" class="executer" title="Lancer le programme (F5)">▶ Exécuter</button>
@@ -133,6 +135,29 @@
       </div>
     </section>
   </main>
+
+  <!-- Informations après l'export en .apk -->
+  <div id="info-apk" class="voile" hidden>
+    <div class="info-boite">
+      <h2>🤖 Votre application Android est prête !</h2>
+      <p class="si-navigateur">Le fichier <b id="info-apk-nom"></b> se trouve dans votre dossier <b>Téléchargements</b>.</p>
+      <p class="si-hote">Votre application est enregistrée ici :<br><b id="info-apk-chemin" class="info-chemin"></b></p>
+      <p>Pour l'installer, copiez-la sur le téléphone (câble USB, e-mail, Google Drive…), puis touchez le fichier sur le téléphone.</p>
+      <div class="info-note">
+        <b>⚠️ La première fois</b>, Android demande d'autoriser l'installation d'applications de cette source
+        (le gestionnaire de fichiers, Gmail…) : touchez <b>Paramètres</b>, activez l'autorisation, puis revenez.
+        Play Protect peut aussi prévenir que l'application est inconnue : touchez <b>Installer quand même</b>.
+      </div>
+      <div id="info-apk-cle" class="info-note">
+        <b>🔑 Clé de signature créée.</b> BlocStudio l'a gardée pour vos prochains exports : une nouvelle version de
+        cette application s'installera par-dessus l'ancienne, sans perdre ses données.
+      </div>
+      <p class="info-petit">Fonctionne sur Android 7 et plus récent. L'application n'est pas destinée au Play Store.</p>
+      <div class="info-actions">
+        <button id="btn-fermer-info-apk">J'ai compris</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Informations après l'export en .exe -->
   <div id="info-exe" class="voile" hidden>
@@ -322,6 +347,7 @@
   <!-- Les textes de Blockly et de BlocStudio dans la langue choisie (menu 🌐) -->
   <script>BlocLangues.ecrireScripts();</script>
   <script src="js/runtime.js"></script>
+  <script src="js/export-android.js"></script>
   <script src="js/emojis.js"></script>
   <script src="js/blocks.js"></script>
   <script src="js/editeur-sprite.js"></script>
